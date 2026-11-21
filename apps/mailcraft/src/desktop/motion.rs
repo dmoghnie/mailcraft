@@ -1,7 +1,7 @@
-//! Whether the system asks apps to keep motion down: on a Mac, System Settings › Accessibility ›
-//! Display › Reduce motion, asked as the window draws, once in a while. Elsewhere it isn't read
-//! yet (Windows' Animation effects, the desktop portal's `reduced-motion`), and only Play
-//! animations turns motion off there.
+//! Whether the system asks apps to keep motion down, asked as the window draws, once in a while:
+//! on a Mac, System Settings › Accessibility › Display › Reduce motion; on Windows, Settings ›
+//! Accessibility › Visual effects › Animation effects. Linux and the BSDs tell it through the
+//! desktop portal, which `platform/appearance.rs` follows.
 
 use std::cell::Cell;
 use std::time::{Duration, Instant};
@@ -39,7 +39,18 @@ fn ask() -> bool {
     {
         objc2_app_kit::NSWorkspace::sharedWorkspace().accessibilityDisplayShouldReduceMotion()
     }
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(windows)]
+    {
+        // A Windows without WinRT's settings (Server Core) is taken as one that moves.
+        match windows::UI::ViewManagement::UISettings::new().and_then(|s| s.AnimationsEnabled()) {
+            Ok(on) => !on,
+            Err(e) => {
+                log::debug!("reduced motion: Windows didn't say: {e}");
+                false
+            }
+        }
+    }
+    #[cfg(not(any(target_os = "macos", windows)))]
     {
         false
     }
@@ -67,7 +78,7 @@ mod tests {
         assert_eq!(asked.get(), 2);
     }
 
-    /// The system answers (on a Mac, as the setting is).
+    /// The system answers (on a Mac and Windows, as the setting is).
     #[test]
     fn the_system_answers() {
         let _ = SystemMotion::default().reduced();

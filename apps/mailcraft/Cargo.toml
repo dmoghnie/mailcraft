@@ -60,6 +60,9 @@ open = "5"
 # Notifications under MailCraft's name: its app id's name and icon, per user (`platform/toast.rs`).
 # The version ipconfig (the network crate's DNS settings) uses, so it's built once.
 windows-registry = "0.100"
+# Whether Animation effects are on (`desktop/motion.rs`): the version egui's screen reader
+# support brings, so it's built once.
+windows = { version = "0.62", features = ["UI_ViewManagement"] }
 # One MailCraft per data folder (`startup/single_instance.rs`): Unix sockets on Windows, which std lacks.
 # The version zbus brings, so it's built once.
 uds_windows = "1.2"

@@ -490,11 +490,12 @@ fn run(options: eframe::NativeOptions, started: Started) -> eframe::Result {
                 let ctx = cc.egui_ctx.clone();
                 u.set_waker(Arc::new(move || ctx.request_repaint()));
             }
-            // Linux and the BSDs: the desktop's dark or light, which winit doesn't report there.
-            let dark = appearance::SystemDark::default();
+            // Linux and the BSDs: the desktop's dark or light, which winit doesn't report there,
+            // and whether it asks for less motion.
+            let look = appearance::SystemLook::default();
             {
                 let ctx = cc.egui_ctx.clone();
-                dark.follow(move || ctx.request_repaint());
+                look.follow(move || ctx.request_repaint());
             }
             let (regular, bold) = system_fonts();
             mailcraft_ui_egui::theme::install_fonts(&cc.egui_ctx, regular.clone(), bold.clone());
@@ -545,7 +546,7 @@ fn run(options: eframe::NativeOptions, started: Started) -> eframe::Result {
                     session,
                     backend,
                     Box::new(Desktop {
-                        dark,
+                        look,
                         data: desktop_data,
                         base,
                         moved,

@@ -45,8 +45,9 @@ pub(crate) struct Desktop {
     pub(crate) portable: bool,
     /// Test builds' updater (`self_update.rs`), when this one has it.
     pub(crate) updater: Option<self_update::Updater>,
-    /// The desktop's light or dark preference where winit doesn't report one (`appearance.rs`).
-    pub(crate) dark: appearance::SystemDark,
+    /// The desktop's light or dark preference where winit doesn't report one, and whether it
+    /// asks for less motion (`appearance.rs`: Linux and the BSDs).
+    pub(crate) look: appearance::SystemLook,
     /// Whether the system asks for less motion (`motion.rs`).
     pub(crate) motion: motion::SystemMotion,
     /// The folder of the last file picked or saved: the next file dialog opens there (attaching
@@ -113,10 +114,10 @@ impl Services for Desktop {
         iana_time_zone::get_timezone().ok()
     }
     fn system_dark(&self) -> Option<bool> {
-        self.dark.get()
+        self.look.dark()
     }
     fn reduce_motion(&self) -> bool {
-        self.motion.reduced()
+        self.motion.reduced() || self.look.reduced_motion()
     }
     fn pick_files(&mut self) -> Vec<PathBuf> {
         let files = self.dialog("Attach files").pick_files().unwrap_or_default();

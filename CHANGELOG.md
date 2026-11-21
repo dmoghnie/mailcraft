@@ -12,7 +12,7 @@ on GitHub.
 
 ### Added
 
-- On a Mac, MailCraft follows **Reduce motion** (System Settings › Accessibility › Display): nothing slides or fades while it's on, as with Play animations off.
+- MailCraft follows the system's setting for less motion: **Reduce motion** on a Mac (System Settings › Accessibility › Display), **Animation effects** on Windows (Settings › Accessibility › Visual effects), and on Linux and the BSDs the desktop's own, as its desktop portal passes it on. Nothing slides or fades while it's on, as with Play animations off.
 - AI agents can drive MailCraft through MCP: an agent's app starts `mailcraft mcp`, which reaches the running window and offers two tools, list_commands and run_command, for every command the window has. It's off until you turn on File › Options › Safety › Let AI agents control MailCraft, and an agent then only reads and searches until **Let AI agents send, delete and change settings** is on too ([docs/mcp.md](docs/mcp.md)).
 - Adding an account: a JMAP server the domain names in DNS (its `_jmap._tcp` record, as Fastmail publishes) is found. The dialog says "It offers JMAP too" with Use JMAP, and picks JMAP when it's the only server named; `mailcraft-cli add` says so too.
 
