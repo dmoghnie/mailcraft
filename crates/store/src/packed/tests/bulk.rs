@@ -192,7 +192,9 @@ fn a_bulk_write_s_durable_commits_are_sealed() {
         drop(s);
         let env = [("MC_CHILD_DIR", t.display().to_string()), ("MC_CHILD_MODE", mode.to_string())];
         let out = child("packed::tests::bulk::killed_in_a_bulk_write", &env).wait_with_output().unwrap();
-        assert!(!out.status.success() && String::from_utf8_lossy(&out.stdout).contains("written"), "{mode}: the child was to write, then be killed");
+        let said = String::from_utf8_lossy(&out.stdout);
+        let why = String::from_utf8_lossy(&out.stderr);
+        assert!(!out.status.success() && said.contains("written"), "{mode}: the child was to write, then be killed: {said}\n{why}");
         let (repairs, there) = super::commits::repairs_on_open(&t, &file);
         assert!(there, "{mode}: a durable write was lost");
         assert_eq!(repairs == 0, sealed, "{mode}: {repairs} repairs");
@@ -201,18 +203,27 @@ fn a_bulk_write_s_durable_commits_are_sealed() {
 
 /// The child of [`a_bulk_write_s_durable_commits_are_sealed`]: in a bulk write (`bulk`) or not, a
 /// write from the window, a run of batches past the cap, one more batch, then killed at once.
+/// What's looked at is how the commits themselves are sealed, so the thread that seals a quiet
+/// data file never starts here. Before the last batch the child waits longer than
+/// [`QUIET`](super::super::commit::QUIET), as one commit can take on a busy disk: in a full test
+/// run one did, the thread sealed the file, and the plain run's file reopened with no repair.
 #[test]
 #[ignore = "run by a_bulk_write_s_durable_commits_are_sealed"]
 fn killed_in_a_bulk_write() {
     let Some(dir) = std::env::var_os("MC_CHILD_DIR").map(std::path::PathBuf::from) else { return };
+    super::super::commit::NO_THREAD.set(true);
     let s = Store::open_packed(dir.join("app"), dir.join("Files")).unwrap();
     if std::env::var("MC_CHILD_MODE").is_ok_and(|m| m == "bulk") {
         s.bulk_begin("a1", BULK_CACHE);
     }
     s.write_body(&inbox(1), &source(1)).unwrap();
     let past = super::super::commit::UNDURABLE_MAX / (256 << 10) + 2;
-    for n in 0..u32::try_from(past).unwrap() {
+    let past = u32::try_from(past).unwrap();
+    for n in 0..past {
         let uid = 100 + n;
+        if n + 1 == past {
+            std::thread::sleep(super::super::commit::QUIET + std::time::Duration::from_millis(500));
+        }
         s.write_prepared(vec![(inbox(uid), Store::prepare(true, noise(256 << 10, u64::from(uid))))], false).unwrap();
     }
     println!("written");
