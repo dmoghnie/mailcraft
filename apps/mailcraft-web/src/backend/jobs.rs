@@ -144,6 +144,7 @@ pub(super) async fn job(sh: &Rcs, id: &str, j: Job) {
         | Job::FetchUrl { .. }
         | Job::FetchCalendar { .. }
         | Job::Discover { .. }
+        | Job::CheckSignIn { .. }
         | Job::SignIn { .. }
         | Job::ImportPst { .. }
         | Job::RereadDataFile { .. }

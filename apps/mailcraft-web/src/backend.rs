@@ -8,7 +8,7 @@ use std::collections::{HashMap, VecDeque};
 use std::rc::Rc;
 
 use mailcraft_engine::model::job::{CompactReport, DataFileFacts};
-use mailcraft_engine::model::{AccountConfig, Event, Folder, FolderRole, Job, Op, SyncStatus, sort_folders};
+use mailcraft_engine::model::{AccountConfig, Event, Folder, FolderRole, Job, Op, SignInFailure, SyncStatus, sort_folders};
 use mailcraft_engine::store::Store;
 use mailcraft_jmap::{Client, Error, State, SyncOptions};
 use mailcraft_ui_egui::Backend;
@@ -573,6 +573,7 @@ const MAX_CALENDAR: usize = 20 << 20;
 const DESKTOP_PST: &str = "opening Outlook data files needs the desktop app";
 /// Why message files aren't read here.
 const DESKTOP_FILES: &str = "reading message files from the computer needs the desktop app";
+const DESKTOP_CHECK: &str = "checking a sign-in before the account is added needs the desktop app";
 
 impl Backend for WebBackend {
     fn submit(&mut self, job: Job) {
@@ -586,6 +587,12 @@ impl Backend for WebBackend {
             Job::Discover { email } => emit(sh, Event::Discovered { email, config: None, source: String::new(), elsewhere: None }),
             Job::SignIn { account } => {
                 status(sh, &account.id, SyncStatus::NeedsPassword { error: "signing in through Google or Microsoft needs the desktop app".into() })
+            }
+            // The browser's dialog adds a JMAP account without checking it first; a script that
+            // asks is told the check wasn't made, never that it passed.
+            Job::CheckSignIn { id, account, .. } => {
+                let failure = SignInFailure { server: account.jmap.unwrap_or_default(), error: DESKTOP_CHECK.into(), ..SignInFailure::default() };
+                emit(sh, Event::SignInChecked { id, failure: Some(Box::new(failure)) })
             }
             Job::ImportPst { account, .. } | Job::RereadDataFile { account, .. } => {
                 emit(sh, Event::Imported { account, messages: 0, skipped: 0, done: true, error: Some(DESKTOP_PST.into()), report: None })
