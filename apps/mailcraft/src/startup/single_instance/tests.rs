@@ -2,12 +2,12 @@ use super::*;
 
 /// Where a test's socket goes, in a folder of its own, its name kept short: a socket's whole
 /// path must fit its address (103 bytes on macOS, whose temporary folder alone takes about 50).
-fn socket_at(test: &str) -> PathBuf {
+pub(super) fn socket_at(test: &str) -> PathBuf {
     std::env::temp_dir().join(format!("mci-{:x}-{test}", std::process::id())).join(socket_name(Path::new("C:/data"), ""))
 }
 
 /// That socket's folder, emptied.
-fn socket(test: &str) -> PathBuf {
+pub(super) fn socket(test: &str) -> PathBuf {
     let path = socket_at(test);
     if let Some(dir) = path.parent() {
         let _ = std::fs::remove_dir_all(dir);
@@ -34,6 +34,9 @@ fn socket_paths_fit_a_socket_address() {
         socket_at("lost"),
         socket_at("early"),
         socket_at("patient"),
+        socket_at("agent"),
+        socket_at("agentkey"),
+        socket_at("agentnone"),
     ] {
         let len = p.as_os_str().len();
         assert!(len < 104, "{len} bytes: {}", p.display());

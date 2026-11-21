@@ -161,10 +161,16 @@ impl MailApp {
 
     /// Run a command as [`MailApp::run`] does: its answer, when it worked.
     pub(crate) fn answer(&mut self, id: &str, params: Value) -> Option<Value> {
+        self.ran(id, &params).ok()
+    }
+
+    /// Run a command as the window does, what came of it shown where the window shows it (a
+    /// dialog, over the message being written, a toast), and the result whole: what an agent
+    /// runs (`mailcraft_engine::mcp`), which reads why one failed too.
+    pub fn ran(&mut self, id: &str, params: &Value) -> mailcraft_engine::CmdResult {
         use mailcraft_engine::CmdError;
-        let ran = self.session.run(id, &params);
-        let answer = ran.as_ref().ok().cloned();
-        match ran {
+        let ran = self.session.run(id, params);
+        match &ran {
             // Held to be looked at first: said in the message's window when it has one.
             Ok(v) if id == "compose.send" && v.get("check").is_some() => {
                 // One that can't be read (none ever should) still holds the message, the dialog
@@ -195,12 +201,18 @@ impl MailApp {
                 self.ui.compose_alert = Some(reading::ComposeAlert::NoRecipient);
             }
             Err(CmdError::Params(m) | CmdError::Failed(m)) if id.starts_with("compose.") && self.session.compose.is_some() => {
-                self.ui.compose_alert = Some(reading::ComposeAlert::Other(m));
+                self.ui.compose_alert = Some(reading::ComposeAlert::Other(m.clone()));
             }
-            Err(CmdError::Params(m) | CmdError::Failed(m)) => self.session.notice(m, true),
+            Err(CmdError::Params(m) | CmdError::Failed(m)) => self.session.notice(m.clone(), true),
             Err(e) => self.session.notice(e.to_string(), true),
         }
-        answer
+        ran
+    }
+
+    /// An AI agent's message (`mailcraft mcp`): its answer, its commands run as the window's
+    /// own clicks are.
+    pub fn answer_agent(&mut self, message: &str) -> Option<String> {
+        mailcraft_engine::mcp::answer(self, message)
     }
 
     /// A `mailto:` link or a mail file the system handed MailCraft (as its mail app, or through
@@ -332,5 +344,15 @@ impl MailApp {
         for j in self.session.take_jobs() {
             self.backend.submit(j);
         }
+    }
+}
+
+/// The window runs an agent's commands as its own clicks are ([`MailApp::ran`]).
+impl mailcraft_engine::mcp::Runner for MailApp {
+    fn session(&self) -> &Session {
+        &self.session
+    }
+    fn run(&mut self, id: &str, params: &Value) -> mailcraft_engine::CmdResult {
+        self.ran(id, params)
     }
 }

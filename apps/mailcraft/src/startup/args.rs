@@ -67,6 +67,7 @@ pub const USAGE: &str = "MailCraft: mail, calendar, contacts and notes.
 
 Usage: mailcraft [options] [mailto:LINK | FILE]…
        mailcraft [options] --attach FILE…
+       mailcraft mcp [--data DIR | --sample]
 
   --sample          open the sample mailbox (its own data, nothing of yours)
   --data DIR        keep everything in DIR instead of the usual folders
@@ -83,6 +84,9 @@ Usage: mailcraft [options] [mailto:LINK | FILE]…
 
 A mailto: link starts a new message; a .eml or .msg file is shown, and a .ics or .vcf
 file's events or people are added. If MailCraft is running, they open there.
+
+`mailcraft mcp` is an MCP server for AI agents' clients (over standard input and
+output): it drives the running MailCraft once File › Options › Safety lets agents in.
 
 A portable copy keeps its data beside the app when portable.txt is there.
 The command-line client is mailcraft-cli (mailcraft-cli --help).";

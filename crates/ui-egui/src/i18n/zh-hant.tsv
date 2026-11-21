@@ -1960,3 +1960,5 @@ count	occurrences	次
 	It offers JMAP too.	也提供 JMAP。
 	Use JMAP	使用 JMAP
 	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	這些設定來自可能遭偽造的 DNS 記錄，指向 {domain} 的伺服器。你的密碼將傳送到那裡：請確認 {domain} 負責處理你的郵件。
+	Let AI agents control MailCraft	允許 AI 代理程式控制 MailCraft
+	An AI app connected with the command mailcraft mcp can read your mail and run any command, sending and deleting too. Turn it on only for an agent you trust	透過 mailcraft mcp 命令連線的 AI 應用程式可以讀取你的郵件並執行任何命令，包括傳送和刪除。僅對你信任的代理程式開啟

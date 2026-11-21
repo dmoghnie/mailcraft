@@ -246,6 +246,7 @@ mod accounts;
 mod calendar;
 mod directory;
 mod mail;
+mod mcp;
 mod opening;
 mod organize;
 mod safety;

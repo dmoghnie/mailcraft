@@ -333,6 +333,10 @@ pub struct Prefs {
     /// signed mail is shown. Off at first: the authority learns whose mail is being read.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub check_revocation: bool,
+    /// AI agents may control MailCraft through MCP (`mailcraft mcp`, the engine's `mcp`): run
+    /// any command, sending and deleting too. Off unless the user turns it on.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub agents: bool,
     /// When the message list shows a sender's address after their name (issue #29): Outlook
     /// shows names only, which lets anyone pass for anyone.
     pub sender_addresses: SenderAddresses,
@@ -468,6 +472,7 @@ impl Default for Prefs {
             clean_links: true,
             auto_pictures: false,
             check_revocation: false,
+            agents: false,
             sender_addresses: SenderAddresses::Strangers,
             external_tag: false,
             org_domains: Vec::new(),

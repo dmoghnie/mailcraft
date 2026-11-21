@@ -13,6 +13,7 @@
 
 pub mod backup;
 pub mod cmd;
+pub mod mcp;
 pub mod sample;
 mod session;
 

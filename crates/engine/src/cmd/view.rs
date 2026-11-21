@@ -361,6 +361,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         toggle!("view.photoLocation", "Send where photos were taken", "File › Options › Safety", keep_photo_location, r#"{"on"?: bool (none: switch; off, the place is taken out of attached photos as they're sent)}"#),
         toggle!("view.cleanLinks", "Open links without their tracking", "File › Options › Safety", clean_links, r#"{"on"?: bool (none: switch; on, a link opens out of its redirect wrapper and without the tags naming the reader)}"#),
         toggle!("view.autoPictures", "Show web pictures unless a message looks suspicious", "File › Options › Safety", auto_pictures, r#"{"on"?: bool (none: switch; on, a message whose sender the mail server confirmed shows its web pictures as it opens)}"#),
+        toggle!("options.agents", "Let AI agents control MailCraft", "File › Options › Safety", agents, r#"{"on"?: bool (none: switch; on, an agent connected with `mailcraft mcp` can run any command, sending and deleting too)}"#),
         toggle!("view.checkRevocation", "Check whether certificates were withdrawn", "File › Options › Safety", check_revocation, r#"{"on"?: bool (none: switch; on, a signed message's certificate is checked with its authority as it's shown, which tells the authority)}"#),
         CommandSpec::new("view.senderAddresses", "Show sender addresses in the message list", "File › Options › Safety", |s, v| {
             let show = p::req_str(v, "show")?;

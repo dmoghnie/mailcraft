@@ -171,6 +171,16 @@ impl App {
             single_instance::show(ctx, self.native_wayland);
             handed.give(&mut self.app);
         }
+        // What AI agents ask (`mailcraft mcp`), answered as the window's own clicks are; nothing
+        // but an error until the user lets them in (File › Options › Safety).
+        let asks = self.instance.as_ref().map(single_instance::Server::agent_asks).unwrap_or_default();
+        if !asks.is_empty() {
+            for ask in asks {
+                let reply = self.app.answer_agent(ask.message());
+                ask.answer(reply);
+            }
+            ctx.request_repaint();
+        }
         #[cfg(target_os = "macos")]
         {
             apple_events::deliver(&self.finder, &mut self.app, ctx);
@@ -260,6 +270,17 @@ fn main() -> eframe::Result {
     let (args, opened) = args::opened(args);
     if args.iter().any(|a| a == "--version" || a == "-V") {
         say_out(&args::version_line());
+        return Ok(());
+    }
+    // An AI agent's client starting MailCraft's MCP server: a bridge to the running window over
+    // standard input and output (`single_instance/agents.rs`), with no window of its own and
+    // nothing else written to standard output.
+    if args.first().is_some_and(|a| a == "mcp") {
+        let launch = Launch::resolve(args.get(1..).unwrap_or_default().to_vec(), None);
+        match launch.root.as_deref() {
+            Some(root) => single_instance::agents::bridge(root),
+            None => say("no data folder: MailCraft can't tell which window to reach"),
+        }
         return Ok(());
     }
     // Asking how to start it prints that, and no window opens.

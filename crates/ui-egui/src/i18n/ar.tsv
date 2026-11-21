@@ -1956,3 +1956,5 @@ count	occurrences	مرات
 	It offers JMAP too.	يوفّر JMAP أيضًا.
 	Use JMAP	استخدام JMAP
 	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	جاءت هذه الإعدادات من سجلات DNS، التي يمكن تزويرها، وهي تشير إلى خوادم في {domain}. ستُرسَل كلمة المرور إلى هناك: تحقّق من أن {domain} يتولّى بريدك.
+	Let AI agents control MailCraft	السماح لوكلاء الذكاء الاصطناعي بالتحكم في MailCraft
+	An AI app connected with the command mailcraft mcp can read your mail and run any command, sending and deleting too. Turn it on only for an agent you trust	يستطيع تطبيق ذكاء اصطناعي متصل عبر الأمر mailcraft mcp قراءة بريدك وتشغيل أي أمر، بما في ذلك الإرسال والحذف. شغّل هذا الخيار فقط لوكيل تثق به

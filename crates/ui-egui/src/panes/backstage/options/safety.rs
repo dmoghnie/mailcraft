@@ -81,6 +81,15 @@ pub(super) fn safety(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action
                 s.prefs.check_revocation,
                 "view.checkRevocation",
             ),
+            // AI agents through MCP (`mailcraft mcp`): off unless turned on here.
+            (
+                tl!("Let AI agents control MailCraft"),
+                tl!(
+                    "An AI app connected with the command mailcraft mcp can read your mail and run any command, sending and deleting too. Turn it on only for an agent you trust"
+                ),
+                s.prefs.agents,
+                "options.agents",
+            ),
         ];
         for (i, (label, about, on, cmd)) in switches.into_iter().enumerate() {
             switch_row(ui, t, i == 0, Switch { label, about: Some(about), on, cmd }, acts);

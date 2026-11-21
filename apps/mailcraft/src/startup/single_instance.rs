@@ -24,6 +24,8 @@
 //! kept beside the socket in a file only the user can read (`.key`); a request without it is
 //! refused, so another program can't start messages or add events through the socket (one that
 //! can read the user's private files can already do far more).
+//!
+//! AI agents come the same way (`mailcraft mcp`, `agents.rs`), each on a connection of its own.
 
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -31,6 +33,8 @@ use std::sync::{Arc, Mutex, PoisonError};
 use std::time::Duration;
 
 use super::args::{Handed, MAX_ATTACHED};
+
+pub mod agents;
 
 #[cfg(unix)]
 use std::os::unix::net::{UnixListener, UnixStream};
@@ -72,6 +76,7 @@ struct Asks {
     show: AtomicBool,
     handed: Mutex<Handed>,
     wake: Mutex<Option<egui::Context>>,
+    agents: agents::AgentAsks,
 }
 
 /// The first MailCraft's end of the socket: a thread answers launches as long as it runs.
@@ -499,6 +504,9 @@ fn answer(stream: &UnixStream, server: &Server) -> std::io::Result<()> {
     stream.set_write_timeout(Some(TIMEOUT))?;
     let mut line = String::new();
     std::io::BufReader::new(Patient::new(stream).take(MAX_REQUEST)).read_line(&mut line)?;
+    if agents::is_request(&line, &server.key) {
+        return agents::take(stream, &server.asks);
+    }
     let handed =
         parse_request(&line, &server.key).ok_or_else(|| std::io::Error::new(std::io::ErrorKind::InvalidData, "not a request with the key"))?;
     server.ask(handed);
