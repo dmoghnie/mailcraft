@@ -209,11 +209,17 @@ fn a_message_window_selects_its_text_the_same_way() {
 /// A plain message, and one in Hebrew: Ctrl+A copies the text as written, every line.
 #[test]
 fn ctrl_a_takes_a_plain_message_whole_in_either_direction() {
-    for body in [
+    for (n, body) in [
         "Dear Riley,\n\nThe cut is ready.\nSee you Tuesday.\n",
         "\u{5e9}\u{5dc}\u{5d5}\u{5dd},\n\n\u{5d4}\u{5d2}\u{5e8}\u{5e1}\u{5d4} \u{5de}\u{5d5}\u{5db}\u{5e0}\u{5d4}.\n",
-    ] {
-        let (mut a, _) = app("select-plain");
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        // A folder of its own each: the first window's store is still alive as the second is
+        // made, and the second emptying the folder they shared left it with no mail (every time
+        // the other text selection tests ran beside it).
+        let (mut a, _) = app(&format!("select-plain-{n}"));
         let ctx = egui::Context::default();
         let d = mailcraft_engine::mime::Draft { subject: "Plain".into(), body: body.into(), ..Default::default() };
         let from = mailcraft_engine::model::EmailAddress::new("Sam", "sam@studio.example");
