@@ -180,6 +180,7 @@ impl Session {
             Event::Discovered { email, config, source } => {
                 self.discovered.insert(email.trim().to_ascii_lowercase(), Some((config.map(|c| *c), source)));
             }
+            Event::SignInChecked { id, failure } => self.sign_in_checked(id, failure.map(|f| *f)),
             Event::Releases { releases, error } => {
                 self.update = match error {
                     Some(e) => UpdateCheck::Failed(e),

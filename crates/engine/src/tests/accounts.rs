@@ -784,3 +784,57 @@ fn saved_preferences_keep_what_can_be_read() {
     assert!(crate::Prefs::from_saved(&json!("not preferences")).is_none());
     assert!(crate::Prefs::from_saved(&json!([1, 2])).is_none());
 }
+
+/// A new account's sign-in is checked before it's added: refused as adding it would be, its
+/// servers then asked (nothing added), and the answer kept for the last check asked alone.
+#[test]
+fn a_new_accounts_sign_in_is_checked_before_it_is_added() {
+    let mut s = Session::blank();
+    let params = json!({"email": "zoe@example.org", "password": "pw", "imapHost": "imap.example.org", "smtpHost": "smtp.example.org",
+        "smtpUsername": "out", "smtpPassword": "spw"});
+    assert_eq!(s.run("account.checked", &json!({})).unwrap(), json!({"checking": false}));
+    // Refused as adding would be.
+    assert!(s.run("account.check", &json!({"email": "zoe@example.org"})).is_err(), "no password");
+    assert!(s.run("account.check", &json!({"email": "zoe@example.org", "oauth": "google"})).is_err());
+    assert!(s.run("account.check", &json!({"email": "zoe@example.org", "password": "pw", "imapHost": ""})).is_err());
+    assert!(s.take_jobs().is_empty());
+
+    assert_eq!(s.run("account.check", &params).unwrap()["checking"], true);
+    let first = match s.take_jobs().as_slice() {
+        [Job::CheckSignIn { id, account, password, smtp_password }] => {
+            assert_eq!(
+                (account.imap.host.as_str(), account.smtp.host.as_str(), account.smtp_username.as_deref()),
+                ("imap.example.org", "smtp.example.org", Some("out"))
+            );
+            assert_eq!((password.0.as_str(), smtp_password.as_ref().map(|p| p.0.as_str())), ("pw", Some("spw")));
+            *id
+        }
+        other => panic!("{other:?}"),
+    };
+    assert!(s.accounts.is_empty(), "nothing added");
+    assert_eq!(s.run("account.checked", &json!({})).unwrap(), json!({"checking": true, "email": "zoe@example.org"}));
+
+    // Asked again: the first's answer, coming late, isn't this one's.
+    s.run("account.check", &params).unwrap();
+    let Some(Job::CheckSignIn { id: second, .. }) = s.take_jobs().pop() else { panic!() };
+    assert_ne!(first, second);
+    s.apply(Event::SignInChecked { id: first, failure: None });
+    assert_eq!(s.run("account.checked", &json!({})).unwrap()["checking"], true);
+    let refused =
+        mailcraft_model::SignInFailure { server: "smtp.example.org".into(), outgoing: true, error: "bad credentials".into(), certificate: None };
+    s.apply(Event::SignInChecked { id: second, failure: Some(Box::new(refused)) });
+    let r = s.run("account.checked", &json!({})).unwrap();
+    assert_eq!(
+        (r["ok"].as_bool(), r["server"].as_str(), r["outgoing"].as_bool(), r["error"].as_str()),
+        (Some(false), Some("smtp.example.org"), Some(true), Some("bad credentials"))
+    );
+
+    // Taken: added as it was checked; an address added already isn't checked again.
+    s.run("account.check", &params).unwrap();
+    let Some(Job::CheckSignIn { id, .. }) = s.take_jobs().pop() else { panic!() };
+    s.apply(Event::SignInChecked { id, failure: None });
+    assert_eq!(s.run("account.checked", &json!({})).unwrap()["ok"], true);
+    s.run("account.add", &params).unwrap();
+    assert_eq!(s.accounts.len(), 1);
+    assert!(s.run("account.check", &params).unwrap_err().to_string().contains("already added"));
+}

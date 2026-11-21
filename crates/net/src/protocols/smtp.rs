@@ -77,9 +77,14 @@ fn submit(server: &ServerConfig, sign_in: SignIn<'_>, envelope: &Envelope, raw: 
 /// certificate one an authority vouches for (or `trusted` holds): nothing is signed in to, and
 /// nothing sent. What looking for an address's servers asks when nothing is published.
 pub fn reach(server: &ServerConfig, trusted: Trusted<'_>) -> Result<()> {
+    check_sign_in(server, SignIn { user: "", password: "", oauth: false, method: SignInMethod::None }, trusted)
+}
+
+/// Sign in to an outgoing server as `sign_in` says, then leave: whether it takes the sign-in,
+/// checked before an account is added. Nothing is sent.
+pub fn check_sign_in(server: &ServerConfig, sign_in: SignIn<'_>, trusted: Trusted<'_>) -> Result<()> {
     let trust = Trust { roots: crate::stream::system_roots(), verifier: crate::stream::system_verifier().map_err(NetError::Tls)?, trusted };
-    let nobody = SignIn { user: "", password: "", oauth: false, method: SignInMethod::None };
-    let mut conn = open(server, &nobody, &[], &trust)?;
+    let mut conn = open(server, &sign_in, &[], &trust)?;
     let _ = conn.quit();
     Ok(())
 }

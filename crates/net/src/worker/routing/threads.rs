@@ -1,6 +1,7 @@
 //! What the pool runs on threads of its own, so it never waits behind a sync: browser sign-in,
 //! a message's pictures, calendars read from their links, Outlook data files written
-//! (`imports.rs` reads them), the check for updates and a new account's servers looked for.
+//! (`imports.rs` reads them), the check for updates, a new account's servers looked for and its
+//! sign-in checked.
 
 use super::*;
 
@@ -301,6 +302,21 @@ impl Pool {
             // Nothing found: the user fills the servers in.
             log::warn!("autoconfiguration: {e}");
             self.sink.emit(Event::Discovered { email: asked, config: None, source: String::new() });
+        }
+    }
+
+    /// A new account's sign-in checked before it's added, on a thread of its own. One that can't
+    /// start says so, for the account to be added anyway if wanted.
+    pub(super) fn check_sign_in(&self, id: u64, account: AccountConfig, password: Secret, smtp_password: Option<Secret>) {
+        let sink = self.sink.clone();
+        let server = account.jmap.clone().unwrap_or_else(|| account.imap.host.clone());
+        let spawned = spawn("mail-check-sign-in", move || {
+            let failure = crate::worker::checking::check_sign_in(&account, &password.0, smtp_password.as_ref().map(|p| p.0.as_str()));
+            sink.emit(Event::SignInChecked { id, failure: failure.map(Box::new) });
+        });
+        if let Err(e) = spawned {
+            let failure = mailcraft_model::SignInFailure { server, error: e.to_string(), ..Default::default() };
+            self.sink.emit(Event::SignInChecked { id, failure: Some(Box::new(failure)) });
         }
     }
 }

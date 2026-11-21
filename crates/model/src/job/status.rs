@@ -146,3 +146,18 @@ mod tests {
         assert_eq!(elsewhere.refusal(), format!("{REMOTE_CERTIFICATE} (mail.corp.test {print})"));
     }
 }
+
+/// Why a new account's servers didn't take its sign-in as it was checked, before it was added.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct SignInFailure {
+    /// The server, as the account names it.
+    pub server: String,
+    /// The outgoing (SMTP) server's, not the incoming one's.
+    pub outgoing: bool,
+    /// What went wrong, as the server or the connection said it.
+    pub error: String,
+    /// The certificate it showed when no authority vouches for it: trusting it is asked once the
+    /// account is added.
+    pub certificate: Option<Box<UntrustedCertificate>>,
+}

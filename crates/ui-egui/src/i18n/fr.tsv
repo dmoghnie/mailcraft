@@ -1954,3 +1954,7 @@ count	occurrences	occurrences
 	{h} h	{h} h
 	Notify of mail in Other too	Notifier aussi le courrier dans Autres
 	Off, only mail that goes to Focused is announced	Désactivé, seul le courrier qui va dans Prioritaire est annoncé
+	Checking the sign-in…	Vérification de la connexion…
+	Add anyway	Ajouter quand même
+	Couldn't sign in to {server}: {error}	Impossible de se connecter à {server} : {error}
+	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} présente un certificat qu'aucune autorité ne garantit. Ajoutez quand même le compte pour le consulter et choisir de lui faire confiance ou non.

@@ -375,6 +375,9 @@ impl MailApp {
     /// A command for the open dialog: it closes when it's done, else says why.
     fn submit(&mut self, id: &'static str, p: Value) {
         match self.session.run(id, &p) {
+            // A new account's sign-in being checked: its dialog stays, saying so, until the
+            // answer comes (and adds it).
+            Ok(_) if id == "account.check" => {}
             Ok(v) => {
                 if id == "contact.create" {
                     self.ui.person = v.get("uid").and_then(Value::as_str).map(str::to_string);

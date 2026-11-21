@@ -4,6 +4,7 @@ use super::*;
 
 mod archiving;
 mod auto_archive;
+mod checking;
 mod importing;
 mod mailbox_settings;
 mod trusting;
@@ -11,6 +12,7 @@ pub(in crate::session) use archiving::ArchiveReport;
 pub(crate) use archiving::Archiving;
 pub(crate) use auto_archive::RuleChange;
 pub use auto_archive::{AgeUnit, ArchiveRule, AutoArchive, AutoArchiving, FolderArchive};
+pub use checking::SignInCheck;
 #[cfg(test)]
 pub(crate) use importing::REMOVE_BACKSTOP;
 pub(crate) use importing::data_file_path;
@@ -117,31 +119,11 @@ impl Session {
 
     /// Add an account (the password goes to the keychain through the `Start` job).
     pub fn add_account(&mut self, mut config: AccountConfig, password: Option<String>) -> Result<String, CmdError> {
-        config.email = config.email.trim().to_string();
         config.migrate_signature();
-        if !addr::is_valid_email(&config.email) {
-            return Err(CmdError::Params(format!("`{}` is not an email address", config.email)));
-        }
-        if self.accounts.iter().any(|a| a.config.email.eq_ignore_ascii_case(&config.email)) {
-            return Err(CmdError::Params(format!("{} is already added", config.email)));
-        }
-        if config.username.trim().is_empty() {
-            config.username = config.email.clone();
-        }
+        self.admissible(&mut config)?;
         config.id = self.new_account_id();
         config.color = u8::try_from(self.accounts.len() % usize::from(ACCOUNT_COLORS)).unwrap_or(0);
-        let local = config.is_local();
-        let incoming = config.pop.as_ref().unwrap_or(&config.imap);
-        if !local
-            && !config.is_api()
-            && (incoming.host.trim().is_empty() || incoming.port == 0 || config.smtp.host.trim().is_empty() || config.smtp.port == 0)
-        {
-            return Err(CmdError::Params("incoming and outgoing server names and ports are required".into()));
-        }
         let id = config.id.clone();
-        if config.online_only && !config.can_be_online_only() {
-            return Err(CmdError::Params("a POP account keeps its mail on this computer: it can't be online only".into()));
-        }
         if let Some(store) = &self.store
             && config.keeps_online()
         {
@@ -167,6 +149,32 @@ impl Session {
             self.refresh_list();
         }
         Ok(id)
+    }
+
+    /// Whether `config` can be added as a new account (or have its sign-in checked first), made
+    /// ready to be: its address trimmed, its user name the address when it has none.
+    fn admissible(&self, config: &mut AccountConfig) -> Result<(), CmdError> {
+        config.email = config.email.trim().to_string();
+        if !addr::is_valid_email(&config.email) {
+            return Err(CmdError::Params(format!("`{}` is not an email address", config.email)));
+        }
+        if self.accounts.iter().any(|a| a.config.email.eq_ignore_ascii_case(&config.email)) {
+            return Err(CmdError::Params(format!("{} is already added", config.email)));
+        }
+        if config.username.trim().is_empty() {
+            config.username = config.email.clone();
+        }
+        let incoming = config.pop.as_ref().unwrap_or(&config.imap);
+        if !config.is_local()
+            && !config.is_api()
+            && (incoming.host.trim().is_empty() || incoming.port == 0 || config.smtp.host.trim().is_empty() || config.smtp.port == 0)
+        {
+            return Err(CmdError::Params("incoming and outgoing server names and ports are required".into()));
+        }
+        if config.online_only && !config.can_be_online_only() {
+            return Err(CmdError::Params("a POP account keeps its mail on this computer: it can't be online only".into()));
+        }
+        Ok(())
     }
 
     /// A calendar-only account (issue #61): no mail server, its calendars and contacts on the

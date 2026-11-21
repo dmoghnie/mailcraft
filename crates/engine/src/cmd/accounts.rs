@@ -19,6 +19,10 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         .params(r#"{"account"?: string, "folder"?: string (Deleted Items and Junk are emptied for good; any other folder's mail goes to Deleted Items), "role"?: "trash"|"junk"}"#),
         CommandSpec::new("account.add", "Add account", "File › Accounts", add_account)
             .params(r#"{"email": string, "password"?: string, "oauth"?: "google"|"microsoft", "deferSignIn"?: bool, "local"?: bool, "name"?: string, "username"?: string, "imapHost"?: string, "imapPort"?: number, "imapSecurity"?: "tls"|"starttls"|"none", "smtpHost"?: string, "smtpPort"?: number, "smtpSecurity"?: …, "smtpUsername"?: string and "smtpPassword"?: string (the outgoing server's own sign-in, when it isn't the incoming server's), "signIn"?: "automatic"|"password"|"ntlm" (how the incoming server is signed in to), "smtpSignIn"?: "automatic"|"password"|"ntlm"|"none" (the outgoing server's; "none": it takes mail without a sign-in), "jmap"?: string (a JMAP session URL, instead of IMAP and SMTP), "pop"?: true (POP3 instead of IMAP: popHost, popPort, popSecurity, "popDelete"?: bool to remove mail from the server once downloaded, else a copy stays: "popKeepDays"?: number (removed that many days after downloading; 14 when not given, 0 for never), "popDeleteWithTrash"?: bool (removed once deleted here for good)), "pst"?: string (an existing Outlook data file whose mail comes in first), "ews"?: string|true (on-premises Exchange: its EWS address or server name, or true to find it with Autodiscover; username DOMAIN\\user or an address), "graph"?: true|string (Exchange Online through Microsoft Graph; signs in with Microsoft), "dav"?: string (calendars and contacts only, with no mail server: its CalDAV and CardDAV server's address; signs in as username, or the address, with password), "userAgent"?: string (with ews: the User-Agent its requests name instead of MailCraft's, for a server that lets in only clients it knows), "onlineOnly"?: bool (keep none of its mail on this computer; not for POP)}"#),
+        CommandSpec::new("account.check", "Check the sign-in", "File › Accounts", check_account).params(
+            r#"{the params of account.add, for an IMAP, POP or JMAP account with its password} (signs in to its servers and leaves, adding nothing; account.checked has the answer)"#,
+        ),
+        CommandSpec::new("account.checked", "Sign-in checked", "File › Accounts", |s, _| Ok(s.sign_in_check_json())),
         CommandSpec::new("account.exportPst", "Export to Outlook data file", "File › Open & Export", |s, v| {
             let path = p::req_str(v, "path")?.to_string();
             let account = account_param(s, v)?;
@@ -204,6 +208,37 @@ pub(super) fn add_account(s: &mut Session, v: &Value) -> CmdResult {
     if let Some(server) = p::str(v, "dav") {
         return add_calendar_only(s, v, server);
     }
+    let NewAccount { config, password, smtp_password, pst } = new_account(s, v)?;
+    let id = s.add_account(config, password)?;
+    if let Some(pw) = smtp_password {
+        s.keep_smtp_password(&id, pw);
+    }
+    if let Some(path) = pst {
+        s.attach_data_file(&id, &path)?;
+    }
+    Ok(json!({"account": id}))
+}
+
+/// `account.check`: the account `account.add` would add from the same params, its sign-in
+/// checked without adding it.
+fn check_account(s: &mut Session, v: &Value) -> CmdResult {
+    if p::str(v, "dav").is_some() || p::bool(v, "deferSignIn").unwrap_or(false) || p::bool(v, "local").unwrap_or(false) {
+        return Err(CmdError::Params("only an account signing in to a mail server with a password now is checked".into()));
+    }
+    let NewAccount { config, password, smtp_password, .. } = new_account(s, v)?;
+    s.check_sign_in(config, password.unwrap_or_default(), smtp_password)
+}
+
+/// An account as `account.add` takes it, not yet added: its settings, its password and its
+/// outgoing server's own, and a data file whose mail comes in first.
+struct NewAccount {
+    config: AccountConfig,
+    password: Option<String>,
+    smtp_password: Option<String>,
+    pst: Option<String>,
+}
+
+fn new_account(s: &Session, v: &Value) -> Result<NewAccount, CmdError> {
     let email = p::req_str(v, "email")?;
     let guess = AccountConfig::guess(email);
     let local = p::bool(v, "local").unwrap_or(false);
@@ -308,14 +343,7 @@ pub(super) fn add_account(s: &mut Session, v: &Value) -> CmdResult {
         Some(path) => Some(crate::session::data_file_path(path)?.to_string()),
         None => None,
     };
-    let id = s.add_account(config, password)?;
-    if let Some(pw) = smtp_password {
-        s.keep_smtp_password(&id, pw);
-    }
-    if let Some(path) = pst {
-        s.attach_data_file(&id, &path)?;
-    }
-    Ok(json!({"account": id}))
+    Ok(NewAccount { config, password, smtp_password, pst })
 }
 
 /// `account.add` with `dav`: calendars and contacts only (issue #61), with no mail server.

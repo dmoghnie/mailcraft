@@ -1954,3 +1954,7 @@ count	occurrences	Terminen
 	{h} h	{h} Std.
 	Notify of mail in Other too	Auch bei E-Mails in „Sonstige“ benachrichtigen
 	Off, only mail that goes to Focused is announced	Aus: Nur E-Mails, die in „Relevant“ landen, werden gemeldet
+	Checking the sign-in…	Anmeldung wird geprüft…
+	Add anyway	Trotzdem hinzufügen
+	Couldn't sign in to {server}: {error}	Anmeldung bei {server} fehlgeschlagen: {error}
+	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} zeigt ein Zertifikat, für das keine Zertifizierungsstelle bürgt. Fügen Sie das Konto trotzdem hinzu, um es anzusehen und zu entscheiden, ob Sie ihm vertrauen.

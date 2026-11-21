@@ -464,12 +464,14 @@ fn every_kind_of_account_draws_its_rows_and_gives_its_params() {
         let (id, v) = p.split_once(' ').unwrap();
         (id.to_string(), serde_json::from_str::<serde_json::Value>(v).unwrap())
     };
+    // IMAP, POP and JMAP accounts have their sign-in checked first, with the params they'd be
+    // added with (`a_new_accounts_sign_in_is_checked_then_added`).
     // The settings are looked up as the server settings are open (once a frame, until found).
     assert_eq!(acts("imap in the clear"), vec![r#"run account.discover {"email":"zoe@example.org"}"#; 3]);
     assert_eq!(
         submitted("imap"),
         (
-            "account.add".into(),
+            "account.check".into(),
             json!({"email": "zoe@example.org", "name": "Zoe Park", "password": "pw", "username": "zoe@example.org",
                 "imapHost": "mail.example.org", "imapPort": 993, "imapSecurity": "tls",
                 "smtpHost": "mail.example.org", "smtpPort": 465, "smtpSecurity": "tls",
@@ -485,11 +487,11 @@ fn every_kind_of_account_draws_its_rows_and_gives_its_params() {
     let guessed = json!({"email": "zoe@example.org", "name": "Zoe Park", "password": "pw", "username": "zoe@example.org",
         "imapHost": "mail.example.org", "imapPort": 993, "imapSecurity": "tls",
         "smtpHost": "mail.example.org", "smtpPort": 465, "smtpSecurity": "tls", "smtpUsername": null, "signIn": "automatic", "smtpSignIn": "automatic"});
-    assert_eq!(submitted("imap, settings closed"), ("account.add".into(), guessed.clone()));
-    assert_eq!(submitted("imap, no servers yet"), ("account.add".into(), guessed.clone()));
+    assert_eq!(submitted("imap, settings closed"), ("account.check".into(), guessed.clone()));
+    assert_eq!(submitted("imap, no servers yet"), ("account.check".into(), guessed.clone()));
     let mut on = guessed.clone();
     on["onlineOnly"] = json!(true);
-    assert_eq!(submitted("portable"), ("account.add".into(), on));
+    assert_eq!(submitted("portable"), ("account.check".into(), on));
     assert_eq!(
         get("imap, settings found").params,
         json!({"email": "zoe@example.org", "name": "Zoe Park", "password": "pw", "username": "zoe@example.org",
@@ -506,7 +508,7 @@ fn every_kind_of_account_draws_its_rows_and_gives_its_params() {
     assert_eq!(
         submitted("pop"),
         (
-            "account.add".into(),
+            "account.check".into(),
             json!({"email": "zoe@example.org", "name": "Zoe Park", "password": "pw", "username": "zoe@example.org", "pop": true,
                 "popHost": "pop.example.org", "popPort": 995, "popSecurity": "tls",
                 "smtpHost": "mail.example.org", "smtpPort": 465, "smtpSecurity": "none",
@@ -517,7 +519,7 @@ fn every_kind_of_account_draws_its_rows_and_gives_its_params() {
     assert_eq!(
         submitted("pop, no server yet"),
         (
-            "account.add".into(),
+            "account.check".into(),
             json!({"email": "zoe@example.org", "name": "Zoe Park", "password": "pw", "username": "zoe@example.org", "pop": true,
                 "popHost": "mail.example.org", "popPort": 995, "popSecurity": "tls",
                 "smtpHost": "mail.example.org", "smtpPort": 465, "smtpSecurity": "tls",
@@ -531,7 +533,7 @@ fn every_kind_of_account_draws_its_rows_and_gives_its_params() {
     assert_eq!(
         submitted("jmap"),
         (
-            "account.add".into(),
+            "account.check".into(),
             json!({"email": "zoe@fastmail.example", "name": "Zoe Park", "password": "pw", "username": "zoe@fastmail.example",
                 "jmap": "https://api.fastmail.example/jmap/session", "onlineOnly": true})
         )
@@ -660,4 +662,66 @@ fn leaving_the_address_looks_again_when_nothing_was_found() {
             assert!(asked.is_empty(), "{answer:?}:\n{}", l.dump());
         }
     }
+}
+
+/// An IMAP, POP or JMAP account's sign-in is checked before it's added: while it is, the form
+/// says so and Connect waits; taken, the account is added with what was checked; refused, why
+/// (by server), with Add anyway. An answer for another address isn't taken for this one.
+#[test]
+fn a_new_accounts_sign_in_is_checked_then_added() {
+    use mailcraft_engine::SignInCheck;
+    use mailcraft_engine::model::{SignInFailure, UntrustedCertificate};
+    let checking = |answer: Option<Option<SignInFailure>>, email: &str| {
+        let mut s = session();
+        s.sign_in_check = Some(SignInCheck { id: 1, email: email.into(), answer });
+        let mut d = add("zoe@example.org", false, |_| {});
+        if let Dialog::AddAccount(f) = &mut d {
+            f.checking = Some(f.params());
+        }
+        (s, d)
+    };
+    let form = |d: &Dialog| match d {
+        Dialog::AddAccount(f) => (f.checking.is_some(), f.check_failed),
+        _ => panic!("not the account dialog"),
+    };
+
+    // Connect asks for the check, and the form waits for it.
+    let mut d = add("zoe@example.org", false, |_| {});
+    let l = look(&session(), &mut d, Some("Connect"));
+    assert!(l.acts.iter().any(|a| a.starts_with("submit account.check ")), "{}", l.dump());
+    assert_eq!(form(&d), (true, false));
+
+    // Still checking: said, and Connect does nothing more. Another address's answer isn't this one's.
+    for (answer, email) in [(None, "zoe@example.org"), (Some(None), "ana@example.org")] {
+        let (s, mut d) = checking(answer, email);
+        let l = look(&s, &mut d, Some("Connect"));
+        assert!(l.has("Checking the sign-in…"), "{}", l.dump());
+        assert!(!l.acts.iter().any(|a| a.starts_with("submit ")), "{}", l.dump());
+    }
+
+    // Taken: added with the params checked.
+    let (s, mut d) = checking(Some(None), "Zoe@Example.org");
+    let Dialog::AddAccount(f) = &d else { panic!("not the account dialog") };
+    let checked = f.checking.clone().unwrap();
+    let l = look(&s, &mut d, None);
+    assert_eq!(l.acts.iter().filter(|a| a.starts_with("submit account.add ")).count(), 1, "{}", l.dump());
+    assert!(l.acts.contains(&format!("submit account.add {checked}")), "{}", l.dump());
+    assert_eq!(form(&d), (false, false));
+
+    // Refused: why, by server, and the account can be added anyway.
+    let refused = SignInFailure { server: "mail.example.org".into(), outgoing: false, error: "wrong password".into(), certificate: None };
+    let (s, mut d) = checking(Some(Some(refused.clone())), "zoe@example.org");
+    let l = look(&s, &mut d, None);
+    assert!(l.has("Couldn't sign in to mail.example.org: wrong password") && l.has("Add anyway"), "{}", l.dump());
+    assert!(!l.acts.iter().any(|a| a.starts_with("submit ")), "not added: {}", l.dump());
+    assert_eq!(form(&d), (false, true));
+    let l = look(&s, &mut d, Some("Add anyway"));
+    assert!(l.acts.iter().any(|a| a.starts_with("submit account.add ")), "{}", l.dump());
+
+    // A certificate nobody vouches for: looked at once the account is added.
+    let shown = UntrustedCertificate { host: "mail.example.org".into(), fingerprint: "ab".into(), remote: true, ..Default::default() };
+    let (s, mut d) = checking(Some(Some(SignInFailure { certificate: Some(Box::new(shown)), ..refused })), "zoe@example.org");
+    let l = look(&s, &mut d, None);
+    let said = "mail.example.org shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.";
+    assert!(l.has(said) && l.has("Add anyway"), "{}", l.dump());
 }

@@ -501,7 +501,11 @@ impl Dialog {
     /// (Select Names, a question): the caller says it some other way.
     pub fn set_error(&mut self, e: String) -> bool {
         match self {
-            Dialog::AddAccount(f) => f.error = Some(e),
+            Dialog::AddAccount(f) => {
+                f.error = Some(e);
+                // A check refused before it began isn't waited for.
+                f.checking = None;
+            }
             Dialog::FolderName { error, .. }
             | Dialog::MoveFolder { error, .. }
             | Dialog::DeleteFolder { error, .. }

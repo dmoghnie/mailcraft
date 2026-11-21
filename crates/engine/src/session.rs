@@ -37,7 +37,7 @@ pub(crate) use accounts::REMOVE_BACKSTOP;
 pub(crate) use accounts::RuleChange;
 pub(crate) use accounts::data_file_path;
 pub use accounts::{AgeUnit, ArchiveRule, AutoArchive, Compacting, Compaction, FolderArchive, IDLE_AFTER_S};
-pub use accounts::{Changes, ImportState, Imports, TrustedCertificate};
+pub use accounts::{Changes, ImportState, Imports, SignInCheck, TrustedCertificate};
 use changing::Batch;
 use changing::keys_by_account;
 #[cfg(test)]
@@ -416,6 +416,8 @@ pub struct Session {
     pictures_for: BTreeSet<MessageKey>,
     /// Server settings looked up per address (lower case): `None` while looking.
     pub discovered: HashMap<String, Option<(Option<AccountConfig>, String)>>,
+    /// The last new account's sign-in asked to be checked before it's added.
+    pub sign_in_check: Option<SignInCheck>,
     /// Accounts waiting for a data file to come in before they connect (their start).
     held: HashMap<String, Job>,
     /// OAuth providers this copy can sign in with (set by the app).
@@ -573,6 +575,7 @@ impl Session {
             pictures: HashMap::new(),
             pictures_for: BTreeSet::new(),
             discovered: HashMap::new(),
+            sign_in_check: None,
             held: HashMap::new(),
             oauth_available: Vec::new(),
             portable: false,

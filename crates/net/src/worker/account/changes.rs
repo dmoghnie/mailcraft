@@ -164,6 +164,7 @@ impl Worker {
             Job::FetchUrl { .. }
             | Job::FetchCalendar { .. }
             | Job::Discover { .. }
+            | Job::CheckSignIn { .. }
             | Job::SignIn { .. }
             | Job::AllowDirectory { .. }
             | Job::ImportPst { .. }

@@ -1954,3 +1954,7 @@ count	occurrences	kez
 	{h} h	{h} sa
 	Notify of mail in Other too	Diğer'deki postalar için de bildir
 	Off, only mail that goes to Focused is announced	Kapalıyken yalnızca Odaklanmış'a giden postalar bildirilir
+	Checking the sign-in…	Oturum açma denetleniyor…
+	Add anyway	Yine de ekle
+	Couldn't sign in to {server}: {error}	{server} sunucusunda oturum açılamadı: {error}
+	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server}, hiçbir yetkilinin kefil olmadığı bir sertifika gösteriyor. Sertifikayı görmek ve ona güvenip güvenmeyeceğinizi seçmek için hesabı yine de ekleyin.

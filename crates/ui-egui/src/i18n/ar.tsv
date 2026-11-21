@@ -1949,3 +1949,7 @@ count	occurrences	مرات
 	{h} h	{h} س
 	Notify of mail in Other too	الإشعار بالبريد في «أخرى» أيضًا
 	Off, only mail that goes to Focused is announced	عند الإيقاف، يُعلَن فقط عن البريد الذي يذهب إلى «المهم»
+	Checking the sign-in…	جارٍ التحقق من تسجيل الدخول…
+	Add anyway	إضافة على أي حال
+	Couldn't sign in to {server}: {error}	تعذّر تسجيل الدخول إلى {server}: {error}
+	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	يعرض {server} شهادة لا تضمنها أي جهة. أضف الحساب على أي حال لعرضها واختيار ما إذا كنت ستثق بها.

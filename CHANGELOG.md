@@ -12,6 +12,7 @@ on GitHub.
 
 ### Changed
 
+- Adding an IMAP, POP or JMAP account: Connect signs in to its incoming and outgoing servers first and adds the account only once they take the sign-in. When one refuses it or can't be reached, the dialog says which server and why, and the account can still be added with Add anyway. A mistyped password or server was found only after the account was added.
 - Adding an account whose domain publishes no settings: MailCraft asks the domain's own servers under the usual names (`imap.`, `mail.`, the domain itself) whether they answer over an encrypted connection with a valid certificate, and fills in those that do. It filled in `mail.` and the domain unchecked, which often wasn't the server.
 
 ### Fixed

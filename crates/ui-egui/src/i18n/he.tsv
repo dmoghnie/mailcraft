@@ -1949,3 +1949,7 @@ count	occurrences	פעמים
 	{h} h	{h} שע׳
 	Notify of mail in Other too	להודיע גם על דואר ב'אחר'
 	Off, only mail that goes to Focused is announced	כשכבוי, מודיעים רק על דואר שעובר ל'ממוקד'
+	Checking the sign-in…	בודק את הכניסה…
+	Add anyway	הוסף בכל זאת
+	Couldn't sign in to {server}: {error}	לא ניתן להיכנס אל {server}: {error}
+	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} מציג אישור שאף רשות אינה ערבה לו. הוסף את החשבון בכל זאת כדי לראות אותו ולבחור אם לתת בו אמון.

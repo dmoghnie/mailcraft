@@ -1953,3 +1953,7 @@ count	occurrences	次
 	{h} h	{h} 小時
 	Notify of mail in Other too	「其他」中的郵件也通知
 	Off, only mail that goes to Focused is announced	關閉時，只通知進入「焦點」的郵件
+	Checking the sign-in…	正在檢查登入…
+	Add anyway	仍要新增
+	Couldn't sign in to {server}: {error}	無法登入 {server}：{error}
+	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} 出示的憑證沒有任何機構擔保。仍要新增此帳戶，即可查看此憑證並選擇是否信任它。

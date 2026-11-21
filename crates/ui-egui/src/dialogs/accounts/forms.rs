@@ -52,6 +52,11 @@ pub struct AccountForm {
     /// chosen before.
     pub calendar_only: bool,
     pub dav_url: String,
+    /// The params whose sign-in is being checked, to add the account with once its servers take
+    /// it (`account.check`).
+    pub checking: Option<serde_json::Value>,
+    /// The last check found the sign-in refused, or a server unreachable: it can be added anyway.
+    pub check_failed: bool,
 }
 
 /// The kind of mail server an account added here works with.

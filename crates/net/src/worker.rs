@@ -362,6 +362,7 @@ impl Pool {
 }
 
 mod account;
+mod checking;
 mod credentials;
 mod data_files;
 mod edits;

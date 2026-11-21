@@ -1949,3 +1949,7 @@ count	occurrences	keer
 	{h} h	{h} u
 	Notify of mail in Other too	Ook melden bij e-mail in Overige
 	Off, only mail that goes to Focused is announced	Uit: alleen e-mail die naar Prioriteit gaat, wordt gemeld
+	Checking the sign-in…	Aanmelding controleren…
+	Add anyway	Toch toevoegen
+	Couldn't sign in to {server}: {error}	Kan niet aanmelden bij {server}: {error}
+	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} toont een certificaat waar geen instantie voor instaat. Voeg het account toch toe om het te bekijken en te kiezen of je het vertrouwt.

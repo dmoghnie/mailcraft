@@ -55,9 +55,19 @@ pub(super) fn add_account(ui: &mut Ui, f: &mut AccountForm, s: &Session, t: &Tok
         online_only(ui, t, &mut on);
         f.online_only = Some(on);
     }
+    checked(ui, f, s, t, acts);
     if let Some(e) = &f.error {
         ui.add_space(6.0);
         ui.add(egui::Label::new(RichText::new(e).color(t.danger)).wrap());
+    }
+    // Refused, or a server not reached now (one behind a VPN, say; a certificate to look at once
+    // it's added): added as it is when wanted.
+    if f.check_failed && f.checking.is_none() {
+        ui.add_space(4.0);
+        if ui.button(tl!("Add anyway")).clicked() {
+            (f.error, f.check_failed) = (None, false);
+            acts.push(Action::Submit("account.add", f.params()));
+        }
     }
     if !s.jmap_only {
         ui.add_space(8.0);
@@ -79,7 +89,11 @@ pub(super) fn add_account(ui: &mut Ui, f: &mut AccountForm, s: &Session, t: &Tok
         }
         return !cancel;
     }
-    let ready = !consumer && !f.email.trim().is_empty() && !f.password.is_empty() && (f.kind != AccountKind::Jmap || !f.jmap_url.trim().is_empty());
+    let ready = !consumer
+        && f.checking.is_none()
+        && !f.email.trim().is_empty()
+        && !f.password.is_empty()
+        && (f.kind != AccountKind::Jmap || !f.jmap_url.trim().is_empty());
     let (ok, cancel) = buttons(ui, t, "Connect", ready);
     if ok {
         if !matches!(f.kind, AccountKind::Jmap | AccountKind::Ews) && f.imap_host.is_empty() {
@@ -88,10 +102,57 @@ pub(super) fn add_account(ui: &mut Ui, f: &mut AccountForm, s: &Session, t: &Tok
         if f.kind == AccountKind::Pop && f.pop_host.trim().is_empty() {
             f.guess_pop();
         }
-        f.error = None;
-        acts.push(Action::Submit("account.add", f.params()));
+        (f.error, f.check_failed) = (None, false);
+        let p = f.params();
+        // IMAP, POP and JMAP sign in with the password typed here: checked before the account is
+        // added, so a mistyped password or server is said here, not after.
+        if !s.jmap_only && matches!(f.kind, AccountKind::Imap | AccountKind::Pop | AccountKind::Jmap) {
+            f.checking = Some(p.clone());
+            acts.push(Action::Submit("account.check", p));
+        } else {
+            acts.push(Action::Submit("account.add", p));
+        }
     }
     !cancel
+}
+
+/// While the sign-in is checked, a line saying so; once its servers took it, the account added as
+/// it was checked; once one didn't, why (on the form's error line).
+fn checked(ui: &mut Ui, f: &mut AccountForm, s: &Session, t: &Tokens, acts: &mut Vec<Action>) {
+    let Some(p) = &f.checking else { return };
+    let email = p.get("email").and_then(serde_json::Value::as_str).unwrap_or_default().trim().to_string();
+    let answer = s.sign_in_check.as_ref().filter(|c| c.email.eq_ignore_ascii_case(&email)).and_then(|c| c.answer.clone());
+    match answer {
+        None => {
+            ui.add_space(6.0);
+            ui.horizontal(|ui| {
+                ui.spinner();
+                ui.label(RichText::new(tl!("Checking the sign-in…")).color(t.faint).small());
+            });
+        }
+        Some(None) => {
+            if let Some(p) = f.checking.take() {
+                acts.push(Action::Submit("account.add", p));
+            }
+        }
+        Some(Some(refused)) => {
+            f.error = Some(refusal(&refused));
+            f.check_failed = true;
+            f.checking = None;
+        }
+    }
+}
+
+/// Why a server didn't take the sign-in, as the form says it.
+fn refusal(f: &mailcraft_engine::model::SignInFailure) -> String {
+    if f.certificate.is_some() {
+        tf!(
+            "{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.",
+            server = f.server
+        )
+    } else {
+        tf!("Couldn't sign in to {server}: {error}", server = f.server, error = f.error)
+    }
 }
 
 /// The address (its settings looked up and filled in once it's typed), the name and the password.

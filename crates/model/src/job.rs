@@ -25,7 +25,7 @@ pub use import::*;
 pub use keys::{HeldKey, Revocation};
 pub use op::{FollowUpDay, Op};
 pub use progress::Work;
-pub use status::{FailureKind, LOCAL_CERTIFICATE, REMOTE_CERTIFICATE, SyncStatus, UntrustedCertificate};
+pub use status::{FailureKind, LOCAL_CERTIFICATE, REMOTE_CERTIFICATE, SignInFailure, SyncStatus, UntrustedCertificate};
 pub use transfer::{Transfer, TransferKind, TransferState};
 pub use vacation::{Vacation, is_day};
 
@@ -140,6 +140,9 @@ pub enum Job {
     FetchCalendar { account: String, calendar: String, url: String, etag: String, modified: String },
     /// Look up the server settings for an address (autoconfiguration).
     Discover { email: String },
+    /// Sign in to a new account's servers, as it will connect, and sign out again, before it's
+    /// added: answered by [`Event::SignInChecked`] with the same `id`. Nothing is kept.
+    CheckSignIn { id: u64, account: AccountConfig, password: Secret, smtp_password: Option<Secret> },
     /// Sign an OAuth account in through the browser; it starts once signed in.
     SignIn { account: AccountConfig },
     /// Work offline (every account's connection closed, changes and mail kept to send later), or
@@ -384,6 +387,7 @@ impl Job {
             | Job::ReadMessageFile { .. }
             | Job::InspectDataFile { .. }
             | Job::Discover { .. }
+            | Job::CheckSignIn { .. }
             | Job::WorkOffline { .. }
             | Job::SetSync { .. }
             | Job::CheckUpdates
@@ -504,6 +508,12 @@ pub enum Event {
         email: String,
         config: Option<Box<AccountConfig>>,
         source: String,
+    },
+    /// What checking a new account's sign-in ([`Job::CheckSignIn`] `id`) came to: `None`, its
+    /// servers took it.
+    SignInChecked {
+        id: u64,
+        failure: Option<Box<SignInFailure>>,
     },
     /// Show this page in the browser (an OAuth sign-in page).
     OpenUrl {
