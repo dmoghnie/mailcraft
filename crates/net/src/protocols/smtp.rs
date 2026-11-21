@@ -507,6 +507,15 @@ pub(crate) mod tests {
             eprintln!("no network address: the rest skipped");
             return;
         };
+        // A firewall may keep this computer from reaching its own address (a Mac's, for a program
+        // built a moment ago, as this test is): nothing then reaches a server there, whatever
+        // the EHLO would have said.
+        let probe = TcpListener::bind((own, 0)).unwrap();
+        if std::net::TcpStream::connect_timeout(&probe.local_addr().unwrap(), Duration::from_secs(3)).is_err() {
+            eprintln!("this computer can't reach its own address {own}: the rest skipped");
+            return;
+        }
+        drop(probe);
         let (port, h) = serve_once_on(TcpListener::bind((own, 0)).unwrap());
         let server = ServerConfig { host: own.to_string(), port, security: Security::None };
         send(&server, "", "", "z@x.example", &to, raw).unwrap();
