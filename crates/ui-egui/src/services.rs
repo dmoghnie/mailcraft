@@ -333,6 +333,11 @@ pub trait Services {
     fn system_dark(&self) -> Option<bool> {
         None
     }
+    /// Whether the system asks apps to keep motion down (a Mac's Reduce motion): nothing moves
+    /// then, as with Play animations off.
+    fn reduce_motion(&self) -> bool {
+        false
+    }
 }
 
 /// Services for tests: a fixed clock, no dialogs.

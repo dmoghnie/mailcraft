@@ -8,6 +8,7 @@ pub(crate) mod boot;
 pub(crate) mod fonts;
 mod lanes;
 pub(crate) mod launch;
+mod motion;
 pub(crate) mod start;
 pub(crate) mod state_writer;
 pub(crate) mod tray;
@@ -46,6 +47,8 @@ pub(crate) struct Desktop {
     pub(crate) updater: Option<self_update::Updater>,
     /// The desktop's light or dark preference where winit doesn't report one (`appearance.rs`).
     pub(crate) dark: appearance::SystemDark,
+    /// Whether the system asks for less motion (`motion.rs`).
+    pub(crate) motion: motion::SystemMotion,
     /// The folder of the last file picked or saved: the next file dialog opens there (attaching
     /// several files from one folder, saving attachments beside each other), as figcraft's do.
     pub(crate) last_dir: Option<PathBuf>,
@@ -111,6 +114,9 @@ impl Services for Desktop {
     }
     fn system_dark(&self) -> Option<bool> {
         self.dark.get()
+    }
+    fn reduce_motion(&self) -> bool {
+        self.motion.reduced()
     }
     fn pick_files(&mut self) -> Vec<PathBuf> {
         let files = self.dialog("Attach files").pick_files().unwrap_or_default();

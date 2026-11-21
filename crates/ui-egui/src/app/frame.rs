@@ -290,7 +290,8 @@ impl MailApp {
             return None;
         }
         self.apply_language(&ctx);
-        motion::set_enabled(&ctx, self.session.prefs.animations);
+        // Play animations, unless the system asks for less motion (WCAG 2.3.3).
+        motion::set_enabled(&ctx, self.session.prefs.animations && !self.services.reduce_motion());
         // Ctrl+Q is Mark as read, as Outlook's: egui's own Ctrl+Q closed the window too. On a
         // Mac, Cmd+Q quits, as every Mac app does.
         if !cfg!(target_os = "macos") && ctx.options(|o| !o.quit_shortcuts.is_empty()) {

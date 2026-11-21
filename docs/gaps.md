@@ -191,6 +191,15 @@ Test builds update themselves ([how test builds update](updates.md)). These part
   calendar change the whole series, and the series moved for one occurrence went wrong on its
   days (Monday's moved to Tuesday, the rule still said Mondays).
 
+### 16. Reduce motion on Windows and Linux
+
+- **Impact:** On Windows and Linux, the system's setting for less motion (Windows' **Animation
+  effects**, GNOME's and KDE's) isn't followed: the folder pane slides and a message fades in.
+- **Workaround:** Turn off **Play animations** in **File › Options › General**.
+- **Cause:** Only the Mac's setting is read (`apps/mailcraft/src/desktop/motion.rs`). Windows'
+  is read through a call the safe wrappers MailCraft uses don't offer, and Linux's through the
+  desktop portal's `reduced-motion`, which the portal watcher doesn't ask for yet.
+
 ## Not planned
 
 These are outside MailCraft's control, or accepted as they are.

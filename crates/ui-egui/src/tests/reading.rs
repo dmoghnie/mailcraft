@@ -293,6 +293,40 @@ fn motion_plays_and_stops() {
     assert!(a.session.prefs.animations && crate::motion::enabled(&ctx));
 }
 
+/// The system asking for less motion (a Mac's Reduce motion) stops it as Play animations off
+/// does, though that's left on; it played whatever the system said.
+#[test]
+fn the_systems_reduce_motion_stops_it() {
+    struct Still(NullServices);
+    impl crate::Services for Still {
+        fn clock(&self) -> (i64, i32) {
+            self.0.clock()
+        }
+        fn pick_files(&mut self) -> Vec<std::path::PathBuf> {
+            self.0.pick_files()
+        }
+        fn save_path(&mut self, suggested: &str) -> Option<std::path::PathBuf> {
+            self.0.save_path(suggested)
+        }
+        fn open_path(&mut self, path: &std::path::Path) -> Result<(), String> {
+            self.0.open_path(path)
+        }
+        fn reduce_motion(&self) -> bool {
+            true
+        }
+    }
+    let (a, _) = app("reduce-motion");
+    let mut a = MailApp::new(a.session, Box::new(NullBackend), Box::new(Still(NullServices(NOW))));
+    let ctx = egui::Context::default();
+    // The first frame only puts the fonts in.
+    for _ in 0..2 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    assert!(a.session.prefs.animations, "Play animations is on");
+    assert!(!crate::motion::enabled(&ctx));
+    assert_eq!(ctx.global_style().animation_time, 0.0);
+}
+
 /// Issue #10: a picture of an HTML message shows at the size the message sets, as Outlook and
 /// browsers show it: both sides as set, one side with its shape kept, no wider than its
 /// `max-width` or the room; a spacer that sets a size keeps its room, a tracking pixel has none.

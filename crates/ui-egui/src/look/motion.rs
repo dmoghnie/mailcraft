@@ -1,7 +1,8 @@
 //! Motion: how things move, kept short and calm, as a mail client's should be. Things coming in
 //! decelerate into place, things leaving accelerate away, and a change of state (a hover, a
 //! selection) eases both ways; nothing takes longer than a quarter of a second. With Play
-//! animations off (File › Options) everything lands at once.
+//! animations off (File › Options), or the system asking for less motion (a Mac's Reduce
+//! motion), everything lands at once.
 //!
 //! The curves are cubic Béziers like CSS's `cubic-bezier()`, solved here: x(s) = t is found by
 //! Newton's method, with bisection when the slope is too flat to trust, and y(s) is the eased
