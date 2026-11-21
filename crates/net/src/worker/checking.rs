@@ -2,6 +2,8 @@
 //! and its outgoing one (SMTP) signed in to as the account will connect, then left. Nothing is
 //! kept; what failed is said by server, for the account dialog to show.
 
+use std::time::{Duration, Instant};
+
 use mailcraft_model::{AccountConfig, SignInFailure};
 
 use crate::NetError;
@@ -9,8 +11,15 @@ use crate::stream::Trusted;
 
 /// Sign in to `acc`'s servers with `password` (and `smtp_password` for an outgoing server with
 /// a sign-in of its own): `None` when they took it, else the first that didn't, and why.
+///
+/// Each server's answer is logged with how long it took, and the check's start: a check that
+/// went on for minutes left nothing to say which server it waited on.
 pub(crate) fn check_sign_in(acc: &AccountConfig, password: &str, smtp_password: Option<&str>) -> Option<SignInFailure> {
-    if let Err(e) = incoming(acc, password) {
+    log::info!("sign-in check: started");
+    let began = Instant::now();
+    let checked = incoming(acc, password);
+    log::info!("{}", said(false, began.elapsed(), &checked));
+    if let Err(e) = checked {
         let server = acc.jmap.clone().or_else(|| acc.pop.as_ref().map(|p| p.host.clone())).unwrap_or_else(|| acc.imap.host.clone());
         return Some(failure(acc, server, false, e));
     }
@@ -18,7 +27,25 @@ pub(crate) fn check_sign_in(acc: &AccountConfig, password: &str, smtp_password: 
     if acc.jmap.is_some() {
         return None;
     }
-    outgoing(acc, password, smtp_password).err().map(|e| failure(acc, acc.smtp.host.clone(), true, e))
+    let began = Instant::now();
+    let checked = outgoing(acc, password, smtp_password);
+    log::info!("{}", said(true, began.elapsed(), &checked));
+    checked.err().map(|e| failure(acc, acc.smtp.host.clone(), true, e))
+}
+
+/// The log's line for one server's answer: which server, how it answered, and how long it took.
+/// Never what the server said, which can name the account's address.
+fn said(outgoing: bool, took: Duration, checked: &crate::Result<()>) -> String {
+    let server = if outgoing { "outgoing" } else { "incoming" };
+    let how = match checked {
+        Ok(()) => "took the sign-in".to_string(),
+        Err(NetError::Auth(_)) => "refused the sign-in".to_string(),
+        Err(NetError::Untrusted(_)) => "showed a certificate not trusted".to_string(),
+        Err(NetError::Io(e)) => format!("couldn't be reached ({:?})", e.kind()),
+        Err(NetError::Tls(_)) => "failed to secure the connection".to_string(),
+        Err(_) => "failed".to_string(),
+    };
+    format!("sign-in check: the {server} server {how} in {:.1} s", took.as_secs_f32())
 }
 
 fn incoming(acc: &AccountConfig, password: &str) -> crate::Result<()> {
@@ -169,5 +196,20 @@ mod tests {
         a.smtp_sign_in = SignInMethod::None;
         assert_eq!(check_sign_in(&a, "pw", None), None);
         assert!(!h.join().unwrap().contains("AUTH"));
+    }
+
+    /// The log says which server answered how, and how long it took, never with what it said:
+    /// a server's refusal can name the account's address.
+    #[test]
+    fn the_log_says_each_server_and_its_time_not_its_words() {
+        let took = Duration::from_millis(83_400);
+        assert_eq!(said(false, took, &Ok(())), "sign-in check: the incoming server took the sign-in in 83.4 s");
+        let refused = said(true, took, &Err(NetError::Auth("535 no such user someone@example.com".into())));
+        assert_eq!(refused, "sign-in check: the outgoing server refused the sign-in in 83.4 s");
+        let slow = said(false, took, &Err(NetError::Io(std::io::Error::new(std::io::ErrorKind::TimedOut, "imap.example.com:993"))));
+        assert_eq!(slow, "sign-in check: the incoming server couldn't be reached (TimedOut) in 83.4 s");
+        for e in [NetError::Protocol("* BYE someone@example.com".into()), NetError::Closed("someone@example.com".into())] {
+            assert!(!said(true, took, &Err(e)).contains('@'), "nothing the server said");
+        }
     }
 }
