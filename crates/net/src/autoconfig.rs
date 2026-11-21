@@ -10,7 +10,10 @@
 //! 4. the host an `_autodiscover._tcp` SRV record names (where Outlook looks), for the same
 //!    configuration file;
 //! 5. DNS SRV records (RFC 6186: `_imaps._tcp`, `_imap._tcp`, `_submissions._tcp`,
-//!    `_submission._tcp`).
+//!    `_submission._tcp`);
+//! 6. with nothing published, the names most hosts give their servers (`imap.`, `mail.`, the
+//!    domain itself, [`candidates`]), asked whether they answer over TLS by the caller's probe
+//!    (the network's is in `protocols`, which this module stays apart from).
 //!
 //! The first answer wins; a POP server offered alongside is kept (`pop`) for POP accounts. Only
 //! the domain's own server is told the address; the others are asked about the domain, and
@@ -95,12 +98,36 @@ pub fn base_domain(host: &str) -> String {
     labels[n.saturating_sub(keep)..].join(".")
 }
 
+/// The servers asked whether they answer for `domain`, when it publishes nothing, best first:
+/// IMAP's, then SMTP's. Implicit TLS before STARTTLS (RFC 8314), each on `imap.` (or `smtp.`),
+/// `mail.` and the domain itself: only the domain's own names, never in the clear.
+pub fn candidates(domain: &str) -> (Vec<ServerConfig>, Vec<ServerConfig>) {
+    let list = |first: &str, tls: u16, starttls: u16| -> Vec<ServerConfig> {
+        [(tls, Security::Tls), (starttls, Security::StartTls)]
+            .into_iter()
+            .flat_map(|(port, security)| {
+                [format!("{first}.{domain}"), format!("mail.{domain}"), domain.to_string()].into_iter().map(move |host| ServerConfig {
+                    host,
+                    port,
+                    security,
+                })
+            })
+            .collect()
+    };
+    (list("imap", 993, 143), list("smtp", 465, 587))
+}
+
+/// Of servers given best first (IMAP's, SMTP's), the best of each that answers.
+pub type Probe<'a> = &'a mut dyn FnMut(&[ServerConfig], &[ServerConfig]) -> (Option<ServerConfig>, Option<ServerConfig>);
+
 /// The lookups, injectable for tests.
 pub struct Lookups<'a> {
     /// GET a URL; the body when it answered 200.
     pub fetch: &'a mut dyn FnMut(&str) -> Option<String>,
     pub mx: &'a mut dyn FnMut(&str) -> Vec<String>,
     pub srv: &'a mut dyn FnMut(&str) -> Option<(String, u16)>,
+    /// The best IMAP and SMTP servers that answer, of those given best first.
+    pub probe: Probe<'a>,
 }
 
 /// Find settings for `email` (see the module docs for the order).
@@ -155,11 +182,21 @@ pub fn discover_with(email: &str, l: &mut Lookups<'_>) -> Option<Found> {
         c.smtp = smtp;
         return Some(Found { config: c, source: "DNS (SRV records)".into() });
     }
-    None
+    // Nothing published: the domain's own servers under the usual names, if they answer. An
+    // outgoing server that didn't is guessed on the incoming one's host.
+    let (imap, smtp) = candidates(&domain);
+    let (imap, smtp) = (l.probe)(&imap, &smtp);
+    let imap = imap?;
+    let smtp = smtp.unwrap_or_else(|| ServerConfig { host: imap.host.clone(), port: 465, security: Security::Tls });
+    let mut c = AccountConfig::guess(email);
+    c.imap = imap;
+    c.smtp = smtp;
+    Some(Found { config: c, source: format!("{domain}'s servers, which answered") })
 }
 
-/// Find settings for `email` over the network.
-pub fn discover(email: &str) -> Option<Found> {
+/// Find settings for `email` over the network, `probe` asking servers whether they answer
+/// (`mailcraft_net::answering::answering`).
+pub fn discover(email: &str, probe: Probe<'_>) -> Option<Found> {
     let mut fetch = |url: &str| {
         crate::http::get(url, MAX_XML)
             .ok()
@@ -168,12 +205,17 @@ pub fn discover(email: &str) -> Option<Found> {
     };
     let mut mx = crate::dns::mx;
     let mut srv = crate::dns::srv;
-    discover_with(email, &mut Lookups { fetch: &mut fetch, mx: &mut mx, srv: &mut srv })
+    discover_with(email, &mut Lookups { fetch: &mut fetch, mx: &mut mx, srv: &mut srv, probe })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A probe of servers that finds none answering.
+    fn no_probe(_: &[ServerConfig], _: &[ServerConfig]) -> (Option<ServerConfig>, Option<ServerConfig>) {
+        (None, None)
+    }
 
     const XML: &str = r#"<?xml version="1.0"?>
 <clientConfig version="1.1">
@@ -224,7 +266,7 @@ mod tests {
     #[ignore = "needs the internet"]
     fn live_discovery() {
         assert!(!crate::dns::mx("gmail.com").is_empty(), "MX lookup through the system resolver");
-        let f = discover("someone@gmail.com").unwrap();
+        let f = discover("someone@gmail.com", &mut no_probe).unwrap();
         assert_eq!(f.config.imap.host, "imap.gmail.com");
         println!("gmail.com: {} ({}); smtp {}:{}", f.config.imap.host, f.source, f.config.smtp.host, f.config.smtp.port);
     }
@@ -247,7 +289,7 @@ mod tests {
         };
         let mut mx = |_: &str| vec!["mx1.mailhost.example".to_string()];
         let mut srv = |_: &str| None;
-        let f = discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut mx, srv: &mut srv }).unwrap();
+        let f = discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut mx, srv: &mut srv, probe: &mut no_probe }).unwrap();
         assert_eq!(f.source, "mailhost.example");
         assert_eq!((f.config.imap.host.as_str(), f.config.smtp.port, f.config.smtp.security), ("mail.mailhost.example", 465, Security::Tls));
         assert_eq!(f.config.pop, Some(ServerConfig { host: "mail.mailhost.example".into(), port: 995, security: Security::Tls }));
@@ -260,12 +302,70 @@ mod tests {
         let mut fetch = |url: &str| url.starts_with("https://autoconfig.mailhost.example/").then(|| HOSTED.to_string());
         let mut no_mx = |_: &str| Vec::new();
         let mut srv = |name: &str| (name == "_autodiscover._tcp.studio.example").then(|| ("autoconfig.mailhost.example".to_string(), 443));
-        let f = discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut no_mx, srv: &mut srv }).unwrap();
+        let f = discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut no_mx, srv: &mut srv, probe: &mut no_probe }).unwrap();
         assert_eq!((f.source.as_str(), f.config.pop.map(|p| p.port)), ("mailhost.example", Some(995)));
         // A record naming something that isn't a host name is ignored.
         let mut fetch = |_: &str| None;
         let mut srv = |name: &str| name.starts_with("_autodiscover").then(|| ("evil/../x".to_string(), 443));
-        assert!(discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut no_mx, srv: &mut srv }).is_none());
+        assert!(
+            discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut no_mx, srv: &mut srv, probe: &mut no_probe }).is_none()
+        );
+    }
+
+    /// With nothing published, the domain's own servers under the usual names are asked last:
+    /// what answers is taken, the outgoing server guessed on the incoming one's host when none
+    /// of those answered. Nothing answering, nothing is found.
+    #[test]
+    fn nothing_published_asks_the_domains_own_servers_last() {
+        let mut none = |_: &str| None;
+        let mut no_mx = |_: &str| Vec::new();
+        let mut no_srv = |_: &str| None;
+        let mut asked: Vec<String> = Vec::new();
+        let mut probe = |imap: &[ServerConfig], smtp: &[ServerConfig]| {
+            asked.extend(imap.iter().chain(smtp).map(|s| s.host.clone()));
+            (imap.get(1).cloned(), None)
+        };
+        let f = discover_with("zoe@studio.example", &mut Lookups { fetch: &mut none, mx: &mut no_mx, srv: &mut no_srv, probe: &mut probe }).unwrap();
+        assert!(!asked.is_empty() && asked.iter().all(|h| h == "studio.example" || h.ends_with(".studio.example")), "{asked:?}");
+        assert_eq!(f.config.imap, ServerConfig { host: "mail.studio.example".into(), port: 993, security: Security::Tls });
+        assert_eq!(f.config.smtp, ServerConfig { host: "mail.studio.example".into(), port: 465, security: Security::Tls });
+        assert_eq!((f.config.username.as_str(), f.source.as_str()), ("zoe@studio.example", "studio.example's servers, which answered"));
+
+        // Published settings are taken without asking any server.
+        let mut fetch = |url: &str| url.starts_with("https://autoconfig.studio.example/").then(|| XML.to_string());
+        let mut probed = false;
+        let mut probe = |_: &[ServerConfig], _: &[ServerConfig]| {
+            probed = true;
+            (None, None)
+        };
+        assert!(
+            discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut no_mx, srv: &mut no_srv, probe: &mut probe }).is_some()
+        );
+        assert!(!probed);
+
+        // Only an outgoing server answering isn't enough.
+        let mut probe = |_: &[ServerConfig], smtp: &[ServerConfig]| (None, smtp.first().cloned());
+        assert!(
+            discover_with("zoe@studio.example", &mut Lookups { fetch: &mut none, mx: &mut no_mx, srv: &mut no_srv, probe: &mut probe }).is_none()
+        );
+    }
+
+    #[test]
+    fn asks_the_domains_own_names_encrypted_best_first() {
+        let (imap, smtp) = candidates("example.org");
+        let named = |l: &[ServerConfig]| l.iter().map(|s| format!("{}:{}", s.host, s.port)).collect::<Vec<_>>();
+        assert_eq!(
+            named(&imap),
+            ["imap.example.org:993", "mail.example.org:993", "example.org:993", "imap.example.org:143", "mail.example.org:143", "example.org:143"]
+        );
+        assert_eq!(
+            named(&smtp),
+            ["smtp.example.org:465", "mail.example.org:465", "example.org:465", "smtp.example.org:587", "mail.example.org:587", "example.org:587"]
+        );
+        assert!(imap.iter().chain(&smtp).all(|s| s.host == "example.org" || s.host.ends_with(".example.org")), "only the domain's own");
+        let tls = |l: &[ServerConfig]| l.iter().map(|s| s.security).collect::<Vec<_>>();
+        assert_eq!(tls(&imap), [[Security::Tls; 3], [Security::StartTls; 3]].concat(), "never in the clear");
+        assert_eq!(tls(&smtp), tls(&imap));
     }
 
     #[test]
@@ -277,7 +377,7 @@ mod tests {
         };
         let mut mx = |d: &str| if d == "studio.example" { vec!["aspmx.l.google.com".to_string()] } else { Vec::new() };
         let mut srv = |_: &str| None;
-        let f = discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut mx, srv: &mut srv }).unwrap();
+        let f = discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut mx, srv: &mut srv, probe: &mut no_probe }).unwrap();
         assert!(f.source.contains("google.com"), "{}", f.source);
         assert_eq!(
             asked,
@@ -297,10 +397,10 @@ mod tests {
             "_submission._tcp.x.example" => Some(("mail.x.example".to_string(), 587)),
             _ => None,
         };
-        let f = discover_with("a@x.example", &mut Lookups { fetch: &mut none, mx: &mut no_mx, srv: &mut srv }).unwrap();
+        let f = discover_with("a@x.example", &mut Lookups { fetch: &mut none, mx: &mut no_mx, srv: &mut srv, probe: &mut no_probe }).unwrap();
         assert_eq!((f.config.imap.port, f.config.imap.security, f.config.smtp.security), (993, Security::Tls, Security::StartTls));
         let mut srv_none = |_: &str| None;
-        assert!(discover_with("nobody", &mut Lookups { fetch: &mut none, mx: &mut no_mx, srv: &mut srv_none }).is_none());
+        assert!(discover_with("nobody", &mut Lookups { fetch: &mut none, mx: &mut no_mx, srv: &mut srv_none, probe: &mut no_probe }).is_none());
         assert_eq!(base_domain("aspmx.l.google.com"), "google.com");
         assert_eq!(base_domain("mx1.mail.example.co.uk."), "example.co.uk");
     }

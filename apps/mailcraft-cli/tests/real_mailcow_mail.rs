@@ -49,9 +49,12 @@ fn real_mailcow_account_setup() {
     };
     let mut mx = |_: &str| Vec::new();
     let mut srv = |_: &str| None;
-    let found =
-        mailcraft_net::autoconfig::discover_with(email, &mut mailcraft_net::autoconfig::Lookups { fetch: &mut fetch, mx: &mut mx, srv: &mut srv })
-            .expect("Mailcow's autoconfig");
+    let mut probe = |_: &[mailcraft_engine::model::ServerConfig], _: &[mailcraft_engine::model::ServerConfig]| (None, None);
+    let found = mailcraft_net::autoconfig::discover_with(
+        email,
+        &mut mailcraft_net::autoconfig::Lookups { fetch: &mut fetch, mx: &mut mx, srv: &mut srv, probe: &mut probe },
+    )
+    .expect("Mailcow's autoconfig");
     let c = &found.config;
     eprintln!("found at {}: imap {:?} smtp {:?} pop {:?} as {}", found.source, c.imap, c.smtp, c.pop, c.username);
     assert_eq!(found.source, domain);

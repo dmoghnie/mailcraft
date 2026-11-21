@@ -65,10 +65,30 @@ struct Trust<'a> {
 }
 
 /// One message over one connection, as lettre's `SmtpTransport` sends it (connect and EHLO,
-/// STARTTLS, AUTH, MAIL / RCPT / DATA, QUIT), with the server's certificates checked between
-/// the handshake and the sign-in: lettre takes no verifier of ours, and only so are a server or
-/// intermediate certificate the system distrusts refused before the password goes out.
+/// STARTTLS, AUTH, MAIL / RCPT / DATA, QUIT).
 fn submit(server: &ServerConfig, sign_in: SignIn<'_>, envelope: &Envelope, raw: &[u8], recipients: &[String], trust: &Trust<'_>) -> Result<()> {
+    let mut conn = open(server, &sign_in, recipients, trust)?;
+    let sent = hand_over(&mut conn, envelope, raw, recipients);
+    conn.abort();
+    sent
+}
+
+/// Whether an outgoing server answers at `server` over a connection secured as it says, its
+/// certificate one an authority vouches for (or `trusted` holds): nothing is signed in to, and
+/// nothing sent. What looking for an address's servers asks when nothing is published.
+pub fn reach(server: &ServerConfig, trusted: Trusted<'_>) -> Result<()> {
+    let trust = Trust { roots: crate::stream::system_roots(), verifier: crate::stream::system_verifier().map_err(NetError::Tls)?, trusted };
+    let nobody = SignIn { user: "", password: "", oauth: false, method: SignInMethod::None };
+    let mut conn = open(server, &nobody, &[], &trust)?;
+    let _ = conn.quit();
+    Ok(())
+}
+
+/// A connection to `server`, connected and greeted, secured, and signed in as `sign_in` says,
+/// with the server's certificates checked between the handshake and the sign-in: lettre takes
+/// no verifier of ours, and only so are a server or intermediate certificate the system
+/// distrusts refused before the password goes out. `recipients` are what a failure names.
+fn open(server: &ServerConfig, sign_in: &SignIn<'_>, recipients: &[String], trust: &Trust<'_>) -> Result<SmtpConnection> {
     let failed = |e: lettre::transport::smtp::Error| failure(e, recipients);
     let host = server.host.as_str();
     // Each of the server's addresses in turn, as lettre would try them, greeted with this
@@ -121,13 +141,11 @@ fn submit(server: &ServerConfig, sign_in: SignIn<'_>, envelope: &Envelope, raw: 
             return Err(e);
         }
     }
-    if let Err(e) = sign_in_to(&mut conn, &hello, &sign_in, recipients) {
+    if let Err(e) = sign_in_to(&mut conn, &hello, sign_in, recipients) {
         conn.abort();
         return Err(e);
     }
-    let sent = hand_over(&mut conn, envelope, raw, recipients);
-    conn.abort();
-    sent
+    Ok(conn)
 }
 
 /// Sign in as `sign_in` says, once the connection is secured (issue #123). An OAuth token goes

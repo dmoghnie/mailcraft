@@ -10,6 +10,10 @@ on GitHub.
 
 ## Unreleased
 
+### Changed
+
+- Adding an account whose domain publishes no settings: MailCraft asks the domain's own servers under the usual names (`imap.`, `mail.`, the domain itself) whether they answer over an encrypted connection with a valid certificate, and fills in those that do. It filled in `mail.` and the domain unchecked, which often wasn't the server.
+
 ### Fixed
 
 - Adding an account: when no settings were found for an address (looked up while this computer was offline, say), leaving its box looks again. It said "No published settings" for that address until MailCraft was restarted.

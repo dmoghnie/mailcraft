@@ -1,6 +1,7 @@
 //! Mail and calendar protocols, each over a stream: IMAP, POP, SMTP, ManageSieve, JMAP, and
 //! CalDAV/CardDAV.
 
+pub mod answering;
 pub mod dav;
 pub mod imap;
 pub mod jmap;

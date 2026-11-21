@@ -290,7 +290,7 @@ impl Pool {
     pub(super) fn discover(&self, email: String) {
         let (sink, asked) = (self.sink.clone(), email.clone());
         let spawned = spawn("mail-discover", move || {
-            let found = crate::autoconfig::discover(&email);
+            let found = crate::autoconfig::discover(&email, &mut crate::answering::answering);
             let (config, source) = match found {
                 Some(f) => (Some(Box::new(f.config)), f.source),
                 None => (None, String::new()),
