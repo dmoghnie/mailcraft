@@ -1959,3 +1959,4 @@ count	occurrences	ripetizioni
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} presenta un certificato che nessuna autorità garantisce. Aggiungi comunque l'account per vederlo e scegliere se considerarlo attendibile.
 	It offers JMAP too.	Offre anche JMAP.
 	Use JMAP	Usa JMAP
+	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	Queste impostazioni provengono da record DNS, che possono essere falsificati, e indicano server presso {domain}. La password verrà inviata lì: verifica che {domain} gestisca la tua posta.

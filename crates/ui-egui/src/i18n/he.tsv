@@ -1955,3 +1955,4 @@ count	occurrences	פעמים
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} מציג אישור שאף רשות אינה ערבה לו. הוסף את החשבון בכל זאת כדי לראות אותו ולבחור אם לתת בו אמון.
 	It offers JMAP too.	הוא מציע גם JMAP.
 	Use JMAP	השתמש ב-JMAP
+	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	ההגדרות האלה הגיעו מרשומות DNS, שאפשר לזייף, והן מציינות שרתים ב-{domain}. הסיסמה שלך תישלח לשם: ודא ש-{domain} מטפל בדואר שלך.

@@ -504,10 +504,13 @@ pub enum Event {
         error: Option<String>,
     },
     /// Server settings found for an address (`None`: nothing published; guess instead).
+    /// `elsewhere`: found through DNS alone, they name a server in this other domain.
     Discovered {
         email: String,
         config: Option<Box<AccountConfig>>,
         source: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        elsewhere: Option<String>,
     },
     /// What checking a new account's sign-in ([`Job::CheckSignIn`] `id`) came to: `None`, its
     /// servers took it.

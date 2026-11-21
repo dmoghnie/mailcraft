@@ -177,8 +177,13 @@ impl Session {
                 }
             }
             Event::SignedIn { account, user } => self.signed_in(&account, user),
-            Event::Discovered { email, config, source } => {
-                self.discovered.insert(email.trim().to_ascii_lowercase(), Some((config.map(|c| *c), source)));
+            Event::Discovered { email, config, source, elsewhere } => {
+                let email = email.trim().to_ascii_lowercase();
+                match elsewhere {
+                    Some(d) => self.discovered_elsewhere.insert(email.clone(), d),
+                    None => self.discovered_elsewhere.remove(&email),
+                };
+                self.discovered.insert(email, Some((config.map(|c| *c), source)));
             }
             Event::SignInChecked { id, failure } => self.sign_in_checked(id, failure.map(|f| *f)),
             Event::Releases { releases, error } => {

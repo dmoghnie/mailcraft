@@ -1956,3 +1956,4 @@ count	occurrences	回
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} は、どの認証機関も保証していない証明書を提示しています。このままアカウントを追加すると、証明書を確認して信頼するかどうかを選べます。
 	It offers JMAP too.	JMAP も利用できます。
 	Use JMAP	JMAP を使用
+	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	この設定は偽装される可能性のある DNS レコードから取得したもので、{domain} のサーバーを指定しています。パスワードはそこに送信されます。{domain} があなたのメールを扱っているか確認してください。

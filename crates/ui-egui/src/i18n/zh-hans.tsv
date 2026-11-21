@@ -1956,3 +1956,4 @@ count	occurrences	次
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} 出示的证书没有任何机构担保。仍然添加该帐户，即可查看此证书并选择是否信任它。
 	It offers JMAP too.	也提供 JMAP。
 	Use JMAP	使用 JMAP
+	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	这些设置来自可能被伪造的 DNS 记录，指向 {domain} 的服务器。你的密码将发送到那里：请确认 {domain} 负责处理你的邮件。

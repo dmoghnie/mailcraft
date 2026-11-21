@@ -73,7 +73,7 @@ fn server_settings_are_looked_up_once() {
     assert!(s.take_jobs().is_empty(), "asked once");
     let mut c = mailcraft_model::AccountConfig::guess("zoe@example.org");
     c.imap.host = "imap.example.org".into();
-    s.apply(Event::Discovered { email: "zoe@example.org".into(), config: Some(Box::new(c)), source: "example.org".into() });
+    s.apply(Event::Discovered { email: "zoe@example.org".into(), config: Some(Box::new(c)), source: "example.org".into(), elsewhere: None });
     let r = s.run("account.discover", &json!({"email": "zoe@example.org"})).unwrap();
     assert_eq!((r["found"].as_bool(), r["imap"]["host"].as_str()), (Some(true), Some("imap.example.org")));
 }
@@ -88,7 +88,7 @@ fn nothing_found_is_looked_for_again_when_asked() {
     // Still coming: asking again doesn't ask the network twice.
     s.run("account.discover", &json!({"email": "zoe@example.org", "again": true})).unwrap();
     assert!(s.take_jobs().is_empty(), "still looking");
-    s.apply(Event::Discovered { email: "zoe@example.org".into(), config: None, source: String::new() });
+    s.apply(Event::Discovered { email: "zoe@example.org".into(), config: None, source: String::new(), elsewhere: None });
     assert_eq!(s.run("account.discover", &json!({"email": "zoe@example.org"})).unwrap()["found"], false);
     assert!(s.take_jobs().is_empty(), "not asked again unless wanted");
     let r = s.run("account.discover", &json!({"email": "zoe@example.org", "again": true})).unwrap();
@@ -99,9 +99,27 @@ fn nothing_found_is_looked_for_again_when_asked() {
         email: "zoe@example.org".into(),
         config: Some(Box::new(mailcraft_model::AccountConfig::guess("zoe@example.org"))),
         source: "example.org".into(),
+        elsewhere: None,
     });
     assert_eq!(s.run("account.discover", &json!({"email": "zoe@example.org", "again": true})).unwrap()["found"], true);
     assert!(s.take_jobs().is_empty());
+}
+
+/// Settings found through DNS that name servers in another domain say which: kept per address,
+/// and gone once it's found again without.
+#[test]
+fn settings_naming_servers_elsewhere_say_where() {
+    let mut s = Session::blank();
+    let found = |elsewhere: Option<&str>| Event::Discovered {
+        email: "Zoe@Example.org".into(),
+        config: Some(Box::new(mailcraft_model::AccountConfig::guess("zoe@example.org"))),
+        source: "DNS (SRV records)".into(),
+        elsewhere: elsewhere.map(str::to_string),
+    };
+    s.apply(found(Some("mailhost.example")));
+    assert_eq!(s.run("account.discover", &json!({"email": "zoe@example.org"})).unwrap()["elsewhere"], "mailhost.example");
+    s.apply(found(None));
+    assert_eq!(s.run("account.discover", &json!({"email": "zoe@example.org"})).unwrap()["elsewhere"], serde_json::Value::Null);
 }
 
 #[test]

@@ -404,6 +404,15 @@ fn found_note(ui: &mut Ui, f: &AccountForm, s: &Session, t: &Tokens) {
         (Some(src), _) if f.found_for.as_deref() == Some(email.as_str()) => {
             ui.add_space(4.0);
             ui.label(RichText::new(tf!("Settings found: {source}", source = src)).color(t.ok).small());
+            // DNS records can be forged where they aren't signed (RFC 6186 §6): a server they
+            // name outside the address's domain is said, before the password goes to it.
+            if let Some(other) = s.discovered_elsewhere.get(&email) {
+                let said = tf!(
+                    "These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.",
+                    domain = other
+                );
+                ui.add(egui::Label::new(RichText::new(said).color(t.warn).small()).wrap());
+            }
         }
         (_, Some(None)) => {
             ui.add_space(4.0);

@@ -35,10 +35,20 @@ pub(crate) fn add(s: &mut Session, args: &Args) -> Result<(), String> {
             // Only a JMAP server named.
             Some(f) if f.config.imap.host.is_empty() => {
                 errln!("settings found: {} (JMAP)", f.source);
+                if let Some(other) = &f.elsewhere {
+                    errln!(
+                        "warning: found through DNS records, which can be forged; they name a server at {other}: check that {other} handles this address's mail"
+                    );
+                }
                 p["jmap"] = json!(f.config.jmap);
             }
             Some(f) => {
                 errln!("settings found: {}", f.source);
+                if let Some(other) = &f.elsewhere {
+                    errln!(
+                        "warning: found through DNS records, which can be forged; they name servers at {other}: check that {other} handles this address's mail"
+                    );
+                }
                 if let Some(url) = &f.config.jmap {
                     errln!("it offers JMAP too: add with --jmap {url} to use that");
                 }

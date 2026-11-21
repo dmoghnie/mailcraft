@@ -1960,3 +1960,4 @@ count	occurrences	opakovaní
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} predkladá certifikát, za ktorý neručí žiadna certifikačná autorita. Pridajte účet napriek tomu, aby ste si ho mohli pozrieť a rozhodnúť, či mu dôverujete.
 	It offers JMAP too.	Ponúka aj JMAP.
 	Use JMAP	Použiť JMAP
+	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	Tieto nastavenia pochádzajú zo záznamov DNS, ktoré sa dajú sfalšovať, a uvádzajú servery na {domain}. Vaše heslo sa odošle tam: overte, či vašu poštu spravuje {domain}.

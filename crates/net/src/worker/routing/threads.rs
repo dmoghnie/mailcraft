@@ -292,16 +292,16 @@ impl Pool {
         let (sink, asked) = (self.sink.clone(), email.clone());
         let spawned = spawn("mail-discover", move || {
             let found = crate::autoconfig::discover(&email, &mut crate::answering::answering);
-            let (config, source) = match found {
-                Some(f) => (Some(Box::new(f.config)), f.source),
-                None => (None, String::new()),
+            let (config, source, elsewhere) = match found {
+                Some(f) => (Some(Box::new(f.config)), f.source, f.elsewhere),
+                None => (None, String::new(), None),
             };
-            sink.emit(Event::Discovered { email, config, source });
+            sink.emit(Event::Discovered { email, config, source, elsewhere });
         });
         if let Err(e) = spawned {
             // Nothing found: the user fills the servers in.
             log::warn!("autoconfiguration: {e}");
-            self.sink.emit(Event::Discovered { email: asked, config: None, source: String::new() });
+            self.sink.emit(Event::Discovered { email: asked, config: None, source: String::new(), elsewhere: None });
         }
     }
 

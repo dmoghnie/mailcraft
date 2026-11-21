@@ -35,6 +35,40 @@ const MAX_XML: usize = 256 << 10;
 pub struct Found {
     pub config: AccountConfig,
     pub source: String,
+    /// Found through DNS alone (an MX or SRV record, which can be forged where it isn't
+    /// signed: RFC 6186 §6), they name a server outside the address's domain: that server's
+    /// domain, for the user to check before a password goes there.
+    pub elsewhere: Option<String>,
+}
+
+impl Found {
+    /// Settings the domain itself or the ISP database gave: vouched for over HTTPS.
+    fn vouched(config: AccountConfig, source: String) -> Found {
+        Found { config, source, elsewhere: None }
+    }
+
+    /// Settings that came through DNS records for `domain`.
+    fn through_dns(config: AccountConfig, source: String, domain: &str) -> Found {
+        let jmap = config.jmap.as_deref().map(url_host);
+        let hosts = [Some(config.imap.host.as_str()), Some(config.smtp.host.as_str()), config.pop.as_ref().map(|p| p.host.as_str()), jmap];
+        let elsewhere = hosts.into_iter().flatten().find_map(|h| foreign(domain, h));
+        Found { config, source, elsewhere }
+    }
+}
+
+/// The registrable domain of `host` when it isn't under `domain`'s (`imap.gmail.com` for an
+/// address at `studio.example`: `gmail.com`).
+fn foreign(domain: &str, host: &str) -> Option<String> {
+    let host = host.trim().trim_end_matches('.').to_ascii_lowercase();
+    let own = base_domain(domain);
+    let inside = host.is_empty() || host == own || host.ends_with(&format!(".{own}"));
+    (!inside).then(|| base_domain(&host))
+}
+
+/// The host of a JMAP session address (`https://<host>[:<port>]/…`).
+fn url_host(url: &str) -> &str {
+    let rest = url.strip_prefix("https://").unwrap_or(url);
+    rest.split(['/', ':']).next().unwrap_or_default()
 }
 
 /// The text of the first `<tag>` in `block`, trimmed.
@@ -195,6 +229,8 @@ pub fn discover_with(email: &str, l: &mut Lookups<'_>) -> Option<Found> {
     let published = published(email, &domain, l);
     let jmap = jmap_session(&domain, l);
     if let Some(mut found) = published {
+        // The JMAP server came through DNS, whatever the rest came through.
+        found.elsewhere = found.elsewhere.or_else(|| jmap.as_deref().and_then(|u| foreign(&domain, url_host(u))));
         found.config.jmap = jmap;
         return Some(found);
     }
@@ -202,7 +238,7 @@ pub fn discover_with(email: &str, l: &mut Lookups<'_>) -> Option<Found> {
         let mut c = AccountConfig::guess(email);
         c.imap.host = String::new();
         c.jmap = Some(url);
-        return Some(Found { config: c, source: "DNS (a JMAP SRV record)".into() });
+        return Some(Found::through_dns(c, "DNS (a JMAP SRV record)".into(), &domain));
     }
     // Nothing published: the domain's own servers under the usual names, if they answer. An
     // outgoing server that didn't is guessed on the incoming one's host.
@@ -213,7 +249,8 @@ pub fn discover_with(email: &str, l: &mut Lookups<'_>) -> Option<Found> {
     let mut c = AccountConfig::guess(email);
     c.imap = imap;
     c.smtp = smtp;
-    Some(Found { config: c, source: format!("{domain}'s servers, which answered") })
+    // Only names under the domain are asked.
+    Some(Found::vouched(c, format!("{domain}'s servers, which answered")))
 }
 
 /// The JMAP session address `domain`'s `_jmap._tcp` SRV record gives (RFC 8620 §2.2):
@@ -234,21 +271,22 @@ fn published(email: &str, domain: &str, l: &mut Lookups<'_>) -> Option<Found> {
         format!("https://{domain}/.well-known/autoconfig/mail/config-v1.1.xml"),
     ] {
         if let Some(c) = try_url(l, &url) {
-            return Some(Found { config: c, source: domain.to_string() });
+            return Some(Found::vouched(c, domain.to_string()));
         }
     }
     if let Some(c) = try_url(l, &format!("https://autoconfig.thunderbird.net/v1.1/{domain}")) {
-        return Some(Found { config: c, source: "the ISP database".into() });
+        return Some(Found::vouched(c, "the ISP database".into()));
     }
     if let Some(mx) = (l.mx)(domain).into_iter().next() {
         let base = base_domain(&mx);
         if base != domain {
             if let Some(c) = try_url(l, &format!("https://autoconfig.thunderbird.net/v1.1/{base}")) {
-                return Some(Found { config: c, source: format!("the ISP database ({base} handles this domain's mail)") });
+                // Which provider it is came from the MX record.
+                return Some(Found::through_dns(c, format!("the ISP database ({base} handles this domain's mail)"), domain));
             }
             // The mail provider's own configuration (asked about the domain, not the address).
             if let Some(c) = try_url(l, &format!("https://autoconfig.{base}/mail/config-v1.1.xml?emaildomain={domain}")) {
-                return Some(Found { config: c, source: base });
+                return Some(Found::through_dns(c, base, domain));
             }
         }
     }
@@ -258,7 +296,7 @@ fn published(email: &str, domain: &str, l: &mut Lookups<'_>) -> Option<Found> {
         && host.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-'))
         && let Some(c) = try_url(l, &format!("https://{host}/mail/config-v1.1.xml?emaildomain={domain}"))
     {
-        return Some(Found { config: c, source: base_domain(&host) });
+        return Some(Found::through_dns(c, base_domain(&host), domain));
     }
     let imap = (l.srv)(&format!("_imaps._tcp.{domain}"))
         .map(|(h, p)| ServerConfig { host: h, port: p, security: Security::Tls })
@@ -270,7 +308,7 @@ fn published(email: &str, domain: &str, l: &mut Lookups<'_>) -> Option<Found> {
     let mut c = AccountConfig::guess(email);
     c.imap = imap;
     c.smtp = smtp;
-    Some(Found { config: c, source: "DNS (SRV records)".into() })
+    Some(Found::through_dns(c, "DNS (SRV records)".into(), domain))
 }
 
 /// Find settings for `email` over the network, `probe` asking servers whether they answer
@@ -397,6 +435,44 @@ mod tests {
         let mut fetch = |url: &str| url.starts_with("https://autoconfig.studio.example/").then(|| XML.to_string());
         let f = discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut no_mx, srv: &mut bad, probe: &mut no_probe }).unwrap();
         assert_eq!(f.config.jmap, None);
+    }
+
+    /// Settings that came through DNS alone and name a server outside the address's domain say
+    /// which domain it's in; those its own domain or the ISP database gave, and servers under
+    /// the address's domain, don't.
+    #[test]
+    fn servers_elsewhere_found_through_dns_are_named() {
+        let file = |host: &str| XML.replace("imap.example.org", host).replace("smtp.%EMAILDOMAIN%", host).replace("plain.example.org", host);
+        let mut no_mx = |_: &str| Vec::new();
+        let mut no_srv = |_: &str| None;
+        let ask = |email: &str,
+                   fetch: &mut dyn FnMut(&str) -> Option<String>,
+                   mx: &mut dyn FnMut(&str) -> Vec<String>,
+                   srv: &mut dyn FnMut(&str) -> Option<(String, u16)>| {
+            discover_with(email, &mut Lookups { fetch, mx, srv, probe: &mut no_probe }).unwrap()
+        };
+        // The domain's own file, naming another's servers: its choice.
+        let mut own = |url: &str| url.starts_with("https://autoconfig.studio.example/").then(|| file("imap.mailhost.example"));
+        assert_eq!(ask("zoe@studio.example", &mut own, &mut no_mx, &mut no_srv).elsewhere, None);
+        // The provider the MX record names.
+        let mut ispdb = |url: &str| (url == "https://autoconfig.thunderbird.net/v1.1/google.com").then(|| file("imap.gmail.com"));
+        let mut mx = |_: &str| vec!["aspmx.l.google.com".to_string()];
+        let f = ask("zoe@studio.example", &mut ispdb, &mut mx, &mut no_srv);
+        assert_eq!((f.config.imap.host.as_str(), f.elsewhere.as_deref()), ("imap.gmail.com", Some("gmail.com")));
+        // SRV records: under the address's domain (a subdomain's address too), or not.
+        let mut none = |_: &str| None;
+        for (email, host, elsewhere) in [
+            ("a@x.example", "mail.x.example", None),
+            ("a@eu.x.example", "mail.x.example", None),
+            ("a@x.example", "mail.x.example.evil", Some("example.evil")),
+        ] {
+            let mut srv = |name: &str| (name.starts_with("_imaps.") || name.starts_with("_submission.")).then(|| (host.to_string(), 993));
+            assert_eq!(ask(email, &mut none, &mut no_mx, &mut srv).elsewhere.as_deref(), elsewhere, "{email} {host}");
+        }
+        // A JMAP server named in DNS beside the domain's own file.
+        let mut own = |url: &str| url.starts_with("https://autoconfig.studio.example/").then(|| file("imap.studio.example"));
+        let mut jmap = |name: &str| name.starts_with("_jmap.").then(|| ("api.mailhost.example".to_string(), 443));
+        assert_eq!(ask("zoe@studio.example", &mut own, &mut no_mx, &mut jmap).elsewhere.as_deref(), Some("mailhost.example"));
     }
 
     /// A provider's file is read as XML: a server in a comment isn't offered, and character

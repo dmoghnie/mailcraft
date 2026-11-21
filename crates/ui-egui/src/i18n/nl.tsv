@@ -1955,3 +1955,4 @@ count	occurrences	keer
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} toont een certificaat waar geen instantie voor instaat. Voeg het account toch toe om het te bekijken en te kiezen of je het vertrouwt.
 	It offers JMAP too.	JMAP wordt ook aangeboden.
 	Use JMAP	JMAP gebruiken
+	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	Deze instellingen komen uit DNS-records, die vervalst kunnen worden, en noemen servers bij {domain}. Je wachtwoord wordt daarheen gestuurd: controleer of {domain} je e-mail verzorgt.

@@ -416,6 +416,8 @@ pub struct Session {
     pictures_for: BTreeSet<MessageKey>,
     /// Server settings looked up per address (lower case): `None` while looking.
     pub discovered: HashMap<String, Option<(Option<AccountConfig>, String)>>,
+    /// Of those found through DNS alone, the other domain a server they name is in, per address.
+    pub discovered_elsewhere: HashMap<String, String>,
     /// The last new account's sign-in asked to be checked before it's added.
     pub sign_in_check: Option<SignInCheck>,
     /// Accounts waiting for a data file to come in before they connect (their start).
@@ -575,6 +577,7 @@ impl Session {
             pictures: HashMap::new(),
             pictures_for: BTreeSet::new(),
             discovered: HashMap::new(),
+            discovered_elsewhere: HashMap::new(),
             sign_in_check: None,
             held: HashMap::new(),
             oauth_available: Vec::new(),

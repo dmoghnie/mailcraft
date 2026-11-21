@@ -1960,3 +1960,4 @@ count	occurrences	kez
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server}, hiçbir yetkilinin kefil olmadığı bir sertifika gösteriyor. Sertifikayı görmek ve ona güvenip güvenmeyeceğinizi seçmek için hesabı yine de ekleyin.
 	It offers JMAP too.	JMAP da sunuluyor.
 	Use JMAP	JMAP kullan
+	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	Bu ayarlar sahtesi yapılabilen DNS kayıtlarından geldi ve {domain} üzerindeki sunucuları gösteriyor. Parolanız oraya gönderilecek: postanızın {domain} tarafından yönetildiğini denetleyin.

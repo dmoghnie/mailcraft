@@ -796,3 +796,22 @@ fn a_jmap_server_found_is_offered() {
     assert_eq!((f.kind, f.jmap_url.as_str()), (AccountKind::Jmap, url));
     assert!(!f.imap_host.is_empty(), "IMAP's stays guessed");
 }
+
+/// Settings found through DNS alone that name servers in another domain say so, before the
+/// password goes there; others don't.
+#[test]
+fn servers_in_another_domain_found_through_dns_are_said() {
+    let said = "These settings came from DNS records, which can be forged, and name servers at gmail.com. Your password will be sent there: check that gmail.com handles your mail.";
+    for elsewhere in [Some("gmail.com"), None] {
+        let mut c = AccountConfig::guess("zoe@example.org");
+        c.imap.host = "imap.gmail.com".into();
+        let mut s = session();
+        s.discovered.insert("zoe@example.org".into(), Some((Some(c), "the ISP database (google.com handles this domain's mail)".into())));
+        if let Some(d) = elsewhere {
+            s.discovered_elsewhere.insert("zoe@example.org".into(), d.into());
+        }
+        let mut d = add("zoe@example.org", false, |_| {});
+        let l = look(&s, &mut d, None);
+        assert_eq!(l.has(said), elsewhere.is_some(), "{}", l.dump());
+    }
+}
