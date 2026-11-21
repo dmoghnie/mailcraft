@@ -61,6 +61,7 @@ cd apps/mailcraft-web && trunk serve           # browser: http://127.0.0.1:8774/
 ```
 
 - The CLI reads your password from `MAILCRAFT_PASSWORD`, or asks for it. It never stores it.
+- A build of your own offers **Sign in with Microsoft** or **Sign in with Google** only with an app you register with them: set `MAILCRAFT_MICROSOFT_CLIENT_ID`, or `MAILCRAFT_GOOGLE_CLIENT_ID` and `MAILCRAFT_GOOGLE_CLIENT_SECRET`, when you build or start it ([how](docs/oauth.md)). Without one, accounts sign in with passwords (an app password for Gmail), and Outlook.com accounts can't be added.
 - MailCraft keeps its data in `%APPDATA%\MailCraft` (Windows), `~/Library/Application Support/MailCraft` (macOS) or `~/.local/share/mailcraft` (Linux). To use another folder, pass `--data DIR` or set `MAILCRAFT_DATA`.
 - To put the web build on your own site, see [hosting the web build](packaging/web/README.md).
 
