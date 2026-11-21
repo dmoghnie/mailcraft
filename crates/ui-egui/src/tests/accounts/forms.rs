@@ -725,3 +725,41 @@ fn a_new_accounts_sign_in_is_checked_then_added() {
     let said = "mail.example.org shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.";
     assert!(l.has(said) && l.has("Add anyway"), "{}", l.dump());
 }
+
+/// Found settings say how their servers are signed in to (NTLM; an outgoing server without a
+/// sign-in), and which provider's sign-in the incoming one takes: offered while it's that
+/// server, when this copy can sign in there.
+#[test]
+fn found_settings_say_how_their_servers_are_signed_in_to() {
+    use mailcraft_engine::model::SignInMethod;
+    let mut c = AccountConfig::guess("zoe@example.org");
+    c.imap.host = "imap.google.com".into();
+    c.sign_in = SignInMethod::Ntlm;
+    c.smtp_sign_in = SignInMethod::None;
+    c.oauth = Some("google".into());
+    let mut s = session();
+    s.oauth_available = vec!["google".into()];
+    s.discovered.insert("zoe@example.org".into(), Some((Some(c.clone()), "example.org".into())));
+    let mut d = add("zoe@example.org", false, |_| {});
+    let l = look(&s, &mut d, None);
+    assert!(l.has("Sign in with Google"), "{}", l.dump());
+    let Dialog::AddAccount(f) = &mut d else { panic!("not the account dialog") };
+    let p = f.params();
+    assert_eq!((p["signIn"].as_str(), p["smtpSignIn"].as_str()), (Some("ntlm"), Some("none")));
+
+    // Another server typed in: not that provider's.
+    f.imap_host = "imap.example.org".into();
+    f.servers_edited = true;
+    assert!(!look(&s, &mut d, None).has("Sign in with Google"));
+
+    // Settings that don't say so offer none; nor where this copy can't sign in there.
+    for (oauth, available) in [(None, "google"), (Some("google"), "microsoft")] {
+        let mut s = session();
+        s.oauth_available = vec![available.into()];
+        let mut c = c.clone();
+        c.oauth = oauth.map(str::to_string);
+        s.discovered.insert("zoe@example.org".into(), Some((Some(c), "example.org".into())));
+        let mut d = add("zoe@example.org", false, |_| {});
+        assert!(!look(&s, &mut d, None).has("Sign in with Google"), "{oauth:?} {available}");
+    }
+}

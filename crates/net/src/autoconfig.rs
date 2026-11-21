@@ -20,7 +20,7 @@
 //! only when the user types an address into the account dialog. Everything fetched is hostile input: sizes are capped and
 //! a bad file is simply skipped.
 
-use mailcraft_model::{AccountConfig, Security, ServerConfig};
+use mailcraft_model::{AccountConfig, Security, ServerConfig, SignInMethod};
 
 use crate::xml::{self, El};
 
@@ -55,30 +55,82 @@ fn server(block: &El, email: &str) -> Option<(ServerConfig, String)> {
     ok.then_some((ServerConfig { host: host.to_ascii_lowercase(), port, security }, user))
 }
 
+/// How a server's block says it's signed in to (its `<authentication>` elements; none listed:
+/// with the password, as the format's own default).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+struct Methods {
+    /// `password-cleartext` or `password-encrypted` (and their old names `plain`, `secure`).
+    password: bool,
+    ntlm: bool,
+    oauth: bool,
+    /// `none` or `client-IP-address`: an outgoing server that takes mail without a sign-in.
+    nothing: bool,
+}
+
+impl Methods {
+    fn of(block: &El) -> Methods {
+        let named: Vec<String> = block.children("authentication").map(|a| a.text.trim().to_ascii_lowercase()).collect();
+        let has = |names: &[&str]| named.iter().any(|n| names.contains(&n.as_str()));
+        Methods {
+            password: named.is_empty() || has(&["password-cleartext", "password-encrypted", "plain", "secure"]),
+            ntlm: has(&["ntlm"]),
+            oauth: has(&["oauth2"]),
+            nothing: has(&["none", "client-ip-address"]),
+        }
+    }
+
+    /// Whether MailCraft can sign in to `host` a way it says (GSSAPI, a client certificate or
+    /// another provider's OAuth alone aren't).
+    fn usable(self, host: &str) -> bool {
+        self.password || self.ntlm || self.nothing || (self.oauth && mailcraft_model::oauth_provider_by_domain(host).is_some())
+    }
+
+    /// How MailCraft signs in: NTLM where that's the only way with a password, none where none
+    /// is needed (an outgoing server), else as the server offers.
+    fn sign_in(self) -> SignInMethod {
+        match self {
+            Methods { password: false, ntlm: true, .. } => SignInMethod::Ntlm,
+            Methods { password: false, ntlm: false, oauth: false, nothing: true } => SignInMethod::None,
+            _ => SignInMethod::Automatic,
+        }
+    }
+}
+
 /// The best IMAP and SMTP servers of a Mozilla autoconfig file, and its POP server when it has
-/// one (in `pop`). Encrypted servers are preferred; one without encryption is only taken when
-/// nothing else is offered.
+/// one (in `pop`). A server MailCraft can sign in to the way it says is preferred, then an
+/// encrypted one; one without encryption is only taken when nothing else is offered. How each
+/// is signed in to is kept (`sign_in`, `smtp_sign_in`), and, when the IMAP server takes OAuth
+/// from a provider MailCraft can sign in with, that provider (`oauth`: offered, not chosen).
 pub fn parse_config(xml: &str, email: &str) -> Option<AccountConfig> {
     let doc = xml::parse(xml);
-    let pick = |tag: &str, kind: &str| -> Option<(ServerConfig, String)> {
+    let pick = |tag: &str, kind: &str| -> Option<(ServerConfig, String, Methods)> {
         let mut blocks = Vec::new();
         doc.all(tag, &mut blocks);
-        let mut all: Vec<(ServerConfig, String)> =
-            blocks.into_iter().filter(|b| b.attr("type") == Some(kind)).filter_map(|b| server(b, email)).collect();
-        all.sort_by_key(|(s, _)| match s.security {
-            Security::Tls => 0,
-            Security::StartTls => 1,
-            Security::None => 2,
+        let mut all: Vec<(ServerConfig, String, Methods)> = blocks
+            .into_iter()
+            .filter(|b| b.attr("type") == Some(kind))
+            .filter_map(|b| server(b, email).map(|(s, user)| (s, user, Methods::of(b))))
+            .collect();
+        all.sort_by_key(|(s, _, m)| {
+            let security = match s.security {
+                Security::Tls => 0,
+                Security::StartTls => 1,
+                Security::None => 2,
+            };
+            (!m.usable(&s.host), security)
         });
         all.into_iter().next()
     };
-    let (imap, user) = pick("incomingServer", "imap")?;
-    let (smtp, _) = pick("outgoingServer", "smtp")?;
+    let (imap, user, methods) = pick("incomingServer", "imap")?;
+    let (smtp, _, smtp_methods) = pick("outgoingServer", "smtp")?;
     let mut c = AccountConfig::guess(email);
+    c.oauth = methods.oauth.then(|| mailcraft_model::oauth_provider_by_domain(&imap.host)).flatten().map(str::to_string);
     c.imap = imap;
     c.smtp = smtp;
     c.username = user;
-    c.pop = pick("incomingServer", "pop3").map(|(s, _)| s);
+    c.sign_in = methods.sign_in();
+    c.smtp_sign_in = smtp_methods.sign_in();
+    c.pop = pick("incomingServer", "pop3").map(|(s, _, _)| s);
     Some(c)
 }
 
@@ -244,6 +296,47 @@ mod tests {
         );
         let evil = XML.replace("imap.example.org", "imap.example.org/../x");
         assert_eq!(parse_config(&evil, "z@example.org").unwrap().imap.host, "plain.example.org", "bad host names are skipped");
+    }
+
+    /// How each server is signed in to, as its `<authentication>` says: NTLM where that's the only
+    /// way, no sign-in for an outgoing server that takes mail from where it's sent, a server
+    /// MailCraft can't sign in to the way it says passed over for one it can, and OAuth offered
+    /// only by a provider MailCraft signs in with.
+    #[test]
+    fn reads_how_each_server_is_signed_in_to() {
+        let file = |imap: &str, smtp: &str| {
+            format!(
+                r#"<clientConfig><emailProvider id="example.org">
+                <incomingServer type="imap"><hostname>{imap}</hostname><port>993</port><socketType>SSL</socketType><authentication>GSSAPI</authentication></incomingServer>
+                <incomingServer type="imap"><hostname>{imap}</hostname><port>143</port><socketType>STARTTLS</socketType>
+                  <authentication>NTLM</authentication></incomingServer>
+                <outgoingServer type="smtp"><hostname>{smtp}</hostname><port>25</port><socketType>STARTTLS</socketType>
+                  <authentication>client-IP-address</authentication></outgoingServer>
+                </emailProvider></clientConfig>"#
+            )
+        };
+        let c = parse_config(&file("imap.example.org", "smtp.example.org"), "zoe@example.org").unwrap();
+        assert_eq!((c.imap.port, c.sign_in), (143, SignInMethod::Ntlm), "GSSAPI alone passed over, encrypted or not");
+        assert_eq!(c.smtp_sign_in, SignInMethod::None);
+        assert_eq!(c.oauth, None);
+        // None listed: the password, as before.
+        let c = parse_config(XML, "zoe@example.org").unwrap();
+        assert_eq!((c.sign_in, c.smtp_sign_in, c.oauth.as_deref()), (SignInMethod::Automatic, SignInMethod::Automatic, None));
+
+        let google = r#"<clientConfig><emailProvider id="example.org">
+            <incomingServer type="imap"><hostname>imap.gmail.com</hostname><port>993</port><socketType>SSL</socketType>
+              <authentication>OAuth2</authentication><authentication>password-cleartext</authentication></incomingServer>
+            <outgoingServer type="smtp"><hostname>smtp.gmail.com</hostname><port>465</port><socketType>SSL</socketType>
+              <authentication>OAuth2</authentication><authentication>password-cleartext</authentication></outgoingServer>
+            </emailProvider></clientConfig>"#;
+        let c = parse_config(google, "zoe@example.org").unwrap();
+        assert_eq!((c.oauth.as_deref(), c.sign_in, c.smtp_sign_in), (Some("google"), SignInMethod::Automatic, SignInMethod::Automatic));
+        // Another provider's OAuth isn't offered: MailCraft can't sign in with it.
+        let other = google.replace("gmail.com", "mail.example.net");
+        assert_eq!(parse_config(&other, "zoe@example.org").unwrap().oauth, None);
+        // Nor Google's for a server only named like it.
+        let lookalike = google.replace("imap.gmail.com", "imap.gmail.com.example.net");
+        assert_eq!(parse_config(&lookalike, "zoe@example.org").unwrap().oauth, None);
     }
 
     /// A provider's file is read as XML: a server in a comment isn't offered, and character

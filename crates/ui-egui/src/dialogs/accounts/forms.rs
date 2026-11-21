@@ -47,6 +47,8 @@ pub struct AccountForm {
     /// The address whose looked-up settings are filled in, and where they came from.
     pub found_for: Option<String>,
     pub found_source: Option<String>,
+    /// The provider the found settings say the incoming server (by name) takes OAuth from.
+    pub found_oauth: Option<(String, String)>,
     /// Calendars and contacts only, with no email (issue #61), at this CalDAV and CardDAV server.
     /// Not a kind of its own: it's a dialog of its own, and unticked it gives back the kind
     /// chosen before.

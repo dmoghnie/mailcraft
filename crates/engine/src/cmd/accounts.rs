@@ -39,7 +39,8 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             let again = p::bool(v, "again").unwrap_or(false);
             match s.discovered.get(&email) {
                 Some(Some((Some(c), source))) => {
-                    Ok(json!({"found": true, "source": source, "imap": c.imap, "smtp": c.smtp, "pop": c.pop, "username": c.username}))
+                    Ok(json!({"found": true, "source": source, "imap": c.imap, "smtp": c.smtp, "pop": c.pop, "username": c.username,
+                        "signIn": c.sign_in.code(), "smtpSignIn": c.smtp_sign_in.code(), "oauth": c.oauth}))
                 }
                 Some(Some((None, _))) if !again => Ok(json!({"found": false})),
                 Some(None) => Ok(json!({"pending": true})),

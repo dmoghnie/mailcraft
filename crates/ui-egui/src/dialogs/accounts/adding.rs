@@ -162,8 +162,12 @@ fn basics(ui: &mut Ui, f: &mut AccountForm, s: &Session, acts: &mut Vec<Action>)
         let r = ui.add(egui::TextEdit::singleline(&mut f.email).hint_text(tl!("you@example.com")).min_size(vec2(300.0, 26.0)).desired_width(300.0));
         if r.changed() && !f.servers_edited {
             f.guess();
-            f.found_for = None;
+            if f.found_for.take().is_some() {
+                // How the found servers were signed in to isn't another address's.
+                f.sign_in = SignInMethods::default();
+            }
             f.found_source = None;
+            f.found_oauth = None;
         }
         // Look the settings up once the address is typed (when the box is left). Nothing found
         // is looked for again each time the box is left: this computer may have been offline.
@@ -197,6 +201,9 @@ fn basics(ui: &mut Ui, f: &mut AccountForm, s: &Session, acts: &mut Vec<Action>)
                 None => f.guess_pop(),
             }
             f.username = if c.username.eq_ignore_ascii_case(&email) { String::new() } else { c.username.clone() };
+            // How they're signed in to, as the settings say (NTLM; an outgoing server without).
+            f.sign_in = SignInMethods { incoming: c.sign_in, outgoing: c.smtp_sign_in };
+            f.found_oauth = c.oauth.clone().map(|p| (c.imap.host.clone(), p));
             f.found_for = Some(email.clone());
             f.found_source = Some(source.clone());
         }
@@ -385,9 +392,14 @@ fn found_note(ui: &mut Ui, f: &AccountForm, s: &Session, t: &Tokens) {
 }
 
 /// The provider to sign in with through the browser (OAuth), when this copy can: Microsoft for
-/// Exchange (Microsoft 365), else the one the incoming server belongs to.
+/// Exchange (Microsoft 365), else the one the incoming server belongs to: one known to take it,
+/// or the one its domain's settings say it takes it from (while it's the server they named).
 fn browser_sign_in(f: &AccountForm, s: &Session) -> Option<&'static str> {
-    let p = if f.kind == AccountKind::Graph { Some("microsoft") } else { mailcraft_engine::model::oauth_provider_for(&f.imap_host) };
+    let found = || {
+        let (host, p) = f.found_oauth.as_ref().filter(|(h, _)| h.eq_ignore_ascii_case(f.imap_host.trim()))?;
+        mailcraft_engine::model::oauth_provider_by_domain(host).filter(|known| known == p)
+    };
+    let p = if f.kind == AccountKind::Graph { Some("microsoft") } else { mailcraft_engine::model::oauth_provider_for(&f.imap_host).or_else(found) };
     p.filter(|p| s.oauth_available.iter().any(|a| a == p))
 }
 

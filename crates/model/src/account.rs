@@ -337,6 +337,23 @@ pub fn oauth_provider_for(imap_host: &str) -> Option<&'static str> {
     }
 }
 
+/// The OAuth provider whose servers these are, by their domain, for a server its domain's
+/// settings say takes OAuth (autoconfiguration's `<authentication>OAuth2`): Google's
+/// (`gmail.com`, `googlemail.com`, `google.com`) or Microsoft's (`outlook.com`, `office365.com`,
+/// `office.com`), when it's one MailCraft can sign in to. A server named by hand goes by
+/// [`oauth_provider_for`]'s list of the servers known to take it.
+pub fn oauth_provider_by_domain(host: &str) -> Option<&'static str> {
+    let h = host.trim().trim_end_matches('.').to_ascii_lowercase();
+    let under = |ds: &[&str]| ds.iter().any(|d| lookalike::is_under(&h, d));
+    if under(&["gmail.com", "googlemail.com", "google.com"]) {
+        Some("google")
+    } else if under(&["outlook.com", "office365.com", "office.com"]) {
+        Some("microsoft")
+    } else {
+        None
+    }
+}
+
 /// Microsoft's own addresses (Outlook.com, Hotmail, Live, MSN). Since September 2024 they
 /// take no passwords from other mail apps over IMAP, POP or SMTP: only Microsoft sign-in.
 pub fn microsoft_consumer(email: &str) -> bool {
@@ -477,6 +494,23 @@ mod tests {
         }
         for h in ["smtp.notgmail.com", "mail.xgmail.com", "gmail.com.example", "smtp.googlemail.co", "", "."] {
             assert!(!files_sent_mail_itself(h), "{h}");
+        }
+    }
+
+    /// A server whose settings say it takes OAuth is Google's or Microsoft's by its domain, not
+    /// by a name that only starts like theirs.
+    #[test]
+    fn oauth_servers_are_known_by_their_domain() {
+        for (h, p) in [
+            ("imap.gmail.com", "google"),
+            ("IMAP.GoogleMail.com.", "google"),
+            ("outlook.office365.com", "microsoft"),
+            ("imap-mail.outlook.com", "microsoft"),
+        ] {
+            assert_eq!(oauth_provider_by_domain(h), Some(p), "{h}");
+        }
+        for h in ["imap.gmail.com.example.net", "notgmail.com", "outlook.example", "office365.com.evil.example", "", "."] {
+            assert_eq!(oauth_provider_by_domain(h), None, "{h}");
         }
     }
 
