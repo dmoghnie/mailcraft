@@ -255,6 +255,9 @@ impl Dav {
 
     /// The home of the user's calendars or address books, found from the account's domain.
     pub fn discover(&self, kind: Kind, email: &str, imap_host: &str) -> Result<Option<String>> {
+        if !worth_looking_for(email, imap_host) {
+            return Ok(None);
+        }
         let domain = email.rsplit_once('@').map(|(_, d)| d.trim().to_ascii_lowercase()).unwrap_or_default();
         let srv = if domain.is_empty() {
             None
@@ -601,6 +604,16 @@ fn parent_of(url: &str) -> Option<String> {
 /// The path of an absolute address (multiget names items by path).
 fn path_of(url: &str) -> String {
     Url::parse(url).map(|u| u.path).unwrap_or_else(|_| url.to_string())
+}
+
+/// Whether an account's calendar and contacts servers are worth looking for from its address
+/// and mail server. Not a Google account's (Gmail, or a domain whose mail Google serves): Google's
+/// calendars and contacts take OAuth alone, so nothing a password can sign in to is found, and
+/// one of the places looked at, the mail server's name on the web's port, takes no connection,
+/// so each look waited out its connection timeouts (half a minute for calendars, and again for
+/// contacts). An address the user gives is still followed.
+fn worth_looking_for(email: &str, imap_host: &str) -> bool {
+    !mailcraft_model::google_mail(email, imap_host)
 }
 
 pub(crate) mod digest;

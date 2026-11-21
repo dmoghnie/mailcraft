@@ -248,3 +248,16 @@ fn real_an_invitations_odd_uid_is_found_where_it_was_stored() {
     let [url, user, password] = p.as_slice() else { panic!("MAILCRAFT_REAL_CALDAV: url user password") };
     an_odd_uid_is_found(&Dav::new(user, password), url, &std::process::id().to_string());
 }
+
+/// A Google account's calendars and contacts aren't looked for (they take OAuth alone, and the
+/// look waited out a minute of timeouts): Gmail's addresses, and a domain whose mail Google
+/// serves. Others are, a name that merely ends like Google's among them.
+#[test]
+fn a_google_accounts_calendars_arent_looked_for() {
+    assert!(!worth_looking_for("zoe@gmail.com", "imap.gmail.com"));
+    assert!(!worth_looking_for("zoe@googlemail.com", "imap.googlemail.com"));
+    assert!(!worth_looking_for("zoe@gmail.com", "pop.gmail.com"));
+    assert!(!worth_looking_for("zoe@company.example", "imap.gmail.com"));
+    assert!(worth_looking_for("zoe@example.org", "mail.example.org"));
+    assert!(worth_looking_for("zoe@notgmail.com", "imap.notgmail.com"));
+}

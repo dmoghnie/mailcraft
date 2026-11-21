@@ -25,6 +25,7 @@ on GitHub.
 ### Fixed
 
 - Sending, and checking a new account's sign-in: an outgoing server's address that takes no connection (an IPv6 one, often) holds MailCraft a few seconds before the next is tried, not a minute.
+- A Gmail or Google Workspace account no longer spends a minute looking for calendars and contacts when it's added and once a day after: Google's take only Google sign-in, so none are looked for. An address given in **File › Info › Account settings › Calendar server…** is still used.
 - Adding an account: when no settings were found for an address (looked up while this computer was offline, say), leaving its box looks again. It said "No published settings" for that address until MailCraft was restarted.
 
 ## 0.41.0
