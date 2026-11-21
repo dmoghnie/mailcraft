@@ -72,7 +72,7 @@ pub(super) fn message_row(s: &Session, t: &theme::Tokens, ui: &mut Ui, of: RowOf
     let first_line = match (single, compact) {
         (true, _) => 5.0,
         (false, true) => 6.0,
-        (false, false) => 9.0,
+        (false, false) => 7.0,
     };
     let row = MessageRow {
         s,
@@ -181,7 +181,8 @@ impl MessageRow<'_> {
         if !s.prefs.compact && !self.single {
             let nobody = mailcraft_engine::model::EmailAddress::default();
             let who_addr = if self.sent_view { m.to.first().unwrap_or(&nobody) } else { &m.from };
-            let c = mr.pos(egui::pos2(r.min.x + 14.0 + 17.0, r.min.y + 26.0));
+            // Level with the first line's top, as wide as the sender and subject are tall.
+            let c = mr.pos(egui::pos2(r.min.x + 14.0 + 17.0, line1 + 17.0));
             widgets::avatar(ui, c, 17.0, &who_addr.initials(), theme::avatar_color(&who_addr.email, t.dark));
         }
         // Sender (or recipients in Sent) and time.

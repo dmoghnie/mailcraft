@@ -39,10 +39,12 @@ fn row_height(s: &Session) -> f32 {
     if s.prefs.single_line {
         return 28.0;
     }
+    // With the picture: 7 points above its lines and 9 under them, so 16 between two messages'
+    // text, where a message's own lines are 3 or 4 apart.
     match (s.prefs.compact, s.prefs.show_preview) {
         (true, _) => 46.0,
-        (false, true) => 76.0,
-        (false, false) => 58.0,
+        (false, true) => 68.0,
+        (false, false) => 50.0,
     }
 }
 

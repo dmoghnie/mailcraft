@@ -671,3 +671,39 @@ fn it_starts_in_the_folder_chosen() {
     c.restore_state(&json!({"prefs": {"compact": true}}));
     assert_eq!(c.session.view, View::Folder { account: "sample".into(), folder: "INBOX".into() });
 }
+
+/// The list as it starts (a picture, the sender, the subject and a line of the message) holds
+/// eight messages a page in a window of 1320 by 852, where it held seven: a row keeps 7 points
+/// above its lines and 9 under them, where it kept 9 and 15. Its three lines stay in order,
+/// apart and inside the row.
+#[test]
+fn the_list_as_it_starts_holds_more_mail() {
+    let (mut a, _) = app("list-density");
+    let p = &a.session.prefs;
+    assert!(p.show_preview && !p.compact && !p.single_line, "the list as it starts");
+    let ctx = egui::Context::default();
+    ctx.enable_accesskit();
+    let size = egui::vec2(1320.0, 852.0);
+    let mut drawn = Vec::new();
+    for _ in 0..3 {
+        drawn = drawn_text(&ctx, &mut a, size);
+    }
+    assert!(a.ui.list_page >= 8, "{} messages a page", a.ui.list_page);
+    let row = named(&ctx, &mut a, size)
+        .into_iter()
+        .filter(|n| n.role == egui::accesskit::Role::ListItem)
+        .find(|n| n.name().is_some_and(|w| w.starts_with("Sam Okafor, Re: Storyboard review")))
+        .and_then(|n| n.rect)
+        .expect("the newest message's row");
+    let line = |starts: &str| {
+        drawn
+            .iter()
+            .find(|d| d.seen() && d.text.starts_with(starts) && row.contains(d.rect.center()))
+            .map(|d| d.rect)
+            .unwrap_or_else(|| panic!("{starts} isn't in {row:?}"))
+    };
+    let (who, what, text) = (line("Sam Okafor"), line("Re: Storyboard review"), line("Works for me"));
+    assert!(who.bottom() <= what.top() && what.bottom() <= text.top(), "in order and apart: {who:?} {what:?} {text:?}");
+    assert!(who.top() - row.top() >= 5.0 && row.bottom() - text.bottom() >= 5.0, "inside the row: {row:?} {who:?} {text:?}");
+    assert!(row.height() <= 70.0, "a row {} tall", row.height());
+}
