@@ -40,7 +40,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             match s.discovered.get(&email) {
                 Some(Some((Some(c), source))) => {
                     Ok(json!({"found": true, "source": source, "imap": c.imap, "smtp": c.smtp, "pop": c.pop, "username": c.username,
-                        "signIn": c.sign_in.code(), "smtpSignIn": c.smtp_sign_in.code(), "oauth": c.oauth}))
+                        "signIn": c.sign_in.code(), "smtpSignIn": c.smtp_sign_in.code(), "oauth": c.oauth, "jmap": c.jmap}))
                 }
                 Some(Some((None, _))) if !again => Ok(json!({"found": false})),
                 Some(None) => Ok(json!({"pending": true})),
@@ -51,7 +51,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
                 }
             }
         })
-        .params(r#"{"email": string, "again"?: bool (ask again when nothing was found before)} (asks once; call again for the answer)"#),
+        .params(r#"{"email": string, "again"?: bool (ask again when nothing was found before)} (asks once; call again for the answer: "jmap" is a JMAP server offered too, and the only one when "imap" has no host)"#),
         CommandSpec::new("account.move", "Move account", "Folder pane › account menu", |s, v| {
             let id = p::req_str(v, "account")?.to_string();
             let by = p::i64(v, "by").ok_or_else(|| CmdError::Params("`by` is required: -1 (up) or 1 (down)".into()))?;

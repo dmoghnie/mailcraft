@@ -1957,3 +1957,5 @@ count	occurrences	次
 	Add anyway	仍要新增
 	Couldn't sign in to {server}: {error}	無法登入 {server}：{error}
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} 出示的憑證沒有任何機構擔保。仍要新增此帳戶，即可查看此憑證並選擇是否信任它。
+	It offers JMAP too.	也提供 JMAP。
+	Use JMAP	使用 JMAP

@@ -1958,3 +1958,5 @@ count	occurrences	opakovaní
 	Add anyway	Napriek tomu pridať
 	Couldn't sign in to {server}: {error}	Nepodarilo sa prihlásiť na {server}: {error}
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} predkladá certifikát, za ktorý neručí žiadna certifikačná autorita. Pridajte účet napriek tomu, aby ste si ho mohli pozrieť a rozhodnúť, či mu dôverujete.
+	It offers JMAP too.	Ponúka aj JMAP.
+	Use JMAP	Použiť JMAP

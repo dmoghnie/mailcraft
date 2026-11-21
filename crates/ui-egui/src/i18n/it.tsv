@@ -1957,3 +1957,5 @@ count	occurrences	ripetizioni
 	Add anyway	Aggiungi comunque
 	Couldn't sign in to {server}: {error}	Impossibile accedere a {server}: {error}
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} presenta un certificato che nessuna autorità garantisce. Aggiungi comunque l'account per vederlo e scegliere se considerarlo attendibile.
+	It offers JMAP too.	Offre anche JMAP.
+	Use JMAP	Usa JMAP

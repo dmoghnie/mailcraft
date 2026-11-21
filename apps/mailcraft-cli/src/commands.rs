@@ -32,8 +32,16 @@ pub(crate) fn add(s: &mut Session, args: &Args) -> Result<(), String> {
     // No servers given: look them up (the domain's autoconfig, the ISP database, DNS).
     if args.opt("--imap").is_none() && args.opt("--smtp").is_none() && args.opt("--jmap").is_none() {
         match mailcraft_net::autoconfig::discover(&email, &mut mailcraft_net::answering::answering) {
+            // Only a JMAP server named.
+            Some(f) if f.config.imap.host.is_empty() => {
+                errln!("settings found: {} (JMAP)", f.source);
+                p["jmap"] = json!(f.config.jmap);
+            }
             Some(f) => {
                 errln!("settings found: {}", f.source);
+                if let Some(url) = &f.config.jmap {
+                    errln!("it offers JMAP too: add with --jmap {url} to use that");
+                }
                 p["imapHost"] = json!(f.config.imap.host);
                 p["imapPort"] = json!(f.config.imap.port);
                 p["imapSecurity"] = json!(f.config.imap.security.code());

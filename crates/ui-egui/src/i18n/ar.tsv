@@ -1953,3 +1953,5 @@ count	occurrences	مرات
 	Add anyway	إضافة على أي حال
 	Couldn't sign in to {server}: {error}	تعذّر تسجيل الدخول إلى {server}: {error}
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	يعرض {server} شهادة لا تضمنها أي جهة. أضف الحساب على أي حال لعرضها واختيار ما إذا كنت ستثق بها.
+	It offers JMAP too.	يوفّر JMAP أيضًا.
+	Use JMAP	استخدام JMAP

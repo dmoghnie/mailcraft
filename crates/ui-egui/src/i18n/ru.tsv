@@ -1957,3 +1957,5 @@ count	occurrences	повторений
 	Add anyway	Всё равно добавить
 	Couldn't sign in to {server}: {error}	Не удалось войти на {server}: {error}
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} предъявляет сертификат, за который не ручается ни один центр сертификации. Всё равно добавьте учётную запись, чтобы посмотреть его и решить, доверять ли ему.
+	It offers JMAP too.	Также доступен JMAP.
+	Use JMAP	Использовать JMAP

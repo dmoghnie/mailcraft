@@ -31,6 +31,7 @@ pub(super) fn add_account(ui: &mut Ui, f: &mut AccountForm, s: &Session, t: &Tok
     // What looking the servers up found: only IMAP and POP have servers to look up.
     if f.kind.imap_or_pop() {
         found_note(ui, f, s, t);
+        jmap_note(ui, f, t);
     }
     // Outlook.com, Hotmail and Live take no passwords from mail apps any more.
     let consumer = !matches!(f.kind, AccountKind::Jmap | AccountKind::Ews) && mailcraft_engine::model::microsoft_consumer(&f.email);
@@ -168,6 +169,9 @@ fn basics(ui: &mut Ui, f: &mut AccountForm, s: &Session, acts: &mut Vec<Action>)
             }
             f.found_source = None;
             f.found_oauth = None;
+            if std::mem::take(&mut f.found_jmap) {
+                f.jmap_url.clear();
+            }
         }
         // Look the settings up once the address is typed (when the box is left). Nothing found
         // is looked for again each time the box is left: this computer may have been offline.
@@ -185,20 +189,31 @@ fn basics(ui: &mut Ui, f: &mut AccountForm, s: &Session, acts: &mut Vec<Action>)
             && f.found_for.as_deref() != Some(email.as_str())
             && let Some(Some((Some(c), source))) = s.discovered.get(&email)
         {
-            f.imap_host = c.imap.host.clone();
-            f.imap_port = c.imap.port.to_string();
-            f.imap_security = c.imap.security;
-            f.smtp_host = c.smtp.host.clone();
-            f.smtp_port = c.smtp.port.to_string();
-            f.smtp_security = c.smtp.security;
-            // The provider's POP server when it named one, else one named after the IMAP server.
-            match &c.pop {
-                Some(p) => {
-                    f.pop_host = p.host.clone();
-                    f.pop_port = p.port.to_string();
-                    f.pop_security = p.security;
+            // Only a JMAP server named: it's the one to use, the others stay guessed.
+            if c.imap.host.is_empty() {
+                if f.kind.imap_or_pop() {
+                    f.kind = AccountKind::Jmap;
                 }
-                None => f.guess_pop(),
+            } else {
+                f.imap_host = c.imap.host.clone();
+                f.imap_port = c.imap.port.to_string();
+                f.imap_security = c.imap.security;
+                f.smtp_host = c.smtp.host.clone();
+                f.smtp_port = c.smtp.port.to_string();
+                f.smtp_security = c.smtp.security;
+                // The provider's POP server when it named one, else one named after the IMAP server.
+                match &c.pop {
+                    Some(p) => {
+                        f.pop_host = p.host.clone();
+                        f.pop_port = p.port.to_string();
+                        f.pop_security = p.security;
+                    }
+                    None => f.guess_pop(),
+                }
+            }
+            if let Some(url) = &c.jmap {
+                f.jmap_url = url.clone();
+                f.found_jmap = true;
             }
             f.username = if c.username.eq_ignore_ascii_case(&email) { String::new() } else { c.username.clone() };
             // How they're signed in to, as the settings say (NTLM; an outgoing server without).
@@ -369,6 +384,20 @@ fn servers_named(f: &AccountForm) -> Option<String> {
 
 /// What looking the address's settings up came to, under the address: found, still looking, or
 /// nothing published.
+/// Settings found with a JMAP server beside IMAP's: said, to be chosen instead.
+fn jmap_note(ui: &mut Ui, f: &mut AccountForm, t: &Tokens) {
+    let email = f.email.trim().to_ascii_lowercase();
+    if !f.found_jmap || !f.kind.imap_or_pop() || f.found_for.as_deref() != Some(email.as_str()) {
+        return;
+    }
+    ui.horizontal(|ui| {
+        ui.label(RichText::new(tl!("It offers JMAP too.")).color(t.faint).small());
+        if ui.small_button(tl!("Use JMAP")).clicked() {
+            f.kind = AccountKind::Jmap;
+        }
+    });
+}
+
 fn found_note(ui: &mut Ui, f: &AccountForm, s: &Session, t: &Tokens) {
     let email = f.email.trim().to_ascii_lowercase();
     match (&f.found_source, s.discovered.get(&email)) {

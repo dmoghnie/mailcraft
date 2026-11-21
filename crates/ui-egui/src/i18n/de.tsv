@@ -1958,3 +1958,5 @@ count	occurrences	Terminen
 	Add anyway	Trotzdem hinzufügen
 	Couldn't sign in to {server}: {error}	Anmeldung bei {server} fehlgeschlagen: {error}
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} zeigt ein Zertifikat, für das keine Zertifizierungsstelle bürgt. Fügen Sie das Konto trotzdem hinzu, um es anzusehen und zu entscheiden, ob Sie ihm vertrauen.
+	It offers JMAP too.	JMAP wird ebenfalls angeboten.
+	Use JMAP	JMAP verwenden

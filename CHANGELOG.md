@@ -10,6 +10,10 @@ on GitHub.
 
 ## Unreleased
 
+### Added
+
+- Adding an account: a JMAP server the domain names in DNS (its `_jmap._tcp` record, as Fastmail publishes) is found. The dialog says "It offers JMAP too" with Use JMAP, and picks JMAP when it's the only server named; `mailcraft-cli add` says so too.
+
 ### Changed
 
 - Adding an account: the settings its domain publishes now say how its servers are signed in to. A server that takes only NTLM is set to NTLM, an outgoing server that takes mail without a sign-in is set to none, a server MailCraft can't sign in to the way it says is passed over for one it can, and Sign in with Google or Microsoft is offered wherever the settings say that provider's servers take it. Before, only a fixed list of server names was offered that sign-in.

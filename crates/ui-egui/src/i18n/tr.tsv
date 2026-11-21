@@ -1958,3 +1958,5 @@ count	occurrences	kez
 	Add anyway	Yine de ekle
 	Couldn't sign in to {server}: {error}	{server} sunucusunda oturum açılamadı: {error}
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server}, hiçbir yetkilinin kefil olmadığı bir sertifika gösteriyor. Sertifikayı görmek ve ona güvenip güvenmeyeceğinizi seçmek için hesabı yine de ekleyin.
+	It offers JMAP too.	JMAP da sunuluyor.
+	Use JMAP	JMAP kullan

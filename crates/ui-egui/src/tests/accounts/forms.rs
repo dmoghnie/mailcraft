@@ -763,3 +763,36 @@ fn found_settings_say_how_their_servers_are_signed_in_to() {
         assert!(!look(&s, &mut d, None).has("Sign in with Google"), "{oauth:?} {available}");
     }
 }
+
+/// A JMAP server found beside IMAP's is offered, filled in, and used when chosen; one found
+/// alone is chosen.
+#[test]
+fn a_jmap_server_found_is_offered() {
+    let url = "https://api.mailhost.example/.well-known/jmap";
+    let found = |imap: &str| {
+        let mut c = AccountConfig::guess("zoe@example.org");
+        c.imap.host = imap.into();
+        c.jmap = Some(url.into());
+        let mut s = session();
+        s.discovered.insert("zoe@example.org".into(), Some((Some(c), "example.org".into())));
+        s
+    };
+    let s = found("imap.mailhost.example");
+    let mut d = add("zoe@example.org", false, |_| {});
+    let l = look(&s, &mut d, None);
+    assert!(l.has("It offers JMAP too."), "{}", l.dump());
+    let Dialog::AddAccount(f) = &d else { panic!("not the account dialog") };
+    assert_eq!((f.kind, f.imap_host.as_str()), (AccountKind::Imap, "imap.mailhost.example"), "IMAP's stays chosen");
+    look(&s, &mut d, Some("Use JMAP"));
+    let Dialog::AddAccount(f) = &d else { panic!("not the account dialog") };
+    assert_eq!((f.kind, f.jmap_url.as_str()), (AccountKind::Jmap, url));
+    assert_eq!(f.params()["jmap"], json!(url));
+
+    let s = found("");
+    let mut d = add("zoe@example.org", false, |_| {});
+    let l = look(&s, &mut d, None);
+    assert!(!l.has("It offers JMAP too."), "{}", l.dump());
+    let Dialog::AddAccount(f) = &d else { panic!("not the account dialog") };
+    assert_eq!((f.kind, f.jmap_url.as_str()), (AccountKind::Jmap, url));
+    assert!(!f.imap_host.is_empty(), "IMAP's stays guessed");
+}

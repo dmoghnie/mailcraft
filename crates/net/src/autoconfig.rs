@@ -15,7 +15,10 @@
 //!    domain itself, [`candidates`]), asked whether they answer over TLS by the caller's probe
 //!    (the network's is in `protocols`, which this module stays apart from).
 //!
-//! The first answer wins; a POP server offered alongside is kept (`pop`) for POP accounts. Only
+//! The first answer wins; a POP server offered alongside is kept (`pop`) for POP accounts. A
+//! JMAP server the domain's `_jmap._tcp` SRV record names (RFC 8620 §2.2) is kept beside it
+//! (`jmap`, offered, not chosen); with only that published, it's the answer (and `imap` has no
+//! host) before any server is asked. Only
 //! the domain's own server is told the address; the others are asked about the domain, and
 //! only when the user types an address into the account dialog. Everything fetched is hostile input: sizes are capped and
 //! a bad file is simply skipped.
@@ -189,6 +192,41 @@ pub fn discover_with(email: &str, l: &mut Lookups<'_>) -> Option<Found> {
     if !domain.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-')) {
         return None;
     }
+    let published = published(email, &domain, l);
+    let jmap = jmap_session(&domain, l);
+    if let Some(mut found) = published {
+        found.config.jmap = jmap;
+        return Some(found);
+    }
+    if let Some(url) = jmap {
+        let mut c = AccountConfig::guess(email);
+        c.imap.host = String::new();
+        c.jmap = Some(url);
+        return Some(Found { config: c, source: "DNS (a JMAP SRV record)".into() });
+    }
+    // Nothing published: the domain's own servers under the usual names, if they answer. An
+    // outgoing server that didn't is guessed on the incoming one's host.
+    let (imap, smtp) = candidates(&domain);
+    let (imap, smtp) = (l.probe)(&imap, &smtp);
+    let imap = imap?;
+    let smtp = smtp.unwrap_or_else(|| ServerConfig { host: imap.host.clone(), port: 465, security: Security::Tls });
+    let mut c = AccountConfig::guess(email);
+    c.imap = imap;
+    c.smtp = smtp;
+    Some(Found { config: c, source: format!("{domain}'s servers, which answered") })
+}
+
+/// The JMAP session address `domain`'s `_jmap._tcp` SRV record gives (RFC 8620 §2.2):
+/// `https://<host>[:<port>]/.well-known/jmap`.
+fn jmap_session(domain: &str, l: &mut Lookups<'_>) -> Option<String> {
+    let (host, port) = (l.srv)(&format!("_jmap._tcp.{domain}"))?;
+    let host = host.trim_end_matches('.').to_ascii_lowercase();
+    let named = !host.is_empty() && host.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-'));
+    named.then(|| if port == 443 { format!("https://{host}/.well-known/jmap") } else { format!("https://{host}:{port}/.well-known/jmap") })
+}
+
+/// Settings published for `domain` (steps 1 to 5 of the module docs).
+fn published(email: &str, domain: &str, l: &mut Lookups<'_>) -> Option<Found> {
     let enc = crate::http::pct(email);
     let try_url = |l: &mut Lookups<'_>, url: &str| (l.fetch)(url).and_then(|x| parse_config(&x, email));
     for url in [
@@ -196,13 +234,13 @@ pub fn discover_with(email: &str, l: &mut Lookups<'_>) -> Option<Found> {
         format!("https://{domain}/.well-known/autoconfig/mail/config-v1.1.xml"),
     ] {
         if let Some(c) = try_url(l, &url) {
-            return Some(Found { config: c, source: domain.clone() });
+            return Some(Found { config: c, source: domain.to_string() });
         }
     }
     if let Some(c) = try_url(l, &format!("https://autoconfig.thunderbird.net/v1.1/{domain}")) {
         return Some(Found { config: c, source: "the ISP database".into() });
     }
-    if let Some(mx) = (l.mx)(&domain).into_iter().next() {
+    if let Some(mx) = (l.mx)(domain).into_iter().next() {
         let base = base_domain(&mx);
         if base != domain {
             if let Some(c) = try_url(l, &format!("https://autoconfig.thunderbird.net/v1.1/{base}")) {
@@ -228,22 +266,11 @@ pub fn discover_with(email: &str, l: &mut Lookups<'_>) -> Option<Found> {
     let smtp = (l.srv)(&format!("_submissions._tcp.{domain}"))
         .map(|(h, p)| ServerConfig { host: h, port: p, security: Security::Tls })
         .or_else(|| (l.srv)(&format!("_submission._tcp.{domain}")).map(|(h, p)| ServerConfig { host: h, port: p, security: Security::StartTls }));
-    if let (Some(imap), Some(smtp)) = (imap, smtp) {
-        let mut c = AccountConfig::guess(email);
-        c.imap = imap;
-        c.smtp = smtp;
-        return Some(Found { config: c, source: "DNS (SRV records)".into() });
-    }
-    // Nothing published: the domain's own servers under the usual names, if they answer. An
-    // outgoing server that didn't is guessed on the incoming one's host.
-    let (imap, smtp) = candidates(&domain);
-    let (imap, smtp) = (l.probe)(&imap, &smtp);
-    let imap = imap?;
-    let smtp = smtp.unwrap_or_else(|| ServerConfig { host: imap.host.clone(), port: 465, security: Security::Tls });
+    let (imap, smtp) = (imap?, smtp?);
     let mut c = AccountConfig::guess(email);
     c.imap = imap;
     c.smtp = smtp;
-    Some(Found { config: c, source: format!("{domain}'s servers, which answered") })
+    Some(Found { config: c, source: "DNS (SRV records)".into() })
 }
 
 /// Find settings for `email` over the network, `probe` asking servers whether they answer
@@ -339,6 +366,39 @@ mod tests {
         assert_eq!(parse_config(&lookalike, "zoe@example.org").unwrap().oauth, None);
     }
 
+    /// A JMAP server the domain's SRV record names is kept beside the settings found (Fastmail's
+    /// way), and is the answer, before any server is asked, when it's all that's published.
+    #[test]
+    fn a_jmap_server_named_in_dns_is_found() {
+        let mut no_mx = |_: &str| Vec::new();
+        let mut srv = |name: &str| match name {
+            "_jmap._tcp.studio.example" => Some(("API.Mailhost.example.".to_string(), 443)),
+            "_jmap._tcp.other.example" => Some(("jmap.other.example".to_string(), 8443)),
+            _ => None,
+        };
+        let mut fetch = |url: &str| url.starts_with("https://autoconfig.studio.example/").then(|| XML.to_string());
+        let f = discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut no_mx, srv: &mut srv, probe: &mut no_probe }).unwrap();
+        assert_eq!((f.config.imap.host.as_str(), f.source.as_str()), ("imap.example.org", "studio.example"));
+        assert_eq!(f.config.jmap.as_deref(), Some("https://api.mailhost.example/.well-known/jmap"));
+
+        let mut none = |_: &str| None;
+        let mut probed = false;
+        let mut probe = |_: &[ServerConfig], _: &[ServerConfig]| {
+            probed = true;
+            (None, None)
+        };
+        let f = discover_with("zoe@other.example", &mut Lookups { fetch: &mut none, mx: &mut no_mx, srv: &mut srv, probe: &mut probe }).unwrap();
+        assert_eq!(f.config.jmap.as_deref(), Some("https://jmap.other.example:8443/.well-known/jmap"));
+        assert!(f.config.imap.host.is_empty(), "no IMAP server named");
+        assert!(!probed);
+
+        // A target that isn't a host name isn't taken.
+        let mut bad = |name: &str| name.starts_with("_jmap.").then(|| ("evil.example/x?".to_string(), 443));
+        let mut fetch = |url: &str| url.starts_with("https://autoconfig.studio.example/").then(|| XML.to_string());
+        let f = discover_with("zoe@studio.example", &mut Lookups { fetch: &mut fetch, mx: &mut no_mx, srv: &mut bad, probe: &mut no_probe }).unwrap();
+        assert_eq!(f.config.jmap, None);
+    }
+
     /// A provider's file is read as XML: a server in a comment isn't offered, and character
     /// references and CDATA are read as such.
     #[test]
@@ -362,6 +422,10 @@ mod tests {
         let f = discover("someone@gmail.com", &mut no_probe).unwrap();
         assert_eq!(f.config.imap.host, "imap.gmail.com");
         println!("gmail.com: {} ({}); smtp {}:{}", f.config.imap.host, f.source, f.config.smtp.host, f.config.smtp.port);
+        assert_eq!((f.config.oauth.as_deref(), f.config.jmap.as_deref()), (Some("google"), None), "its settings say Google's sign-in");
+        // Fastmail names its JMAP server in DNS.
+        let f = discover("someone@fastmail.com", &mut no_probe).unwrap();
+        assert_eq!(f.config.jmap.as_deref(), Some("https://api.fastmail.com/.well-known/jmap"), "{f:?}");
     }
 
     /// A domain hosted by a provider that publishes its own configuration (not in the ISP

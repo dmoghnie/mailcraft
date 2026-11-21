@@ -1958,3 +1958,5 @@ count	occurrences	repeticiones
 	Add anyway	Añadir de todos modos
 	Couldn't sign in to {server}: {error}	No se pudo iniciar sesión en {server}: {error}
 	{server} shows a certificate no authority vouches for. Add the account anyway to see it and choose whether to trust it.	{server} muestra un certificado que ninguna autoridad respalda. Añade la cuenta de todos modos para verlo y decidir si confías en él.
+	It offers JMAP too.	También ofrece JMAP.
+	Use JMAP	Usar JMAP
