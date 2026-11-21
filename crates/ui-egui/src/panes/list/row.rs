@@ -198,13 +198,15 @@ impl MessageRow<'_> {
             let left = right - tw - 10.0 - w - 10.0;
             if single { left - subject_x >= SUBJECT_LEAST } else { left - x >= who_least }
         };
-        // A search over several folders: each result says where it is, before its time.
+        // A search over several folders: each result says where it is, before its time; on the
+        // selection, as dim as the time (the faintest grey is 4.1:1 there).
         if let Some(f) = s.folder(&m.key.account, &m.key.folder).filter(|_| self.several_folders) {
             let name: String = crate::i18n::folder(f).chars().take(24).collect();
-            let fg = p.layout_no_wrap(name, theme::regular(11.5), t.faint);
+            let quiet = if self.selected { t.dim } else { t.faint };
+            let fg = p.layout_no_wrap(name, theme::regular(11.5), quiet);
             let fw = fg.size().x;
             if fits(tw, fw) {
-                p.galley(egui::pos2(mr.start(right - tw - 10.0 - fw, fw), line1 + 2.0), fg, t.faint);
+                p.galley(egui::pos2(mr.start(right - tw - 10.0 - fw, fw), line1 + 2.0), fg, quiet);
                 tw += fw + 10.0;
             }
         }

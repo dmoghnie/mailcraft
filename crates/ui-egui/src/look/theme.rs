@@ -19,6 +19,9 @@ pub struct Tokens {
     pub border: Color32,
     pub text: Color32,
     pub dim: Color32,
+    /// The quietest text (times, counts, hints, captions) and icons: still text, so it reads at
+    /// WCAG's 4.5:1 on the panes and on a row under the pointer, a step under `dim`. The grey it
+    /// was read 3.1:1 to 3.4:1 there, at the 12-point size it's mostly drawn at.
     pub faint: Color32,
     pub accent: Color32,
     /// Text on an accent fill.
@@ -57,7 +60,7 @@ impl Tokens {
             border: Color32::from_rgb(0xD5, 0xD9, 0xDF),
             text: Color32::from_rgb(0x1F, 0x23, 0x28),
             dim: Color32::from_rgb(0x5B, 0x63, 0x6E),
-            faint: Color32::from_rgb(0x84, 0x8B, 0x95),
+            faint: Color32::from_rgb(0x68, 0x6E, 0x76),
             accent: APP_COLOR,
             on_accent: Color32::WHITE,
             accent_soft: Color32::from_rgb(0xD2, 0xEB, 0xEE),
@@ -83,7 +86,7 @@ impl Tokens {
             border: Color32::from_rgb(0x4A, 0x4F, 0x57),
             text: Color32::from_rgb(0xE8, 0xEA, 0xED),
             dim: Color32::from_rgb(0xA9, 0xAF, 0xB7),
-            faint: Color32::from_rgb(0x7C, 0x83, 0x8C),
+            faint: Color32::from_rgb(0x95, 0x9B, 0xA2),
             accent: Color32::from_rgb(0x3F, 0xB8, 0xC4),
             on_accent: Color32::from_rgb(0x0B, 0x1E, 0x21),
             accent_soft: Color32::from_rgb(0x1D, 0x3B, 0x40),
@@ -127,21 +130,24 @@ impl Tokens {
                 t.on_accent = if contrast([0, 0, 0], a) > contrast([255, 255, 255], a) { Color32::BLACK } else { Color32::WHITE };
             }
             // The tints: as much of the accent as still leaves text, dim text and the accent
-            // itself reading on them.
+            // itself reading on them; on a row under the pointer, the faintest text too.
             let surface = rgb(t.surface);
-            let tint = |start: f32, step: f32| {
+            let tint = |start: f32, step: f32, faint: f32| {
                 let mut share = start;
                 loop {
                     let c = mix(surface, a, share);
-                    let ok = contrast(rgb(t.text), c) >= 7.2 && contrast(rgb(t.dim), c) >= 4.6 && contrast(a, c) >= 3.1;
+                    let ok = contrast(rgb(t.text), c) >= 7.2
+                        && contrast(rgb(t.dim), c) >= 4.6
+                        && contrast(rgb(t.faint), c) >= faint
+                        && contrast(a, c) >= 3.1;
                     if ok || share <= 0.02 {
                         return color(c);
                     }
                     share -= step;
                 }
             };
-            t.accent_soft = tint(if dark { 0.24 } else { 0.18 }, 0.02);
-            t.hover_row = tint(if dark { 0.10 } else { 0.08 }, 0.01);
+            t.accent_soft = tint(if dark { 0.24 } else { 0.18 }, 0.02, 0.0);
+            t.hover_row = tint(if dark { 0.10 } else { 0.08 }, 0.01, 4.6);
             // The bar: the accent made deep enough for white.
             let mut b = base;
             for _ in 0..40 {
@@ -284,11 +290,10 @@ pub fn apply(ctx: &egui::Context, t: &Tokens) {
 
 /// Quiet text on the ribbon that's still read as text (WCAG's 4.5:1 on the panes and the ribbon):
 /// the label of a command that can't be used now (no message selected), told apart from one that
-/// can, and the classic ribbon's group captions. The faint grey they had was 3.2:1 on the light
-/// ribbon, and a tester read it as faint and shaky (issue #45). A disabled command's icon stays
-/// faint, as an icon needs less.
+/// can, and the classic ribbon's group captions. The faint grey was 3.2:1 on the light ribbon
+/// then, and a tester read it as faint and shaky (issue #45); it reads as text now.
 pub fn quiet_text(t: &Tokens) -> Color32 {
-    if t.dark { Color32::from_rgb(0x8F, 0x96, 0x9F) } else { Color32::from_rgb(0x6B, 0x72, 0x7C) }
+    t.faint
 }
 
 /// WCAG relative luminance of an sRGB colour.
@@ -517,7 +522,8 @@ mod tests {
     }
 
     /// Issue #8: the panes, the chrome around them and the lines between them told apart, in both
-    /// themes, and text that reads on every pane (WCAG: 4.5 for text, 3 for the faintest notes).
+    /// themes, and text that reads on every pane (WCAG: 4.5 for text, the faintest notes too, as
+    /// they're small) and on a row under the pointer.
     #[test]
     fn panes_borders_and_text_stand_apart() {
         for (which, t) in every_theme() {
@@ -530,8 +536,10 @@ mod tests {
             for under in [t.surface, t.chrome, t.bg] {
                 assert!(c(t.text, under) >= 7.0, "{which}: text {}", c(t.text, under));
                 assert!(c(t.dim, under) >= 4.5, "{which}: dim text {}", c(t.dim, under));
-                assert!(c(t.faint, under) >= 3.0, "{which}: faint text {}", c(t.faint, under));
+                assert!(c(t.faint, under) >= 4.5, "{which}: faint text {}", c(t.faint, under));
             }
+            assert!(c(t.faint, t.hover_row) >= 4.5, "{which}: faint text on a row pointed at {}", c(t.faint, t.hover_row));
+            assert!(c(t.dim, t.faint) >= 1.15, "{which}: dim and faint text told apart {}", c(t.dim, t.faint));
             // Issue #45: the label the ribbon's buttons give a command that can't be used now
             // reads on the ribbon and the panes, and is still told apart from one that can; the
             // classic ribbon's group captions read too.

@@ -17,6 +17,7 @@ on GitHub.
 
 ### Changed
 
+- The quietest grey text (times, counts, hints, captions) is darker in the light theme and lighter in the dark one: it reads at 4.5:1 or more on every pane and on a row under the pointer, where it was about 3:1.
 - Adding an account: settings found only through DNS records (the domain's mail exchanger, or SRV records) that name servers outside the address's domain now come with a warning naming that domain, because DNS records can be forged and the password would be sent there. `mailcraft-cli add` says so too.
 - Adding an account: the settings its domain publishes now say how its servers are signed in to. A server that takes only NTLM is set to NTLM, an outgoing server that takes mail without a sign-in is set to none, a server MailCraft can't sign in to the way it says is passed over for one it can, and Sign in with Google or Microsoft is offered wherever the settings say that provider's servers take it. Before, only a fixed list of server names was offered that sign-in.
 - Adding an IMAP, POP or JMAP account: Connect signs in to its incoming and outgoing servers first and adds the account only once they take the sign-in. When one refuses it or can't be reached, the dialog says which server and why, and the account can still be added with Add anyway. A mistyped password or server was found only after the account was added.
