@@ -81,14 +81,21 @@ pub(super) fn safety(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action
                 s.prefs.check_revocation,
                 "view.checkRevocation",
             ),
-            // AI agents through MCP (`mailcraft mcp`): off unless turned on here.
+            // AI agents through MCP (`mailcraft mcp`): off unless turned on here, and then
+            // reading and searching only, unless they're let act too.
             (
                 tl!("Let AI agents control MailCraft"),
-                tl!(
-                    "An AI app connected with the command mailcraft mcp can read your mail and run any command, sending and deleting too. Turn it on only for an agent you trust"
-                ),
+                tl!("An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust"),
                 s.prefs.agents,
                 "options.agents",
+            ),
+            (
+                tl!("Let AI agents send, delete and change settings"),
+                tl!(
+                    "Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust"
+                ),
+                s.prefs.agents_act,
+                "options.agentsAct",
             ),
         ];
         for (i, (label, about, on, cmd)) in switches.into_iter().enumerate() {

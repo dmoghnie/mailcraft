@@ -1957,4 +1957,6 @@ count	occurrences	פעמים
 	Use JMAP	השתמש ב-JMAP
 	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	ההגדרות האלה הגיעו מרשומות DNS, שאפשר לזייף, והן מציינות שרתים ב-{domain}. הסיסמה שלך תישלח לשם: ודא ש-{domain} מטפל בדואר שלך.
 	Let AI agents control MailCraft	לאפשר לסוכני בינה מלאכותית לשלוט ב-MailCraft
-	An AI app connected with the command mailcraft mcp can read your mail and run any command, sending and deleting too. Turn it on only for an agent you trust	אפליקציית בינה מלאכותית שמחוברת באמצעות הפקודה mailcraft mcp יכולה לקרוא את הדואר שלך ולהריץ כל פקודה, כולל שליחה ומחיקה. הפעל זאת רק עבור סוכן שאתה סומך עליו
+	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	אפליקציית בינה מלאכותית שמחוברת באמצעות הפקודה mailcraft mcp יכולה לקרוא את הדואר שלך ולחפש בו. הפעל זאת רק עבור סוכן שאתה סומך עליו
+	Let AI agents send, delete and change settings	לאפשר לסוכני בינה מלאכותית לשלוח, למחוק ולשנות הגדרות
+	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	בלי זה, סוכן יכול רק לקרוא את הדואר שלך ולחפש בו. עם זה, הוא יכול להריץ כל פקודה: לשלוח, להשיב, למחוק, להעביר ולשנות הגדרות. הפעל זאת רק עבור סוכן שאתה סומך עליו

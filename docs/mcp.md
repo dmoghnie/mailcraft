@@ -1,8 +1,9 @@
 # Letting AI agents use MailCraft (MCP)
 
 An AI app that speaks the Model Context Protocol (MCP), such as Claude Code or Claude Desktop,
-can drive a running MailCraft: read and search mail, file it, reply, send, and anything else a
-command does. It works in MailCraft's window, and what it does shows there.
+can drive a running MailCraft: read and search mail and, once you let it act, file it, reply,
+send, and anything else a command does. It works in MailCraft's window, and what it does shows
+there.
 
 ## Turn it on
 
@@ -10,6 +11,12 @@ Agents get nothing until you turn on **File › Options › Safety › Let AI ag
 MailCraft**. Until then, MailCraft answers every request with that instruction. The switch is
 saved with the other options. It can also be set from a script with
 `--cmd 'options.agents={"on":true}'`.
+
+Let in, an agent only reads: it opens folders and messages, lists and reads mail, and searches
+mail, calendars and contacts. To let it also send, reply, delete, move mail and change settings,
+turn on **Let AI agents send, delete and change settings** under it as well
+(`--cmd 'options.agentsAct={"on":true}'`). An agent can't turn either on itself. A message an
+agent opens is marked read as your reading options say, as when you open it.
 
 ## Connect an agent
 
@@ -42,16 +49,18 @@ MailCraft offers two tools:
   parameters, and says why when it can't run now. A filter narrows the list, for example `mail.`
   or `Calendar`.
 - **`run_command`** runs one command by id with its parameters and returns its JSON answer. A
-  command that fails returns why, and the window shows it as it would after a click.
+  command that fails returns why, and the window shows it as it would after a click. While
+  agents only read, a command that would change something isn't run: it returns how to allow
+  it, and `list_commands` marks it as one that can't run.
 
 For example, `folder.open` and `list.messages` list a folder, `message.read` opens a message
 (asked again when it answers `pending`: it is being downloaded), and `search.run` searches.
 
 ## What to keep in mind
 
-- **An agent can do anything you can.** That includes sending mail, deleting it for good and
-  changing settings, at once and without asking you. Most agent apps ask before each tool call
-  unless you allow it: leave that on for `run_command`.
+- **Let act, an agent can do anything you can.** That includes sending mail, deleting it for
+  good and changing settings, at once and without asking you. Most agent apps ask before each
+  tool call unless you allow it: leave that on for `run_command`.
 - **Mail can carry instructions meant for the agent.** A message can contain text that tries to
   get an agent to forward mail or delete it. Keep an eye on what an agent sends.
 - **Only your user account can connect.** `mailcraft mcp` reaches the window through the socket

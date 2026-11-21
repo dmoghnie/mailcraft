@@ -12,7 +12,7 @@ on GitHub.
 
 ### Added
 
-- AI agents can drive MailCraft through MCP: an agent's app starts `mailcraft mcp`, which reaches the running window and offers two tools, list_commands and run_command, for every command the window has. It's off until you turn on File › Options › Safety › Let AI agents control MailCraft ([docs/mcp.md](docs/mcp.md)).
+- AI agents can drive MailCraft through MCP: an agent's app starts `mailcraft mcp`, which reaches the running window and offers two tools, list_commands and run_command, for every command the window has. It's off until you turn on File › Options › Safety › Let AI agents control MailCraft, and an agent then only reads and searches until **Let AI agents send, delete and change settings** is on too ([docs/mcp.md](docs/mcp.md)).
 - Adding an account: a JMAP server the domain names in DNS (its `_jmap._tcp` record, as Fastmail publishes) is found. The dialog says "It offers JMAP too" with Use JMAP, and picks JMAP when it's the only server named; `mailcraft-cli add` says so too.
 
 ### Changed

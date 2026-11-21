@@ -649,4 +649,13 @@ fn options_let_ai_agents_in_only_when_switched_on() {
     assert_eq!(failed["result"]["isError"], true, "{failed}");
     let said = failed["result"]["content"][0]["text"].as_str().unwrap_or_default().to_string();
     assert!(a.session.notices.iter().any(|n| said.contains(&n.text)), "said in the window too: {said}");
+    // Reading only, until the switch under it lets agents act too.
+    let mark = r#"{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"run_command","arguments":{"id":"mail.markAllRead"}}}"#;
+    let refused: serde_json::Value = serde_json::from_str(&a.answer_agent(mark).unwrap()).unwrap();
+    assert_eq!(refused["result"]["content"][0]["text"], mailcraft_engine::mcp::READ_ONLY_SAID, "{refused}");
+    click_named(&ctx, &mut a, "Let AI agents send, delete and change settings");
+    frame(&ctx, &mut a, vec![]);
+    assert!(a.session.prefs.agents_act, "let act");
+    let done: serde_json::Value = serde_json::from_str(&a.answer_agent(mark).unwrap()).unwrap();
+    assert_eq!(done["result"]["isError"], false, "{done}");
 }

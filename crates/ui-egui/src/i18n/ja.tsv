@@ -1958,4 +1958,6 @@ count	occurrences	回
 	Use JMAP	JMAP を使用
 	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	この設定は偽装される可能性のある DNS レコードから取得したもので、{domain} のサーバーを指定しています。パスワードはそこに送信されます。{domain} があなたのメールを扱っているか確認してください。
 	Let AI agents control MailCraft	AI エージェントによる MailCraft の操作を許可
-	An AI app connected with the command mailcraft mcp can read your mail and run any command, sending and deleting too. Turn it on only for an agent you trust	コマンド mailcraft mcp で接続した AI アプリは、メールを読み、送信や削除を含むあらゆるコマンドを実行できます。信頼できるエージェントに対してのみオンにしてください
+	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	コマンド mailcraft mcp で接続した AI アプリは、メールを閲覧し検索できます。信頼できるエージェントに対してのみオンにしてください
+	Let AI agents send, delete and change settings	AI エージェントによる送信、削除、設定の変更を許可
+	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	オフのとき、エージェントはメールの閲覧と検索だけができます。オンにすると、送信、返信、削除、移動、設定の変更を含むあらゆるコマンドを実行できます。信頼できるエージェントに対してのみオンにしてください

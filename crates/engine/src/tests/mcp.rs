@@ -1,5 +1,5 @@
-//! The MCP answers (`crate::mcp`): agents let in by the user alone, JSON-RPC as the spec has it,
-//! and the two tools on the sample mailbox.
+//! The MCP answers (`crate::mcp`): agents let in by the user alone, reading only until the user
+//! lets them act, JSON-RPC as the spec has it, and the two tools on the sample mailbox.
 
 use serde_json::{Value, json};
 
@@ -150,5 +150,102 @@ fn the_instructions_name_commands_there_are() {
     assert!(named.len() >= 8, "{named:?}");
     for id in named {
         assert!(s.registry().get(id).is_some(), "{id} isn't a command");
+    }
+}
+
+/// Let in, an agent reads and searches until the user lets it act too: a command that sends,
+/// deletes or changes something (letting the agent act, among them) isn't run and says why, and
+/// list_commands marks it; run_command is said to change nothing. Let act, it runs them.
+#[test]
+fn an_agent_only_reads_until_the_user_lets_it_act() {
+    let mut s = let_in("mcp-reads");
+    let before = s.run("list.messages", &json!({})).unwrap();
+    for (id, params) in [
+        ("mail.markAllRead", json!({})),
+        ("mail.delete", json!({})),
+        ("options.agentsAct", json!({"on": true})),
+        ("options.agents", json!({"on": false})),
+    ] {
+        let a = call(&mut s, "run_command", json!({"id": id, "params": params}));
+        assert_eq!((&a["result"]["isError"], &a["result"]["content"][0]["text"]), (&json!(true), &json!(READ_ONLY_SAID)), "{id}: {a}");
+    }
+    assert!(s.prefs.agents && !s.prefs.agents_act, "the agent didn't let itself act");
+    assert_eq!(s.run("list.messages", &json!({})).unwrap(), before, "nothing was marked read");
+    assert_eq!(call(&mut s, "run_command", json!({"id": "list.messages"}))["result"]["isError"], json!(false));
+    let disabled = |s: &mut Session, id: &str| -> Value {
+        let listed: Vec<Value> =
+            serde_json::from_str(call(s, "list_commands", json!({"filter": id}))["result"]["content"][0]["text"].as_str().unwrap()).unwrap();
+        listed.iter().find(|c| c["id"] == id).map(|c| c["disabled"].clone()).unwrap_or_default()
+    };
+    assert_eq!(disabled(&mut s, "mail.markAllRead"), json!("agents may only read and search"));
+    let tools = ask(&mut s, request(3, "tools/list", json!({})));
+    let run = tools["result"]["tools"].as_array().and_then(|t| t.iter().find(|t| t["name"] == "run_command")).cloned().unwrap();
+    assert_eq!(run["annotations"]["readOnlyHint"], json!(true));
+    assert!(ask(&mut s, request(4, "initialize", json!({})))["result"]["instructions"].as_str().is_some_and(|i| i.contains("only read")));
+    // The user lets it act.
+    assert_eq!(s.run("options.agentsAct", &json!({"on": true})).unwrap(), json!({"on": true}));
+    assert_eq!(call(&mut s, "run_command", json!({"id": "mail.markAllRead"}))["result"]["isError"], json!(false));
+    assert_ne!(s.run("list.messages", &json!({})).unwrap(), before, "marked read");
+    assert_ne!(disabled(&mut s, "mail.markAllRead"), json!("agents may only read and search"));
+    let tools = ask(&mut s, request(5, "tools/list", json!({})));
+    assert_eq!(tools["result"]["tools"][1]["annotations"]["readOnlyHint"], json!(false));
+}
+
+/// What an agent that may only read runs are commands there are, and whatever params it gives
+/// them, none changes the settings, the accounts or the mail kept here (its flags, where it is),
+/// or has the servers change anything: what they ask of the servers is to sync, search, index
+/// and download.
+#[test]
+fn what_an_agent_that_only_reads_runs_changes_nothing() {
+    let mut s = let_in("mcp-reads-guard");
+    // A message opened is marked read as the user's reading options say, an agent's opening it
+    // too: off here, so what's marked read is something else's doing.
+    s.prefs.mark_read_on_open = false;
+    for id in READS {
+        assert!(s.registry().get(id).is_some(), "{id} isn't a command");
+    }
+    // Every message kept, in every folder of every account, with its flags.
+    let mail = |s: &Session| -> Vec<String> {
+        let Some(store) = s.store.as_ref() else { return Vec::new() };
+        let mut all = Vec::new();
+        for a in &s.accounts {
+            for f in store.load_folders(&a.config.id).unwrap_or_default() {
+                for m in store.load_folder(&a.config.id, &f.path).map(|l| l.messages).unwrap_or_default() {
+                    all.push(format!("{} {:?}", m.key.to_id(), m.flags));
+                }
+            }
+        }
+        all
+    };
+    let (prefs, accounts, kept) = (s.prefs.clone(), format!("{:?}", s.accounts.iter().map(|a| &a.config).collect::<Vec<_>>()), mail(&s));
+    assert!(kept.len() > 5, "the sample's mail: {kept:?}");
+    let _ = s.take_jobs();
+    for id in READS {
+        for params in
+            [json!({}), json!(null), json!({"key": "x:1:1:INBOX"}), json!({"query": "storyboard"}), json!({"limit": 3}), json!({"folder": "INBOX"})]
+        {
+            let _ = call(&mut s, "run_command", json!({"id": id, "params": params}));
+        }
+    }
+    assert_eq!(s.prefs, prefs, "the settings changed");
+    assert_eq!(mail(&s), kept, "the mail kept changed");
+    assert_eq!(format!("{:?}", s.accounts.iter().map(|a| &a.config).collect::<Vec<_>>()), accounts, "the accounts changed");
+    use mailcraft_model::Job;
+    for j in s.take_jobs() {
+        assert!(
+            matches!(
+                j,
+                Job::SyncAll { .. }
+                    | Job::SyncFolder { .. }
+                    | Job::MoreMail { .. }
+                    | Job::SearchServer { .. }
+                    | Job::StopSearch
+                    | Job::Index { .. }
+                    | Job::StopIndex { .. }
+                    | Job::FetchBody { .. }
+                    | Job::FetchCalendar { .. }
+            ),
+            "a job that changes something: {j:?}"
+        );
     }
 }

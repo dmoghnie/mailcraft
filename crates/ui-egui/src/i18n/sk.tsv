@@ -1962,4 +1962,6 @@ count	occurrences	opakovaní
 	Use JMAP	Použiť JMAP
 	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	Tieto nastavenia pochádzajú zo záznamov DNS, ktoré sa dajú sfalšovať, a uvádzajú servery na {domain}. Vaše heslo sa odošle tam: overte, či vašu poštu spravuje {domain}.
 	Let AI agents control MailCraft	Povoliť agentom AI ovládať MailCraft
-	An AI app connected with the command mailcraft mcp can read your mail and run any command, sending and deleting too. Turn it on only for an agent you trust	Aplikácia AI pripojená príkazom mailcraft mcp môže čítať vašu poštu a spúšťať ľubovoľné príkazy vrátane odosielania a odstraňovania. Zapnite to len pre agenta, ktorému dôverujete
+	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	Aplikácia AI pripojená príkazom mailcraft mcp môže čítať a prehľadávať vašu poštu. Zapnite to len pre agenta, ktorému dôverujete
+	Let AI agents send, delete and change settings	Povoliť agentom AI odosielať, odstraňovať a meniť nastavenia
+	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	Bez tohto môže agent vašu poštu len čítať a prehľadávať. S týmto môže spúšťať ľubovoľné príkazy: odosielať, odpovedať, odstraňovať, presúvať a meniť nastavenia. Zapnite to len pre agenta, ktorému dôverujete
