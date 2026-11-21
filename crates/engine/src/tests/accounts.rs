@@ -78,6 +78,32 @@ fn server_settings_are_looked_up_once() {
     assert_eq!((r["found"].as_bool(), r["imap"]["host"].as_str()), (Some(true), Some("imap.example.org")));
 }
 
+/// Nothing found (this computer offline as it looked) isn't the answer for good: asked again, it
+/// looks again. A found answer, or one still coming, isn't asked for twice.
+#[test]
+fn nothing_found_is_looked_for_again_when_asked() {
+    let mut s = Session::blank();
+    s.run("account.discover", &json!({"email": "zoe@example.org"})).unwrap();
+    assert_eq!(s.take_jobs().len(), 1);
+    // Still coming: asking again doesn't ask the network twice.
+    s.run("account.discover", &json!({"email": "zoe@example.org", "again": true})).unwrap();
+    assert!(s.take_jobs().is_empty(), "still looking");
+    s.apply(Event::Discovered { email: "zoe@example.org".into(), config: None, source: String::new() });
+    assert_eq!(s.run("account.discover", &json!({"email": "zoe@example.org"})).unwrap()["found"], false);
+    assert!(s.take_jobs().is_empty(), "not asked again unless wanted");
+    let r = s.run("account.discover", &json!({"email": "zoe@example.org", "again": true})).unwrap();
+    assert_eq!(r["pending"], true);
+    assert!(matches!(s.take_jobs().as_slice(), [Job::Discover { email }] if email == "zoe@example.org"), "looked for again");
+    // Found this time: kept, and not looked for again.
+    s.apply(Event::Discovered {
+        email: "zoe@example.org".into(),
+        config: Some(Box::new(mailcraft_model::AccountConfig::guess("zoe@example.org"))),
+        source: "example.org".into(),
+    });
+    assert_eq!(s.run("account.discover", &json!({"email": "zoe@example.org", "again": true})).unwrap()["found"], true);
+    assert!(s.take_jobs().is_empty());
+}
+
 #[test]
 fn remote_accounts_go_through_jobs_and_events() {
     let store = temp("remote");

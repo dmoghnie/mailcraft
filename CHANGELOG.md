@@ -8,6 +8,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 version is a milestone, named in italics under its heading. Numbers like (#11) are tester issues
 on GitHub.
 
+## Unreleased
+
+### Fixed
+
+- Adding an account: when no settings were found for an address (looked up while this computer was offline, say), leaving its box looks again. It said "No published settings" for that address until MailCraft was restarted.
+
 ## 0.41.0
 
 *What testers met in their first days with 0.40.*

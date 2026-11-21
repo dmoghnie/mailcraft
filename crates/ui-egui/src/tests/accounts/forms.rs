@@ -636,3 +636,28 @@ fn a_google_address_is_told_of_app_passwords() {
     let l = look(&s, &mut d, Some("Make an app password"));
     assert!(l.acts.iter().any(|a| a == "open https://myaccount.google.com/apppasswords"), "{}", l.dump());
 }
+
+/// Nothing found for an address (this computer may have been offline as it looked) is looked
+/// for again when its box is left; an answer found, or still coming, isn't asked for again.
+#[test]
+fn leaving_the_address_looks_again_when_nothing_was_found() {
+    let found = AccountConfig::guess("zoe@example.org");
+    for (answer, again) in [(Some((None, String::new())), true), (None, false), (Some((Some(found), "example.org".to_string())), false)] {
+        let mut s = session();
+        s.discovered.insert("zoe@example.org".into(), answer.clone());
+        let mut d = add("zoe@example.org", false, |_| {});
+        let l = look(&s, &mut d, Some("zoe@example.org › Your name"));
+        let asked: Vec<&String> = l.acts.iter().filter(|a| a.starts_with("run account.discover")).collect();
+        if again {
+            // Asked as the box is left (each pass of that frame: the session, still looking by
+            // then, asks the network once).
+            assert!(!asked.is_empty(), "{answer:?}:\n{}", l.dump());
+            for a in asked {
+                let p: serde_json::Value = serde_json::from_str(a.trim_start_matches("run account.discover ")).unwrap();
+                assert_eq!(p, json!({"email": "zoe@example.org", "again": true}));
+            }
+        } else {
+            assert!(asked.is_empty(), "{answer:?}:\n{}", l.dump());
+        }
+    }
+}

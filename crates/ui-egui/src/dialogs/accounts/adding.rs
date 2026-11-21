@@ -104,14 +104,17 @@ fn basics(ui: &mut Ui, f: &mut AccountForm, s: &Session, acts: &mut Vec<Action>)
             f.found_for = None;
             f.found_source = None;
         }
-        // Look the settings up once the address is typed (when the box is left).
+        // Look the settings up once the address is typed (when the box is left). Nothing found
+        // is looked for again each time the box is left: this computer may have been offline.
         let email = f.email.trim().to_ascii_lowercase();
+        let answer = s.discovered.get(&email);
+        let none_found = matches!(answer, Some(Some((None, _))));
         if !s.jmap_only
-            && (r.lost_focus() || f.advanced)
             && mailcraft_engine::model::addr::is_valid_email(&email)
-            && !s.discovered.contains_key(&email)
+            && ((r.lost_focus() && (answer.is_none() || none_found)) || (f.advanced && answer.is_none()))
         {
-            acts.push(Action::Run("account.discover", json!({"email": email})));
+            let p = if none_found { json!({"email": email, "again": true}) } else { json!({"email": email}) };
+            acts.push(Action::Run("account.discover", p));
         }
         if !f.servers_edited
             && f.found_for.as_deref() != Some(email.as_str())

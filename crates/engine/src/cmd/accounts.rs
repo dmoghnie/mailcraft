@@ -30,20 +30,23 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             if !mailcraft_model::addr::is_valid_email(&email) {
                 return Err(CmdError::Params(format!("`{email}` is not an email address")));
             }
+            // Nothing found may only mean this computer was offline when it asked: asked again
+            // when wanted, it isn't the answer for the rest of the session.
+            let again = p::bool(v, "again").unwrap_or(false);
             match s.discovered.get(&email) {
                 Some(Some((Some(c), source))) => {
                     Ok(json!({"found": true, "source": source, "imap": c.imap, "smtp": c.smtp, "pop": c.pop, "username": c.username}))
                 }
-                Some(Some((None, _))) => Ok(json!({"found": false})),
+                Some(Some((None, _))) if !again => Ok(json!({"found": false})),
                 Some(None) => Ok(json!({"pending": true})),
-                None => {
+                Some(Some((None, _))) | None => {
                     s.discovered.insert(email.clone(), None);
                     s.push_job(mailcraft_model::Job::Discover { email });
                     Ok(json!({"pending": true}))
                 }
             }
         })
-        .params(r#"{"email": string} (asks once; call again for the answer)"#),
+        .params(r#"{"email": string, "again"?: bool (ask again when nothing was found before)} (asks once; call again for the answer)"#),
         CommandSpec::new("account.move", "Move account", "Folder pane › account menu", |s, v| {
             let id = p::req_str(v, "account")?.to_string();
             let by = p::i64(v, "by").ok_or_else(|| CmdError::Params("`by` is required: -1 (up) or 1 (down)".into()))?;
