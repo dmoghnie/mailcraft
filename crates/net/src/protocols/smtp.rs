@@ -111,24 +111,7 @@ fn open(server: &ServerConfig, sign_in: &SignIn<'_>, recipients: &[String], trus
         Security::Tls => Some(tls_parameters(host, trust.roots, local)?),
         Security::StartTls | Security::None => None,
     };
-    let mut tried = None;
-    let mut connected = None;
-    for addr in addrs {
-        let hello = hello_for(addr);
-        match SmtpConnection::connect(addr, Some(TIMEOUT), &hello, wrapper.as_ref(), None) {
-            Ok(c) => {
-                connected = Some((c, hello));
-                break;
-            }
-            Err(e) => tried = Some(e),
-        }
-    }
-    let Some((mut conn, hello)) = connected else {
-        return Err(match tried {
-            Some(e) => failed(e),
-            None => NetError::Io(std::io::Error::other(format!("{host}: no address"))),
-        });
-    };
+    let (mut conn, hello) = connect_first(host, &addrs, wrapper.as_ref(), failed)?;
     if server.security == Security::StartTls {
         conn.starttls(&tls_parameters(host, trust.roots, local)?, &hello).map_err(failed)?;
     }
@@ -318,6 +301,37 @@ const SENT_TIMEOUT: Duration = Duration::from_secs(600);
 /// The most of a server's addresses tried.
 const MAX_ADDRESSES: usize = 8;
 
+/// A connection, greeted, to the first of `addrs` that takes one, and the name it was greeted
+/// with. lettre gave each address the whole [`TIMEOUT`], so a server's address on a route that
+/// goes nowhere (an IPv6 one, often) held sending or a sign-in check a minute before the next was
+/// tried. Each address but the last now has [`crate::stream::SHORT_TRY`], as the other
+/// protocols' connections do, to take the connection and greet (lettre gives the connection and
+/// the greeting one timeout), and the connection made then has the whole [`TIMEOUT`]. No
+/// connection is made only to see whether an address answers: a server would count each.
+fn connect_first(
+    host: &str,
+    addrs: &[SocketAddr],
+    wrapper: Option<&TlsParameters>,
+    failed: impl Fn(lettre::transport::smtp::Error) -> NetError,
+) -> Result<(SmtpConnection, ClientId)> {
+    let mut tried = None;
+    for (i, &addr) in addrs.iter().enumerate() {
+        let budget = if i + 1 == addrs.len() { TIMEOUT } else { crate::stream::SHORT_TRY };
+        let hello = hello_for(addr);
+        match SmtpConnection::connect(addr, Some(budget), &hello, wrapper, None) {
+            Ok(mut c) => match c.set_timeout(Some(TIMEOUT)) {
+                Ok(()) => return Ok((c, hello)),
+                Err(e) => {
+                    c.abort();
+                    tried = Some(NetError::Io(e));
+                }
+            },
+            Err(e) => tried = Some(failed(e)),
+        }
+    }
+    Err(tried.unwrap_or_else(|| NetError::Io(std::io::Error::other(format!("{host}: no address")))))
+}
+
 /// What MailCraft calls itself in its EHLO to `server` (RFC 5321 §4.1.4): the address literal
 /// of this computer's address on the way there, as Thunderbird sends, since a desktop has no name
 /// the world knows. lettre's own, without a host name, is `[127.0.0.1]`, and some providers'
@@ -443,6 +457,24 @@ pub(crate) mod tests {
             log
         });
         (port, h)
+    }
+
+    /// A server's address that takes no connection holds the next one up a few seconds, not
+    /// lettre's minute: a documentation address (RFC 5737), where nothing answers, before a
+    /// server on this computer. (Where the system says at once that it can't be reached, the
+    /// test passes either way.)
+    #[test]
+    fn an_address_that_takes_no_connection_is_left_soon() {
+        let (port, h) = serve_once();
+        let nowhere: SocketAddr = "192.0.2.1:25".parse().unwrap();
+        let here = SocketAddr::from(([127, 0, 0, 1], port));
+        let started = std::time::Instant::now();
+        let connected = connect_first("test", &[nowhere, here], None, |e| failure(e, &[]));
+        let waited = started.elapsed();
+        let Ok((mut conn, _)) = connected else { panic!("the server on this computer was reached") };
+        let _ = conn.quit();
+        assert!(waited < crate::stream::SHORT_TRY + Duration::from_secs(5), "waited {waited:?}");
+        assert!(h.join().unwrap().starts_with("EHLO"));
     }
 
     /// Issue #50: the EHLO names this computer's address on the way to the server, as an address

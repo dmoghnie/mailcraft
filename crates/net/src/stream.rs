@@ -19,7 +19,7 @@ pub const CONNECT_TIMEOUT: Duration = Duration::from_secs(20);
 pub const IO_TIMEOUT: Duration = Duration::from_secs(60);
 /// Per-address budget when more candidates remain. With a black-holed IPv6 route each AAAA
 /// record used to cost the full [`CONNECT_TIMEOUT`] before any A record was tried.
-const SHORT_TRY: Duration = Duration::from_secs(3);
+pub(crate) const SHORT_TRY: Duration = Duration::from_secs(3);
 
 /// Set the first time an IPv4 address connects after an IPv6 one of the same host didn't.
 static V4_LEADS: AtomicBool = AtomicBool::new(false);

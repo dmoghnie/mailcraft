@@ -24,6 +24,7 @@ on GitHub.
 
 ### Fixed
 
+- Sending, and checking a new account's sign-in: an outgoing server's address that takes no connection (an IPv6 one, often) holds MailCraft a few seconds before the next is tried, not a minute.
 - Adding an account: when no settings were found for an address (looked up while this computer was offline, say), leaving its box looks again. It said "No published settings" for that address until MailCraft was restarted.
 
 ## 0.41.0
