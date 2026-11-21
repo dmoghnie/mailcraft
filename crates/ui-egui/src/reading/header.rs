@@ -16,8 +16,8 @@ pub(super) enum Part {
 }
 
 /// The header, against the right in a right-to-left interface, its rows from there (the message
-/// itself goes the way its own text does).
-pub(super) fn header(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, part: Part, acts: &mut Vec<Action>) {
+/// itself goes the way its own text does). How tall what it drew is (none: nothing).
+pub(super) fn header(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, part: Part, acts: &mut Vec<Action>) -> f32 {
     let t = st.tokens;
     let r = o.r;
     let conversation = |ui: &mut Ui, acts: &mut Vec<Action>| {
@@ -35,7 +35,7 @@ pub(super) fn header(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, p
             if part == Part::All {
                 conversation(ui, acts);
             }
-            sender_card(s, &t, ui, o, acts);
+            let beside = sender_card(s, st, ui, o, acts);
             ui.add_space(8.0);
             follow_up_line(s, &t, ui, o.summary);
             if let Some(w) = &r.warning {
@@ -47,8 +47,8 @@ pub(super) fn header(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, p
             if let Some(name) = s.opened_file_name(&r.key) {
                 opened_file_bar(&t, ui, name);
             }
-            action_bar(s, st, ui, o, acts);
-            ui.add_space(12.0);
+            action_bar(s, st, ui, o, beside, acts);
+            ui.add_space(if beside { 4.0 } else { 12.0 });
         }
         if part != Part::Pinned {
             reactions::reactions_row(s, &t, ui, &r.key, acts);
@@ -56,7 +56,10 @@ pub(super) fn header(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, p
                 invite_card(s, st, ui, &r.key, acts);
             }
         }
-    });
+    })
+    .response
+    .rect
+    .height()
 }
 
 /// The subject (flagged: with a flag), and under it the message's categories.
@@ -104,9 +107,14 @@ fn subject_line(s: &Session, t: &Tokens, ui: &mut Ui, o: &Open<'_>, acts: &mut V
 }
 
 /// The sender card: the avatar, who it's from (External, Add to contacts), To and Cc, and the
-/// date beside them or under them.
-fn sender_card(s: &Session, t: &Tokens, ui: &mut Ui, o: &Open<'_>, acts: &mut Vec<Action>) {
+/// date beside them or under them. Mail that's answered has Reply, Reply all, Forward, React and
+/// More beside them too, over the date, as Outlook's: on a row of their own under the header
+/// they put the message's text below the middle of a short pane. Whether they're there.
+fn sender_card(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut Vec<Action>) -> bool {
+    let t = &st.tokens;
     let p = o.p;
+    let quick = answered_here(s, o);
+    let mut drawn = false;
     ui.horizontal_top(|ui| {
         let (ar, _) = ui.allocate_exact_size(vec2(44.0, 44.0), Sense::hover());
         widgets::avatar(ui, ar.center(), 21.0, &p.from.initials(), theme::avatar_color(&p.from.email, t.dark));
@@ -122,11 +130,16 @@ fn sender_card(s: &Session, t: &Tokens, ui: &mut Ui, o: &Open<'_>, acts: &mut Ve
             f32::INFINITY,
             egui::TextStyle::Small,
         );
-        let rest = ui.available_width() - date.size().x - 16.0;
+        let side = if quick { date.size().x.max(quick_width(o)) } else { date.size().x };
+        let rest = ui.available_width() - side - 16.0;
         let beside = rest >= 200.0;
         let room = if beside { rest } else { ui.available_width() };
         ui.allocate_ui_with_layout(vec2(room, 0.0), crate::bidi::column(), |ui| {
             ui.set_max_width(room);
+            // To and Cc close under the name, as one block (each row was a button's height: a
+            // wrapped row takes its height from here as it starts).
+            ui.spacing_mut().item_spacing.y = 2.0;
+            ui.spacing_mut().interact_size.y = PEOPLE_ROW;
             ui.horizontal_wrapped(|ui| {
                 let name = person_link(ui, t, RichText::new(p.from.display()).font(theme::bold(15.0)).color(t.text));
                 person_menus(s, t, &name, &p.from, acts);
@@ -167,11 +180,100 @@ fn sender_card(s: &Session, t: &Tokens, ui: &mut Ui, o: &Open<'_>, acts: &mut Ve
             }
         });
         if beside {
-            ui.with_layout(crate::bidi::row_from_end(egui::Align::Min), |ui| {
+            ui.with_layout(crate::bidi::column_from_end(), |ui| {
+                ui.spacing_mut().item_spacing.y = 2.0;
+                if quick {
+                    // Their own width, against the end, laid out from the start: Tab reaches
+                    // them in the order they're seen.
+                    let size = vec2(quick_width(o), widgets::ACTION_ICON);
+                    ui.allocate_ui_with_layout(size, crate::bidi::row_from_start(egui::Align::Center), |ui| quick_actions(s, st, ui, o, acts));
+                    drawn = true;
+                }
                 ui.label(date);
             });
         }
     });
+    drawn
+}
+
+/// The height of a To or Cc row: its small text's, with room for the line drawn under a name
+/// pointed at.
+const PEOPLE_ROW: f32 = 18.0;
+
+/// The room between two of [`quick_actions`].
+const QUICK_GAP: f32 = 2.0;
+
+/// How wide [`quick_actions`] are: their icons and the room between them.
+fn quick_width(o: &Open<'_>) -> f32 {
+    let n = if reactable(o) { 5.0 } else { 4.0 };
+    n * widgets::ACTION_ICON + (n - 1.0) * QUICK_GAP
+}
+
+/// Whether the open message is answered from the reading pane: mail that isn't waiting in the
+/// Outbox or a draft, in the main window (a message's own window has them on its ribbon).
+fn answered_here(s: &Session, o: &Open<'_>) -> bool {
+    let draft = s.view_role() == Some(mailcraft_engine::model::FolderRole::Drafts) || o.summary.is_some_and(|m| m.flags.draft);
+    !o.in_window && !draft && s.outbox_entry(&o.r.key).is_none()
+}
+
+/// Whether a reaction can be sent to the open message: not to a reaction itself, a list's mail,
+/// or encrypted mail (it would go unencrypted).
+fn reactable(o: &Open<'_>) -> bool {
+    o.summary.is_none_or(|m| m.reaction.is_empty() && !m.bulk) && !o.p.bulk && o.r.security.as_ref().is_none_or(|sec| sec.lock.is_none())
+}
+
+/// React, Reply, Reply all, Forward and More as icons beside the sender.
+fn quick_actions(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut Vec<Action>) {
+    let t = st.tokens;
+    ui.spacing_mut().item_spacing.x = QUICK_GAP;
+    if reactable(o) {
+        reactions::react_icon(ui, &t, acts);
+    }
+    if widgets::action_icon(ui, Icon::Reply, "Reply", &t).clicked() {
+        acts.push(Action::Run("mail.reply", json!({})));
+    }
+    if widgets::action_icon(ui, Icon::ReplyAll, "Reply all", &t).clicked() {
+        acts.push(Action::Run("mail.replyAll", json!({})));
+    }
+    if widgets::action_icon(ui, Icon::Forward, "Forward", &t).clicked() {
+        acts.push(Action::Run("mail.forward", json!({})));
+    }
+    let more = widgets::more_icon(ui, "More actions", &t);
+    egui::Popup::menu(&more).show(|ui| {
+        if ui.button(tl!("Print")).on_hover_text(tl!("Open as a PDF to print")).clicked() {
+            acts.push(Action::Print);
+            ui.close();
+        }
+        if ui.button(tl!("Save as PDF…")).clicked() {
+            acts.push(Action::ExportPdf);
+            ui.close();
+        }
+        if ui.button(tl!("Save as email (.eml)…")).clicked() {
+            acts.push(Action::SaveMessage);
+            ui.close();
+        }
+        ui.separator();
+        more_items(s, st, ui, o, acts);
+    });
+}
+
+/// What More offers for answered mail, after printing and saving: answering with a meeting,
+/// forwarding as an attachment, the source, and the plain-text check.
+fn more_items(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut Vec<Action>) {
+    let (r, p) = (o.r, o.p);
+    if ui.button(tl!("Reply with meeting")).clicked() {
+        acts.push(Action::Dialog(crate::Dialog::meeting_from(s, p)));
+        ui.close();
+    }
+    if ui.button(tl!("Forward as attachment")).clicked() {
+        acts.push(Action::Run("mail.forwardAsAttachment", json!({})));
+        ui.close();
+    }
+    if ui.button(tl!("View message source")).clicked() {
+        acts.push(Action::Run("message.source", json!({"key": r.key.to_id()})));
+        ui.close();
+    }
+    plain_text_check(s, st, ui, &r.key, p, acts);
 }
 
 /// What Outlook says above a message: its follow-up date, its importance.
@@ -237,10 +339,11 @@ fn outbox_says(item: &mailcraft_engine::store::OutboxItem, s: &Session) -> Strin
 
 /// What can be done with the message: one waiting in the Outbox is sent now, edited or deleted;
 /// a draft is carried on with or deleted; other mail is answered, printed, saved and the rest
-/// (not in a window of its own, whose ribbon has them).
-fn action_bar(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut Vec<Action>) {
+/// (not in a window of its own, whose ribbon has them), on a row of their own when they're not
+/// `beside` the sender.
+fn action_bar(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, beside: bool, acts: &mut Vec<Action>) {
     let t = st.tokens;
-    let (r, p) = (o.r, o.p);
+    let r = o.r;
     if let Some((_, item)) = s.outbox_entry(&r.key) {
         egui::Frame::new().fill(t.warn.gamma_multiply(0.12)).corner_radius(6).inner_margin(Margin::symmetric(10, 6)).show(ui, |ui| {
             ui.label(RichText::new(outbox_says(&item, s)).color(t.text));
@@ -274,7 +377,7 @@ fn action_bar(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut V
                 acts.push(Action::Run("mail.delete", json!({})));
             }
         });
-    } else if !o.in_window {
+    } else if !o.in_window && !beside {
         // Wrapped: a narrow pane cut off Save and More.
         ui.horizontal_wrapped(|ui| {
             ui.spacing_mut().item_spacing = vec2(6.0, 6.0);
@@ -287,9 +390,7 @@ fn action_bar(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut V
             if widgets::pill_button(ui, Icon::Forward, "Forward", &t).clicked() {
                 acts.push(Action::Run("mail.forward", json!({})));
             }
-            // Not to a reaction itself, a list's mail, or encrypted mail (it would go
-            // unencrypted).
-            if o.summary.is_none_or(|m| m.reaction.is_empty() && !m.bulk) && !p.bulk && r.security.as_ref().is_none_or(|sec| sec.lock.is_none()) {
+            if reactable(o) {
                 reactions::react_button(ui, &t, acts);
             }
             ui.add_space(6.0);
@@ -309,21 +410,7 @@ fn action_bar(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut V
             });
             // More, as Outlook's ⋯ beside Forward.
             let more = widgets::more_pill(ui, "More actions", &t);
-            egui::Popup::menu(&more).show(|ui| {
-                if ui.button(tl!("Reply with meeting")).clicked() {
-                    acts.push(Action::Dialog(crate::Dialog::meeting_from(s, p)));
-                    ui.close();
-                }
-                if ui.button(tl!("Forward as attachment")).clicked() {
-                    acts.push(Action::Run("mail.forwardAsAttachment", json!({})));
-                    ui.close();
-                }
-                if ui.button(tl!("View message source")).clicked() {
-                    acts.push(Action::Run("message.source", json!({"key": r.key.to_id()})));
-                    ui.close();
-                }
-                plain_text_check(s, st, ui, &r.key, p, acts);
-            });
+            egui::Popup::menu(&more).show(|ui| more_items(s, st, ui, o, acts));
         });
     }
 }

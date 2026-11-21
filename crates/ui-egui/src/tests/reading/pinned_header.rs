@@ -64,3 +64,34 @@ fn the_header_stays_at_the_top_as_the_text_scrolls() {
         }
     }
 }
+
+/// The open message's Reply, Reply all, Forward, React and More are icons beside who it's from,
+/// over its date, as Outlook's, and its text starts close under the header: on a row of their
+/// own under the header they put the text below the middle of a short pane. A pane too narrow
+/// for them there keeps that row.
+#[test]
+fn a_messages_actions_are_beside_who_its_from() {
+    for (size, beside) in [(egui::vec2(1280.0, 800.0), true), (egui::vec2(820.0, 800.0), false)] {
+        let (mut a, _) = app(if beside { "actions-beside" } else { "actions-under" });
+        let ctx = egui::Context::default();
+        ctx.enable_accesskit();
+        long_message(&mut a);
+        for _ in 0..5 {
+            let _ = drawn_with(&ctx, &mut a, size, vec![]);
+        }
+        // The reading pane's (the ribbon's is higher up).
+        let nodes = named(&ctx, &mut a, size);
+        let reply_all =
+            nodes.iter().filter(|n| n.label.as_deref() == Some("Reply all")).filter_map(|n| n.rect).max_by(|x, y| x.top().total_cmp(&y.top()));
+        let drawn = drawn_with(&ctx, &mut a, size, vec![]);
+        let from = seen_at(&drawn, "Sam Okafor").expect("who it's from");
+        let text = seen_at(&drawn, "Line 1 of the plan").expect("the text");
+        let reply_all = reply_all.expect("the reading pane's Reply all");
+        if beside {
+            assert!(reply_all.left() > from.right() && reply_all.top() < from.bottom(), "beside the sender: {reply_all:?} {from:?}");
+            assert!(text.top() - from.bottom() < 110.0, "the text close under the header: {text:?} {from:?}");
+        } else {
+            assert!(reply_all.top() > from.bottom(), "under the sender in a narrow pane: {reply_all:?} {from:?} ({size:?})");
+        }
+    }
+}

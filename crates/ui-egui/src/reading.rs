@@ -180,8 +180,8 @@ fn message(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action
             };
             let o = Open { r: &r, p, summary: summary.as_ref(), in_window };
             if pinned.is_some() {
-                header::header(s, st, ui, &o, header::Part::Scrolled, acts);
-                message_text(s, st, ui, &o, shown_formatted(s, st, &r.key, p), acts);
+                let above = header::header(s, st, ui, &o, header::Part::Scrolled, acts) > 0.5;
+                message_text(s, st, ui, &o, shown_formatted(s, st, &r.key, p), above, acts);
                 return;
             }
             // Previewing an attachment: back to the message, and what can be done with the file.
@@ -194,7 +194,7 @@ fn message(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action
                 }
             }
             if viewing.is_none() {
-                header::header(s, st, ui, &o, header::Part::All, acts);
+                let _ = header::header(s, st, ui, &o, header::Part::All, acts);
             }
 
             // An encrypted message not decrypted: nothing of it (its smime.p7m) is shown.
@@ -213,7 +213,7 @@ fn message(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action
                 attachment_preview(s, st, ui, &r.key, p, a, acts);
                 return;
             }
-            message_text(s, st, ui, &o, formatted, acts);
+            message_text(s, st, ui, &o, formatted, true, acts);
         });
     });
 }
@@ -295,10 +295,13 @@ fn attachments_strip(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, f
 }
 
 /// The message's text, under the bars about it (words hidden, its formatting, its mailing list):
-/// formatted, or plain, selected as one whatever it's drawn as.
-fn message_text(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, formatted: bool, acts: &mut Vec<Action>) {
+/// formatted, or plain, selected as one whatever it's drawn as. A line is drawn above it when
+/// something is (`above`, or a bar here): under a header kept in place with nothing between,
+/// the header's edge is that line (there were two, one under the other).
+fn message_text(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, formatted: bool, above: bool, acts: &mut Vec<Action>) {
     let t = st.tokens;
     let (r, p) = (o.r, o.p);
+    let start = ui.cursor().top();
     if p.hidden_words > 0 {
         hidden_bar(&t, ui, &r.key, p);
     }
@@ -324,9 +327,11 @@ fn message_text(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, format
             }
         });
     }
-    let sep = ui.available_rect_before_wrap();
-    ui.painter().line_segment([sep.left_top(), sep.right_top()], egui::Stroke::new(1.0, t.border));
-    ui.add_space(12.0);
+    if above || ui.cursor().top() > start + 0.5 {
+        let sep = ui.available_rect_before_wrap();
+        ui.painter().line_segment([sep.left_top(), sep.right_top()], egui::Stroke::new(1.0, t.border));
+        ui.add_space(12.0);
+    }
     if han_missing(ui, &p.text) {
         st.han_missing = true;
     }

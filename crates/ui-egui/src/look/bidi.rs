@@ -150,6 +150,11 @@ pub fn column() -> egui::Layout {
     egui::Layout::top_down(if crate::i18n::current().rtl() { egui::Align::Max } else { egui::Align::Min })
 }
 
+/// A column against the side the interface's text ends on (the right, in English).
+pub fn column_from_end() -> egui::Layout {
+    egui::Layout::top_down(if crate::i18n::current().rtl() { egui::Align::Min } else { egui::Align::Max })
+}
+
 /// `ui.vertical` in the interface's direction (egui's own is always against the left, and its
 /// rows run from there).
 pub fn vertical<R>(ui: &mut egui::Ui, add: impl FnOnce(&mut egui::Ui) -> R) -> egui::InnerResponse<R> {

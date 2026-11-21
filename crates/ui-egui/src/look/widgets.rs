@@ -410,6 +410,30 @@ pub fn tiny_icon_button(ui: &mut Ui, icon: Icon, tip: &str, t: &Tokens) -> Respo
     resp.on_hover_text(tl!(tip))
 }
 
+/// An icon button beside the open message's sender (Reply, Forward…), its label the tooltip and
+/// what a screen reader says: the size of the ribbon's, filled as they are under the pointer.
+pub fn action_icon(ui: &mut Ui, icon: Icon, tip: &str, t: &Tokens) -> Response {
+    let (rect, resp) = ui.allocate_exact_size(vec2(ACTION_ICON, ACTION_ICON), Sense::click());
+    named(ui, &resp, tl!(tip), true, None);
+    hover_fill(ui, &resp, rect, t, true);
+    icons::paint(ui.painter(), icons::centered(rect, 16.0), icon, t.accent);
+    resp.on_hover_text(tl!(tip))
+}
+
+/// [`action_icon`]'s More: three dots, as Outlook's ⋯.
+pub fn more_icon(ui: &mut Ui, tip: &str, t: &Tokens) -> Response {
+    let (rect, resp) = ui.allocate_exact_size(vec2(ACTION_ICON, ACTION_ICON), Sense::click());
+    named(ui, &resp, tl!(tip), true, None);
+    hover_fill(ui, &resp, rect, t, true);
+    for dx in [-6.0, 0.0, 6.0] {
+        ui.painter().circle_filled(rect.center() + vec2(dx, 0.0), 1.6, if resp.hovered() { t.text } else { t.dim });
+    }
+    resp.on_hover_text(tl!(tip))
+}
+
+/// The side of an [`action_icon`].
+pub const ACTION_ICON: f32 = 28.0;
+
 /// Same-height chips in columns that share the width and wrap onto more rows, as Outlook lays out
 /// attachments; past `max_rows` rows they scroll. `chip(ui, i, width)` draws chip `i`.
 pub fn chip_grid(ui: &mut Ui, id: egui::Id, n: usize, min_w: f32, max_w: f32, h: f32, max_rows: usize, mut chip: impl FnMut(&mut Ui, usize, f32)) {

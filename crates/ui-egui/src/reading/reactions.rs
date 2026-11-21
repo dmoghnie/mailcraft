@@ -15,7 +15,18 @@ use crate::{Action, widgets};
 /// The React button, beside Forward: a menu of the six reactions.
 pub(crate) fn react_button(ui: &mut Ui, t: &Tokens, acts: &mut Vec<Action>) {
     let b = widgets::pill_button(ui, Icon::Smile, "React", t).on_hover_text(tl!("Send a reaction to everyone it went to"));
-    egui::Popup::menu(&b).show(|ui| {
+    react_menu(&b, t, acts);
+}
+
+/// [`react_button`] as an icon beside the sender.
+pub(crate) fn react_icon(ui: &mut Ui, t: &Tokens, acts: &mut Vec<Action>) {
+    let b = widgets::action_icon(ui, Icon::Smile, "React", t).on_hover_text(tl!("Send a reaction to everyone it went to"));
+    react_menu(&b, t, acts);
+}
+
+/// The reactions to pick from, under `b`.
+fn react_menu(b: &egui::Response, t: &Tokens, acts: &mut Vec<Action>) {
+    egui::Popup::menu(b).show(|ui| {
         ui.horizontal(|ui| {
             ui.spacing_mut().item_spacing.x = 2.0;
             for emoji in mailcraft_engine::mime::REACTIONS {

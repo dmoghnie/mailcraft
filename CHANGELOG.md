@@ -17,6 +17,7 @@ on GitHub.
 
 ### Changed
 
+- The reading pane: Reply, Reply all, Forward, React and More are icons beside who a message is from, over its date, as in Outlook, with Print and Save under More. To and Cc sit close under the sender, and one line comes above the text where there were two, so the text starts about a hundred points higher. A pane too narrow for the icons keeps the row of buttons.
 - The quietest grey text (times, counts, hints, captions) is darker in the light theme and lighter in the dark one: it reads at 4.5:1 or more on every pane and on a row under the pointer, where it was about 3:1.
 - Adding an account: settings found only through DNS records (the domain's mail exchanger, or SRV records) that name servers outside the address's domain now come with a warning naming that domain, because DNS records can be forged and the password would be sent there. `mailcraft-cli add` says so too.
 - Adding an account: the settings its domain publishes now say how its servers are signed in to. A server that takes only NTLM is set to NTLM, an outgoing server that takes mail without a sign-in is set to none, a server MailCraft can't sign in to the way it says is passed over for one it can, and Sign in with Google or Microsoft is offered wherever the settings say that provider's servers take it. Before, only a fixed list of server names was offered that sign-in.
