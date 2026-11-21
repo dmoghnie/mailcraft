@@ -2,7 +2,7 @@
 
 An AI app that speaks the Model Context Protocol (MCP), such as Claude Code or Claude Desktop,
 can drive a running MailCraft: read and search mail, file it, reply, send, and anything else a
-command does. It works in the window you see, and what it does shows there as it happens.
+command does. It works in MailCraft's window, and what it does shows there.
 
 ## Turn it on
 
@@ -64,6 +64,7 @@ For example, `folder.open` and `list.messages` list a folder, `message.read` ope
 
 - At most four agents connect at once.
 - A request that the window doesn't answer within a minute gets an error. A window that is
-  minimized still answers.
+  minimized or hidden still answers, though more slowly (about a tenth of a second each), and
+  shows what was done once it's on screen again.
 - Tested on macOS. On Windows and Linux, `mailcraft mcp` uses the same code, but hasn't been
   tried with an agent's app.

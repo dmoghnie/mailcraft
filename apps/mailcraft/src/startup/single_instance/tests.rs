@@ -37,6 +37,7 @@ fn socket_paths_fit_a_socket_address() {
         socket_at("agent"),
         socket_at("agentkey"),
         socket_at("agentnone"),
+        socket_at("agentslow"),
     ] {
         let len = p.as_os_str().len();
         assert!(len < 104, "{len} bytes: {}", p.display());

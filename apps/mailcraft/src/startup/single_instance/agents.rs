@@ -204,7 +204,14 @@ fn connect(path: &Path) -> Result<UnixStream, &'static str> {
     let mut reply = String::new();
     let mut reader = BufReader::new(Patient::new(&stream)).take(16);
     reader.read_line(&mut reply).map_err(|_| NOT_LET_IN)?;
-    if reply == OK { Ok(stream) } else { Err(NOT_LET_IN) }
+    if reply != OK {
+        return Err(NOT_LET_IN);
+    }
+    // `Patient` leaves a read timeout of a moment on the socket, and so on its clones: the
+    // window's answers then had that moment, and the first that took longer (a hidden window
+    // runs ten times a second at most) ended them all. They take as long as they take.
+    stream.set_read_timeout(None).map_err(|_| NOT_RUNNING)?;
+    Ok(stream)
 }
 
 /// Answer every request on `input` with `why` until it ends.
