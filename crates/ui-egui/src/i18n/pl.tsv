@@ -2019,3 +2019,36 @@ count	occurrences	wystąpieniach
 	The message says a file is attached, but none is.	Wiadomość mówi, że dołączono plik, ale żaden nie jest dołączony.
 	Attach a file	Dołącz plik
 	Send again	Wyślij ponownie
+	Find a command	Znajdź polecenie
+	Type a command's name	Wpisz nazwę polecenia
+	No command has that name.	Żadne polecenie nie ma takiej nazwy.
+	Can't be used now	Teraz niedostępne
+	no message selected	nie wybrano wiadomości
+	open a message first	najpierw otwórz wiadomość
+	no message is being written	nie jest pisana żadna wiadomość
+	add an account first	najpierw dodaj konto
+	working offline	pracujesz w trybie offline
+	nothing is being imported	nic nie jest importowane
+	nothing is being compacted	nic nie jest kompaktowane
+	old mail is being archived already	stara poczta jest już archiwizowana
+	there are no tasks	brak zadań
+	nothing to undo	nie ma czego cofnąć
+	the Outbox is empty	skrzynka nadawcza jest pusta
+	no recent searches	brak ostatnich wyszukiwań
+	search for something first	najpierw coś wyszukaj
+	the message is still downloading	wiadomość jest jeszcze pobierana
+	Clean Up	Wyczyść
+	Message list	Lista wiadomości
+	Quick access	Szybki dostęp
+	Navigation	Nawigacja
+	Personalize	Personalizacja
+	Reminders	Przypomnienia
+	Search box	Pole wyszukiwania
+	Status bar	Pasek stanu
+	account menu	menu konta
+	end of the results	koniec wyników
+	recent searches	ostatnie wyszukiwania
+	Invitation	Zaproszenie
+	More	Więcej
+	Names	Nazwy
+	AutoArchive settings	Ustawienia autoarchiwizacji

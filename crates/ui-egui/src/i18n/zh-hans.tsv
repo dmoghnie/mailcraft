@@ -2002,3 +2002,36 @@ count	occurrences	次
 	The message says a file is attached, but none is.	邮件中提到附有文件，但没有附加任何文件。
 	Attach a file	附加文件
 	Send again	再次发送
+	Find a command	查找命令
+	Type a command's name	输入命令的名称
+	No command has that name.	没有这个名称的命令。
+	Can't be used now	现在无法使用
+	no message selected	未选择邮件
+	open a message first	请先打开一封邮件
+	no message is being written	没有正在撰写的邮件
+	add an account first	请先添加帐户
+	working offline	正在脱机工作
+	nothing is being imported	没有正在导入的内容
+	nothing is being compacted	没有正在压缩的内容
+	old mail is being archived already	已在存档旧邮件
+	there are no tasks	没有任务
+	nothing to undo	没有可撤消的操作
+	the Outbox is empty	发件箱为空
+	no recent searches	没有最近的搜索
+	search for something first	请先搜索
+	the message is still downloading	邮件仍在下载
+	Clean Up	清理
+	Message list	邮件列表
+	Quick access	快速访问
+	Navigation	导航
+	Personalize	个性化
+	Reminders	提醒
+	Search box	搜索框
+	Status bar	状态栏
+	account menu	帐户菜单
+	end of the results	结果末尾
+	recent searches	最近的搜索
+	Invitation	邀请
+	More	更多
+	Names	姓名
+	AutoArchive settings	自动存档设置

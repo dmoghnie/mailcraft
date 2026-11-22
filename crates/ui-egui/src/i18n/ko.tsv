@@ -2005,3 +2005,36 @@ count	occurrences	회
 	The message says a file is attached, but none is.	메시지에 파일이 첨부되었다고 되어 있지만 첨부된 파일이 없습니다.
 	Attach a file	파일 첨부
 	Send again	다시 보내기
+	Find a command	명령 찾기
+	Type a command's name	명령 이름을 입력하세요
+	No command has that name.	그런 이름의 명령이 없습니다.
+	Can't be used now	지금은 사용할 수 없음
+	no message selected	선택한 메시지가 없음
+	open a message first	먼저 메시지를 여세요
+	no message is being written	작성 중인 메시지가 없음
+	add an account first	먼저 계정을 추가하세요
+	working offline	오프라인으로 작업 중
+	nothing is being imported	가져오는 중인 항목 없음
+	nothing is being compacted	압축 중인 항목 없음
+	old mail is being archived already	오래된 메일을 이미 보관하는 중
+	there are no tasks	작업이 없음
+	nothing to undo	취소할 작업 없음
+	the Outbox is empty	보낼 편지함이 비어 있음
+	no recent searches	최근 검색 없음
+	search for something first	먼저 검색하세요
+	the message is still downloading	메시지를 아직 다운로드하는 중
+	Clean Up	정리
+	Message list	메시지 목록
+	Quick access	빠른 실행
+	Navigation	탐색
+	Personalize	개인 설정
+	Reminders	미리 알림
+	Search box	검색 상자
+	Status bar	상태 표시줄
+	account menu	계정 메뉴
+	end of the results	결과의 끝
+	recent searches	최근 검색
+	Invitation	초대
+	More	더 보기
+	Names	이름
+	AutoArchive settings	자동 보관 설정

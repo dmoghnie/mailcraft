@@ -2006,3 +2006,36 @@ count	occurrences	Terminen
 	The message says a file is attached, but none is.	Laut Nachricht ist eine Datei angehängt, aber es ist keine angehängt.
 	Attach a file	Datei anfügen
 	Send again	Erneut senden
+	Find a command	Befehl suchen
+	Type a command's name	Geben Sie den Namen eines Befehls ein
+	No command has that name.	Kein Befehl hat diesen Namen.
+	Can't be used now	Gerade nicht verfügbar
+	no message selected	keine Nachricht ausgewählt
+	open a message first	öffnen Sie zuerst eine Nachricht
+	no message is being written	es wird keine Nachricht verfasst
+	add an account first	fügen Sie zuerst ein Konto hinzu
+	working offline	Offline arbeiten ist eingeschaltet
+	nothing is being imported	es wird nichts importiert
+	nothing is being compacted	es wird nichts komprimiert
+	old mail is being archived already	alte E-Mails werden bereits archiviert
+	there are no tasks	es gibt keine Aufgaben
+	nothing to undo	nichts rückgängig zu machen
+	the Outbox is empty	der Postausgang ist leer
+	no recent searches	keine letzten Suchen
+	search for something first	suchen Sie zuerst nach etwas
+	the message is still downloading	die Nachricht wird noch heruntergeladen
+	Clean Up	Aufräumen
+	Message list	Nachrichtenliste
+	Quick access	Schnellzugriff
+	Navigation	Navigation
+	Personalize	Personalisieren
+	Reminders	Erinnerungen
+	Search box	Suchfeld
+	Status bar	Statusleiste
+	account menu	Kontomenü
+	end of the results	Ende der Ergebnisse
+	recent searches	letzte Suchen
+	Invitation	Einladung
+	More	Mehr
+	Names	Namen
+	AutoArchive settings	Einstellungen für AutoArchivierung

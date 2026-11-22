@@ -198,6 +198,15 @@ impl MailApp {
         if resp.changed() {
             self.ui.search_due = Some(now + SEARCH_PAUSE);
         }
+        // `>` typed first finds a command instead, with what follows it (as code editors' boxes
+        // do): the box is emptied, which ends a search shown, as emptying it by hand does.
+        if resp.changed()
+            && let Some(rest) = self.ui.search_text.strip_prefix('>')
+        {
+            acts.push(Action::Dialog(Dialog::commands(rest)));
+            self.ui.search_text.clear();
+            resp.surrender_focus();
+        }
         let enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
         match self.ui.search_due {
             Some(due) if enter || now >= due || self.ui.search_text.is_empty() => {

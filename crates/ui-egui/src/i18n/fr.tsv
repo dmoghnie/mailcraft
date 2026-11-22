@@ -2006,3 +2006,36 @@ count	occurrences	occurrences
 	The message says a file is attached, but none is.	Le message indique qu'un fichier est joint, mais aucun ne l'est.
 	Attach a file	Joindre un fichier
 	Send again	Renvoyer
+	Find a command	Rechercher une commande
+	Type a command's name	Tapez le nom d’une commande
+	No command has that name.	Aucune commande ne porte ce nom.
+	Can't be used now	Indisponible pour l’instant
+	no message selected	aucun message sélectionné
+	open a message first	ouvrez d’abord un message
+	no message is being written	aucun message n’est en cours de rédaction
+	add an account first	ajoutez d’abord un compte
+	working offline	vous travaillez hors connexion
+	nothing is being imported	aucune importation en cours
+	nothing is being compacted	aucun compactage en cours
+	old mail is being archived already	l’ancien courrier est déjà en cours d’archivage
+	there are no tasks	il n’y a aucune tâche
+	nothing to undo	rien à annuler
+	the Outbox is empty	la boîte d’envoi est vide
+	no recent searches	aucune recherche récente
+	search for something first	lancez d’abord une recherche
+	the message is still downloading	le message est encore en cours de téléchargement
+	Clean Up	Nettoyer
+	Message list	Liste des messages
+	Quick access	Accès rapide
+	Navigation	Navigation
+	Personalize	Personnaliser
+	Reminders	Rappels
+	Search box	Zone de recherche
+	Status bar	Barre d’état
+	account menu	menu du compte
+	end of the results	fin des résultats
+	recent searches	recherches récentes
+	Invitation	Invitation
+	More	Plus
+	Names	Noms
+	AutoArchive settings	Paramètres d'archivage automatique

@@ -40,6 +40,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - Adding an account: a JMAP server the domain names in DNS (its `_jmap._tcp` record, as Fastmail publishes) is found. The dialog says "It offers JMAP too" with Use JMAP, and picks JMAP when it's the only server named; `mailcraft-cli add` says so too.
 - Sending asks first when the text you wrote says a file is attached and none is, with **Attach a file** beside **Send anyway**: the word in the original under a reply, or in the signature, doesn't count, and it's found in each of MailCraft's languages.
 - **Send again** in a sent message's More menu (Reading pane): it opens as a new message with the same recipients, subject, text and files, to change or send as it is.
+- **Find a command** (Ctrl+Shift+P, ⌘⇧P on a Mac, or `>` typed first in the search box): type part of a command's name and press Enter to run it. Each row says where the command lives and its shortcut; one that can't be used now is dimmed with the reason, and those run last come first.
 
 ### Changed
 

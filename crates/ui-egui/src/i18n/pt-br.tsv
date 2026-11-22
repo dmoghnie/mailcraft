@@ -2006,3 +2006,36 @@ count	occurrences	ocorrências
 	The message says a file is attached, but none is.	A mensagem diz que há um arquivo anexado, mas não há nenhum.
 	Attach a file	Anexar um arquivo
 	Send again	Enviar novamente
+	Find a command	Encontrar um comando
+	Type a command's name	Digite o nome de um comando
+	No command has that name.	Nenhum comando tem esse nome.
+	Can't be used now	Não pode ser usado agora
+	no message selected	nenhuma mensagem selecionada
+	open a message first	abra uma mensagem primeiro
+	no message is being written	nenhuma mensagem está sendo escrita
+	add an account first	adicione uma conta primeiro
+	working offline	trabalhando offline
+	nothing is being imported	nada está sendo importado
+	nothing is being compacted	nada está sendo compactado
+	old mail is being archived already	os e-mails antigos já estão sendo arquivados
+	there are no tasks	não há tarefas
+	nothing to undo	nada para desfazer
+	the Outbox is empty	a caixa de saída está vazia
+	no recent searches	nenhuma pesquisa recente
+	search for something first	pesquise algo primeiro
+	the message is still downloading	a mensagem ainda está sendo baixada
+	Clean Up	Limpar
+	Message list	Lista de mensagens
+	Quick access	Acesso rápido
+	Navigation	Navegação
+	Personalize	Personalizar
+	Reminders	Lembretes
+	Search box	Caixa de pesquisa
+	Status bar	Barra de status
+	account menu	menu da conta
+	end of the results	fim dos resultados
+	recent searches	pesquisas recentes
+	Invitation	Convite
+	More	Mais
+	Names	Nomes
+	AutoArchive settings	Configurações do AutoArquivar

@@ -2005,3 +2005,36 @@ count	occurrences	ripetizioni
 	The message says a file is attached, but none is.	Il messaggio dice che c'è un file allegato, ma non ce n'è nessuno.
 	Attach a file	Allega un file
 	Send again	Invia di nuovo
+	Find a command	Trova un comando
+	Type a command's name	Digita il nome di un comando
+	No command has that name.	Nessun comando ha questo nome.
+	Can't be used now	Non disponibile ora
+	no message selected	nessun messaggio selezionato
+	open a message first	apri prima un messaggio
+	no message is being written	nessun messaggio in fase di scrittura
+	add an account first	aggiungi prima un account
+	working offline	stai lavorando offline
+	nothing is being imported	nessuna importazione in corso
+	nothing is being compacted	nessuna compattazione in corso
+	old mail is being archived already	la posta vecchia è già in archiviazione
+	there are no tasks	non ci sono attività
+	nothing to undo	niente da annullare
+	the Outbox is empty	la posta in uscita è vuota
+	no recent searches	nessuna ricerca recente
+	search for something first	cerca prima qualcosa
+	the message is still downloading	il messaggio è ancora in download
+	Clean Up	Pulisci
+	Message list	Elenco dei messaggi
+	Quick access	Accesso rapido
+	Navigation	Navigazione
+	Personalize	Personalizza
+	Reminders	Promemoria
+	Search box	Casella di ricerca
+	Status bar	Barra di stato
+	account menu	menu dell’account
+	end of the results	fine dei risultati
+	recent searches	ricerche recenti
+	Invitation	Invito
+	More	Altro
+	Names	Nomi
+	AutoArchive settings	Impostazioni archiviazione automatica

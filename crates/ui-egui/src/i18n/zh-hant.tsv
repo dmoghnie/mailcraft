@@ -2005,3 +2005,36 @@ count	occurrences	次
 	The message says a file is attached, but none is.	郵件中提到附有檔案，但沒有附加任何檔案。
 	Attach a file	附加檔案
 	Send again	再次傳送
+	Find a command	尋找命令
+	Type a command's name	輸入命令的名稱
+	No command has that name.	沒有這個名稱的命令。
+	Can't be used now	現在無法使用
+	no message selected	未選擇郵件
+	open a message first	請先開啟一封郵件
+	no message is being written	沒有正在撰寫的郵件
+	add an account first	請先新增帳戶
+	working offline	正在離線工作
+	nothing is being imported	沒有正在匯入的內容
+	nothing is being compacted	沒有正在壓縮的內容
+	old mail is being archived already	已在封存舊郵件
+	there are no tasks	沒有任務
+	nothing to undo	沒有可復原的動作
+	the Outbox is empty	寄件匣是空的
+	no recent searches	沒有最近的搜尋
+	search for something first	請先搜尋
+	the message is still downloading	郵件仍在下載
+	Clean Up	清理
+	Message list	郵件清單
+	Quick access	快速存取
+	Navigation	導覽
+	Personalize	個人化
+	Reminders	提醒
+	Search box	搜尋方塊
+	Status bar	狀態列
+	account menu	帳戶功能表
+	end of the results	結果結尾
+	recent searches	最近的搜尋
+	Invitation	邀請
+	More	更多
+	Names	姓名
+	AutoArchive settings	自動封存設定

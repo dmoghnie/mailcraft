@@ -403,6 +403,8 @@ pub(crate) fn tour() {
         for d in [
             Dialog::add_account(),
             Dialog::move_to(),
+            Dialog::commands("mark"),
+            Dialog::commands("zzz"),
             Dialog::ConfirmDelete { count: 2 },
             Dialog::ConfirmDeleteContact { uid: "zoe".into(), name: "Zoe Park".into() },
             Dialog::EmptySubject,
@@ -812,6 +814,7 @@ impl crate::Services for Ticking {
 mod access;
 mod accounts;
 mod calendar;
+mod commands;
 mod organize;
 mod pictures;
 mod reading;

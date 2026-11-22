@@ -110,6 +110,11 @@ impl MailApp {
             self.next_pane(ctx, combo == "Shift+F6");
             return true;
         }
+        // Find a command by its name, wherever the keyboard is (as code editors' Ctrl+Shift+P).
+        if combo == "Mod+Shift+P" {
+            self.ui.dialog = Some(Dialog::commands(""));
+            return true;
+        }
         let plain = !(m.command || m.ctrl || m.alt);
         // Single keys type text when a text box has focus.
         if typing && plain && !matches!(key, Key::F9 | Key::Escape) {

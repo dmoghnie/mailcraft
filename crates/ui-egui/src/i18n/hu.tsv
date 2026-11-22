@@ -2006,3 +2006,36 @@ count	occurrences	előfordulás
 	The message says a file is attached, but none is.	Az üzenet szerint csatolva van egy fájl, de nincs csatolva semmi.
 	Attach a file	Fájl csatolása
 	Send again	Küldés újra
+	Find a command	Parancs keresése
+	Type a command's name	Írd be egy parancs nevét
+	No command has that name.	Nincs ilyen nevű parancs.
+	Can't be used now	Most nem használható
+	no message selected	nincs kiválasztott üzenet
+	open a message first	előbb nyiss meg egy üzenetet
+	no message is being written	nincs megírás alatt álló üzenet
+	add an account first	előbb adj hozzá egy fiókot
+	working offline	a kapcsolat nélküli munka be van kapcsolva
+	nothing is being imported	nincs folyamatban importálás
+	nothing is being compacted	nincs folyamatban tömörítés
+	old mail is being archived already	a régi levelek archiválása már folyamatban van
+	there are no tasks	nincsenek feladatok
+	nothing to undo	nincs mit visszavonni
+	the Outbox is empty	a Kimenő üzenetek mappa üres
+	no recent searches	nincsenek legutóbbi keresések
+	search for something first	előbb keress valamit
+	the message is still downloading	az üzenet letöltése még folyamatban van
+	Clean Up	Tisztítás
+	Message list	Üzenetlista
+	Quick access	Gyorselérés
+	Navigation	Navigáció
+	Personalize	Testreszabás
+	Reminders	Emlékeztetők
+	Search box	Keresőmező
+	Status bar	Állapotsor
+	account menu	fiókmenü
+	end of the results	a találatok vége
+	recent searches	legutóbbi keresések
+	Invitation	Meghívó
+	More	Továbbiak
+	Names	Nevek
+	AutoArchive settings	Automatikus archiválás beállításai

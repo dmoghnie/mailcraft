@@ -293,6 +293,12 @@ pub fn current() -> Lang {
     CURRENT.get()
 }
 
+/// Whether every language's catalog has `s`: wording the interface shows, not words only an agent
+/// reads (a command's description, a reason given in English).
+pub fn in_every_catalog(s: &str) -> bool {
+    Lang::all().skip(1).all(|l| l.0.catalog().contains_key(s))
+}
+
 /// `s` in the current language (as written: egui orders right-to-left text when it draws it).
 pub fn t(s: &str) -> &str {
     tr(current(), s)

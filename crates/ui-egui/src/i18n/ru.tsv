@@ -2019,3 +2019,36 @@ count	occurrences	повторений
 	The message says a file is attached, but none is.	В сообщении говорится, что файл вложен, но вложений нет.
 	Attach a file	Вложить файл
 	Send again	Отправить снова
+	Find a command	Найти команду
+	Type a command's name	Введите название команды
+	No command has that name.	Нет команды с таким названием.
+	Can't be used now	Сейчас недоступно
+	no message selected	письмо не выбрано
+	open a message first	сначала откройте письмо
+	no message is being written	письмо не пишется
+	add an account first	сначала добавьте учётную запись
+	working offline	включена автономная работа
+	nothing is being imported	ничего не импортируется
+	nothing is being compacted	ничего не сжимается
+	old mail is being archived already	старые письма уже архивируются
+	there are no tasks	задач нет
+	nothing to undo	нечего отменять
+	the Outbox is empty	папка «Исходящие» пуста
+	no recent searches	недавних поисков нет
+	search for something first	сначала выполните поиск
+	the message is still downloading	письмо ещё загружается
+	Clean Up	Очистка
+	Message list	Список писем
+	Quick access	Быстрый доступ
+	Navigation	Навигация
+	Personalize	Персонализация
+	Reminders	Напоминания
+	Search box	Поле поиска
+	Status bar	Строка состояния
+	account menu	меню учётной записи
+	end of the results	конец результатов
+	recent searches	недавние поиски
+	Invitation	Приглашение
+	More	Ещё
+	Names	Имена
+	AutoArchive settings	Параметры автоархивации

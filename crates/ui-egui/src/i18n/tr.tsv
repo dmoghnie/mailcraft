@@ -2006,3 +2006,36 @@ count	occurrences	kez
 	The message says a file is attached, but none is.	İletide bir dosya eklendiği yazıyor, ancak ekli dosya yok.
 	Attach a file	Dosya ekle
 	Send again	Yeniden gönder
+	Find a command	Komut bul
+	Type a command's name	Bir komutun adını yazın
+	No command has that name.	Bu adda bir komut yok.
+	Can't be used now	Şu anda kullanılamıyor
+	no message selected	seçili ileti yok
+	open a message first	önce bir ileti açın
+	no message is being written	yazılmakta olan ileti yok
+	add an account first	önce bir hesap ekleyin
+	working offline	çevrimdışı çalışılıyor
+	nothing is being imported	içe aktarılan bir şey yok
+	nothing is being compacted	sıkıştırılan bir şey yok
+	old mail is being archived already	eski postalar zaten arşivleniyor
+	there are no tasks	görev yok
+	nothing to undo	geri alınacak bir şey yok
+	the Outbox is empty	Giden Kutusu boş
+	no recent searches	son arama yok
+	search for something first	önce bir arama yapın
+	the message is still downloading	ileti hâlâ indiriliyor
+	Clean Up	Toparla
+	Message list	İleti listesi
+	Quick access	Hızlı erişim
+	Navigation	Gezinti
+	Personalize	Kişiselleştir
+	Reminders	Anımsatıcılar
+	Search box	Arama kutusu
+	Status bar	Durum çubuğu
+	account menu	hesap menüsü
+	end of the results	sonuçların sonu
+	recent searches	son aramalar
+	Invitation	Davet
+	More	Diğer
+	Names	Adlar
+	AutoArchive settings	Otomatik Arşivleme ayarları

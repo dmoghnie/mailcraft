@@ -2020,3 +2020,36 @@ count	occurrences	opakovaní
 	The message says a file is attached, but none is.	Správa uvádza, že je priložený súbor, ale žiadny nie je.
 	Attach a file	Priložiť súbor
 	Send again	Odoslať znova
+	Find a command	Nájsť príkaz
+	Type a command's name	Zadajte názov príkazu
+	No command has that name.	Žiadny príkaz nemá taký názov.
+	Can't be used now	Teraz nedostupné
+	no message selected	nie je vybratá žiadna správa
+	open a message first	najprv otvorte správu
+	no message is being written	nepíše sa žiadna správa
+	add an account first	najprv pridajte konto
+	working offline	pracujete offline
+	nothing is being imported	nič sa neimportuje
+	nothing is being compacted	nič sa nezhutňuje
+	old mail is being archived already	stará pošta sa už archivuje
+	there are no tasks	nie sú žiadne úlohy
+	nothing to undo	nie je čo zrušiť
+	the Outbox is empty	priečinok Pošta na odoslanie je prázdny
+	no recent searches	žiadne nedávne hľadania
+	search for something first	najprv niečo vyhľadajte
+	the message is still downloading	správa sa ešte sťahuje
+	Clean Up	Vyčistiť
+	Message list	Zoznam správ
+	Quick access	Rýchly prístup
+	Navigation	Navigácia
+	Personalize	Prispôsobenie
+	Reminders	Pripomenutia
+	Search box	Vyhľadávacie pole
+	Status bar	Stavový riadok
+	account menu	ponuka konta
+	end of the results	koniec výsledkov
+	recent searches	nedávne hľadania
+	Invitation	Pozvánka
+	More	Ďalšie
+	Names	Mená
+	AutoArchive settings	Nastavenia automatickej archivácie

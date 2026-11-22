@@ -2001,3 +2001,36 @@ count	occurrences	مرات
 	The message says a file is attached, but none is.	تذكر الرسالة أن ملفًا مرفق، لكن لا يوجد أي ملف مرفق.
 	Attach a file	إرفاق ملف
 	Send again	إرسال مرة أخرى
+	Find a command	البحث عن أمر
+	Type a command's name	اكتب اسم أمر
+	No command has that name.	لا يوجد أمر بهذا الاسم.
+	Can't be used now	لا يمكن استخدامه الآن
+	no message selected	لم تُحدَّد أي رسالة
+	open a message first	افتح رسالة أولًا
+	no message is being written	لا تُكتب أي رسالة
+	add an account first	أضف حسابًا أولًا
+	working offline	العمل دون اتصال قيد التشغيل
+	nothing is being imported	لا يُستورَد أي شيء
+	nothing is being compacted	لا يُضغط أي شيء
+	old mail is being archived already	البريد القديم قيد الأرشفة بالفعل
+	there are no tasks	لا توجد مهام
+	nothing to undo	لا شيء للتراجع عنه
+	the Outbox is empty	علبة الصادر فارغة
+	no recent searches	لا توجد عمليات بحث أخيرة
+	search for something first	ابحث عن شيء أولًا
+	the message is still downloading	لا تزال الرسالة قيد التنزيل
+	Clean Up	تنظيف
+	Message list	قائمة الرسائل
+	Quick access	الوصول السريع
+	Navigation	التنقل
+	Personalize	تخصيص
+	Reminders	التذكيرات
+	Search box	مربع البحث
+	Status bar	شريط الحالة
+	account menu	قائمة الحساب
+	end of the results	نهاية النتائج
+	recent searches	عمليات البحث الأخيرة
+	Invitation	الدعوة
+	More	المزيد
+	Names	الأسماء
+	AutoArchive settings	إعدادات الأرشفة التلقائية

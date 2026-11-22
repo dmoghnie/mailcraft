@@ -2002,3 +2002,36 @@ count	occurrences	回
 	The message says a file is attached, but none is.	メッセージにはファイルを添付したと書かれていますが、添付されていません。
 	Attach a file	ファイルを添付
 	Send again	再送信
+	Find a command	コマンドを検索
+	Type a command's name	コマンド名を入力してください
+	No command has that name.	その名前のコマンドはありません。
+	Can't be used now	現在は使用できません
+	no message selected	メッセージが選択されていません
+	open a message first	先にメッセージを開いてください
+	no message is being written	作成中のメッセージはありません
+	add an account first	先にアカウントを追加してください
+	working offline	オフラインで作業中です
+	nothing is being imported	取り込み中のものはありません
+	nothing is being compacted	圧縮中のものはありません
+	old mail is being archived already	古いメールはすでにアーカイブ中です
+	there are no tasks	タスクがありません
+	nothing to undo	取り消す操作はありません
+	the Outbox is empty	送信トレイは空です
+	no recent searches	最近の検索はありません
+	search for something first	先に検索してください
+	the message is still downloading	メッセージはまだダウンロード中です
+	Clean Up	クリーンアップ
+	Message list	メッセージ一覧
+	Quick access	クイック アクセス
+	Navigation	ナビゲーション
+	Personalize	個人用設定
+	Reminders	アラーム
+	Search box	検索ボックス
+	Status bar	ステータス バー
+	account menu	アカウントのメニュー
+	end of the results	結果の末尾
+	recent searches	最近の検索
+	Invitation	招待
+	More	その他
+	Names	名前
+	AutoArchive settings	自動アーカイブの設定

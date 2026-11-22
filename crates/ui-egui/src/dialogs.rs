@@ -15,6 +15,7 @@ mod archiving;
 mod backup;
 mod categories;
 mod closing;
+mod commands;
 mod folders;
 mod importing;
 mod mailbox;
@@ -106,6 +107,12 @@ pub enum Dialog {
     ConfirmDeleteContact {
         uid: String,
         name: String,
+    },
+    /// Find a command by its name and run it (`filter`: what's typed; `picked`: the row Enter
+    /// runs, moved with the arrows).
+    Commands {
+        filter: String,
+        picked: usize,
     },
     /// Pick the folder the selection is moved to, or (`copy`) copied to.
     MoveTo {
@@ -371,6 +378,11 @@ impl Dialog {
 
     pub fn move_to() -> Dialog {
         Dialog::MoveTo { filter: String::new(), copy: false }
+    }
+
+    /// Find a command, with `typed` in its box already.
+    pub fn commands(typed: &str) -> Dialog {
+        Dialog::Commands { filter: typed.to_string(), picked: 0 }
     }
 
     pub fn copy_to() -> Dialog {
@@ -733,6 +745,7 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         | Dialog::FolderProperties { .. }
         | Dialog::ConfirmEmpty { .. } => folders::draw(ui, d, s, t, acts),
         Dialog::NewCategory { .. } | Dialog::Categories => categories::draw(ui, d, s, t, acts),
+        Dialog::Commands { .. } => commands::draw(ui, d, s, t, acts),
         Dialog::Rules | Dialog::EditRule(..) | Dialog::SearchFolder(..) | Dialog::QuickStep(..) => organize::draw(ui, d, s, t, acts),
         Dialog::SelectNames(..)
         | Dialog::CheckNames(..)

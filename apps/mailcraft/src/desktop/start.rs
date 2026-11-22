@@ -71,6 +71,7 @@ pub(crate) fn commands(app: &mut MailApp, args: &[String]) {
             }
             "ui.signature" => app.ui.dialog = mailcraft_ui_egui::Dialog::signature(&app.session),
             "ui.categories" => app.ui.dialog = Some(mailcraft_ui_egui::Dialog::Categories),
+            "ui.commands" => app.ui.dialog = Some(mailcraft_ui_egui::Dialog::commands("")),
             "ui.nameKeyword" => {
                 let k = p.get("keyword").and_then(|v| v.as_str()).unwrap_or_default();
                 app.ui.dialog = Some(mailcraft_ui_egui::Dialog::name_keyword(k));
