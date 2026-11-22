@@ -43,7 +43,16 @@ android {
 
 tasks.named("preBuild") { dependsOn(copyIcon) }
 
+// The Kotlin side of rustls-platform-verifier must be the version its Rust side expects: the one
+// Cargo.lock names for rustls-platform-verifier-android.
+val rustlsVerifierVersion: String = rootProject.file("../../../Cargo.lock").readLines().let { lines ->
+    val at = lines.indexOfFirst { it.trim() == "name = \"rustls-platform-verifier-android\"" }
+    require(at >= 0) { "rustls-platform-verifier-android isn't in Cargo.lock" }
+    lines.drop(at + 1).first { it.trimStart().startsWith("version = ") }.substringAfter('"').substringBefore('"')
+}
+
 dependencies {
+    implementation("org.rustls:rustls-platform-verifier:$rustlsVerifierVersion")
     val bom = platform("androidx.compose:compose-bom:2026.11.01")
     implementation(bom)
     implementation("androidx.compose.material3:material3")

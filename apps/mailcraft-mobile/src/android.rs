@@ -12,7 +12,7 @@
 
 use jni::EnvUnowned;
 use jni::errors::ThrowRuntimeExAndDefault;
-use jni::objects::{JClass, JString};
+use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jint, jlong};
 
 /// The text of a Java string; an unreadable one is empty (what a call then refuses).
@@ -85,4 +85,26 @@ pub extern "system" fn Java_io_github_zidan44_mailcraft_Core_zone<'c>(
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_io_github_zidan44_mailcraft_Core_background<'c>(mut env: EnvUnowned<'c>, _class: JClass<'c>) -> JString<'c> {
     env.with_env(|env| -> Result<_, jni::errors::Error> { JString::from_str(env, said(crate::background())) }).resolve::<ThrowRuntimeExAndDefault>()
+}
+
+/// The app's context, handed to the platform verifier once (before `start`), so the
+/// connections can ask Android's trust store about a server Mozilla's roots don't know
+/// (`mailcraft_net::stream::platform_ready`). Failing, they keep Mozilla's roots alone.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_io_github_zidan44_mailcraft_Core_platform<'c>(
+    mut env: EnvUnowned<'c>,
+    _class: JClass<'c>,
+    context: JObject<'c>,
+) -> JString<'c> {
+    env.with_env(|env| -> Result<_, jni::errors::Error> {
+        let said = match rustls_platform_verifier::android::init_with_env(env, context) {
+            Ok(()) => {
+                mailcraft_net::stream::platform_ready();
+                String::new()
+            }
+            Err(e) => format!("Android's trust store can't be asked: {e}"),
+        };
+        JString::from_str(env, said)
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
 }

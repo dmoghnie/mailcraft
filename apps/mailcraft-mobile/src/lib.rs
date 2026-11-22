@@ -48,6 +48,15 @@ pub fn start(dir: &str, secrets: &str, offset: i32, zone: &str) -> Result<(), St
             mailcraft_net::logfile::log_panics();
         }
         log::info!("MailCraft {} for phones starting", env!("CARGO_PKG_VERSION"));
+        #[cfg(target_os = "android")]
+        log::info!(
+            "TLS: {}",
+            if mailcraft_net::stream::platform_is_ready() {
+                "Android's trust store asked for servers Mozilla's roots don't know"
+            } else {
+                "Android's trust store not set up: Mozilla's roots alone"
+            }
+        );
     });
     let d = Driver::start(dir.into(), credentials::parse(secrets)?, offset, zone.to_string())?;
     // Two shells' threads starting at once: the second driver is dropped (its thread ends).

@@ -103,6 +103,9 @@ class Mail(context: Context) {
     private val main = Handler(Looper.getMainLooper())
 
     init {
+        // Certificates Mozilla's roots don't know are asked of Android's trust store; without it
+        // (said in the log) they stay unknown, as before.
+        Core.platform(context.applicationContext)
         val tz = TimeZone.getDefault()
         val said = Core.start(context.filesDir.resolve("mail").path, secrets.all(), tz.getOffset(System.currentTimeMillis()) / 1000, tz.id)
         if (said.isNotEmpty()) {

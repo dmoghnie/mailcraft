@@ -53,6 +53,12 @@ sspi = { version = "0.23.1", default-features = false }
 log = { workspace = true }
 thiserror = { workspace = true }
 
+# Android's own trust store (the system's CAs, and those the person installed), asked through the
+# platform's TrustManager when Mozilla's roots don't vouch for a server (MIT OR Apache-2.0):
+# rustls-native-certs finds no roots there. Its JNI side is set up by the phone library.
+[target.'cfg(target_os = "android")'.dependencies]
+rustls-platform-verifier = "0.7"
+
 [target.'cfg(windows)'.dependencies]
 # The system's DNS resolvers (account autoconfiguration).
 ipconfig = "0.3"

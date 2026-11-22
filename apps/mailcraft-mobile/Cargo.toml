@@ -36,6 +36,8 @@ crux_core = "0.20"
 serde_json = { workspace = true }
 log = { workspace = true }
 
-# JNI (MIT OR Apache-2.0): the Kotlin shell's native methods.
+# JNI (MIT OR Apache-2.0): the Kotlin shell's native methods; and the platform verifier's JNI
+# side, set up here with the app's context so `net` can ask Android's trust store.
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.22"
+rustls-platform-verifier = "0.7"

@@ -134,7 +134,8 @@ pub(crate) struct Distrusting {
 
 impl ServerCertVerifier for Distrusting {
     /// Refused as revoked when the server's certificate or an intermediate is distrusted;
-    /// otherwise WebPKI's verdict.
+    /// otherwise WebPKI's verdict, and on Android the platform's when WebPKI didn't know the
+    /// issuer.
     fn verify_server_cert(
         &self,
         end_entity: &CertificateDer<'_>,
@@ -146,7 +147,15 @@ impl ServerCertVerifier for Distrusting {
         if std::iter::once(end_entity).chain(intermediates).any(|c| self.distrusted.contains(&c[..])) {
             return Err(rustls::Error::InvalidCertificate(CertificateError::Revoked));
         }
-        self.inner.verify_server_cert(end_entity, intermediates, server_name, ocsp_response, now)
+        let verdict = self.inner.verify_server_cert(end_entity, intermediates, server_name, ocsp_response, now);
+        // Android lists no system roots: its trust store is asked instead ([`android`]).
+        #[cfg(target_os = "android")]
+        if let Err(e) = &verdict
+            && let Some(ok) = android::second_opinion(e, end_entity, intermediates, server_name, ocsp_response, now)
+        {
+            return Ok(ok);
+        }
+        verdict
     }
 
     fn verify_tls12_signature(
@@ -172,7 +181,11 @@ impl ServerCertVerifier for Distrusting {
     }
 }
 
+#[cfg(target_os = "android")]
+mod android;
 mod own;
+#[cfg(target_os = "android")]
+pub use android::{platform_is_ready, platform_ready};
 pub use own::Trusted;
 pub(crate) use own::{Own, public_service};
 

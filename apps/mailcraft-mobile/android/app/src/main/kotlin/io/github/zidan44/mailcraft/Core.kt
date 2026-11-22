@@ -6,6 +6,9 @@ package io.github.zidan44.mailcraft
  * when none came in time, and blocks, so it is called from a thread of its own.
  */
 object Core {
+    /** Hands the app's context to the Rust side, for Android's trust store; before [start]. */
+    @JvmStatic external fun platform(context: android.content.Context): String
+
     init {
         System.loadLibrary("mailcraftcore")
     }

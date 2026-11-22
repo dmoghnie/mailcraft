@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Which CAs Android's trust store vouches for when MailCraft asks it (a server Mozilla's roots
+     don't know: crates/net/src/stream/trust/android.rs): the system's, and those the person
+     installed, as the desktop trusts what's in its system's store. Never cleartext. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

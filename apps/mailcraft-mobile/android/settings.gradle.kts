@@ -11,6 +11,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // rustls-platform-verifier's Kotlin side, from the rustls project; nothing else is taken
+        // from there.
+        maven {
+            url = uri("https://github.com/rustls/rustls-platform-verifier/raw/maven-archive/android-release-support/maven/")
+            content { includeGroup("org.rustls") }
+        }
     }
 }
 rootProject.name = "MailCraft"

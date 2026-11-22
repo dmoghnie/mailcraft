@@ -211,6 +211,11 @@ How it works:
   pane's order (`Session::pane_folders`), as a tree, the special folders at the top wherever the
   server keeps them, and what's collapsed (`view.collapse`, the desktop's own) left out. Avatars
   are initials and a hue from the address (`avatar.rs`), so both shells draw the same.
+- Certificates: Android lists no system roots, so a server whose issuer Mozilla's roots don't
+  know is asked of Android's trust store (`net/src/stream/trust/android.rs`, through
+  `rustls-platform-verifier`; the phone library hands it the app's context first). The app's
+  network security config trusts the system's CAs and those the person installed, as the
+  desktop trusts what's in its system's store.
 - Icons: Google's Material Symbols, kept in `assets/icons/material-symbols.json` (pinned upstream)
   and turned into each shell's code by `cargo xtask symbols`.
 - The shells: `android/` (Kotlin, Jetpack Compose, Gradle; `build.sh` builds the Rust library

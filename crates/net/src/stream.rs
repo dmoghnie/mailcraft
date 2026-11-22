@@ -13,6 +13,8 @@ use crate::{NetError, Result};
 
 pub(crate) mod trust;
 pub use trust::Trusted;
+#[cfg(target_os = "android")]
+pub use trust::{platform_is_ready, platform_ready};
 pub(crate) use trust::{system_roots, system_verifier};
 
 pub const CONNECT_TIMEOUT: Duration = Duration::from_secs(20);

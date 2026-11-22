@@ -81,7 +81,8 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
 ## Privacy and security
 - Passwords never touch MailCraft's files or logs: the `Credentials` trait (system keychain in the
   app, memory in the CLI and tests); `Secret`'s `Debug` is redacted.
-- Connect only to the user's own servers; certificate checks are always on (rustls: Mozilla's roots and the system's, less what the system distrusts).
+- Connect only to the user's own servers; certificate checks are always on (rustls: Mozilla's roots and the system's, less what the system distrusts;
+  on Android, which lists no roots, the system's are its trust store, asked through `rustls-platform-verifier` when Mozilla's don't know the issuer: `net/src/stream/trust/android.rs`).
   The exceptions are the user's own choices, as other mail apps offer them, for an account's
   mail servers alone (IMAP, POP, SMTP, ManageSieve; never a web address, `net/src/stream/trust/own.rs`):
   a certificate trusted by fingerprint when asked, and certificate files imported (an authority
