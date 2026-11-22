@@ -50,6 +50,10 @@ fn starts_takes_actions_and_draws() {
 
     // The cache as the desktop's: the data files' folder made in the app's folder.
     assert!(dir.join("Data Files").is_dir());
+    // And the desktop's log beside it.
+    log::logger().flush();
+    let logged = std::fs::read_to_string(dir.join("mailcraft.log")).unwrap();
+    assert!(logged.contains("for phones starting"), "{logged}");
     // Out of sight: sealed, and still working after.
     background().unwrap();
     send(r#"{"type":"startAdding"}"#).unwrap();

@@ -29,6 +29,7 @@ mod ios;
 use driver::Driver;
 
 static DRIVER: OnceLock<Driver> = OnceLock::new();
+static LOGGING: std::sync::Once = std::sync::Once::new();
 
 /// Open the cache in `dir` (the app's own files folder) and start. `secrets` is what the
 /// keystore kept, `{"entry": "password", …}` as [`poll`]'s `secret` messages named them;
@@ -38,6 +39,16 @@ pub fn start(dir: &str, secrets: &str, offset: i32, zone: &str) -> Result<(), St
     if DRIVER.get().is_some() {
         return Ok(());
     }
+    // The desktop's log (`mailcraft.log` in the mail folder, the last run's kept as the old one),
+    // and every panic in it by where it happened: started first, so opening the store is logged.
+    // Once a process: a second start would set the last run's log aside under the logger still
+    // writing it (a start that failed, then one that didn't).
+    LOGGING.call_once(|| {
+        if mailcraft_net::logfile::start(Some(std::path::Path::new(dir)), false).is_some() {
+            mailcraft_net::logfile::log_panics();
+        }
+        log::info!("MailCraft {} for phones starting", env!("CARGO_PKG_VERSION"));
+    });
     let d = Driver::start(dir.into(), credentials::parse(secrets)?, offset, zone.to_string())?;
     // Two shells' threads starting at once: the second driver is dropped (its thread ends).
     let _ = DRIVER.set(d);
