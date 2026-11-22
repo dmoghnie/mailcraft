@@ -2061,3 +2061,11 @@ count	occurrences	kez
 	Mail from your VIPs, in every account	Tüm hesaplarınızdaki VIP postaları
 	Notify only of mail from VIPs	Yalnızca VIP postaları için bildir
 	Other mail still arrives, without a notification	Diğer postalar bildirim olmadan gelmeye devam eder
+	No answer yet ({count})	Henüz yanıt yok ({count})
+	Show all {count}	Tümünü göster ({count})
+	Hide sent mail nobody answered	Yanıtlanmamış gönderilen postaları gizle
+	Show sent mail nobody answered	Yanıtlanmamış gönderilen postaları göster
+	Write a follow-up	Hatırlatma yaz
+	Bring back sent mail nobody answered	Yanıtlanmamış gönderilen postaları geri getir
+	At the top of the Inbox, to follow up or dismiss	Gelen Kutusu'nun en üstünde; hatırlatmak ya da kapatmak için
+	When nobody has answered after	Yanıt gelmeden geçen

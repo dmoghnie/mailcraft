@@ -2057,3 +2057,11 @@ count	occurrences	回
 	Mail from your VIPs, in every account	すべてのアカウントの VIP からのメール
 	Notify only of mail from VIPs	VIP からのメールだけを通知
 	Other mail still arrives, without a notification	ほかのメールも届きますが、通知はされません
+	No answer yet ({count})	未回答 ({count})
+	Show all {count}	すべて表示 ({count})
+	Hide sent mail nobody answered	返信のない送信済みメールを隠す
+	Show sent mail nobody answered	返信のない送信済みメールを表示
+	Write a follow-up	フォローアップを書く
+	Bring back sent mail nobody answered	返信のない送信済みメールを再表示する
+	At the top of the Inbox, to follow up or dismiss	受信トレイの一番上に表示され、フォローアップするか閉じるかを選べます
+	When nobody has answered after	返信がないまま

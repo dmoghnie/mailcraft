@@ -2056,3 +2056,11 @@ count	occurrences	keer
 	Mail from your VIPs, in every account	E-mail van je VIP's, in elk account
 	Notify only of mail from VIPs	Alleen melden bij e-mail van VIP's
 	Other mail still arrives, without a notification	Andere e-mail komt nog steeds binnen, zonder melding
+	No answer yet ({count})	Nog geen antwoord ({count})
+	Show all {count}	Alle {count} tonen
+	Hide sent mail nobody answered	Verzonden e-mail zonder antwoord verbergen
+	Show sent mail nobody answered	Verzonden e-mail zonder antwoord tonen
+	Write a follow-up	Herinnering schrijven
+	Bring back sent mail nobody answered	Verzonden e-mail zonder antwoord terughalen
+	At the top of the Inbox, to follow up or dismiss	Boven aan Postvak IN, om een herinnering te schrijven of te negeren
+	When nobody has answered after	Als niemand heeft geantwoord na

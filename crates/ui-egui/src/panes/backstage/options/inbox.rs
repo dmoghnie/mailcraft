@@ -37,6 +37,7 @@ pub(super) fn inbox(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>
             }
         }
         answered_invites(s, t, ui, acts);
+        no_answer(s, t, ui, acts);
         let switches = [
             (tl!("Ask before deleting for good"), None, s.prefs.confirm_permanent_delete, "view.confirmDelete"),
             (
@@ -50,6 +51,27 @@ pub(super) fn inbox(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>
             switch_row(ui, t, false, Switch { label, about, on, cmd }, acts);
         }
     });
+}
+
+/// Sent mail nobody answered, brought back to the top of the Inbox after a few days.
+fn no_answer(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
+    let (label, about) = (tl!("Bring back sent mail nobody answered"), Some(tl!("At the top of the Inbox, to follow up or dismiss")));
+    switch_row(ui, t, false, Switch { label, about, on: s.prefs.no_answer, cmd: "options.noAnswer" }, acts);
+    if !s.prefs.no_answer {
+        return;
+    }
+    ui.indent("no-answer-days", |ui| {
+        ui.horizontal(|ui| {
+            ui.label(tl!("When nobody has answered after"));
+            let mut days = s.prefs.no_answer_days;
+            let r = ui.add(egui::DragValue::new(&mut days).range(1..=mailcraft_engine::NO_ANSWER_DAYS_MAX).speed(0.1));
+            if r.accessible_name(tl!("When nobody has answered after")).changed() {
+                acts.push(Action::Run("options.noAnswerDays", json!({"days": days})));
+            }
+            ui.label(tl!("days"));
+        });
+    });
+    ui.add_space(8.0);
 }
 
 /// Issue #31: Outlook's "Delete meeting requests and notifications from Inbox after

@@ -17,6 +17,7 @@ mod kept;
 mod look_up;
 mod matching;
 mod merge;
+pub mod no_answer;
 mod publish;
 mod run;
 mod work;
@@ -77,9 +78,8 @@ pub struct ServerSearch {
 
 /// How many searches the search box remembers.
 pub const RECENT_SEARCHES: usize = 10;
-/// Sent at least this long ago with nothing back, a message is waiting for a reply
-/// (`is:awaiting`); sent longer ago than [`AWAITING_WITHIN_DAYS`], it no longer is.
-pub const AWAITING_AFTER_DAYS: i64 = 2;
+/// Sent at least [`Prefs::no_answer_days`] ago with nothing back, a message is waiting for a
+/// reply (`is:awaiting`); sent longer ago than this many days, it no longer is.
 pub const AWAITING_WITHIN_DAYS: i64 = 30;
 
 /// How an account's last pass of its search index went ([`Event::Indexed`]).
@@ -159,6 +159,8 @@ pub(crate) struct SearchState {
     letting_go_answers: Vec<matching::Answers>,
     /// The folder's list on view when the search started, shown again when it's cleared.
     pub(crate) kept: Option<kept::KeptList>,
+    /// The Inbox's No answer yet ([`no_answer`]).
+    pub(crate) no_answer: no_answer::NoAnswer,
     /// Bumped whenever cached mail changes: a kept list older than that is built again.
     pub(crate) changes: u64,
     /// A test's: the next step stops part-way, as a bug would.
@@ -184,7 +186,13 @@ pub(crate) struct AwaitingScan {
     newest: i64,
     oldest: i64,
     answered: HashSet<String>,
-    sent: Vec<(MessageKey, String)>,
+    /// Mailing lists' and newsletters' messages, and the addresses they went to: mail to a list
+    /// or answering one isn't waited on.
+    bulk_ids: HashSet<String>,
+    lists: HashSet<String>,
+    /// Message-IDs the user dismissed ([`Prefs::no_answer_dismissed`]).
+    dismissed: HashSet<String>,
+    sent: Vec<SharedSummary>,
 }
 
 impl AwaitingScan {
@@ -202,27 +210,60 @@ impl AwaitingScan {
             .iter()
             .flat_map(|a| a.folders.iter().filter(|f| f.selectable).map(|f| (a.config.id.clone(), f.path.clone(), f.role == FolderRole::Sent)))
             .collect();
-        let (newest, oldest) = (s.clock.now.saturating_sub(AWAITING_AFTER_DAYS * DAY), s.clock.now.saturating_sub(AWAITING_WITHIN_DAYS * DAY));
-        AwaitingScan { mine, folders, newest, oldest, answered: HashSet::new(), sent: Vec::new() }
+        let days = i64::from(s.prefs.no_answer_days.clamp(1, no_answer::NO_ANSWER_DAYS_MAX));
+        let (newest, oldest) = (s.clock.now.saturating_sub(days * DAY), s.clock.now.saturating_sub(AWAITING_WITHIN_DAYS * DAY));
+        let dismissed = s.prefs.no_answer_dismissed.iter().cloned().collect();
+        AwaitingScan {
+            mine,
+            folders,
+            newest,
+            oldest,
+            answered: HashSet::new(),
+            bulk_ids: HashSet::new(),
+            lists: HashSet::new(),
+            dismissed,
+            sent: Vec::new(),
+        }
     }
 
     /// Take a message of a folder into account (`sent`: a Sent folder's).
-    pub(crate) fn take(&mut self, m: &Summary, sent: bool) {
-        if !self.mine.contains(&m.from.email.trim().to_lowercase()) {
+    pub(crate) fn take(&mut self, m: &SharedSummary, sent: bool) {
+        let mine = |mine: &HashSet<String>, e: &str| mine.contains(&e.trim().to_lowercase());
+        if !mine(&self.mine, &m.from.email) {
             self.answered.extend(std::iter::once(&m.in_reply_to).chain(&m.references).filter(|id| !id.is_empty()).cloned());
+            if m.bulk {
+                if !m.message_id.is_empty() {
+                    self.bulk_ids.insert(m.message_id.clone());
+                }
+                let to: Vec<String> =
+                    m.to.iter().chain(&m.cc).map(|a| a.email.trim().to_lowercase()).filter(|e| !e.is_empty() && !self.mine.contains(e)).collect();
+                self.lists.extend(to);
+            }
         } else if sent
             && !m.bulk
             && !m.message_id.is_empty()
             && (self.oldest..=self.newest).contains(&m.date)
-            && m.to.iter().chain(&m.cc).any(|r| !self.mine.contains(&r.email.trim().to_lowercase()))
+            && !self.dismissed.contains(&m.message_id)
+            && m.to.iter().chain(&m.cc).any(|r| !mine(&self.mine, &r.email))
         {
-            self.sent.push((m.key.clone(), m.message_id.clone()));
+            self.sent.push(Arc::clone(m));
         }
     }
 
+    /// The messages waiting for a reply: those no one answered, not to a list (one of its
+    /// addresses, or answering one of its messages), each once.
+    pub(crate) fn finish_messages(self) -> Vec<SharedSummary> {
+        let AwaitingScan { answered, bulk_ids, lists, sent, .. } = self;
+        let mut seen = HashSet::new();
+        sent.into_iter()
+            .filter(|m| !answered.contains(&m.message_id) && !bulk_ids.contains(&m.in_reply_to))
+            .filter(|m| !m.to.iter().chain(&m.cc).any(|r| lists.contains(&r.email.trim().to_lowercase())))
+            .filter(|m| seen.insert(m.message_id.clone()))
+            .collect()
+    }
+
     pub(crate) fn finish(self) -> HashSet<MessageKey> {
-        let answered = self.answered;
-        self.sent.into_iter().filter(|(_, id)| !answered.contains(id)).map(|(k, _)| k).collect()
+        self.finish_messages().into_iter().map(|m| m.key.clone()).collect()
     }
 }
 
@@ -397,9 +438,9 @@ impl Session {
     }
 
     /// The user's messages still waiting for a reply: in a Sent folder, sent between
-    /// [`AWAITING_AFTER_DAYS`] and [`AWAITING_WITHIN_DAYS`] ago to someone else (not in bulk),
-    /// and named by no message from anyone else, in any folder, as the one it answers
-    /// (`In-Reply-To`) or follows (`References`).
+    /// [`Prefs::no_answer_days`] and [`AWAITING_WITHIN_DAYS`] ago to someone else (not in bulk,
+    /// not to a mailing list, not dismissed), and named by no message from anyone else, in any
+    /// folder, as the one it answers (`In-Reply-To`) or follows (`References`).
     pub fn awaiting_replies(&mut self) -> HashSet<MessageKey> {
         let mut scan = AwaitingScan::new(self);
         for (account, folder, sent) in std::mem::take(&mut scan.folders) {

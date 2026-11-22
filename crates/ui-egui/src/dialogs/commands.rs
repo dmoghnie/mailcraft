@@ -28,6 +28,7 @@ const HIDDEN: &[&str] = &[
     "contact.list",
     "dataFile.idle",
     "list.rowAction",
+    "mail.noAnswer",
     "meetings.list",
     "note.list",
     "options.composeFont",

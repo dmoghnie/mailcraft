@@ -189,6 +189,14 @@ pub struct Prefs {
     pub notify_other: bool,
     /// Only VIPs' new mail is announced; the rest arrives quietly.
     pub notify_vips_only: bool,
+    /// Sent mail nobody answered comes back at the top of the Inbox, under No answer yet
+    /// ([`no_answer`]).
+    pub no_answer: bool,
+    /// After this many days (1 to [`no_answer::NO_ANSWER_DAYS_MAX`]).
+    pub no_answer_days: u32,
+    /// Sent mail dismissed from No answer yet, by Message-ID, oldest first.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub no_answer_dismissed: Vec<String>,
     /// The people whose mail always matters, by address (lower case): [`vips`].
     #[serde(skip_serializing_if = "std::collections::BTreeSet::is_empty")]
     pub vips: std::collections::BTreeSet<String>,
@@ -457,6 +465,9 @@ impl Default for Prefs {
             notify_other: false,
             notify_vips_only: false,
             vips: std::collections::BTreeSet::new(),
+            no_answer: true,
+            no_answer_days: no_answer::NO_ANSWER_DAYS,
+            no_answer_dismissed: Vec::new(),
             spelling: true,
             dictionary: BTreeSet::new(),
             compose_font: None,

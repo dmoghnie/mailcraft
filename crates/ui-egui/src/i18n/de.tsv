@@ -2061,3 +2061,11 @@ count	occurrences	Terminen
 	Mail from your VIPs, in every account	E-Mails Ihrer VIPs, aus allen Konten
 	Notify only of mail from VIPs	Nur bei E-Mails von VIPs benachrichtigen
 	Other mail still arrives, without a notification	Andere E-Mails kommen weiterhin an, ohne Benachrichtigung
+	No answer yet ({count})	Noch keine Antwort ({count})
+	Show all {count}	Alle {count} anzeigen
+	Hide sent mail nobody answered	Gesendete E-Mails ohne Antwort ausblenden
+	Show sent mail nobody answered	Gesendete E-Mails ohne Antwort anzeigen
+	Write a follow-up	Nachfassen
+	Bring back sent mail nobody answered	Gesendete E-Mails ohne Antwort wieder anzeigen
+	At the top of the Inbox, to follow up or dismiss	Oben im Posteingang, zum Nachfassen oder Verwerfen
+	When nobody has answered after	Ohne Antwort nach

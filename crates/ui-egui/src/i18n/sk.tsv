@@ -2075,3 +2075,11 @@ count	occurrences	opakovaní
 	Mail from your VIPs, in every account	Pošta od vašich VIP zo všetkých kont
 	Notify only of mail from VIPs	Upozorňovať len na poštu od VIP
 	Other mail still arrives, without a notification	Ostatná pošta prichádza ďalej, bez upozornenia
+	No answer yet ({count})	Zatiaľ bez odpovede ({count})
+	Show all {count}	Zobraziť všetky ({count})
+	Hide sent mail nobody answered	Skryť odoslanú poštu bez odpovede
+	Show sent mail nobody answered	Zobraziť odoslanú poštu bez odpovede
+	Write a follow-up	Napísať pripomienku
+	Bring back sent mail nobody answered	Pripomínať odoslanú poštu bez odpovede
+	At the top of the Inbox, to follow up or dismiss	Navrchu Doručenej pošty, na pripomenutie alebo zrušenie
+	When nobody has answered after	Bez odpovede viac ako

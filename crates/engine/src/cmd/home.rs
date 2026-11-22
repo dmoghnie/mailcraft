@@ -52,6 +52,33 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         CommandSpec::new("people.vips", "VIPs", "Folder pane › Favorites", |s, _| Ok(json!({"vips": s.vips()}))),
         CommandSpec::new("folder.vip", "VIP", "Folder pane › Favorites", |s, _| s.open_vip_folder())
             .when(|s| s.prefs.vips.is_empty().then_some("no VIPs yet")),
+        // Sent mail nobody answered: the Inbox's No answer yet, and a search folder of it.
+        CommandSpec::new("mail.noAnswer", "List sent mail nobody answered", "Inbox › No answer yet", |s, _| {
+            let found = s.no_answer_now();
+            let messages: Vec<Value> = found
+                .iter()
+                .map(|m| {
+                    let to: Vec<String> = m.to.iter().chain(&m.cc).map(ToString::to_string).collect();
+                    json!({"key": m.key.to_id(), "subject": m.subject, "to": to, "date": m.date})
+                })
+                .collect();
+            Ok(json!({"messages": messages}))
+        })
+        .when(|s| (!s.prefs.no_answer).then_some("turned off in File › Options › Mail")),
+        CommandSpec::new("mail.noAnswerFollowUp", "Write a follow-up", "Inbox › No answer yet", |s, v| {
+            s.follow_up_no_answer(&parse_key(v).ok_or_else(|| CmdError::Params("key: a message you sent".into()))?)
+        })
+        .params(r#"{"key": string (a message you sent)} (shows it and begins a reply to all of its recipients)"#),
+        CommandSpec::new("mail.noAnswerDismiss", "Dismiss", "Inbox › No answer yet", |s, v| {
+            s.dismiss_no_answer(&parse_key(v).ok_or_else(|| CmdError::Params("key: a message you sent".into()))?)
+        })
+        .params(r#"{"key": string (a message you sent)} (no longer listed under No answer yet, nor found by is:awaiting)"#),
+        CommandSpec::new("folder.noAnswer", "No answer yet", "Inbox › No answer yet", |s, _| s.open_no_answer_folder()),
+        toggle!("options.noAnswer", "Bring back sent mail nobody answered", "File › Options › Mail", no_answer),
+        CommandSpec::new("options.noAnswerDays", "Days before sent mail nobody answered comes back", "File › Options › Mail", |s, v| {
+            s.set_no_answer_days(p::u64(v, "days").ok_or_else(|| CmdError::Params("days: a number".into()))?)
+        })
+        .params(r#"{"days": 1 to 14}"#),
         // A sender's mail in a folder, cleared out in one step (one Undo).
         CommandSpec::new("mail.sweep", "Sweep", "Home › Delete", |s, v| {
             let choice = p::str(v, "choice")

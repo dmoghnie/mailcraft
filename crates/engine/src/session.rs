@@ -46,7 +46,7 @@ pub(crate) use changing::{MOVED_IN_MAX, MovedIn};
 #[cfg(test)]
 pub(crate) use opening::source_lines;
 pub use opening::{BodyWork, PreparedBody, SOURCE_SHOWN, SourceView, Toward};
-pub use searching::{IndexPass, SearchProgress, SearchScope, SearchStats, SearchWork, ServerSearch};
+pub use searching::{IndexPass, SearchProgress, SearchScope, SearchStats, SearchWork, ServerSearch, no_answer};
 pub use security::{
     CardSearch, KeySource, KnownCert, KnownKey, Lock, PGP_DOC, PgpSettings, Reach, RevocationCheck, SMIME_DOC, Scheme, Seal, Security, SignedBy,
     SmimeSettings,

@@ -45,6 +45,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - **Unsubscribe** above a mailing-list message's text (and in Find a command): after asking, it sends the message the list asks for from your account, or opens the list's own page in your browser. In Junk Email it offers Block sender instead, since unsubscribing tells a junk sender that the address is read.
 - **Sweep…** (Home › Delete drop-down, a message's right-click menu, or Find a command) clears out a sender's mail in the folder in one step: all of it, all of it and what they send later (a rule), all but their newest, or what's older than 10 days, now and each day. The dialog says how many messages each way removes, and Undo brings them back.
 - **VIPs**: Mark as VIP on a sender's card or a message's right-click menu. A VIP's mail always goes to Focused and has a star before their name in the list, the **VIP** folder under Favorites holds their mail from every account, and File › Options › Mail can keep notifications to their mail alone.
+- **No answer yet** at the top of the Inbox: mail you sent to people (not to a mailing list or to yourself) that nobody has answered after 3 days comes back there, with **Write a follow-up** (a reply to everyone it went to) and **Dismiss**. An answer filed in any folder counts, from anyone. File › Options › Mail sets the days or turns it off, and `is:awaiting` and the No answer yet search folder list the same messages.
 
 ### Changed
 

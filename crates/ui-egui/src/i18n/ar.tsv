@@ -2056,3 +2056,11 @@ count	occurrences	مرات
 	Mail from your VIPs, in every account	بريد الأشخاص المهمين (VIP)، في كل الحسابات
 	Notify only of mail from VIPs	الإشعار ببريد VIP فقط
 	Other mail still arrives, without a notification	يصل البريد الآخر كالمعتاد، بلا إشعار
+	No answer yet ({count})	لا رد بعد ({count})
+	Show all {count}	عرض الكل ({count})
+	Hide sent mail nobody answered	إخفاء البريد المرسل الذي لم يرد عليه أحد
+	Show sent mail nobody answered	عرض البريد المرسل الذي لم يرد عليه أحد
+	Write a follow-up	كتابة رسالة متابعة
+	Bring back sent mail nobody answered	إعادة إظهار البريد المرسل الذي لم يرد عليه أحد
+	At the top of the Inbox, to follow up or dismiss	في أعلى علبة الوارد، للمتابعة أو التجاهل
+	When nobody has answered after	عندما لا يرد أحد خلال

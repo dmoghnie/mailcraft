@@ -320,6 +320,8 @@ impl Session {
         // then rules; what they file away or mark read isn't announced.
         let mut quiet = self.block_arrived(&arrived);
         let rest: Vec<Summary> = arrived.iter().filter(|m| !quiet.contains(&m.key)).cloned().collect();
+        // What it answers of the user's sent mail leaves No answer yet at once.
+        self.no_answer_arrived(&arrived);
         // Invitations into the calendar as tentative (not from blocked senders), before rules
         // move the mail (issue #20).
         self.invitations_arrived(&rest);

@@ -2057,3 +2057,11 @@ count	occurrences	次
 	Mail from your VIPs, in every account	所有帐户中来自 VIP 的邮件
 	Notify only of mail from VIPs	仅通知来自 VIP 的邮件
 	Other mail still arrives, without a notification	其他邮件照常送达，但不通知
+	No answer yet ({count})	尚未答复（{count}）
+	Show all {count}	全部显示（{count}）
+	Hide sent mail nobody answered	隐藏无人回复的已发送邮件
+	Show sent mail nobody answered	显示无人回复的已发送邮件
+	Write a follow-up	写跟进邮件
+	Bring back sent mail nobody answered	重新显示无人回复的已发送邮件
+	At the top of the Inbox, to follow up or dismiss	显示在收件箱顶部，可跟进或忽略
+	When nobody has answered after	无人回复超过

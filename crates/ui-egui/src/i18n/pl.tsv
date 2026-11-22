@@ -2074,3 +2074,11 @@ count	occurrences	wystąpieniach
 	Mail from your VIPs, in every account	Poczta od VIP-ów ze wszystkich kont
 	Notify only of mail from VIPs	Powiadamiaj tylko o poczcie od VIP-ów
 	Other mail still arrives, without a notification	Pozostała poczta nadal przychodzi, bez powiadomienia
+	No answer yet ({count})	Brak odpowiedzi ({count})
+	Show all {count}	Pokaż wszystkie ({count})
+	Hide sent mail nobody answered	Ukryj wysłaną pocztę bez odpowiedzi
+	Show sent mail nobody answered	Pokaż wysłaną pocztę bez odpowiedzi
+	Write a follow-up	Napisz przypomnienie
+	Bring back sent mail nobody answered	Przypominaj o wysłanej poczcie bez odpowiedzi
+	At the top of the Inbox, to follow up or dismiss	Na górze Skrzynki odbiorczej, by przypomnieć lub odrzucić
+	When nobody has answered after	Gdy nikt nie odpowiedział po

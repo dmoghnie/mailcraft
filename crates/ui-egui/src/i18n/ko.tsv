@@ -2060,3 +2060,11 @@ count	occurrences	회
 	Mail from your VIPs, in every account	모든 계정의 VIP 메일
 	Notify only of mail from VIPs	VIP 메일만 알림
 	Other mail still arrives, without a notification	다른 메일도 계속 도착하지만 알림은 없습니다
+	No answer yet ({count})	아직 응답 없음 ({count})
+	Show all {count}	모두 보기 ({count})
+	Hide sent mail nobody answered	답장 없는 보낸 메일 숨기기
+	Show sent mail nobody answered	답장 없는 보낸 메일 보기
+	Write a follow-up	후속 메일 쓰기
+	Bring back sent mail nobody answered	답장 없는 보낸 메일 다시 보여 주기
+	At the top of the Inbox, to follow up or dismiss	받은 편지함 맨 위에 표시되며 후속 메일을 쓰거나 닫을 수 있습니다
+	When nobody has answered after	답장 없이

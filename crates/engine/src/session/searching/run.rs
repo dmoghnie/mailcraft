@@ -96,7 +96,7 @@ struct Cursor {
 }
 
 /// What a folder's list being had in the cache came to.
-enum Loaded {
+pub(super) enum Loaded {
     /// It's there.
     Ready,
     /// A page was read (a unit).
@@ -508,7 +508,7 @@ impl Session {
     /// Have a folder's list in the cache, a page a call (`load` holds the reading between calls).
     /// `wait`: the run waits (the CLI's), and waits for the folder's read marks as reading it
     /// does; told they were waited for, it went round, a unit at a time, until they were written.
-    fn load_unit(&mut self, k: &(String, String), load: &mut Option<FolderLoad>, wait: bool) -> Loaded {
+    pub(super) fn load_unit(&mut self, k: &(String, String), load: &mut Option<FolderLoad>, wait: bool) -> Loaded {
         let Some(store) = self.store.clone() else {
             return match self.load_cached(&k.0, &k.1) {
                 Ok(()) => Loaded::Ready,

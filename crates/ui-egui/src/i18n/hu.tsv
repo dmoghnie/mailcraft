@@ -2061,3 +2061,11 @@ count	occurrences	előfordulás
 	Mail from your VIPs, in every account	A VIP-jeid levelei, minden fiókból
 	Notify only of mail from VIPs	Értesítés csak a VIP-ek leveleiről
 	Other mail still arrives, without a notification	A többi levél is megérkezik, értesítés nélkül
+	No answer yet ({count})	Még nincs válasz ({count})
+	Show all {count}	Mind a(z) {count} megjelenítése
+	Hide sent mail nobody answered	Megválaszolatlan elküldött levelek elrejtése
+	Show sent mail nobody answered	Megválaszolatlan elküldött levelek megjelenítése
+	Write a follow-up	Emlékeztető írása
+	Bring back sent mail nobody answered	Megválaszolatlan elküldött levelek visszahozása
+	At the top of the Inbox, to follow up or dismiss	A Beérkezett üzenetek tetején, emlékeztetőhöz vagy elvetéshez
+	When nobody has answered after	Válasz nélkül eltelt

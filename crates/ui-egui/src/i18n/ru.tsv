@@ -2074,3 +2074,11 @@ count	occurrences	повторений
 	Mail from your VIPs, in every account	Письма от ваших VIP из всех учётных записей
 	Notify only of mail from VIPs	Уведомлять только о письмах от VIP
 	Other mail still arrives, without a notification	Остальные письма приходят как обычно, без уведомления
+	No answer yet ({count})	Ответа пока нет ({count})
+	Show all {count}	Показать все ({count})
+	Hide sent mail nobody answered	Скрыть отправленные письма без ответа
+	Show sent mail nobody answered	Показать отправленные письма без ответа
+	Write a follow-up	Написать повторно
+	Bring back sent mail nobody answered	Возвращать отправленные письма без ответа
+	At the top of the Inbox, to follow up or dismiss	Вверху папки «Входящие»: напомнить или скрыть
+	When nobody has answered after	Если никто не ответил за

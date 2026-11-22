@@ -2056,3 +2056,11 @@ count	occurrences	פעמים
 	Mail from your VIPs, in every account	דואר מאנשי ה-VIP שלך, בכל החשבונות
 	Notify only of mail from VIPs	להודיע רק על דואר מ-VIP
 	Other mail still arrives, without a notification	שאר הדואר ממשיך להגיע, בלי התראה
+	No answer yet ({count})	עדיין אין תשובה ({count})
+	Show all {count}	הצגת כל ה-{count}
+	Hide sent mail nobody answered	הסתרת דואר שנשלח ולא נענה
+	Show sent mail nobody answered	הצגת דואר שנשלח ולא נענה
+	Write a follow-up	כתיבת תזכורת
+	Bring back sent mail nobody answered	החזרת דואר שנשלח ולא נענה
+	At the top of the Inbox, to follow up or dismiss	בראש הדואר הנכנס, למעקב או לביטול
+	When nobody has answered after	כשאיש לא ענה במשך
