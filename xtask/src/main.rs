@@ -13,6 +13,7 @@ mod icons;
 mod locks;
 mod modules;
 mod sizes;
+mod symbols;
 mod version;
 
 use std::path::{Path, PathBuf};
@@ -24,7 +25,7 @@ const USAGE: &str = "\
 usage: cargo xtask <command>
 
 commands:
-  ci       fmt --check, sizes, modules --cycles, fold --check, clippy -D warnings, tests, forks pinned alike, locks,
+  ci       fmt --check, sizes, modules --cycles, fold --check, symbols --check, clippy -D warnings, tests, forks pinned alike, locks,
            layers, assets, fuzz, wasm (stops at the first failure)
   layers   enforce the crate layering (docs/architecture.md)
   assets   check that every asset file is attributed in ATTRIBUTION.md
@@ -40,6 +41,8 @@ commands:
            fails when the one committed differs
   wasm     cargo check --target wasm32-unknown-unknown for the portable crates and the web app
   icons    render the app icon into assets/app-icon/ (PNGs, SVG, .ico, .icns)
+  symbols  write the apps' Material Symbols code from assets/icons/material-symbols.json;
+           `symbols --add <name>…` fetches more; `symbols --check` fails when the code differs
   ico      pack PNGs into a Windows .ico: ico <out.ico> <in.png>…
   version  print the workspace version; `version set X.Y.Z[-pre]` changes it (release builds)
 ";
@@ -242,6 +245,7 @@ fn cmd_ci() -> Result<(), String> {
     sizes::run(&root(), &[])?;
     modules::run(&root(), &["--cycles"])?;
     fold::run(&root(), &["--check"])?;
+    symbols::run(&root(), &["--check"])?;
     let mut clippy = cargo();
     clippy.args(["clippy", "--workspace", "--all-targets", "--", "-D", "warnings"]);
     run(clippy, "cargo clippy -D warnings")?;
@@ -269,6 +273,7 @@ fn main() -> ExitCode {
         Some("fold") => fold::run(&root(), &args.iter().skip(1).map(String::as_str).collect::<Vec<_>>()),
         Some("wasm") => cmd_wasm(),
         Some("icons") => icons::run(&root()),
+        Some("symbols") => symbols::run(&root(), &args.iter().skip(1).map(String::as_str).collect::<Vec<_>>()),
         Some("ico") => ico::run(&args.iter().skip(1).map(String::as_str).collect::<Vec<_>>()),
         Some("version") => version::run(&root(), &args.iter().skip(1).map(String::as_str).collect::<Vec<_>>()),
         _ => {

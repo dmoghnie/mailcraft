@@ -3,7 +3,9 @@
 Every non-code asset in this repository has a row here (path, author, source, licence).
 `cargo xtask assets` (part of `cargo xtask ci`) fails otherwise.
 
-None of this repository's assets are third-party: the interface icons are drawn in code
+One of this repository's assets is third-party: the phone apps' icons, Google's Material Symbols
+(Apache-2.0), whose paths `assets/icons/material-symbols.json` keeps, pinned to one upstream commit,
+and `cargo xtask symbols` turns into each app's code. The desktop's interface icons are drawn in code
 (`crates/ui-egui/src/look/icons.rs`), the sample picture is generated in code, and the UI uses an
 installed system font when one is found. The app does carry egui's built-in fonts, which come in
 with the `epaint_default_fonts` crate (egui's fallbacks for text, symbols and emoji, under their
@@ -46,3 +48,4 @@ how real files behave, and its results were compared with theirs.
 | `crates/smime/testdata/signed-tampered.eml` | MailCraft contributors | Made with `openssl cms` from MailCraft's own test certificates (S/MIME tests) | MIT OR Apache-2.0 |
 | `assets/app-icon/mailcraft.icns` | MailCraft contributors | Rendered by `cargo xtask icons` (`xtask/src/icons.rs`) | MIT OR Apache-2.0 |
 | `assets/app-icon/mailcraft.ico` | MailCraft contributors | Rendered by `cargo xtask icons` (`xtask/src/icons.rs`) | MIT OR Apache-2.0 |
+| `assets/icons/material-symbols.json` | Google | [Material Symbols](https://github.com/google/material-design-icons) (`symbols/web`, Outlined, weight 400, 24 px, and filled), at the commit the file names | Apache-2.0 |

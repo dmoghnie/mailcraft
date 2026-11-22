@@ -96,6 +96,11 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
 ## Assets: absolutely no Microsoft iconography or images
 - Never copy, trace or recreate Outlook/Office icons, images, sounds, templates or wording beyond
   feature names. Icons are drawn in code (`crates/ui-egui/src/look/icons.rs`); the app colour is MailCraft's own.
+- The phone apps' icons are Google's Material Symbols (Apache-2.0, chosen by the owner):
+  `assets/icons/material-symbols.json` holds the ones used, pinned to an upstream commit;
+  `cargo xtask symbols --add <name>` fetches one, and the Android code is generated from it.
+  An icon Material Symbols lacks comes from Pictogrammers' Material Design Icons (Apache-2.0),
+  never a brand or logo icon. Nothing from Microsoft's Fluent set.
 - Every asset file has a row in `ATTRIBUTION.md`; `cargo xtask assets` enforces it.
 - The app icon is MailCraft's own drawing in `xtask/src/icons.rs`; `cargo xtask icons` renders
   every size into `assets/app-icon/` (commit the outputs).

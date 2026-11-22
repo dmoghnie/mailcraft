@@ -12,6 +12,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -48,13 +50,16 @@ fun ComposeScreen(mail: Mail, snack: SnackbarHostState) {
     Scaffold(
         topBar = {
             TopAppBar(
-                navigationIcon = { TextButton(onClick = { mail.act("back") }) { Text("‹") } },
+                // Back keeps it in Drafts (the core's Back), as closing does on the desktop.
+                navigationIcon = { IconButton(onClick = { mail.act("back") }) { Icon(Symbols.Close, "Close, keeping a draft") } },
                 title = { Text(subject.ifEmpty { "New message" }, maxLines = 1) },
                 actions = {
-                    Button(onClick = { mail.act("send") }, enabled = !c.sending && to.isNotBlank()) { Text("Send") }
-                    TextButton(onClick = { menu = true }) { Text("⋮") }
+                    IconButton(onClick = { mail.act("send") }, enabled = !c.sending && to.isNotBlank()) {
+                        Icon(Symbols.SendFilled, "Send", tint = if (!c.sending && to.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline)
+                    }
+                    IconButton(onClick = { menu = true }) { Icon(Symbols.MoreVert, "More") }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text("Discard") }, onClick = { menu = false; mail.act("discard") })
+                        DropdownMenuItem(text = { Text("Discard") }, leadingIcon = { Icon(Symbols.Delete, null) }, onClick = { menu = false; mail.act("discard") })
                     }
                 },
             )
@@ -88,7 +93,7 @@ fun AddAccountScreen(mail: Mail, snack: SnackbarHostState) {
     Scaffold(
         topBar = {
             TopAppBar(
-                navigationIcon = { TextButton(onClick = { mail.act("back") }) { Text("‹") } },
+                navigationIcon = { IconButton(onClick = { mail.act("back") }) { Icon(Symbols.ArrowBack, "Back") } },
                 title = { Text("Add account") },
             )
         },

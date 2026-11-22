@@ -37,7 +37,7 @@ fn opens_on_the_folders_with_the_accounts() {
     assert_eq!(v.screen, Screen::Folders);
     assert_eq!(v.accounts.len(), 1);
     assert_eq!(v.accounts[0].email, "riley@studio.example");
-    assert!(v.accounts[0].folders.iter().any(|f| f["role"] == "inbox"));
+    assert!(v.accounts[0].folders.iter().any(|f| f.role == "inbox"));
 }
 
 #[test]
@@ -195,6 +195,9 @@ fn junk_actions_are_refused_or_said_never_a_crash() {
         r#"{"type":"openMessage","key":"not a key"}"#,
         r#"{"type":"row","key":"sample:9:9:INBOX","action":"delete"}"#,
         r#"{"type":"row","key":"x","action":"explode"}"#,
+        r#"{"type":"row","key":"x","action":"archive"}"#,
+        r#"{"type":"collapse","account":""}"#,
+        r#"{"type":"collapse","account":"nobody","folder":"nowhere"}"#,
         r#"{"type":"compose","kind":"telegram"}"#,
         r#"{"type":"compose","kind":"reply"}"#,
         r#"{"type":"edit","to":"a"}"#,
@@ -210,4 +213,64 @@ fn junk_actions_are_refused_or_said_never_a_crash() {
         let _ = serde_json::to_string(&core.view()).unwrap();
     }
     assert!(serde_json::from_str::<Action>(r#"{"type":"nonsense"}"#).is_err());
+}
+
+#[test]
+fn the_drawer_shows_the_folders_as_a_tree_in_the_desktops_order() {
+    let core = sample();
+    let v = core.view();
+    let a = &v.accounts[0];
+    assert_eq!(a.avatar.initials.chars().count(), 2, "{:?}", a.avatar);
+    assert_eq!(a.unread, 3);
+    let names: Vec<(&str, usize)> = a.folders.iter().map(|f| (f.path.as_str(), f.depth)).collect();
+    assert_eq!(names.first(), Some(&("INBOX", 0)), "the Inbox first: {names:?}");
+    let projects = names.iter().position(|(p, _)| *p == "Projects").unwrap();
+    assert_eq!(names.get(projects + 1), Some(&("Projects/Short film", 1)), "a folder's folders under it: {names:?}");
+    let p = &a.folders[projects];
+    assert!(p.parent && !p.collapsed);
+}
+
+#[test]
+fn accounts_and_folders_collapse_and_it_is_kept() {
+    let core = sample();
+    act(&core, r#"{"type":"collapse","account":"sample","folder":"Projects"}"#);
+    let v = core.view();
+    assert!(v.accounts[0].folders.iter().any(|f| f.path == "Projects" && f.collapsed));
+    assert!(!v.accounts[0].folders.iter().any(|f| f.path == "Projects/Short film"), "hidden inside its collapsed parent");
+
+    act(&core, r#"{"type":"collapse","account":"sample"}"#);
+    let v = core.view();
+    assert!(v.accounts[0].collapsed && v.accounts[0].folders.is_empty());
+    assert_eq!(v.accounts[0].unread, 3, "the count still shows");
+
+    act(&core, r#"{"type":"collapse","account":"sample"}"#);
+    let v = core.view();
+    assert!(!v.accounts[0].collapsed);
+    assert!(v.accounts[0].folders.iter().any(|f| f.path == "Projects" && f.collapsed), "the folder stays as it was");
+}
+
+#[test]
+fn the_open_folder_is_marked_and_rows_have_avatars() {
+    let core = sample();
+    act(&core, r#"{"type":"openFolder","account":"sample","folder":"INBOX"}"#);
+    let v = core.view();
+    assert!(v.accounts[0].folders.iter().any(|f| f.path == "INBOX" && f.open));
+    assert_eq!(v.accounts[0].folders.iter().filter(|f| f.open).count(), 1);
+    let zoe = v.messages.iter().find(|m| m["from"].as_str().unwrap_or_default().contains("Zoe")).unwrap();
+    assert_eq!(zoe["avatar"]["initials"], "ZP");
+}
+
+#[test]
+fn a_row_is_archived_alone() {
+    let core = sample();
+    act(&core, r#"{"type":"openFolder","account":"sample","folder":"INBOX"}"#);
+    let keys: Vec<String> = core.view().messages.iter().map(|m| m["key"].as_str().unwrap().to_string()).collect();
+    act(&core, &format!(r#"{{"type":"openMessage","key":"{}"}}"#, keys[0]));
+    act(&core, &format!(r#"{{"type":"row","key":"{}","action":"archive"}}"#, keys[1]));
+    let v = core.view();
+    assert_eq!(v.total, 6, "one went");
+    assert!(!v.messages.iter().any(|m| m["key"] == keys[1].as_str()));
+    assert!(v.messages.iter().any(|m| m["key"] == keys[0].as_str()), "the open one stays");
+    let archive = v.accounts[0].folders.iter().find(|f| f.role == "archive").unwrap();
+    assert_eq!(archive.total, 2);
 }

@@ -23,6 +23,8 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 
 mod adding;
+pub mod avatar;
+pub mod drawer;
 mod view;
 
 pub use view::{Screen, ViewModel};
@@ -39,6 +41,12 @@ pub enum Action {
     },
     /// Every account's inbox together.
     UnifiedInbox,
+    /// An account's folders folded away in the drawer, or shown again; with `folder`, that
+    /// folder's folders. Kept, and shared with the desktop's folder pane.
+    Collapse {
+        account: String,
+        folder: Option<String>,
+    },
     OpenMessage {
         key: String,
     },
@@ -49,7 +57,7 @@ pub enum Action {
     Refresh,
     /// The next messages of a long folder.
     LoadMore,
-    /// A row's own action: `delete`, `flag` or `read` (each toggles but delete).
+    /// A row's own action: `archive`, `delete`, `flag` or `read` (the last two toggle).
     Row {
         key: String,
         action: String,
@@ -137,7 +145,6 @@ pub struct Model {
     pub(crate) place: Place,
     /// What the screens show, as the engine's commands answered: kept here because a view
     /// can't run a command (that needs the session mutable).
-    pub(crate) accounts: Value,
     pub(crate) list: Value,
     pub(crate) reading: Value,
     pub(crate) limit: u64,
@@ -228,6 +235,13 @@ fn act(model: &mut Model, a: Action) {
                 model.place = Place { screen: Screen::Messages, folder: None, message: None };
             }
         }
+        Action::Collapse { account, folder } => {
+            let key = match folder {
+                Some(f) => drawer::folder_key(&account, &f),
+                None => drawer::account_key(&account),
+            };
+            run(model, "view.collapse", json!({"key": key}));
+        }
         Action::OpenMessage { key } => {
             if run(model, "list.open", json!({"key": key})).is_some() {
                 model.place.screen = Screen::Message;
@@ -243,7 +257,16 @@ fn act(model: &mut Model, a: Action) {
             run(model, "folder.more", json!({}));
         }
         Action::Row { key, action } => {
-            if matches!(action.as_str(), "delete" | "flag" | "read") {
+            if action == "archive" {
+                // Archive acts on what's selected: that row alone, first.
+                if run(model, "list.select", json!({"key": key})).is_some() {
+                    run(model, "mail.archive", json!({}));
+                }
+                if model.place.message.as_deref() == Some(key.as_str()) {
+                    model.place.screen = Screen::Messages;
+                    model.place.message = None;
+                }
+            } else if matches!(action.as_str(), "delete" | "flag" | "read") {
                 run(model, "list.rowAction", json!({"key": key, "action": action}));
                 if action == "delete" && model.place.message.as_deref() == Some(key.as_str()) {
                     model.place.screen = Screen::Messages;
@@ -342,7 +365,6 @@ fn close_compose(model: &mut Model) {
 /// either can change any of it (a message arriving, a flag set elsewhere).
 fn refresh(model: &mut Model) {
     let Some(s) = model.session.as_mut() else { return };
-    model.accounts = s.run("account.list", &json!({})).unwrap_or(Value::Null);
     if matches!(model.place.screen, Screen::Messages | Screen::Message | Screen::Compose) {
         model.list = s.run("list.messages", &json!({"limit": model.limit})).unwrap_or(Value::Null);
     }

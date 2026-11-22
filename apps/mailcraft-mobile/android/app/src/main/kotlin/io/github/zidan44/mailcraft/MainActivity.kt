@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -28,8 +27,7 @@ class MainActivity : ComponentActivity() {
         registerReceiver(zoneChanged, IntentFilter(Intent.ACTION_TIMEZONE_CHANGED))
         setContent {
             Theme {
-                // Back goes back a screen in the core; on the folders it leaves the app.
-                BackHandler(enabled = mail.view.screen != "folders") { mail.act("back") }
+                // Back is the screens' own (a screen, then the inbox, then out of the app).
                 Screens(mail)
             }
         }

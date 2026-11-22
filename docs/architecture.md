@@ -204,6 +204,14 @@ How it works:
   handed to the library at start, and each one the pool keeps or drops comes back to the shell
   as a `secret` or `forget` message (`credentials.rs`), named as the desktop's keychain names
   them.
+- The cache is the desktop's: a data file per account (`Store::packed`, then
+  `open_data_files`), in `Data Files` inside the app's own folder.
+- The view model is the drawer's too (`drawer.rs`): each account's folders in the desktop folder
+  pane's order (`Session::pane_folders`), as a tree, the special folders at the top wherever the
+  server keeps them, and what's collapsed (`view.collapse`, the desktop's own) left out. Avatars
+  are initials and a hue from the address (`avatar.rs`), so both shells draw the same.
+- Icons: Google's Material Symbols, kept in `assets/icons/material-symbols.json` (pinned upstream)
+  and turned into each shell's code by `cargo xtask symbols`.
 - The shells: `android/` (Kotlin, Jetpack Compose, Gradle; `build.sh` builds the Rust library
   with `cargo ndk` first) and `ios/` (SwiftUI; `build.sh` makes an XCFramework and the Xcode
   project with XcodeGen).

@@ -24,7 +24,8 @@ pub struct ViewModel {
     pub screen: Screen,
     /// False until the cache has opened.
     pub ready: bool,
-    pub accounts: Vec<AccountView>,
+    /// The drawer: each account and its folders.
+    pub accounts: Vec<drawer::AccountView>,
     /// The list's heading: the folder's name, or the search.
     pub title: String,
     pub messages: Vec<Value>,
@@ -46,18 +47,6 @@ pub struct ViewModel {
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AccountView {
-    pub id: String,
-    pub email: String,
-    pub name: String,
-    /// `online`, `connecting`, `offline`, `error`…, as `account.list` says.
-    pub state: String,
-    pub error: Option<String>,
-    pub folders: Vec<Value>,
-}
-
-#[derive(Clone, Debug, Default, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct ComposeView {
     /// Which message is being written: a shell keeps what's typed while it stays the same.
     pub id: u64,
@@ -75,7 +64,7 @@ const ROW: &[&str] = &["key", "from", "subject", "preview", "date", "unread", "f
 
 pub(crate) fn view(model: &Model) -> ViewModel {
     let Some(s) = model.session.as_deref() else { return ViewModel::default() };
-    let accounts = model.accounts.as_array().map(|a| a.iter().map(account).collect()).unwrap_or_default();
+    let accounts = drawer::accounts(model);
     let messages = model.list.get("messages").and_then(Value::as_array).map(|m| m.iter().map(row).collect()).unwrap_or_default();
     let compose = s.compose.as_ref().map(|c| ComposeView {
         id: c.id,
@@ -116,19 +105,6 @@ fn title(model: &Model) -> String {
     }
 }
 
-fn account(a: &Value) -> AccountView {
-    let s = |k: &str| a.get(k).and_then(Value::as_str).unwrap_or_default().to_string();
-    let status = a.get("status").cloned().unwrap_or(Value::Null);
-    AccountView {
-        id: s("account"),
-        email: s("email"),
-        name: s("name"),
-        state: status.get("state").and_then(Value::as_str).unwrap_or("offline").to_string(),
-        error: status.get("error").or_else(|| status.get("message")).and_then(Value::as_str).map(str::to_string),
-        folders: a.get("folders").and_then(Value::as_array).cloned().unwrap_or_default(),
-    }
-}
-
 fn row(m: &Value) -> Value {
     let mut out = serde_json::Map::new();
     for k in ROW {
@@ -136,5 +112,7 @@ fn row(m: &Value) -> Value {
             out.insert((*k).to_string(), v.clone());
         }
     }
+    let from = m.get("from").and_then(Value::as_str).unwrap_or_default();
+    out.insert("avatar".into(), serde_json::to_value(avatar::of(from, "")).unwrap_or(Value::Null));
     Value::Object(out)
 }

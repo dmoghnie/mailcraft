@@ -27,13 +27,25 @@ data class View(
     val notice: String? = null,
 )
 
-data class Folder(val name: String, val path: String, val role: String, val unread: Long, val total: Long)
-data class Account(val id: String, val email: String, val name: String, val state: String, val error: String?, val folders: List<Folder>)
-data class Row(val key: String, val from: String, val subject: String, val preview: String, val date: Long, val unread: Boolean, val flagged: Boolean, val attachments: Boolean)
+/** Initials on a colour of their own (`crates/mobile/src/avatar.rs`). */
+data class Avatar(val initials: String, val hue: Int)
+data class Folder(
+    val name: String, val path: String, val role: String, val unread: Long, val total: Long,
+    val depth: Int, val parent: Boolean, val collapsed: Boolean, val open: Boolean,
+)
+data class Account(
+    val id: String, val email: String, val name: String, val avatar: Avatar, val state: String, val error: String?,
+    val unread: Long, val collapsed: Boolean, val folders: List<Folder>,
+)
+data class Row(
+    val key: String, val from: String, val subject: String, val preview: String, val date: Long,
+    val unread: Boolean, val flagged: Boolean, val attachments: Boolean, val avatar: Avatar,
+)
 data class Message(val key: String, val from: String, val to: String, val cc: String, val subject: String, val date: Long, val text: String, val attachments: List<String>)
 data class Compose(val id: Long, val from: String, val to: String, val cc: String, val subject: String, val body: String, val sending: Boolean, val error: String?)
 
 private fun JSONObject.text(k: String): String = if (isNull(k)) "" else optString(k, "")
+private fun JSONObject.avatar(): Avatar = optJSONObject("avatar").let { Avatar(it?.text("initials")?.ifEmpty { "?" } ?: "?", it?.optInt("hue") ?: 0) }
 private fun JSONObject.textOrNull(k: String): String? = if (isNull(k)) null else optString(k).ifEmpty { null }
 private fun <T> JSONArray?.each(f: (JSONObject) -> T): List<T> =
     if (this == null) emptyList() else (0 until length()).mapNotNull { optJSONObject(it)?.let(f) }
@@ -43,13 +55,22 @@ fun parseView(o: JSONObject): View = View(
     ready = o.optBoolean("ready"),
     accounts = o.optJSONArray("accounts").each { a ->
         Account(
-            a.text("id"), a.text("email"), a.text("name"), a.text("state"), a.textOrNull("error"),
-            a.optJSONArray("folders").each { Folder(it.text("name"), it.text("path"), it.text("role"), it.optLong("unread"), it.optLong("total")) },
+            a.text("id"), a.text("email"), a.text("name"), a.avatar(), a.text("state"), a.textOrNull("error"),
+            a.optLong("unread"), a.optBoolean("collapsed"),
+            a.optJSONArray("folders").each {
+                Folder(
+                    it.text("name"), it.text("path"), it.text("role"), it.optLong("unread"), it.optLong("total"),
+                    it.optInt("depth"), it.optBoolean("parent"), it.optBoolean("collapsed"), it.optBoolean("open"),
+                )
+            },
         )
     },
     title = o.text("title"),
     messages = o.optJSONArray("messages").each {
-        Row(it.text("key"), it.text("from"), it.text("subject"), it.text("preview"), it.optLong("date"), it.optBoolean("unread"), it.optBoolean("flagged"), it.optBoolean("attachments"))
+        Row(
+            it.text("key"), it.text("from"), it.text("subject"), it.text("preview"), it.optLong("date"),
+            it.optBoolean("unread"), it.optBoolean("flagged"), it.optBoolean("attachments"), it.avatar(),
+        )
     },
     total = o.optLong("total"),
     message = o.optJSONObject("message")?.let { m ->

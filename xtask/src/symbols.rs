@@ -1,0 +1,174 @@
+//! `cargo xtask symbols`: the Material Symbols MailCraft's apps use (Google, Apache-2.0).
+//!
+//! The icons' paths live in one data file, [`DATA`], pinned to a commit of
+//! google/material-design-icons: Outlined, weight 400, 24 px, each with its filled variant. Each
+//! platform's code is generated from it, so every app draws the same icons:
+//!
+//! * `cargo xtask symbols` writes the Android app's `Symbols.kt` (Compose `ImageVector`s);
+//! * `cargo xtask symbols --add <name>…` fetches those symbols (with `curl`, at the pinned
+//!   commit) into the data file, then writes the code;
+//! * `cargo xtask symbols --check` (part of `ci`) fails when the code isn't what the data makes.
+//!
+//! The names are Material Symbols' own (`mark_email_unread`), as fonts.google.com/icons lists them.
+
+use std::collections::BTreeMap;
+use std::path::Path;
+use std::process::Command;
+
+use serde_json::{Value, json};
+
+const DATA: &str = "assets/icons/material-symbols.json";
+const KOTLIN: &str = "apps/mailcraft-mobile/android/app/src/main/kotlin/io/github/zidan44/mailcraft/ui/Symbols.kt";
+const REPO: &str = "https://github.com/google/material-design-icons";
+const RAW: &str = "https://raw.githubusercontent.com/google/material-design-icons";
+
+pub fn run(root: &Path, args: &[&str]) -> Result<(), String> {
+    match args {
+        ["--add", names @ ..] if !names.is_empty() => {
+            add(root, names)?;
+            write(root)
+        }
+        ["--check"] => check(root),
+        [] => write(root),
+        _ => Err("usage: cargo xtask symbols [--add <name>… | --check]".into()),
+    }
+}
+
+struct Data {
+    commit: String,
+    /// Name → (outlined path, filled path).
+    icons: BTreeMap<String, (String, String)>,
+}
+
+fn read(root: &Path) -> Result<Data, String> {
+    let text = std::fs::read_to_string(root.join(DATA)).map_err(|e| format!("{DATA}: {e}"))?;
+    let v: Value = serde_json::from_str(&text).map_err(|e| format!("{DATA}: {e}"))?;
+    let commit = v["commit"].as_str().ok_or(format!("{DATA}: no commit"))?.to_string();
+    let mut icons = BTreeMap::new();
+    for (name, i) in v["icons"].as_object().ok_or(format!("{DATA}: no icons"))? {
+        let path = |k: &str| i[k].as_str().map(str::to_string).ok_or(format!("{DATA}: {name} has no {k} path"));
+        icons.insert(name.clone(), (checked(name, &path("outlined")?)?, checked(name, &path("filled")?)?));
+    }
+    Ok(Data { commit, icons })
+}
+
+/// Path data holds only what SVG path data does: it goes into generated code as a string.
+fn checked(name: &str, d: &str) -> Result<String, String> {
+    if d.is_empty() || !d.chars().all(|c| c.is_ascii_alphanumeric() || " .,-".contains(c)) {
+        return Err(format!("{name}: its path isn't plain SVG path data"));
+    }
+    Ok(d.to_string())
+}
+
+fn add(root: &Path, names: &[&str]) -> Result<(), String> {
+    let mut data = read(root)?;
+    for name in names {
+        if !name.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_') {
+            return Err(format!("{name}: Material Symbols' names are lower case, digits and _"));
+        }
+        let get = |file: &str| -> Result<String, String> {
+            let url = format!("{RAW}/{}/symbols/web/{name}/materialsymbolsoutlined/{file}", data.commit);
+            let out = Command::new("curl").args(["-sfL", &url]).output().map_err(|e| format!("curl: {e}"))?;
+            if !out.status.success() {
+                return Err(format!("{name}: not found at {url}"));
+            }
+            let svg = String::from_utf8_lossy(&out.stdout).into_owned();
+            let d = svg.split(" d=\"").nth(1).and_then(|r| r.split('"').next()).ok_or(format!("{name}: no path in {file}"))?;
+            if svg.matches("<path").count() != 1 {
+                return Err(format!("{name}: {file} has more than one path"));
+            }
+            checked(name, d)
+        };
+        let outlined = get(&format!("{name}_24px.svg"))?;
+        let filled = get(&format!("{name}_fill1_24px.svg"))?;
+        data.icons.insert((*name).to_string(), (outlined, filled));
+        println!("symbols: {name}");
+    }
+    let icons: serde_json::Map<String, Value> = data.icons.iter().map(|(n, (o, f))| (n.clone(), json!({"outlined": o, "filled": f}))).collect();
+    let v = json!({
+        "source": REPO,
+        "commit": data.commit,
+        "licence": "Apache-2.0",
+        "style": "Outlined, weight 400, grade 0, 24 px; filled: the same with FILL 1",
+        "icons": icons,
+    });
+    let text = serde_json::to_string_pretty(&v).map_err(|e| e.to_string())? + "\n";
+    std::fs::write(root.join(DATA), text).map_err(|e| format!("{DATA}: {e}"))
+}
+
+/// `mark_email_unread` → `MarkEmailUnread`.
+fn pascal(name: &str) -> String {
+    name.split('_')
+        .map(|w| {
+            let mut c = w.chars();
+            c.next().map(|f| f.to_ascii_uppercase().to_string() + c.as_str()).unwrap_or_default()
+        })
+        .collect()
+}
+
+fn kotlin(data: &Data) -> String {
+    let mut out = format!(
+        "// Generated by `cargo xtask symbols` from {DATA}: don't edit it, add a symbol there.
+// Material Symbols (Outlined, weight 400, 24 px) by Google, Apache-2.0:
+// {REPO} at {}.
+package io.github.zidan44.mailcraft.ui
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.addPathNodes
+import androidx.compose.ui.unit.dp
+
+/** A symbol: its 960-unit path, whose box runs from y = -960 to 0, drawn at 24 dp. */
+private fun symbol(name: String, d: String): ImageVector =
+    ImageVector.Builder(name = name, defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 960f, viewportHeight = 960f)
+        .addGroup(name = \"\", translationY = 960f)
+        .addPath(pathData = addPathNodes(d), fill = SolidColor(Color.Black))
+        .clearGroup()
+        .build()
+
+/** The Material Symbols MailCraft uses, each outlined and filled (`…Filled`, for what's selected). */
+object Symbols {{
+",
+        data.commit
+    );
+    for (name, (outlined, filled)) in &data.icons {
+        let id = pascal(name);
+        out.push_str(&format!("    val {id}: ImageVector by lazy {{ symbol(\"{name}\", \"{outlined}\") }}\n"));
+        out.push_str(&format!("    val {id}Filled: ImageVector by lazy {{ symbol(\"{name}_filled\", \"{filled}\") }}\n"));
+    }
+    out.push_str("}\n");
+    out
+}
+
+fn write(root: &Path) -> Result<(), String> {
+    let data = read(root)?;
+    std::fs::write(root.join(KOTLIN), kotlin(&data)).map_err(|e| format!("{KOTLIN}: {e}"))?;
+    println!("symbols: {} icons written to {KOTLIN}", data.icons.len());
+    Ok(())
+}
+
+fn check(root: &Path) -> Result<(), String> {
+    let data = read(root)?;
+    let have = std::fs::read_to_string(root.join(KOTLIN)).unwrap_or_default();
+    if have == kotlin(&data) {
+        println!("symbols: {KOTLIN} is up to date ({} icons)", data.icons.len());
+        Ok(())
+    } else {
+        Err(format!("symbols: {KOTLIN} isn't what {DATA} makes: run `cargo xtask symbols`"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn names_become_kotlin_names_and_paths_are_checked() {
+        assert_eq!(pascal("mark_email_unread"), "MarkEmailUnread");
+        assert_eq!(pascal("inbox"), "Inbox");
+        assert!(checked("x", "M480-240 160-160Z").is_ok());
+        assert!(checked("x", "M0 0\"); evil()").is_err());
+        assert!(checked("x", "").is_err());
+    }
+}
