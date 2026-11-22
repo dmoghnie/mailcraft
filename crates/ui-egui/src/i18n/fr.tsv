@@ -2092,3 +2092,9 @@ count	occurrences	occurrences
 	Add {command}	Ajouter {command}
 	At most {n} commands besides Home's own	Au plus {n} commandes en plus de celles d'Accueil
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	Accueil sur une ligne avec les boutons les plus utilisés ; clic droit sur le ruban pour les choisir
+	Show the whole conversation in the reading pane	Afficher toute la conversation dans le volet de lecture
+	Each message a card, the one open unfolded, when messages are grouped by conversation	Chaque message sur une carte, celui ouvert déplié, quand les messages sont regroupés par conversation
+	Newest message at the top of a conversation	Le message le plus récent en haut de la conversation
+	Show quoted text	Afficher le texte cité
+	Hide quoted text	Masquer le texte cité
+	Fold this message	Replier ce message

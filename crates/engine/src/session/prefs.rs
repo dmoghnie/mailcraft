@@ -165,6 +165,11 @@ pub struct Prefs {
     /// The simplified ribbon: Home is one row of the buttons chosen for it, as many as fit, the
     /// rest in its More commands; off, every button shows in its group.
     pub simple_ribbon: bool,
+    /// The reading pane shows the open message's whole conversation, each message a card (with
+    /// messages grouped by conversation); off, one message under the conversation's list.
+    pub conversation_pane: bool,
+    /// Those cards with the newest at the top; off, at the bottom.
+    pub conversation_newest_first: bool,
     /// The simplified ribbon's buttons, by command, in order (Customize the ribbon); none: those
     /// it starts with ([`RIBBON_ROW`]). [`Session::ribbon_row`] reads them.
     pub ribbon_buttons: Vec<String>,
@@ -516,6 +521,8 @@ impl Default for Prefs {
             classic_ribbon: false,
             ribbon_hidden: false,
             simple_ribbon: false,
+            conversation_pane: false,
+            conversation_newest_first: false,
             ribbon_buttons: Vec::new(),
             format_bar: false,
             open_send_receive: false,

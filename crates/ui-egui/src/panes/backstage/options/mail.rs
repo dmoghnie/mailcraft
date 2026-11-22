@@ -19,6 +19,13 @@ pub(super) fn reading(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Actio
         start_in(s, t, ui, acts);
         let switches = [
             (tl!("Group messages by conversation"), None, s.prefs.conversations, "view.conversations"),
+            (
+                tl!("Show the whole conversation in the reading pane"),
+                Some(tl!("Each message a card, the one open unfolded, when messages are grouped by conversation")),
+                s.prefs.conversation_pane,
+                "view.conversationPane",
+            ),
+            (tl!("Newest message at the top of a conversation"), None, s.prefs.conversation_newest_first, "view.conversationNewestFirst"),
             (tl!("Show a line of each message in the list"), None, s.prefs.show_preview, "view.preview"),
             (tl!("Compact list"), None, s.prefs.compact, "view.compact"),
             (tl!("Single-line list"), Some(tl!("One line a message: the sender, the subject and the time")), s.prefs.single_line, "view.singleLine"),

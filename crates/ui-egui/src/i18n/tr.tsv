@@ -2092,3 +2092,9 @@ count	occurrences	kez
 	Add {command}	{command} ekle
 	At most {n} commands besides Home's own	Giriş'in kendi komutları dışında en çok {n} komut
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	Giriş'i en çok kullandığınız düğmelerden tek satırda gösterir; seçmek için şeride sağ tıklayın
+	Show the whole conversation in the reading pane	Konuşmanın tamamını okuma bölmesinde göster
+	Each message a card, the one open unfolded, when messages are grouped by conversation	İletiler konuşmaya göre gruplandığında her ileti bir kart, açık olan genişletilmiş
+	Newest message at the top of a conversation	Konuşmanın en yeni iletisi en üstte
+	Show quoted text	Alıntılanan metni göster
+	Hide quoted text	Alıntılanan metni gizle
+	Fold this message	Bu iletiyi daralt

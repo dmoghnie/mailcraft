@@ -2088,3 +2088,9 @@ count	occurrences	回
 	Add {command}	{command} を追加
 	At most {n} commands besides Home's own	ホーム以外のコマンドは {n} 個まで
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	ホームをよく使うボタンの 1 行で表示します。ボタンを選ぶにはリボンを右クリックします
+	Show the whole conversation in the reading pane	閲覧ウィンドウにスレッド全体を表示
+	Each message a card, the one open unfolded, when messages are grouped by conversation	メッセージをスレッドでまとめているとき、各メッセージをカードで表示し、開いているものを展開します
+	Newest message at the top of a conversation	スレッドの最新のメッセージを上に表示
+	Show quoted text	引用されたテキストを表示
+	Hide quoted text	引用されたテキストを隠す
+	Fold this message	このメッセージを折りたたむ

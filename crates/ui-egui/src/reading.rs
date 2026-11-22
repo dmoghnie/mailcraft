@@ -16,6 +16,7 @@ use crate::{Action, UiState, widgets};
 mod attachments;
 pub(crate) mod body;
 mod compose;
+mod conversation;
 mod frame_lru;
 mod header;
 mod invite;
@@ -137,6 +138,10 @@ struct Open<'a> {
     summary: Option<&'a Summary>,
     /// In a window of its own (its ribbon has the actions, it has no conversation list).
     in_window: bool,
+    /// Where the quote of an earlier message starts, the text folded there (a card of the
+    /// conversation shown whole): a byte offset into the plain text, or a line of the formatted
+    /// text. None: all of it is shown.
+    fold_from: Option<usize>,
 }
 
 fn message(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action>, in_window: bool) {
@@ -159,14 +164,16 @@ fn message(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action
     }
     let viewing = viewing.filter(|_| st.attachment_view.is_some());
     let locked = r.security.as_ref().is_some_and(security::still_locked);
+    // The whole conversation as cards (File › Options › Mail): all of it scrolls.
+    let cards = conversation::cards_of(s, &r, in_window).filter(|_| viewing.is_none() && !locked);
     // The header stays at the top while the text scrolls, as Outlook's (issue #151), in a pane
     // with room for it: half of it at most, as it was last drawn; else all of it scrolls.
     let head_id = egui::Id::unique(("reading-head", in_window, r.key.to_id()));
     let head_was: f32 = ui.ctx().data(|d| d.get_temp(head_id)).unwrap_or(0.0);
     let room = ui.available_height();
-    let pinned = r.parsed.as_ref().filter(|_| viewing.is_none() && !locked && room >= PINNED_PANE && head_was <= room / 2.0);
+    let pinned = r.parsed.as_ref().filter(|_| cards.is_none() && viewing.is_none() && !locked && room >= PINNED_PANE && head_was <= room / 2.0);
     if let Some(p) = pinned {
-        let o = Open { r: &r, p, summary: summary.as_ref(), in_window };
+        let o = Open { r: &r, p, summary: summary.as_ref(), in_window, fold_from: None };
         let top = ui.cursor().top();
         egui::Frame::new().inner_margin(Margin { left: 24, right: 24, top: 18, bottom: 0 }).show(ui, |ui| {
             header::header(s, st, ui, &o, header::Part::Pinned, acts);
@@ -177,14 +184,20 @@ fn message(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action
         let line = ui.available_rect_before_wrap();
         ui.painter().line_segment([egui::pos2(line.left() + 24.0, edge), egui::pos2(line.right() - 24.0, edge)], egui::Stroke::new(1.0, t.border));
     }
-    egui::ScrollArea::vertical().auto_shrink(false).id_salt(("reading", in_window, r.key.to_id(), viewing)).show(ui, |ui| {
+    // The conversation's cards keep their place as another of them opens.
+    let scroll = cards.as_deref().and_then(conversation::scroll_key).unwrap_or_else(|| r.key.to_id());
+    egui::ScrollArea::vertical().auto_shrink(false).id_salt(("reading", in_window, scroll, viewing)).show(ui, |ui| {
         let top = if pinned.is_some() { 12 } else { 18 };
         egui::Frame::new().inner_margin(Margin { left: 24, right: 24, top, bottom: 24 }).show(ui, |ui| {
+            if let Some(cards) = &cards {
+                conversation::cards(s, st, ui, &r, summary.as_ref(), cards, getting_ready, acts);
+                return;
+            }
             let Some(p) = &r.parsed else {
                 not_ready(ui, &t, &r, summary.as_ref(), getting_ready, acts);
                 return;
             };
-            let o = Open { r: &r, p, summary: summary.as_ref(), in_window };
+            let o = Open { r: &r, p, summary: summary.as_ref(), in_window, fold_from: None };
             if pinned.is_some() {
                 let above = header::header(s, st, ui, &o, header::Part::Scrolled, acts) > 0.5;
                 message_text(s, st, ui, &o, shown_formatted(s, st, &r.key, p), above, acts);
@@ -388,27 +401,29 @@ fn message_body(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, format
     text_selection::begin(st, ui, ui.scope_id().with(("message-text", r.key.to_id())), o.in_window);
     // A search on: what it found marked (issue #173), the text drawn as formatted lines.
     if let Some(m) = marked(s, st, &r.key, p, formatted) {
-        rich_body(s, st, ui, &r.key, &m, acts);
+        rich_body(s, st, ui, &r.key, &m, None, acts);
         text_selection::finish(st, ui, long_text::many_lines(&m).then_some(p.text.as_str()));
         return;
     }
+    // What a reply quotes of an earlier message shown, folded (the conversation's cards).
+    let text = o.fold_from.and_then(|at| p.text.get(..at)).map_or(p.text.as_str(), str::trim_end);
     if formatted {
-        rich_body(s, st, ui, &r.key, p, acts);
-    } else if p.text.len() > long_text::LONG {
+        rich_body(s, st, ui, &r.key, p, o.fold_from, acts);
+    } else if text.len() > long_text::LONG {
         // Laid out by what's in view: whole, a long one took a frame of its own to lay out.
-        long_text::plain(st, ui, ui.scope_id().with(("long-text", r.key.to_id())), &p.text);
-    } else if crate::bidi::has_rtl(&p.text) {
+        long_text::plain(st, ui, ui.scope_id().with(("long-text", r.key.to_id())), text);
+    } else if crate::bidi::has_rtl(text) {
         // Right-to-left text, against the right edge where it starts; selected with the
         // pointer as it reads, and right-click copies it as written too.
-        let job = egui::text::LayoutJob::simple(p.text.clone(), theme::regular(14.5), t.text, ui.available_width());
+        let job = egui::text::LayoutJob::simple(text.to_string(), theme::regular(14.5), t.text, ui.available_width());
         let r = text_selection::rtl_run(st, ui, job);
-        rtl_copy_menu(&r, None, &p.text);
+        rtl_copy_menu(&r, None, text);
     } else {
-        text_selection::run(st, ui, RichText::new(&p.text).font(theme::regular(14.5)).color(t.text), None);
+        text_selection::run(st, ui, RichText::new(text).font(theme::regular(14.5)).color(t.text), None);
     }
     // Laid out by what's in view, a long text's copy of all of it is its text.
-    let long = if formatted { long_text::many_lines(p) } else { p.text.len() > long_text::LONG };
-    text_selection::finish(st, ui, long.then_some(p.text.as_str()));
+    let long = if formatted { long_text::many_lines(p) } else { text.len() > long_text::LONG };
+    text_selection::finish(st, ui, long.then_some(if formatted { p.text.as_str() } else { text }));
 }
 
 /// The External tag: a sender from outside the organisation (issue #29). One line however

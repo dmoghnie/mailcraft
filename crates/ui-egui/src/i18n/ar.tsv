@@ -2087,3 +2087,9 @@ count	occurrences	مرات
 	Add {command}	إضافة {command}
 	At most {n} commands besides Home's own	{n} أوامر على الأكثر غير أوامر «الرئيسية»
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	«الرئيسية» في صف واحد من الأزرار الأكثر استخدامًا؛ انقر بزر الماوس الأيمن على الشريط لاختيارها
+	Show the whole conversation in the reading pane	عرض المحادثة كاملة في جزء القراءة
+	Each message a card, the one open unfolded, when messages are grouped by conversation	كل رسالة بطاقة، والمفتوحة منها مبسوطة، عند تجميع الرسائل حسب المحادثة
+	Newest message at the top of a conversation	أحدث رسالة في أعلى المحادثة
+	Show quoted text	إظهار النص المقتبس
+	Hide quoted text	إخفاء النص المقتبس
+	Fold this message	طيّ هذه الرسالة

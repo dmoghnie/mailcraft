@@ -2105,3 +2105,9 @@ count	occurrences	повторений
 	Add {command}	Добавить: {command}
 	At most {n} commands besides Home's own	Не больше {n} команд, кроме команд «Главной»
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	«Главная» в одну строку из самых нужных кнопок; чтобы выбрать их, щёлкните ленту правой кнопкой мыши
+	Show the whole conversation in the reading pane	Показывать всю беседу в области чтения
+	Each message a card, the one open unfolded, when messages are grouped by conversation	Каждое письмо — карточка, открытое развёрнуто, когда письма сгруппированы по беседам
+	Newest message at the top of a conversation	Новое письмо вверху беседы
+	Show quoted text	Показать цитату
+	Hide quoted text	Скрыть цитату
+	Fold this message	Свернуть это письмо

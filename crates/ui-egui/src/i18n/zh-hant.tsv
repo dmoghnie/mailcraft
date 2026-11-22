@@ -2091,3 +2091,9 @@ count	occurrences	次
 	Add {command}	新增「{command}」
 	At most {n} commands besides Home's own	除「常用」本身的命令外，最多 {n} 個命令
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	「常用」只顯示一列最常用的按鈕；以滑鼠右鍵按一下功能區即可選擇這些按鈕
+	Show the whole conversation in the reading pane	在讀取窗格中顯示整個交談
+	Each message a card, the one open unfolded, when messages are grouped by conversation	依交談分組郵件時，每封郵件顯示為一張卡片，開啟的那封展開
+	Newest message at the top of a conversation	交談中最新的郵件在最上面
+	Show quoted text	顯示引用的文字
+	Hide quoted text	隱藏引用的文字
+	Fold this message	摺疊這封郵件

@@ -2091,3 +2091,9 @@ count	occurrences	ripetizioni
 	Add {command}	Aggiungi {command}
 	At most {n} commands besides Home's own	Al massimo {n} comandi oltre a quelli di Home
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	Home in una riga con i pulsanti più usati; fai clic con il pulsante destro sulla barra multifunzione per sceglierli
+	Show the whole conversation in the reading pane	Mostra l'intera conversazione nel riquadro di lettura
+	Each message a card, the one open unfolded, when messages are grouped by conversation	Ogni messaggio una scheda, quello aperto espanso, quando i messaggi sono raggruppati per conversazione
+	Newest message at the top of a conversation	Il messaggio più recente in cima alla conversazione
+	Show quoted text	Mostra il testo citato
+	Hide quoted text	Nascondi il testo citato
+	Fold this message	Comprimi questo messaggio

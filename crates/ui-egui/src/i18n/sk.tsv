@@ -2106,3 +2106,9 @@ count	occurrences	opakovaní
 	Add {command}	Pridať: {command}
 	At most {n} commands besides Home's own	Najviac {n} príkazov okrem tých z karty Domov
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	Domov v jednom riadku najpoužívanejších tlačidiel; vyberiete ich kliknutím pravým tlačidlom na pás s nástrojmi
+	Show the whole conversation in the reading pane	Zobrazovať celú konverzáciu na table na čítanie
+	Each message a card, the one open unfolded, when messages are grouped by conversation	Každá správa na karte, otvorená rozbalená, keď sú správy zoskupené podľa konverzácie
+	Newest message at the top of a conversation	Najnovšia správa navrchu konverzácie
+	Show quoted text	Zobraziť citovaný text
+	Hide quoted text	Skryť citovaný text
+	Fold this message	Zbaliť túto správu

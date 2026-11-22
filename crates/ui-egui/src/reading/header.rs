@@ -7,12 +7,14 @@ use super::*;
 /// Which of the header is drawn: all of it, scrolling with the text; or, as Outlook keeps it at
 /// the top of the pane while the text scrolls (issue #151), the part that stays (the subject,
 /// who it's from and to, the bars about it, what can be done with it) or the part that scrolls
-/// (the conversation, reactions, an invitation's card: each can be tall).
+/// (the conversation, reactions, an invitation's card: each can be tall). On a card of the
+/// conversation shown whole, all of it but the subject and the conversation's list.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) enum Part {
     All,
     Pinned,
     Scrolled,
+    Card,
 }
 
 /// The header, against the right in a right-to-left interface, its rows from there (the message
@@ -30,8 +32,10 @@ pub(super) fn header(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, p
         if part == Part::Scrolled {
             conversation(ui, acts);
         } else {
-            subject_line(s, &t, ui, o, acts);
-            ui.add_space(10.0);
+            if part != Part::Card {
+                subject_line(s, &t, ui, o, acts);
+                ui.add_space(10.0);
+            }
             if part == Part::All {
                 conversation(ui, acts);
             }

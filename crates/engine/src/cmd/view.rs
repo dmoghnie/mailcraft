@@ -237,6 +237,8 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         })
         .params(r#"{"key": string (a flagged message of the To-Do Bar's task list: opened in a window of its own)}"#),
         toggle!("view.favorites", "Show Favorites", "View › Layout", show_favorites),
+        toggle!("view.conversationPane", "Show the whole conversation in the reading pane", "File › Options › Mail", conversation_pane),
+        toggle!("view.conversationNewestFirst", "Newest message at the top of a conversation", "File › Options › Mail", conversation_newest_first),
         toggle!("view.markReadOnOpen", "Mark as read when opened", "File › Options › Mail", mark_read_on_open),
         CommandSpec::new("calendar.show", "Show or hide a calendar", "Calendar › Calendars", |s, v| {
             let account = p::req_str(v, "account")?.to_string();

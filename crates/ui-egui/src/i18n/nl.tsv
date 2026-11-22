@@ -2087,3 +2087,9 @@ count	occurrences	keer
 	Add {command}	{command} toevoegen
 	At most {n} commands besides Home's own	Hoogstens {n} opdrachten naast die van Start
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	Start in één rij met de knoppen die u het meest gebruikt; klik met de rechtermuisknop op het lint om ze te kiezen
+	Show the whole conversation in the reading pane	Het hele gesprek in het leesvenster tonen
+	Each message a card, the one open unfolded, when messages are grouped by conversation	Elk bericht een kaart, het geopende uitgeklapt, als berichten per gesprek gegroepeerd zijn
+	Newest message at the top of a conversation	Nieuwste bericht bovenaan in een gesprek
+	Show quoted text	Geciteerde tekst tonen
+	Hide quoted text	Geciteerde tekst verbergen
+	Fold this message	Dit bericht inklappen

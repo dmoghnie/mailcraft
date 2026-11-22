@@ -2105,3 +2105,9 @@ count	occurrences	wystąpieniach
 	Add {command}	Dodaj: {command}
 	At most {n} commands besides Home's own	Najwyżej {n} polecenia poza tymi z karty Narzędzia główne
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	Narzędzia główne w jednym wierszu najczęściej używanych przycisków; kliknij wstążkę prawym przyciskiem myszy, aby je wybrać
+	Show the whole conversation in the reading pane	Pokazuj całą konwersację w okienku odczytu
+	Each message a card, the one open unfolded, when messages are grouped by conversation	Każda wiadomość na karcie, otwarta rozwinięta, gdy wiadomości są grupowane według konwersacji
+	Newest message at the top of a conversation	Najnowsza wiadomość na górze konwersacji
+	Show quoted text	Pokaż cytowany tekst
+	Hide quoted text	Ukryj cytowany tekst
+	Fold this message	Zwiń tę wiadomość

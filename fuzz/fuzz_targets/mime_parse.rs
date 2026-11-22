@@ -20,6 +20,8 @@ fuzz_target!(|raw: &[u8]| {
         // Several from one parse, as the reading pane takes a message's pictures.
         let _ = mime::attachments_data(raw, &[0, 1, 5, usize::MAX], 1 << 20, 4 << 20);
         let _ = mime::with_date(raw, 0);
+        // Where a reply's quote starts, as the reading pane's conversation folds it.
+        let _ = mime::quoted_start(&p.text);
     }
     // Its header block as the places that read one without a parse do: where it ends, a field,
     // and a report's type.

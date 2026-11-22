@@ -2091,3 +2091,9 @@ count	occurrences	회
 	Add {command}	{command} 추가
 	At most {n} commands besides Home's own	홈 외의 명령은 최대 {n}개
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	자주 쓰는 단추만 홈에 한 줄로 표시합니다. 리본을 마우스 오른쪽 단추로 클릭하여 고르세요
+	Show the whole conversation in the reading pane	읽기 창에 대화 전체 표시
+	Each message a card, the one open unfolded, when messages are grouped by conversation	메시지를 대화별로 묶었을 때 각 메시지를 카드로 표시하고, 열린 메시지는 펼쳐 둡니다
+	Newest message at the top of a conversation	대화의 최신 메시지를 맨 위에
+	Show quoted text	인용된 텍스트 표시
+	Hide quoted text	인용된 텍스트 숨기기
+	Fold this message	이 메시지 접기

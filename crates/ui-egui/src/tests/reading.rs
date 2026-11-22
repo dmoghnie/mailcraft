@@ -3,6 +3,7 @@
 use super::*;
 
 mod attachments;
+mod conversation_cards;
 mod conversation_sent;
 mod links;
 mod people;

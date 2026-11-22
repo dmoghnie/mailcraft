@@ -177,7 +177,9 @@ pub(super) fn hidden_bar(t: &Tokens, ui: &mut Ui, key: &MessageKey, p: &mime::Pa
 /// An HTML message, formatted: emphasis, code, links (opened in the browser on click) and
 /// pictures: those inside the message always, those on the web only once allowed. Mail laid out
 /// with tables keeps its columns ([`mime::layout`]).
-pub(super) fn rich_body(s: &Session, st: &mut UiState, ui: &mut Ui, key: &MessageKey, p: &mime::Parsed, acts: &mut Vec<Action>) {
+/// `upto`: its lines before this one alone (a reply's own, its quote folded), in mail that isn't
+/// laid out in blocks.
+pub(super) fn rich_body(s: &Session, st: &mut UiState, ui: &mut Ui, key: &MessageKey, p: &mime::Parsed, upto: Option<usize>, acts: &mut Vec<Action>) {
     let t = st.tokens;
     let allowed = s.pictures_allowed();
     let mut shown: Vec<String> = Vec::new();
@@ -187,7 +189,8 @@ pub(super) fn rich_body(s: &Session, st: &mut UiState, ui: &mut Ui, key: &Messag
         // Thousands of lines: laid out by what's in view.
         long_text::rich(&mut body, st, ui, ui.scope_id().with(("long-text", key.to_id())), width, theme::surface_rgb(&t));
     } else if p.layout.is_empty() {
-        body.lines(st, ui, &p.rich, width, theme::surface_rgb(&t), Align::Min);
+        let lines = upto.and_then(|n| p.rich.get(..n)).unwrap_or(&p.rich);
+        body.lines(st, ui, lines, width, theme::surface_rgb(&t), Align::Min);
     } else {
         body.blocks(st, ui, &p.layout, width, theme::surface_rgb(&t), mime::layout::Align::Left, 0);
     }

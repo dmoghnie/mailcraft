@@ -35,6 +35,8 @@ mod hidden;
 mod html;
 mod outgoing;
 mod parts;
+mod quoted;
+pub use quoted::{QUOTE_LINES, quoted_line, quoted_start};
 pub mod smime;
 pub use smime::pgp;
 /// Outlook's RTF bodies for tests (`test-support`).

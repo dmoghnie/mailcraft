@@ -2092,3 +2092,9 @@ count	occurrences	előfordulás
 	Add {command}	{command} hozzáadása
 	At most {n} commands besides Home's own	Legfeljebb {n} parancs a Kezdőlapéin kívül
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	A Kezdőlap egy sorban, a leggyakrabban használt gombokkal; a kiválasztásukhoz kattintson a jobb gombbal a menüszalagra
+	Show the whole conversation in the reading pane	A teljes beszélgetés megjelenítése az olvasópanelen
+	Each message a card, the one open unfolded, when messages are grouped by conversation	Minden üzenet egy kártya, a megnyitott kibontva, ha az üzenetek beszélgetés szerint vannak csoportosítva
+	Newest message at the top of a conversation	A legújabb üzenet a beszélgetés tetején
+	Show quoted text	Idézett szöveg megjelenítése
+	Hide quoted text	Idézett szöveg elrejtése
+	Fold this message	Az üzenet összecsukása

@@ -2087,3 +2087,9 @@ count	occurrences	פעמים
 	Add {command}	הוספת {command}
 	At most {n} commands besides Home's own	לכל היותר {n} פקודות מלבד אלה של 'בית'
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	'בית' בשורה אחת של הלחצנים שבהם משתמשים הכי הרבה; לחיצה ימנית על רצועת הכלים כדי לבחור אותם
+	Show the whole conversation in the reading pane	הצג את כל השיחה בחלונית הקריאה
+	Each message a card, the one open unfolded, when messages are grouped by conversation	כל הודעה בכרטיס, הפתוחה מוצגת במלואה, כשההודעות מקובצות לפי שיחה
+	Newest message at the top of a conversation	ההודעה החדשה ביותר בראש השיחה
+	Show quoted text	הצג טקסט מצוטט
+	Hide quoted text	הסתר טקסט מצוטט
+	Fold this message	קפל את ההודעה הזו

@@ -2092,3 +2092,9 @@ count	occurrences	Terminen
 	Add {command}	{command} hinzufügen
 	At most {n} commands besides Home's own	Höchstens {n} Befehle außer denen von Start
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	Start in einer Zeile mit den meistgenutzten Schaltflächen; zum Auswählen mit der rechten Maustaste auf das Menüband klicken
+	Show the whole conversation in the reading pane	Die ganze Unterhaltung im Lesebereich zeigen
+	Each message a card, the one open unfolded, when messages are grouped by conversation	Jede Nachricht eine Karte, die geöffnete aufgeklappt, wenn Nachrichten nach Unterhaltung gruppiert sind
+	Newest message at the top of a conversation	Neueste Nachricht oben in der Unterhaltung
+	Show quoted text	Zitierten Text zeigen
+	Hide quoted text	Zitierten Text ausblenden
+	Fold this message	Diese Nachricht zuklappen

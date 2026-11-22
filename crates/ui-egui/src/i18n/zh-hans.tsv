@@ -2088,3 +2088,9 @@ count	occurrences	次
 	Add {command}	添加“{command}”
 	At most {n} commands besides Home's own	除“开始”自带的命令外，最多 {n} 个命令
 	Home in one row of the buttons you use most; right-click the ribbon to choose them	“开始”只显示一行最常用的按钮；右键单击功能区可选择这些按钮
+	Show the whole conversation in the reading pane	在阅读窗格中显示整个对话
+	Each message a card, the one open unfolded, when messages are grouped by conversation	按对话分组邮件时，每封邮件显示为一张卡片，打开的那封展开
+	Newest message at the top of a conversation	对话中最新的邮件在最上面
+	Show quoted text	显示引用的文字
+	Hide quoted text	隐藏引用的文字
+	Fold this message	折叠这封邮件
