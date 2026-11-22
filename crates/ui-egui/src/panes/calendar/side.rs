@@ -8,14 +8,17 @@ use serde_json::json;
 
 use super::*;
 
-/// The side pane: a month to jump around in, then the calendars.
+/// The side pane: a month to jump around in, then the calendars; New event above them and Side by
+/// side below them while the ribbon, which has them, is hidden.
 pub fn nav(s: &Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action>) {
     let t = st.tokens;
     egui::ScrollArea::vertical().auto_shrink(false).id_salt("calendar-nav").show(ui, |ui| {
-        if widgets::accent_button(ui, Icon::Plus, "New event", &t, !s.accounts.is_empty()).clicked() {
-            acts.push(Action::Dialog(Dialog::new_event(s, None)));
+        if s.prefs.ribbon_hidden {
+            if widgets::accent_button(ui, Icon::Plus, "New event", &t, !s.accounts.is_empty()).clicked() {
+                acts.push(Action::Dialog(Dialog::new_event(s, None)));
+            }
+            ui.add_space(10.0);
         }
-        ui.add_space(10.0);
         months(s, st, ui, acts);
         ui.add_space(12.0);
         ui.label(RichText::new(tl!("Calendars")).font(theme::bold(12.0)).color(t.faint));
@@ -284,8 +287,9 @@ fn calendar_row(s: &Session, t: &Tokens, ui: &mut Ui, rows: &Rows<'_>, c: &Calen
 
 /// Under the calendars: side by side, opening a shared calendar, subscribing to one.
 fn more(s: &Session, ui: &mut Ui, several: bool, acts: &mut Vec<Action>) {
-    // Each in a column of its own, or all together (Outlook's side-by-side view).
-    if several {
+    // Each in a column of its own, or all together (Outlook's side-by-side view): here while the
+    // ribbon, which has it, is hidden.
+    if several && s.prefs.ribbon_hidden {
         ui.add_space(4.0);
         let mut on = s.prefs.calendars_side_by_side;
         if ui.checkbox(&mut on, tl!("Side by side")).on_hover_text(tl!("Day and week show each calendar in a pane of its own")).changed() {

@@ -354,7 +354,7 @@ pub fn show(s: &Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action>) 
             let whole = ui.painter().layout_no_wrap(title(s), theme::bold(18.0), t.text).size().x;
             // The days shown, then the views' buttons against the end. In a window with no room
             // for both, the days alone (they ran on under the buttons): the views are on the
-            // ribbon too.
+            // ribbon's View tab too.
             let both = whole <= ui.available_width() - buttons - 12.0;
             let shown = widgets::one_line(ui, &title(s), theme::bold(18.0), t.text, ui.available_width());
             ui.label(shown);

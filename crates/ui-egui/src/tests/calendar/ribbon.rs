@@ -38,3 +38,31 @@ fn each_modules_tabs_show_their_own_buttons() {
         assert!(is(&sr, "Send / Receive all folders") && is(&sr, "Update folder") && !is(&sr, home), "{module} Send / Receive: {sr:?}");
     }
 }
+
+/// Today, the views, New event and Side by side were each shown twice in Calendar's week (the
+/// ribbon, and the header or the side pane), which looked like two things. Each is shown once:
+/// Today and the views in the header, New event and Side by side on the ribbon, or in the side
+/// pane while the ribbon is hidden.
+#[test]
+fn each_calendar_control_is_shown_once() {
+    let (mut a, _) = app("calendar-once");
+    let ctx = egui::Context::default();
+    a.run("view.module", json!({"name": "calendar"}));
+    a.run("calendar.view", json!({"mode": "week"}));
+    let counts = |a: &mut MailApp| {
+        for _ in 0..3 {
+            frame(&ctx, a, vec![]);
+        }
+        let texts: Vec<String> = drawn_text(&ctx, a, SIZE).into_iter().map(|d| d.text).collect();
+        let n = |what: &str| texts.iter().filter(|t| *t == what).count();
+        ["Today", "Day", "Work week", "Week", "Month", "Schedule", "New event", "Side by side"].map(|w| (w, n(w)))
+    };
+    for (what, n) in counts(&mut a) {
+        assert_eq!(n, 1, "{what} shown {n} times");
+    }
+    a.run("view.hideRibbon", json!({}));
+    assert!(a.session.prefs.ribbon_hidden);
+    for (what, n) in counts(&mut a) {
+        assert_eq!(n, 1, "with the ribbon hidden, {what} shown {n} times");
+    }
+}

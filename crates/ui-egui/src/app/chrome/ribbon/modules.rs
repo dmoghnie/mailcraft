@@ -4,8 +4,10 @@
 use crate::*;
 
 impl MailApp {
-    /// Calendar's: New event, Today, a time free for everyone, the views, and its calendars side
-    /// by side.
+    /// Calendar's: New event, a time free for everyone, and its calendars side by side. Today and
+    /// the views are the calendar's header's, beside the days they change (shown twice, they
+    /// looked like two things): the View tab has the views too, for a window too narrow for
+    /// the header to show them.
     pub(super) fn ribbon_calendar(&mut self, ui: &mut Ui, acts: &mut Vec<Action>) {
         let t = self.ui.tokens;
         let s = &self.session;
@@ -13,13 +15,8 @@ impl MailApp {
             acts.push(Action::Dialog(Dialog::new_event(s, None)));
         }
         widgets::group_sep(ui, &t);
-        if widgets::tool_button(ui, Icon::Clock, "Today", &t, true).clicked() {
-            acts.push(Action::Run("calendar.goto", json!({"date": "today"})));
-        }
-        widgets::group_sep(ui, &t);
         free_time(ui, s, t, acts);
-        widgets::group_sep(ui, &t);
-        calendar_views(ui, s, t, acts);
+        side_by_side(ui, s, t, acts);
     }
 
     /// The View tab of the module shown: how it shows what it holds, and the folder pane.
@@ -166,7 +163,11 @@ fn calendar_views(ui: &mut Ui, s: &Session, t: Tokens, acts: &mut Vec<Action>) {
             acts.push(Action::Run("calendar.view", json!({"mode": code})));
         }
     }
-    // Each calendar in a column of its own (Outlook's side by side), or together.
+    side_by_side(ui, s, t, acts);
+}
+
+/// Each calendar in a column of its own (Outlook's side by side), or together: with more than one.
+fn side_by_side(ui: &mut Ui, s: &Session, t: Tokens, acts: &mut Vec<Action>) {
     if s.pim.values().map(|p| p.calendars.len()).sum::<usize>() > 1 {
         widgets::group_sep(ui, &t);
         if widgets::tool_toggle(ui, Icon::Calendar, "Side by side", &t, s.prefs.calendars_side_by_side).clicked() {
