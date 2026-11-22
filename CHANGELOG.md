@@ -16,6 +16,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 
 ### Added
 
+- A first MailCraft for Android, built from source (`apps/mailcraft-mobile/android/build.sh`): accounts added with their password (servers looked up from the address), each account's folders and all inboxes together, the message list with search and Load more, reading, flagging, marking read and deleting, and writing, replying, forwarding and sending; passwords kept in the Android Keystore. The same core drives an iOS app, written but not yet built.
 - Hungarian as an interface language (#198): **File › Options › General › Language › Magyar**, and a Hungarian system picks it.
 - Polish as an interface language (#226): **File › Options › General › Language › Polski**, and a Polish system picks it.
 - Dates can be written year first, with dots (2026.10.28), as Hungary writes them (#198): **File › Options › General › Dates**; a date typed in a form is read so, and MailCraft's own 2026-10-28 still is.

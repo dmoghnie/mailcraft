@@ -1,0 +1,23 @@
+[package]
+name = "mailcraft-mobile"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "MailCraft's phone app core: the engine behind a Crux app, its screens as view models for the Android and iOS shells (portable)"
+
+[lints]
+workspace = true
+
+[dependencies]
+mailcraft-engine = { workspace = true }
+# Crux (Apache-2.0): the app's update and view, the shells only draw and do what it asks. Its
+# default features are its macros alone: no type generation (the shells read the view model as
+# JSON) and no UniFFI.
+crux_core = "0.20"
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+crux_core = { version = "0.20", features = ["testing"] }

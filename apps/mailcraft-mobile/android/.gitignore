@@ -1,0 +1,5 @@
+.gradle/
+build/
+local.properties
+# The Rust library, built into it by `build.sh`.
+app/src/main/jniLibs/

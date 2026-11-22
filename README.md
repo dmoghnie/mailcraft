@@ -58,6 +58,7 @@ To run MailCraft portably, put a `portable.txt` file beside the app. It then kee
 cargo run --release -p mailcraft -- --sample   # local sample mailbox; drop --sample to add an account
 cargo run -p mailcraft-cli -- commands         # CLI: add, sync, list, read, search, send, run
 cd apps/mailcraft-web && trunk serve           # browser: http://127.0.0.1:8774/?sample
+apps/mailcraft-mobile/android/build.sh         # Android: the APK (see apps/mailcraft-mobile/README.md)
 ```
 
 - The CLI reads your password from `MAILCRAFT_PASSWORD`, or asks for it. It never stores it.

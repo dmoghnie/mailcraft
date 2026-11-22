@@ -37,6 +37,7 @@ In the browser (`apps/mailcraft-web`), the same `ui-egui` and engine run over JM
 | L2 | `mailcraft-jmap` | model, mime, store | JMAP, async over a two-method `Http` trait; wasm-safe |
 | L3 | `mailcraft-net` | model, mime, store, pst, smime, pgp, keys, jmap | All network and `.pst` I/O; native only; TLS through `rustls` |
 | L4 | `mailcraft-engine` | model, mime, store, print, smime, pgp | The sans-I/O `Session` and the command registry; wasm-safe |
+| L5 | `mailcraft-mobile` | engine | The phone apps' core: a [Crux](https://github.com/redbadger/crux) app over the `Session`, whose view model the Android and iOS shells draw; wasm-safe |
 | L6 | `mailcraft-ui-egui` | engine | The egui interface; platform services behind traits; interface languages |
 
 - `cargo xtask layers` enforces this table: `egui` appears only in L6, and network crates only in
@@ -47,8 +48,9 @@ In the browser (`apps/mailcraft-web`), the same `ui-egui` and engine run over JM
 - `net` covers IMAP, POP3, SMTP, JMAP push, Microsoft Graph, EWS with NTLM (Windows sign-in over
   HTTP, and over IMAP, POP3 and SMTP when an account asks for it), CalDAV/CardDAV, ManageSieve,
   HTTP, DNS and OAuth.
-- `keys` is the one crate with `unsafe`. The crate denies it, and only `windows/cng.rs` and
-  `macos/sec.rs` allow it.
+- `keys` and the phone library `apps/mailcraft-mobile` are the crates with `unsafe`. Each denies
+  it; in `keys` only `windows/cng.rs` and `macos/sec.rs` allow it, in the phone library only
+  `android.rs` and `ios.rs` (the exported entry points, and the C strings iOS hands over).
 - `.pst` files (Outlook data files) go through MailCraft's own crate, `pst`, written from
   Microsoft's published [MS-PST](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-pst/)
   specification. It reads both formats (Unicode and the older ANSI), adds to files and makes new
@@ -185,6 +187,26 @@ How it works:
 - `WebBackend` runs each account's jobs in order over `fetch`. It keeps the JMAP push stream open
   and polls when push isn't available.
 - Browser accounts are JMAP only (`Session::jmap_only`).
+
+## The phones (`apps/mailcraft-mobile`)
+
+- `crates/mobile` is a Crux app: `update` runs engine commands on the `Session` for each of the
+  person's actions (`Action`, JSON) and asks for two effects, `Render` and `Engine` (the jobs
+  the commands queued). `view` builds one `ViewModel` (JSON) from the commands' own answers
+  (`account.list`, `list.messages`, `message.read`), kept in the model after each update.
+- The native library (`apps/mailcraft-mobile/src`) runs the Crux core and `net`'s worker pool on
+  one thread of their own (`driver.rs`). It does the `Engine` effects itself, so jobs and
+  passwords never cross into Kotlin or Swift that way; the shells see only the view model.
+- The shells talk to it through five calls (`start`, `send`, `poll`, `view`, `zone`), in JSON:
+  JNI for Kotlin (`android.rs`), C for Swift (`ios.rs`). A shell polls from a thread of its own.
+  No UniFFI or generated types: the view model is read as JSON on both sides.
+- Passwords are kept by the phone's keystore (the Android Keystore, the iOS Keychain). They're
+  handed to the library at start, and each one the pool keeps or drops comes back to the shell
+  as a `secret` or `forget` message (`credentials.rs`), named as the desktop's keychain names
+  them.
+- The shells: `android/` (Kotlin, Jetpack Compose, Gradle; `build.sh` builds the Rust library
+  with `cargo ndk` first) and `ios/` (SwiftUI; `build.sh` makes an XCFramework and the Xcode
+  project with XcodeGen).
 
 ## Search
 

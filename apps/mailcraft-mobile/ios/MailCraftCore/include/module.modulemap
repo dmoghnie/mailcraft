@@ -1,0 +1,5 @@
+module MailCraftCore {
+    header "mailcraftcore.h"
+    link "mailcraftcore"
+    export *
+}

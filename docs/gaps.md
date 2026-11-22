@@ -211,6 +211,18 @@ Test builds update themselves ([how test builds update](updates.md)). These part
 - **Cause:** Taking a proposal moves the meeting as a whole; an occurrence's proposal needs that
   occurrence changed on its own.
 
+### 18. Phones: a first build
+
+- **Impact:** MailCraft for Android (`apps/mailcraft-mobile`) reads, writes, files and searches
+  mail over IMAP, SMTP and JMAP, but has no calendar, people, rules, attachments to open or add,
+  signatures, S/MIME or OpenPGP keys, notifications or checking mail in the background. Its
+  words are English only. There's no published package: it's built from source
+  (`apps/mailcraft-mobile/android/build.sh`). The iOS app is written but hasn't been built yet.
+- **Workaround:** The desktop app, or the browser for a JMAP account.
+- **Cause:** The phone shells are new. The engine does all of these already; each needs a screen
+  in both shells, and background checking needs the phones' own job schedulers. The iOS app
+  needs a Mac with Xcode to build and test.
+
 ## Not planned
 
 These are outside MailCraft's control, or accepted as they are.

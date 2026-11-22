@@ -1,0 +1,25 @@
+# The Xcode project, made by XcodeGen (`xcodegen generate`, MIT) so no .xcodeproj is kept here.
+name: MailCraft
+options:
+  bundleIdPrefix: io.github.zidan44
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  MailCraft:
+    type: application
+    platform: iOS
+    sources: [MailCraft]
+    dependencies:
+      - framework: MailCraftCore.xcframework
+        embed: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.zidan44.MailCraft
+        MARKETING_VERSION: "0.42.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: MailCraft
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        SWIFT_VERSION: "5.10"
+        # The Rust library links the system's resolver and Security framework.
+        OTHER_LDFLAGS: ["-lresolv", "-framework", "Security", "-framework", "SystemConfiguration"]

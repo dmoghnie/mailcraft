@@ -61,6 +61,11 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
   every block has a `SAFETY:` comment, and both are tested against the real system (the Windows
   one in CI on Windows). Use a maintained safe wrapper first (`rustls-cng`, `security-framework`);
   don't add `unsafe` anywhere else.
+- **The second exception** (signed off by the owner): the phone library `apps/mailcraft-mobile`,
+  whose entry points the phones find by name. The crate sets `unsafe_code = "deny"`; only
+  `src/android.rs` (`#[unsafe(no_mangle)]` on the JNI methods, through the `jni` crate) and
+  `src/ios.rs` (the C functions, and the C strings Swift hands over) allow it, each with its
+  `SAFETY:` comment. No UniFFI (MPL-2.0, outside the allowlist): the bindings are written by hand.
 - **Errors are `Result`** (`CmdError`, `NetError`, `StoreError`) through `?`.
 - **Everything from the network or disk is hostile:** IMAP responses (line and literal sizes are
   capped in `net/src/protocols/imap.rs`), message sources, attachment pictures (decode limits in
@@ -123,8 +128,9 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
 | L2 | `jmap`, `keys` | the JMAP transport, async over any HTTP client (portable, wasm); keys on smart cards, in the macOS Keychain and the Windows certificate store (native only) |
 | L3 | `net` | IMAP client + sync, SMTP, JMAP push, Microsoft Graph, CalDAV/CardDAV, ManageSieve, `.pst` import, HTTP/DNS/OAuth, worker pool (native only) |
 | L4 | `engine` | sans-I/O `Session` + command registry |
+| L5 | `mobile` | the phone apps' core: a Crux app over the `Session`, its view model in JSON (portable) |
 | L6 | `ui-egui` | egui front end |
-| apps | `mailcraft`, `mailcraft-cli`, `mailcraft-web` | binaries (the web app: `trunk build --release` in `apps/mailcraft-web`) |
+| apps | `mailcraft`, `mailcraft-cli`, `mailcraft-web`, `mailcraft-mobile` | binaries (the web app: `trunk build --release` in `apps/mailcraft-web`); the phone library with its Android and iOS shells (`apps/mailcraft-mobile/README.md`) |
 
 - **Everything is a command** (`crates/engine/src/cmd.rs`): id, label, location, shortcut, params
   doc, `enabled`, `run`. The ribbon, shortcuts, CLI and `--cmd` all dispatch by id. Commands never

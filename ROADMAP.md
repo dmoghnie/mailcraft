@@ -28,5 +28,7 @@ The work left is listed in [known gaps](docs/gaps.md), most-hit first:
 - A data folder that moves keeps its claim on its `.pst` copies.
 - Dragging attachments out of MailCraft on a Wayland-only desktop.
 - Signed releases and signed updates.
+- MailCraft on phones: the Android app past its first build (calendar, people, attachments,
+  notifications, checking in the background), and the iOS app built and tested on a Mac.
 
 See [what each version added](CHANGELOG.md) and [what's still missing](docs/gaps.md).
