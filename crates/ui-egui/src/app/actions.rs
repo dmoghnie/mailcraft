@@ -5,6 +5,7 @@
 mod data_files;
 mod inserting;
 mod names;
+mod notices;
 mod saving;
 mod security;
 
@@ -230,7 +231,7 @@ impl MailApp {
             };
             // Only the system notification and the title's unread count announce mail. No
             // RequestUserAttention: Windows keeps that highlight on the taskbar until focus returns.
-            self.services.notify(&title, &body);
+            self.notify_mail(ctx, &title, &body, news.iter().map(|m| m.key.clone()).collect(), private);
         }
         let unread = self.session.inbox_unread();
         let view = match self.session.module {

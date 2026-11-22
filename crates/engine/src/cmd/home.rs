@@ -13,6 +13,14 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         CommandSpec::new("mail.delete", "Delete", "Home › Delete", delete).key("Delete").params(r#"{"permanent"?: bool}"#).when(has_selection),
         CommandSpec::new("list.rowAction", "Delete, archive, flag or mark read", "Message list › row", row_action)
             .params(r#"{"key": string, "action": "delete"|"archive"|"flag"|"read"} (that message alone, what's selected and open kept)"#),
+        // A new-mail notification's buttons, on the messages it told of wherever they are.
+        CommandSpec::new("notice.act", "Mark read, archive or delete what a notification told of", "Notification", notice_act)
+            .params(r#"{"action": "read"|"archive"|"delete", "keys": [string] (the messages' keys)}"#),
+        CommandSpec::new("notice.open", "Open what a notification told of, to answer it", "Notification", |s, v| {
+            let key = parse_key(v).ok_or_else(|| CmdError::Params("`key` is required (account:validity:uid:folder)".into()))?;
+            s.open_noticed(&key)
+        })
+        .params(r#"{"key": string}"#),
         CommandSpec::new("mail.archive", "Archive", "Home › Delete", |s, _| s.move_selection(MoveTarget::Role(FolderRole::Archive)))
             .key("Backspace")
             .when(has_selection),
@@ -320,6 +328,22 @@ pub(super) fn delete(s: &mut Session, v: &Value) -> CmdResult {
 /// A list row's own button (Delete, Flag, Mark read, issue #216) on that message alone: what's
 /// selected and open stays as it was. They selected the row first (the commands act on the
 /// selection), and the selection the user had was lost.
+/// A notification's button: the messages it told of marked read, archived or deleted.
+fn notice_act(s: &mut Session, v: &Value) -> CmdResult {
+    let code = p::req_str(v, "action")?;
+    let act = crate::session::NoticeAct::from_code(code).ok_or_else(|| CmdError::Params(format!("`{code}` isn't read, archive or delete")))?;
+    let keys = v.get("keys").and_then(Value::as_array).ok_or_else(|| CmdError::Params("`keys` is required: the messages' keys".into()))?;
+    let keys = keys
+        .iter()
+        .map(|k| {
+            k.as_str()
+                .and_then(mailcraft_model::MessageKey::from_id)
+                .ok_or_else(|| CmdError::Params("`keys` holds one that isn't a message's key".into()))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    s.act_on_noticed(act, &keys)
+}
+
 fn row_action(s: &mut Session, v: &Value) -> CmdResult {
     let key = key_param(s, v)?;
     let action = p::req_str(v, "action")?;

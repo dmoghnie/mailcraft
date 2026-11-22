@@ -6,7 +6,9 @@ use super::*;
 
 mod folder_edits;
 mod follow_up;
+mod noticed;
 pub(crate) use folder_edits::keys_by_account;
+pub(crate) use noticed::NoticeAct;
 
 /// The most moves into an Inbox or Junk remembered ([`MovedIn`]) before the oldest are
 /// forgotten: the server's answer takes each out again, so only those it never confirms stay.

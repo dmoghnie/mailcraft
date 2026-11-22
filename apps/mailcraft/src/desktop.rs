@@ -9,6 +9,7 @@ pub(crate) mod fonts;
 mod lanes;
 pub(crate) mod launch;
 mod motion;
+mod notices;
 pub(crate) mod start;
 pub(crate) mod state_writer;
 pub(crate) mod tray;
@@ -61,6 +62,8 @@ pub(crate) struct Desktop {
     /// The window opened on X11 (Linux and the BSDs, `window/display.rs`): through XWayland on a
     /// Wayland desktop too, where attachments drag out as on X11 itself.
     pub(crate) x11: bool,
+    /// The buttons pressed on new-mail notifications, until the window takes them.
+    pub(crate) pressed: notices::Pressed,
 }
 
 impl Desktop {
@@ -80,6 +83,16 @@ impl Desktop {
             self.last_dir = if is_folder { Some(p.to_path_buf()) } else { p.parent().map(Path::to_path_buf) }.or(self.last_dir.take());
         }
         picked
+    }
+
+    /// A portable copy (Windows): it writes nothing to the registry.
+    #[cfg(windows)]
+    fn portable(&self) -> bool {
+        self.portable
+    }
+    #[cfg(not(windows))]
+    fn portable(&self) -> bool {
+        false
     }
 }
 
@@ -389,24 +402,63 @@ impl Services for Desktop {
         shell_open(std::ffi::OsStr::new(url))
     }
     fn notify(&mut self, title: &str, body: &str) {
-        let (title, body) = (title.to_string(), body.to_string());
-        #[cfg(windows)]
-        let portable = self.portable;
+        let (title, body, portable) = (title.to_string(), body.to_string(), self.portable());
         // Off the UI thread: the notification service can be slow, or missing.
         off_thread(std::thread::Builder::new().name("notify".into()), "notification", move || {
-            let mut n = notify_rust::Notification::new();
-            n.summary(&title).body(&body).appname("MailCraft");
-            // Windows names a toast after its app id (PowerShell's when none is given). A
-            // portable copy writes nothing to the registry: it uses an installed MailCraft's.
-            #[cfg(windows)]
-            if (!portable && toast::registered()) || (portable && toast::installed()) {
-                n.app_id(toast::APP_ID);
-            }
-            if let Err(e) = n.show() {
+            if let Err(e) = notification(&title, &body, portable).show() {
                 log::warn!("notification: {e}");
             }
         });
     }
+    fn notify_mail(&mut self, wake: &egui::Context, notice: &mailcraft_ui_egui::MailNotice<'_>) {
+        // Past so many waiting for their buttons, one has none.
+        let Some(waiting) = notices::Waiting::new().filter(|_| !notice.buttons.is_empty()) else {
+            return self.notify(notice.title, notice.body);
+        };
+        let (title, body, more, portable) = (notice.title.to_string(), notice.body.to_string(), notice.more.to_string(), self.portable());
+        let buttons: Vec<(String, String)> = notice.buttons.iter().map(|(id, label)| ((*id).to_string(), (*label).to_string())).collect();
+        let (id, wake, pressed) = (notice.id, wake.clone(), self.pressed.clone());
+        off_thread(std::thread::Builder::new().name("notify".into()), "notification", move || {
+            let _waiting = waiting;
+            let mut n = notification(&title, &body, portable);
+            for (id, label) in &buttons {
+                n.action(id, label);
+            }
+            // Several go under one button there, which says this.
+            #[cfg(target_os = "macos")]
+            notify_rust::NsNotificationExt::actions_label(&mut n, &more);
+            #[cfg(not(target_os = "macos"))]
+            let _ = more;
+            match n.show() {
+                Ok(shown) => shown.wait_for_action(|answer| {
+                    if let Some(button) = notices::button_of(answer, &buttons) {
+                        notices::press(&pressed, id, button);
+                        wake.request_repaint();
+                    }
+                }),
+                Err(e) => log::warn!("notification: {e}"),
+            }
+        });
+    }
+    fn notices_pressed(&mut self) -> Vec<(u64, String)> {
+        notices::take(&self.pressed)
+    }
+}
+
+/// A notification from MailCraft, made off the UI thread (Windows' app id may be registered the
+/// first time).
+fn notification(title: &str, body: &str, portable: bool) -> notify_rust::Notification {
+    let mut n = notify_rust::Notification::new();
+    n.summary(title).body(body).appname("MailCraft");
+    // Windows names a toast after its app id (PowerShell's when none is given). A portable copy
+    // writes nothing to the registry: it uses an installed MailCraft's.
+    #[cfg(windows)]
+    if (!portable && toast::registered()) || (portable && toast::installed()) {
+        n.app_id(toast::APP_ID);
+    }
+    #[cfg(not(windows))]
+    let _ = portable;
+    n
 }
 
 /// Windows' Fonts folder, in the Windows folder (`%WINDIR%`), which needn't be `C:\Windows`.

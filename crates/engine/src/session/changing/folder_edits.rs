@@ -298,17 +298,32 @@ impl Session {
             return Err(CmdError::Disabled("no message selected".into()));
         }
         let next = self.successor(&self.selection.clone());
+        let moved = self.move_messages(&sel, &target)?;
+        // All of it there already (Archive pressed in Archive): nothing moved, and the one open
+        // stays open (it gave way to the next all the same).
+        if moved == 0 {
+            return Ok(serde_json::json!({ "moved": 0 }));
+        }
+        self.after_removal(next);
+        Ok(serde_json::json!({ "moved": moved }))
+    }
+
+    /// Move `sel` to a folder of the same role in each message's account, or to an explicit
+    /// folder (those there already stay), each account's in one change and all of it undone at
+    /// once: how many moved.
+    pub(crate) fn move_messages(&mut self, sel: &[SharedSummary], target: &MoveTarget) -> Result<usize, CmdError> {
         let by_account = keys_by_account(sel.iter().map(|m| m.key.clone()));
         // A data file's import writes its account's lists (and goes on writing them).
         for a in by_account.keys() {
             self.import_holds(a)?;
         }
+        let ids: std::collections::HashMap<&MessageKey, &str> = sel.iter().map(|m| (&m.key, m.message_id.as_str())).collect();
         let mut moved = 0usize;
         // Each account's destination, checked for all of them before anything moves (the first
         // account's mail was moved, and the selection left on it, when the second's was refused).
         let mut plan: Vec<(String, String, Vec<MessageKey>)> = Vec::new();
         for (a, keys) in by_account {
-            let dest = match &target {
+            let dest = match target {
                 MoveTarget::Folder(f) => Some(f.clone()),
                 MoveTarget::Role(r) => self.account(&a).and_then(|acc| acc.folder(*r)).map(|f| f.path.clone()),
             };
@@ -331,10 +346,8 @@ impl Session {
                 moved += keys.len();
                 if !keys.is_empty() {
                     // Undo finds them again by Message-ID (those without one can't come back).
-                    let back: Vec<(String, String)> = keys
-                        .iter()
-                        .filter_map(|k| self.summary(k).filter(|m| !m.message_id.is_empty()).map(|m| (m.message_id.clone(), k.folder.clone())))
-                        .collect();
+                    let back: Vec<(String, String)> =
+                        keys.iter().filter_map(|k| ids.get(k).filter(|id| !id.is_empty()).map(|id| ((*id).to_string(), k.folder.clone()))).collect();
                     // One that didn't happen (a local store error) has nothing to undo, and the
                     // selection stays on it.
                     self.apply_op_checked(&a, Op::Move { keys, to: dest.clone() }).map_err(CmdError::Failed)?;
@@ -352,13 +365,7 @@ impl Session {
             self.remember(Undo::Move { moves });
         }
         done?;
-        // All of it there already (Archive pressed in Archive): nothing moved, and the one open
-        // stays open (it gave way to the next all the same).
-        if moved == 0 {
-            return Ok(serde_json::json!({ "moved": 0 }));
-        }
-        self.after_removal(next);
-        Ok(serde_json::json!({ "moved": moved }))
+        Ok(moved)
     }
 
     /// Delete permanently.

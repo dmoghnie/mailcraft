@@ -6,6 +6,7 @@ mod attachments;
 mod conversation_cards;
 mod conversation_sent;
 mod links;
+mod notices;
 mod people;
 mod pinned_header;
 mod plain_text;

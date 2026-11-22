@@ -294,6 +294,12 @@ pub struct UiState {
     pub(crate) tasks_query: String,
     /// Files: the search of their names, as typed (the Files view filters by it).
     pub(crate) files_query: String,
+    /// The new-mail notifications whose buttons are still answered: each one's id and the
+    /// messages it told of (the newest `NOTICES_KEPT`); the last id given.
+    pub(crate) notices: Vec<(u64, Vec<mailcraft_engine::model::MessageKey>)>,
+    pub(crate) notice_next: u64,
+    /// The message a notification's Reply answers, once it has come.
+    pub(crate) reply_due: Option<mailcraft_engine::model::MessageKey>,
     /// The month the To-Do Bar's date navigator shows (months since year 0), moved by its
     /// arrows; `None`: this month.
     pub(crate) todo_month: Option<i64>,

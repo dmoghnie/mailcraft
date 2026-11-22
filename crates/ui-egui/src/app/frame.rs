@@ -55,6 +55,7 @@ impl MailApp {
         // window draws no frame, and mail that came meanwhile was neither shown in the title
         // nor announced until the window was opened again (issue #68).
         self.pump();
+        self.notices_pressed(ctx);
         self.announce(ctx);
         self.flush_jobs();
     }
@@ -326,6 +327,7 @@ impl MailApp {
         let in_logic = self.ui.close_checked == Some(ctx.input(|i| i.time));
         if !in_logic {
             self.pump();
+            self.notices_pressed(&ctx);
         }
         self.show_finished_import();
         self.step_search(&ctx);

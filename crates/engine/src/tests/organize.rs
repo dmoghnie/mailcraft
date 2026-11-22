@@ -9,6 +9,7 @@ mod folder_order;
 mod inbox_groups;
 mod junk;
 mod many;
+mod notices;
 mod sent_rules;
 mod server_rules;
 mod sweep;

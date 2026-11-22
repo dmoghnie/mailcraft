@@ -40,6 +40,7 @@ pub(crate) use accounts::data_file_path;
 pub use accounts::{AgeUnit, ArchiveRule, AutoArchive, Compacting, Compaction, FolderArchive, IDLE_AFTER_S};
 pub use accounts::{Changes, ImportState, Imports, SignInCheck, TrustedCertificate};
 use changing::Batch;
+pub(crate) use changing::NoticeAct;
 use changing::keys_by_account;
 #[cfg(test)]
 pub(crate) use changing::{MOVED_IN_MAX, MovedIn};

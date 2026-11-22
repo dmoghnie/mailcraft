@@ -124,6 +124,20 @@ pub enum KeptOnClose {
     Minimized,
 }
 
+/// A new-mail notification with buttons ([`Services::notify_mail`]).
+#[derive(Clone, Copy, Debug)]
+pub struct MailNotice<'a> {
+    /// The notification's id: a button pressed comes back with it
+    /// ([`Services::notices_pressed`]).
+    pub id: u64,
+    pub title: &'a str,
+    pub body: &'a str,
+    /// Its buttons, in order: each an id and its label.
+    pub buttons: &'a [(&'a str, &'a str)],
+    /// What the button holding several is called, where the system puts them under one (macOS).
+    pub more: &'a str,
+}
+
 /// Platform services the UI needs.
 pub trait Services {
     /// Unix seconds and the local UTC offset in seconds.
@@ -165,6 +179,16 @@ pub trait Services {
     fn keep_update_for_later(&mut self) {}
     /// Show a desktop notification (new mail). The default does nothing.
     fn notify(&mut self, _title: &str, _body: &str) {}
+    /// Show a new-mail notification with buttons; `wake` is asked for a pass when one is
+    /// pressed (the window may be minimized or hidden). The default: one without buttons.
+    fn notify_mail(&mut self, _wake: &egui::Context, notice: &MailNotice<'_>) {
+        self.notify(notice.title, notice.body);
+    }
+    /// The buttons pressed on notifications since this was asked last: each notification's id
+    /// and the button's.
+    fn notices_pressed(&mut self) -> Vec<(u64, String)> {
+        Vec::new()
+    }
     /// Where an installed Craft app is (`pdfcraft`, `wordcraft`…), if it is.
     fn craft_app(&mut self, _command: &str) -> Option<PathBuf> {
         None
