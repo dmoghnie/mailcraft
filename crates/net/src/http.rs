@@ -302,6 +302,17 @@ pub fn get(url: &str, max: usize) -> Result<Response> {
     send(&Request::get(url, max))
 }
 
+/// Send a request whose answer may take up to `wait` to start, longer than a connection's usual
+/// [`stream::IO_TIMEOUT`] (a language model thinking before it answers). Redirects aren't
+/// followed: what it posts (a key, mail) goes to the address given alone.
+pub fn send_waiting(req: &Request, wait: std::time::Duration) -> Result<Response> {
+    use stream::Timeouts;
+    let url = Url::parse(&req.url)?;
+    let mut s = connect(&url, false)?;
+    s.set_read_timeout(Some(wait))?;
+    exchange(&mut s, req, &url)
+}
+
 /// A connection to `url`'s server: to the internet only when `public_only`
 /// ([`stream::tcp_public`]), and through TLS for `https`.
 fn connect(url: &Url, public_only: bool) -> Result<Stream> {

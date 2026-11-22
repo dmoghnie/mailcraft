@@ -135,6 +135,7 @@ pub fn registry() -> Registry {
     all.extend(data_files::commands());
     all.extend(signatures::commands());
     all.extend(templates::commands());
+    all.extend(crate::session::ai_commands());
     Registry::new(all)
 }
 

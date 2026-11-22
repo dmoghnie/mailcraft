@@ -188,6 +188,8 @@ pub struct Pool {
     order: changes::Order,
     /// The drafts being filed on the server, shared with every worker (`changes/filing.rs`).
     filing: Arc<changes::Filing>,
+    /// Questions waiting for a language model now (`ai.rs`).
+    asking: Arc<AtomicUsize>,
 }
 
 use changes::{DraftOrder, keep_draft};
@@ -246,6 +248,7 @@ impl Pool {
             compacts: compact::Compacts::default(),
             order: changes::Order::default(),
             filing,
+            asking: Arc::default(),
         }
     }
 
@@ -372,6 +375,7 @@ impl Pool {
 }
 
 mod account;
+mod ai;
 mod checking;
 mod credentials;
 mod data_files;

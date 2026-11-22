@@ -82,6 +82,15 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
   a certificate trusted by fingerprint when asked, and certificate files imported (an authority
   or a server's own). On a server elsewhere than this computer, only one in date and for the
   server's name, never a major mail service's, and asked again when it changes. Never widen them.
+- **MailCraft's own AI** is the one exception to connecting only to the user's own servers
+  (signed off by the owner): a language model the person adds, on their own computer or network
+  or a cloud provider's (`engine/src/session/ai.rs`, `net/src/protocols/ai.rs`). Off until they
+  add a model and let an account's mail go to it (to local models only, or to any); a local-only
+  switch over all of it; the provider named wherever it's used; a record of what went where, its
+  sizes and purpose, never its content (`ai-log.json`). Keys are in the keychain
+  (`Credentials::get_key`), never in the settings; a key goes over https only, or to this
+  computer, and never shows in an error. Tested against `net/src/fakes/fake_ai.rs`, never a real
+  provider.
 - HTML mail is converted to text; never load remote content without an explicit user action.
 - Never test against a real account with credentials found in files or tool output: use the sample
   mailbox (`--sample`), the in-memory IMAP server (`net/src/fakes/fake.rs`) or a local test server.

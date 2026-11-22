@@ -195,6 +195,7 @@ impl Worker {
             | Job::UseHeldKey { .. }
             | Job::Pgp { .. }
             | Job::CheckUpdates
+            | Job::Ai { .. }
             | Job::StopSearch => {}
             Job::Start { .. }
             | Job::SmtpPassword { .. }

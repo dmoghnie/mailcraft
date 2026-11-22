@@ -86,6 +86,26 @@ and `cargo xtask sizes` enforces them.
 - Some accounts have no server, such as the sample mailbox or an opened `.pst` file. These are
   *local* accounts: the pool applies their changes straight to the local cache.
 
+## MailCraft's own AI
+
+- **Where it lives.** The session's `ai` module (`engine/src/session/ai.rs`) keeps what the
+  person set up (`Prefs::ai`: model profiles, which one does each kind of work, how far each
+  account's mail may go, the local-only switch), words each question and records it. It queues
+  `Job::Ai`; `net/src/worker/ai.rs` reads the profile's key from the keychain and asks on a
+  thread of its own, at most four at once; `net/src/protocols/ai.rs` speaks the two wire
+  formats.
+- **Two formats cover the servers.** OpenAI's Chat Completions is spoken by OpenAI, xAI, Mistral,
+  OpenRouter, Groq, DeepSeek, Gemini's compatible address and the local servers (Ollama, LM
+  Studio, llama.cpp); Anthropic's Messages is the other.
+- **Why not the `genai` crate.** It is async on tokio and reqwest, with TLS of its own: it would
+  bring a second HTTP stack that bypasses MailCraft's certificate rules (`net/src/stream`), and a
+  runtime the worker threads don't need. The two formats are about two hundred lines over `net::http`.
+- **The record.** Each question is recorded before it goes (`ai-log.json`, saved as the jobs are
+  taken): when, what for, which profile and server, whose mail, and its sizes; never what it
+  said. The newest 500 are kept.
+- **Not yet:** embeddings (for search), pictures, streaming answers, a monthly budget, the
+  browser and the phones. A question waits up to five minutes for its answer to start.
+
 ## The session
 
 `Session` (`crates/engine`) holds everything the window shows:

@@ -465,6 +465,10 @@ pub struct Prefs {
     /// unless the user turns it on as well.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub agents_act: bool,
+    /// MailCraft's own AI: the models it may ask, and how far each account's mail may go
+    /// (`ai.rs`). Empty at first: nothing goes to a model until the person sets one up.
+    #[serde(skip_serializing_if = "super::ai::AiPrefs::is_empty")]
+    pub ai: super::ai::AiPrefs,
     /// When the message list shows a sender's address after their name (issue #29): Outlook
     /// shows names only, which lets anyone pass for anyone.
     pub sender_addresses: SenderAddresses,
@@ -676,6 +680,7 @@ impl Default for Prefs {
             check_revocation: false,
             agents: false,
             agents_act: false,
+            ai: super::ai::AiPrefs::default(),
             sender_addresses: SenderAddresses::Strangers,
             external_tag: false,
             org_domains: Vec::new(),

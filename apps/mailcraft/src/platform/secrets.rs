@@ -188,6 +188,12 @@ fn smtp_entry(a: &AccountConfig) -> String {
     format!("{}|smtp", a.id)
 }
 
+/// A language model's key, by its profile's name: `ai|` first, which no account's id starts
+/// with (they're `a1`, `a2`…).
+fn key_entry(name: &str) -> String {
+    format!("ai|{name}")
+}
+
 // Kept whatever their length (`secrets.rs`): a Microsoft 365 sign-in is longer than one Windows
 // Credential Manager entry holds (issue #5).
 impl Credentials for Keychain {
@@ -217,6 +223,15 @@ impl Credentials for Keychain {
     }
     fn delete_secret(&self, account: &AccountConfig, what: &str) {
         remove(SERVICE, &format!("{}|{what}", account.id));
+    }
+    fn get_key(&self, name: &str) -> Option<String> {
+        load(SERVICE, &key_entry(name))
+    }
+    fn set_key(&self, name: &str, key: &str) -> Result<(), String> {
+        store(SERVICE, &key_entry(name), key)
+    }
+    fn delete_key(&self, name: &str) {
+        remove(SERVICE, &key_entry(name));
     }
 }
 

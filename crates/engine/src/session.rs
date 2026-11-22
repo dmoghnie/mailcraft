@@ -21,6 +21,7 @@ use serde_json::Value;
 use crate::{CmdError, CmdResult, Registry};
 
 mod accounts;
+mod ai;
 mod changing;
 mod events;
 mod mailboxes;
@@ -39,6 +40,8 @@ pub(crate) use accounts::RuleChange;
 pub(crate) use accounts::data_file_path;
 pub use accounts::{AgeUnit, ArchiveRule, AutoArchive, Compacting, Compaction, FolderArchive, IDLE_AFTER_S};
 pub use accounts::{Changes, ImportState, Imports, SignInCheck, TrustedCertificate};
+pub(crate) use ai::ai_commands;
+pub use ai::{AI_LOG_KEPT, AiLogEntry, AiPrefs, AiProfile, AiReach, AiState, AiTask, AiTest};
 use changing::Batch;
 pub(crate) use changing::NoticeAct;
 use changing::keys_by_account;
@@ -500,6 +503,8 @@ pub struct Session {
     pub updates_stable_only: bool,
     /// File › About's update check.
     pub update: UpdateCheck,
+    /// MailCraft's own AI as it runs: questions waiting, tests, what went where (`ai.rs`).
+    pub ai: ai::AiState,
 }
 
 const NOTICE_MAX: usize = 50;
@@ -634,9 +639,11 @@ impl Session {
             build_sha: None,
             updates_stable_only: false,
             update: UpdateCheck::NotAsked,
+            ai: ai::AiState::default(),
         };
         if let Some(store) = s.store.clone() {
             s.templates = writing::KeptTemplates::load(&store);
+            s.load_ai_log();
             match store.load_doc(RULES_DOC) {
                 Ok(r) => s.rules = r,
                 Err(e) => {
@@ -726,8 +733,10 @@ impl Session {
         }
     }
 
-    /// Jobs for the network layer, oldest first.
+    /// Jobs for the network layer, oldest first. The record of what MailCraft's AI sent is
+    /// saved first, so a question is on it before it goes.
     pub fn take_jobs(&mut self) -> Vec<Job> {
+        self.save_ai_log();
         std::mem::take(&mut self.jobs)
     }
 

@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{AccountConfig, Flags, Folder, Identity, MessageKey, Summary};
 
+mod ai;
 mod compact;
 pub mod eta;
 mod import;
@@ -19,6 +20,7 @@ mod status;
 mod transfer;
 mod vacation;
 pub mod work;
+pub use ai::{AiAnswer, AiApi, AiChat, AiDone, AiEndpoint, AiRole, AiTurn, AiWork};
 pub use compact::*;
 pub use eta::Eta;
 pub use import::*;
@@ -184,6 +186,8 @@ pub enum Job {
     /// Ask where MailCraft is published for its recent releases (File › About › Check for
     /// updates); answered by [`Event::Releases`].
     CheckUpdates,
+    /// Ask a language model, or keep its key (MailCraft's own AI); answered by [`Event::Ai`].
+    Ai { work: AiWork },
     /// Ask the account's server which addresses its mail is sent from (issue #81: a JMAP
     /// server keeps them, as identities). Answered by [`Event::IdentitiesFound`].
     FindIdentities { account: String },
@@ -400,6 +404,7 @@ impl Job {
             | Job::WorkOffline { .. }
             | Job::SetSync { .. }
             | Job::CheckUpdates
+            | Job::Ai { .. }
             | Job::StopSearch
             | Job::CheckRevocation { .. }
             | Job::FindHeldKeys { .. } => "",
@@ -489,6 +494,10 @@ pub enum Event {
         account: String,
         op: Op,
         error: String,
+    },
+    /// What a language model answered, or a key kept ([`Job::Ai`]).
+    Ai {
+        done: AiDone,
     },
     /// MailCraft's recent releases (newest first), or why they couldn't be had.
     Releases {

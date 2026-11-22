@@ -1,12 +1,15 @@
 //! What a web server sends: an HTTP answer read whole and read as it streams (lengths, chunks, to
-//! the end of the connection), an event stream (JMAP push), a download's `Content-Range`; and
-//! what the updater reads from GitHub: the release list, a `SHA256SUMS.txt`, the quota header
-//! and release tags.
+//! the end of the connection), an event stream (JMAP push), a download's `Content-Range`; what
+//! the updater reads from GitHub: the release list, a `SHA256SUMS.txt`, the quota header and
+//! release tags; and a language model's reply, in OpenAI's and Anthropic's formats, whose errors
+//! never show the key.
 #![no_main]
 
 use std::io::{Read, Write};
 
 use libfuzzer_sys::fuzz_target;
+use mailcraft_model::AiApi;
+use mailcraft_net::ai;
 use mailcraft_net::http::{self, Request, Url};
 use mailcraft_net::stream::Timeouts;
 use mailcraft_net::updates;
@@ -42,13 +45,22 @@ impl Timeouts for Server<'_> {
     }
 }
 
+/// A model's key, which a reply may quote back.
+const KEY: &str = "sk-fuzz-key";
+
 fuzz_target!(|data: &[u8]| {
     let Ok(url) = Url::parse("https://github.com/ZIDAN44/mailcraft/releases/download/v1/m.msi") else { return };
     let req = Request::get(&url.path, 4096);
     // The step the bytes come in at, from the first byte: chunk sizes and lines split anywhere.
     let step = usize::from(data.first().copied().unwrap_or(1)).max(1);
     let body = data.get(1..).unwrap_or_default();
-    let _ = http::exchange(&mut Server { data: body, step }, &req, &url);
+    if let Ok(resp) = http::exchange(&mut Server { data: body, step }, &req, &url) {
+        for api in [AiApi::OpenAi, AiApi::Anthropic] {
+            if let Err(e) = ai::read_reply(api, &resp, Some(KEY)) {
+                assert!(!e.to_string().contains(KEY), "an error showed the key: {e}");
+            }
+        }
+    }
     let mut got = Vec::new();
     let _ = http::exchange_into(&mut Server { data: body, step }, &req, &url, |_| Ok(Some(&mut got)));
     assert!(got.len() <= 4096, "a body past the cap was written");

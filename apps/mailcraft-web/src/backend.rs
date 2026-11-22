@@ -443,6 +443,8 @@ const BROWSER_SMIME: &str = "smart cards and the system's keychain are used by t
 const BROWSER_REVOCATION: &str = "the browser can't ask a certificate's authority";
 /// OpenPGP keys of one's own are the desktop app's for now (docs/gaps.md).
 const BROWSER_PGP: &str = "your OpenPGP keys are used by the MailCraft desktop app, not in the browser";
+/// What MailCraft's own AI says in the browser, where it doesn't ask models yet.
+const BROWSER_AI: &str = "MailCraft's own AI works in the desktop app, not yet in the browser";
 
 /// OpenPGP work with the account's own keys: not in the browser (a draft is saved as it is).
 fn pgp(sh: &Rcs, id: &str, work: mailcraft_engine::model::PgpWork) {

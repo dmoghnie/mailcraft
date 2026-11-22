@@ -1,7 +1,7 @@
 //! An account's jobs, run in turn by its runner ([`super::run`]).
 
 use mailcraft_engine::model::job::Vacation;
-use mailcraft_engine::model::{Flags, MessageKey};
+use mailcraft_engine::model::{AiDone, AiWork, Flags, MessageKey};
 
 use super::*;
 
@@ -138,6 +138,7 @@ pub(super) async fn job(sh: &Rcs, id: &str, j: Job) {
             sh,
             Event::Identity { account: id.to_string(), chain: Vec::new(), older: Vec::new(), for_reading: false, error: Some(BROWSER_SMIME.into()) },
         ),
+        Job::Ai { work } => emit(sh, Event::Ai { done: browser_ai(work) }),
         Job::Start { .. }
         | Job::SmtpPassword { .. }
         | Job::DavPassword { .. }
@@ -165,6 +166,15 @@ pub(super) async fn job(sh: &Rcs, id: &str, j: Job) {
         | Job::SetSync { .. }
         | Job::Index { .. }
         | Job::StopIndex { .. } => {}
+    }
+}
+
+/// MailCraft's own AI isn't in the browser yet: each question, and each key to keep, is answered
+/// with why.
+fn browser_ai(work: AiWork) -> AiDone {
+    match work {
+        AiWork::Ask { id, .. } => AiDone::Answered { id, answer: None, error: Some(BROWSER_AI.into()) },
+        AiWork::SaveKey { name, .. } => AiDone::KeySaved { name, error: Some(BROWSER_AI.into()) },
     }
 }
 

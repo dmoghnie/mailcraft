@@ -1,6 +1,7 @@
 //! Mail and calendar protocols, each over a stream: IMAP, POP, SMTP, ManageSieve, JMAP, and
-//! CalDAV/CardDAV.
+//! CalDAV/CardDAV; and the language models MailCraft's own AI asks.
 
+pub mod ai;
 pub mod answering;
 pub mod dav;
 pub mod imap;

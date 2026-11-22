@@ -39,6 +39,7 @@ impl Pool {
             Job::Index { account, folders } => self.indexer.ask(&self.store, &self.sink, account, folders),
             Job::StopIndex { account } => self.indexer.stop(&account),
             Job::CheckUpdates => self.check_updates(),
+            Job::Ai { work } => self.ai(work),
             Job::SignIn { account } => self.sign_in(account),
             Job::AllowDirectory { account } => self.allow_directory(account),
             Job::Discover { email } => self.discover(email),
