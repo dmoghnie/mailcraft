@@ -92,15 +92,16 @@ impl MailApp {
                 ui.with_layout(bidi::row_from_start(Align::Center), |ui| {
                     let (r, _) = ui.allocate_exact_size(vec2(16.0, 16.0), Sense::hover());
                     icons::paint(ui.painter(), r, Icon::Search, t.dim);
-                    // In the Calendar, People, Tasks and Notes it searches those (as Outlook's box
-                    // searches where you are).
+                    // In the Calendar, People, Tasks, Notes and Files it searches those (as
+                    // Outlook's box searches where you are).
                     let module = self.session.module;
-                    if matches!(module, Module::Calendar | Module::People | Module::Tasks | Module::Notes) {
+                    if matches!(module, Module::Calendar | Module::People | Module::Tasks | Module::Notes | Module::Files) {
                         let focus = std::mem::take(&mut self.ui.focus_search);
                         let (query, hint) = match module {
                             Module::People => (&mut self.ui.people_query, tl!("Search people")),
                             Module::Calendar => (&mut self.ui.cal_search.query, tl!("Search calendar (location:, organizer:, after:…)")),
                             Module::Tasks => (&mut self.ui.tasks_query, tl!("Search tasks")),
+                            Module::Files => (&mut self.ui.files_query, tl!("Search files")),
                             _ => (&mut self.ui.notes_query, tl!("Search notes")),
                         };
                         // An id of its own, as the mail's (issue #158): the bar's tabs before it change.
@@ -118,8 +119,13 @@ impl MailApp {
                         if focus {
                             resp.request_focus();
                         }
-                        if !query.is_empty() && widgets::tiny_icon_button(ui, Icon::Close, "Clear search", &t).clicked() {
+                        let cleared = !query.is_empty() && widgets::tiny_icon_button(ui, Icon::Close, "Clear search", &t).clicked();
+                        if cleared {
                             query.clear();
+                        }
+                        // The files' names searched by the engine (an agent's search too).
+                        if module == Module::Files && (resp.changed() || cleared) {
+                            acts.push(Action::Run("files.filter", json!({"name": query.clone()})));
                         }
                         return;
                     }

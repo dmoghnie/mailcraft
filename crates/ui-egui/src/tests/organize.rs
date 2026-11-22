@@ -3,6 +3,7 @@
 use super::*;
 
 mod categories;
+mod files;
 mod folder_pane;
 mod inbox_groups;
 mod no_answer;

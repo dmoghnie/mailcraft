@@ -292,6 +292,8 @@ pub struct UiState {
     pub(crate) note_focus: bool,
     /// Tasks: the search, and the task picked (uid).
     pub(crate) tasks_query: String,
+    /// Files: the search of their names, as typed (the Files view filters by it).
+    pub(crate) files_query: String,
     /// The month the To-Do Bar's date navigator shows (months since year 0), moved by its
     /// arrows; `None`: this month.
     pub(crate) todo_month: Option<i64>,

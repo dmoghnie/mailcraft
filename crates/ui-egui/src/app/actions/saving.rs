@@ -245,6 +245,38 @@ impl MailApp {
         }
     }
 
+    /// A file the Files view lists, opened in another app or saved where asked; in the browser,
+    /// downloaded.
+    pub(super) fn mail_file(&mut self, key: &MessageKey, index: usize, name: &str, open: bool) {
+        let name = mailcraft_engine::mime::sanitize_filename(name);
+        if self.services.downloads() {
+            match self.session.file_bytes(key, index) {
+                Ok(b) => self.services.download(&name, &b),
+                Err(e) => self.session.notice(e.to_string(), true),
+            }
+            return;
+        }
+        let path = if open {
+            let Some(dir) = crate::scratch_dir("open") else {
+                self.session.notice(tl!("There's no folder to put the attachment in for another app"), true);
+                return;
+            };
+            dir.join(&name)
+        } else {
+            let Some(path) = self.services.save_path(&name) else { return };
+            path
+        };
+        match self.session.run("files.save", &json!({"key": key.to_id(), "index": index, "path": path.to_string_lossy(), "open": open})) {
+            Ok(_) if open => {
+                if let Err(e) = self.services.open_path(&path) {
+                    self.session.notice(tf!("{name} could not be opened: {error}", name = name, error = e), true);
+                }
+            }
+            Ok(_) => self.session.notice(tf!("Saved {path}", path = path.display()), false),
+            Err(e) => self.session.notice(e.to_string(), true),
+        }
+    }
+
     pub(crate) fn attachment_name(&self, i: usize) -> String {
         self.session
             .reading

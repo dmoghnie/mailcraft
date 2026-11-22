@@ -4,6 +4,7 @@
 
 pub mod backstage;
 pub(crate) mod calendar;
+pub(crate) mod files;
 pub(crate) mod list;
 pub(crate) mod nav;
 pub(crate) mod notes;

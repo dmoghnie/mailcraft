@@ -2126,3 +2126,16 @@ count	occurrences	次
 	Stack each sender's mail in one row	将每个发件人的邮件叠放为一行
 	In Transactions, Updates and Promotions	在交易、动态和推广中
 	Always move to a group	始终移到某个组
+	All files	所有文件
+	Documents	文档
+	PDFs	PDF 文件
+	Archives	压缩文件
+	Other files	其他文件
+	{n} files	{n} 个文件
+	Looking through your mail…	正在查看邮件…
+	From or to	发件人或收件人
+	No file matches.	没有匹配的文件。
+	No files: the files of the mail kept on this computer are listed here.	没有文件：此处列出这台电脑上保存的邮件中的文件。
+	To {name}	收件人：{name}
+	Go to the message	转到邮件
+	Search files	搜索文件

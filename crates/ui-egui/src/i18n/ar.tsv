@@ -2125,3 +2125,16 @@ count	occurrences	مرات
 	Stack each sender's mail in one row	تجميع بريد كل مرسل في صف واحد
 	In Transactions, Updates and Promotions	في المعاملات والتحديثات والعروض الترويجية
 	Always move to a group	النقل دائمًا إلى مجموعة
+	All files	كل الملفات
+	Documents	المستندات
+	PDFs	ملفات PDF
+	Archives	الملفات المضغوطة
+	Other files	ملفات أخرى
+	{n} files	{n} ملف
+	Looking through your mail…	جارٍ البحث في بريدك…
+	From or to	من أو إلى
+	No file matches.	لا يوجد ملف مطابق.
+	No files: the files of the mail kept on this computer are listed here.	لا توجد ملفات: تُعرض هنا ملفات البريد المحفوظ على هذا الكمبيوتر.
+	To {name}	إلى {name}
+	Go to the message	الانتقال إلى الرسالة
+	Search files	البحث في الملفات

@@ -2143,3 +2143,16 @@ count	occurrences	wystąpieniach
 	Stack each sender's mail in one row	Grupuj pocztę każdego nadawcy w jednym wierszu
 	In Transactions, Updates and Promotions	W Transakcjach, Aktualnościach i Ofertach
 	Always move to a group	Zawsze przenoś do grupy
+	All files	Wszystkie pliki
+	Documents	Dokumenty
+	PDFs	Pliki PDF
+	Archives	Archiwa
+	Other files	Inne pliki
+	{n} files	Pliki: {n}
+	Looking through your mail…	Przeglądanie poczty…
+	From or to	Od lub do
+	No file matches.	Brak pasujących plików.
+	No files: the files of the mail kept on this computer are listed here.	Brak plików: tu są wyświetlane pliki z poczty przechowywanej na tym komputerze.
+	To {name}	Do: {name}
+	Go to the message	Przejdź do wiadomości
+	Search files	Wyszukaj pliki

@@ -52,6 +52,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - Message templates: a message being written is kept as a template from More options › Templates (its text without the signature, and if chosen who it's to and its files), and goes into a new message from Home's New mail ▾ › From a template or into one being written at the cursor; File › Options › Mail lists them to rename or delete.
 - Swipe a message-list row sideways with two fingers on a trackpad: the row slides over what the swipe does, and let go far enough it archives the message (to the left) or marks it read or unread (to the right); File › Options › Mail sets each way (Archive, Delete, Mark as read or unread, Flag or unflag, or Nothing), mirrored in right-to-left languages.
 - The Focused Inbox can sort Other into Transactions, Updates and Promotions (File › Options › Mail), Focused becoming Primary: sorted on this computer from each message's sender, subject words (in English, German, French, Spanish, Italian, Portuguese and Dutch) and list headers; a sender moved with Always move to stays in that group, and each sender's mail can be stacked into one row.
+- A Files view, beside Mail, Calendar, People, Tasks and Notes: every file received or sent that this computer holds, newest first, across accounts. Filter by kind (pictures, documents, PDFs, archives), by person and by name; preview a file beside the list, open it, save it, or go to its message. Agents list them with `files.list`.
 
 ### Changed
 

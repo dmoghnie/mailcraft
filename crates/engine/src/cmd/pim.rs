@@ -7,18 +7,19 @@ use crate::session::pim::MAX_SECONDS;
 pub(super) fn commands() -> Vec<CommandSpec> {
     vec![
         // Calendar and People
-        CommandSpec::new("view.module", "Mail, Calendar, People, Tasks or Notes", "Navigation", |s, v| {
+        CommandSpec::new("view.module", "Mail, Calendar, People, Tasks, Notes or Files", "Navigation", |s, v| {
             let module = match p::req_str(v, "name")? {
                 "mail" => crate::Module::Mail,
                 "calendar" => crate::Module::Calendar,
                 "people" => crate::Module::People,
                 "notes" => crate::Module::Notes,
                 "tasks" => crate::Module::Tasks,
+                "files" => crate::Module::Files,
                 other => return Err(CmdError::Params(format!("unknown module `{other}`"))),
             };
             set_module(s, module)
         })
-        .params(r#"{"name": "mail"|"calendar"|"people"|"tasks"|"notes"}"#),
+        .params(r#"{"name": "mail"|"calendar"|"people"|"tasks"|"notes"|"files"}"#),
         // Outlook's keys for its modules: Ctrl+1 Mail, Ctrl+2 Calendar, Ctrl+3 People, Ctrl+5 Notes
         // (Ctrl+4, Tasks: `cmd/tasks.rs`).
         CommandSpec::new("view.mail", "Mail", "Navigation", |s, _| set_module(s, crate::Module::Mail)).key("Mod+1"),

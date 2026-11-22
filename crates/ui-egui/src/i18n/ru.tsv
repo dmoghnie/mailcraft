@@ -2143,3 +2143,16 @@ count	occurrences	повторений
 	Stack each sender's mail in one row	Собирать письма каждого отправителя в одну строку
 	In Transactions, Updates and Promotions	В транзакциях, новостях и промоакциях
 	Always move to a group	Всегда перемещать в группу
+	All files	Все файлы
+	Documents	Документы
+	PDFs	PDF-файлы
+	Archives	Архивы
+	Other files	Другие файлы
+	{n} files	Файлов: {n}
+	Looking through your mail…	Просмотр почты…
+	From or to	От кого или кому
+	No file matches.	Нет подходящих файлов.
+	No files: the files of the mail kept on this computer are listed here.	Файлов нет: здесь показываются файлы писем, хранящихся на этом компьютере.
+	To {name}	Кому: {name}
+	Go to the message	Перейти к письму
+	Search files	Поиск файлов

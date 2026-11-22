@@ -2,6 +2,7 @@
 
 use super::*;
 
+mod attached;
 mod categories;
 mod focused;
 mod folder_order;

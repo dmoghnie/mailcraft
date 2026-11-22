@@ -6,6 +6,7 @@ use mailcraft_model::{PINNED, is_keyword};
 
 use super::*;
 
+pub mod attached;
 pub mod categories;
 pub mod inbox_groups;
 pub mod junk;

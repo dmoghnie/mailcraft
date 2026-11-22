@@ -2125,3 +2125,16 @@ count	occurrences	פעמים
 	Stack each sender's mail in one row	ערום את הדואר של כל שולח בשורה אחת
 	In Transactions, Updates and Promotions	בעסקאות, בעדכונים ובמבצעים
 	Always move to a group	העבר תמיד לקבוצה
+	All files	כל הקבצים
+	Documents	מסמכים
+	PDFs	קובצי PDF
+	Archives	קבצים דחוסים
+	Other files	קבצים אחרים
+	{n} files	{n} קבצים
+	Looking through your mail…	עובר על הדואר שלך…
+	From or to	מאת או אל
+	No file matches.	אין קובץ תואם.
+	No files: the files of the mail kept on this computer are listed here.	אין קבצים: כאן מופיעים הקבצים של הדואר השמור במחשב הזה.
+	To {name}	אל {name}
+	Go to the message	מעבר להודעה
+	Search files	חפש קבצים

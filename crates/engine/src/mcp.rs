@@ -61,6 +61,8 @@ pub const READS: &[&str] = &[
     "contact.list",
     "contact.searchDirectory",
     "contacts.suggest",
+    "files.list",
+    "files.show",
     "folder.noAnswer",
     "folder.open",
     "folder.vip",

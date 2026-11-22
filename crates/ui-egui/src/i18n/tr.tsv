@@ -2130,3 +2130,16 @@ count	occurrences	kez
 	Stack each sender's mail in one row	Her gönderenin postalarını tek satırda topla
 	In Transactions, Updates and Promotions	İşlemler, Güncellemeler ve Promosyonlar'da
 	Always move to a group	Her zaman bir gruba taşı
+	All files	Tüm dosyalar
+	Documents	Belgeler
+	PDFs	PDF'ler
+	Archives	Arşiv dosyaları
+	Other files	Diğer dosyalar
+	{n} files	{n} dosya
+	Looking through your mail…	Postalarınız taranıyor…
+	From or to	Kimden veya kime
+	No file matches.	Eşleşen dosya yok.
+	No files: the files of the mail kept on this computer are listed here.	Dosya yok: Bu bilgisayarda tutulan postaların dosyaları burada listelenir.
+	To {name}	Kime: {name}
+	Go to the message	İletiye git
+	Search files	Dosyalarda ara

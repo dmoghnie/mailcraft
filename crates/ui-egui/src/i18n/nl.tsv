@@ -2125,3 +2125,16 @@ count	occurrences	keer
 	Stack each sender's mail in one row	E-mail van elke afzender in één rij stapelen
 	In Transactions, Updates and Promotions	In Transacties, Updates en Aanbiedingen
 	Always move to a group	Altijd naar een groep verplaatsen
+	All files	Alle bestanden
+	Documents	Documenten
+	PDFs	PDF's
+	Archives	Archieven
+	Other files	Andere bestanden
+	{n} files	{n} bestanden
+	Looking through your mail…	Je e-mail wordt doorzocht…
+	From or to	Van of aan
+	No file matches.	Geen bestand komt overeen.
+	No files: the files of the mail kept on this computer are listed here.	Geen bestanden: hier staan de bestanden van de e-mail die op deze computer is bewaard.
+	To {name}	Aan {name}
+	Go to the message	Naar het bericht
+	Search files	Bestanden zoeken

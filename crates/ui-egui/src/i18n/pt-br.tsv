@@ -2130,3 +2130,16 @@ count	occurrences	ocorrências
 	Stack each sender's mail in one row	Empilhar os e-mails de cada remetente em uma linha
 	In Transactions, Updates and Promotions	Em Transações, Atualizações e Promoções
 	Always move to a group	Sempre mover para um grupo
+	All files	Todos os arquivos
+	Documents	Documentos
+	PDFs	PDFs
+	Archives	Arquivos compactados
+	Other files	Outros arquivos
+	{n} files	{n} arquivos
+	Looking through your mail…	Verificando seus e-mails…
+	From or to	De ou para
+	No file matches.	Nenhum arquivo corresponde.
+	No files: the files of the mail kept on this computer are listed here.	Nenhum arquivo: aqui aparecem os arquivos dos e-mails guardados neste computador.
+	To {name}	Para {name}
+	Go to the message	Ir para a mensagem
+	Search files	Pesquisar arquivos

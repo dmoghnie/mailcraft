@@ -51,6 +51,16 @@ pub enum Action {
         index: usize,
         open: bool,
     },
+    /// A file the Files view lists, previewed beside it: its message shown in the reading pane,
+    /// the file in place of its text.
+    PreviewFile(MessageKey, usize),
+    /// A file the Files view lists: opened in another app, or saved where asked.
+    MailFile {
+        key: MessageKey,
+        index: usize,
+        name: String,
+        open: bool,
+    },
     /// Search every folder for this (shown in the box, with the Search tab).
     Search(String),
     SetDark(Option<bool>),
@@ -229,6 +239,7 @@ impl MailApp {
             Module::People => tl!("People").to_string(),
             Module::Tasks => tl!("Tasks").to_string(),
             Module::Notes => tl!("Notes").to_string(),
+            Module::Files => tl!("Files").to_string(),
         };
         let base = tl!(&self.ui.title_base).to_string();
         let title = if self.session.view == mailcraft_engine::View::Empty {
@@ -335,6 +346,12 @@ impl MailApp {
             Action::OpenInCraft(i, cmd) => self.open_in_craft(i, cmd),
             Action::DragOut(v) => self.drag_out(v),
             Action::NoteFile { uid, index, open } => self.note_file(&uid, index, open),
+            Action::PreviewFile(key, index) => {
+                if self.answer("files.show", json!({"key": key.to_id(), "index": index})).is_some() {
+                    self.ui.attachment_view = Some((key, index));
+                }
+            }
+            Action::MailFile { key, index, name, open } => self.mail_file(&key, index, &name, open),
             // Into the message being written or the signature being edited (`actions/inserting.rs`).
             Action::EditSignature { account, insert } => {
                 self.ui.dialog = Some(Dialog::Signature(Box::new(dialogs::SignatureForm::new(&self.session, &account, insert))));

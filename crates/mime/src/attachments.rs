@@ -116,6 +116,29 @@ pub(super) fn has_real_attachments(m: &Message<'_>) -> bool {
     })
 }
 
+/// A message's files as the Files view lists them, read without its text laid out: the ones
+/// the paperclip counts ([`carries_file`]: not a picture the text shows, nor S/MIME's own part;
+/// a `winmail.dat` as the files in it), each named and numbered as the reading pane has it (the
+/// `index` [`attachment_data`] takes).
+pub fn message_files(raw: &[u8]) -> Vec<AttachmentInfo> {
+    let raw = &*readable_headers(raw);
+    let Some(m) = MessageParser::default().parse(raw) else { return Vec::new() };
+    let html = || m.html_body().filter(|p| matches!(p.kind(), PartKind::Html)).filter_map(|p| p.text()).collect::<Vec<_>>().join("\n");
+    let refs = HtmlRefs::new(&html);
+    let (files, _) = attached(&m);
+    files
+        .into_iter()
+        .filter(|a| match &a.part {
+            Some(p) => {
+                !smime::is_smime_part(&a.info.mime, p.attachment_name().unwrap_or_default())
+                    && !may_be_shown(*p).is_some_and(|(cid, location)| refs.shows(cid, location))
+            }
+            None => !a.info.inline,
+        })
+        .map(|a| a.info)
+        .collect()
+}
+
 /// For each file in a `winmail.dat`, whether it's a picture in its body: one Outlook hid, or
 /// one the body shows by `cid:`.
 pub(crate) fn tnef_inline(t: &crate::Tnef) -> Vec<bool> {

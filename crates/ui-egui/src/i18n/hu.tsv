@@ -2130,3 +2130,16 @@ count	occurrences	előfordulás
 	Stack each sender's mail in one row	Az egyes feladók leveleinek egy sorba gyűjtése
 	In Transactions, Updates and Promotions	A Tranzakciók, Frissítések és Ajánlatok között
 	Always move to a group	Mindig egy csoportba kerüljön
+	All files	Minden fájl
+	Documents	Dokumentumok
+	PDFs	PDF-fájlok
+	Archives	Tömörített fájlok
+	Other files	Egyéb fájlok
+	{n} files	{n} fájl
+	Looking through your mail…	A levelek átnézése…
+	From or to	Feladó vagy címzett
+	No file matches.	Nincs egyező fájl.
+	No files: the files of the mail kept on this computer are listed here.	Nincsenek fájlok: itt a számítógépen tárolt levelek fájljai jelennek meg.
+	To {name}	Címzett: {name}
+	Go to the message	Ugrás az üzenethez
+	Search files	Keresés a fájlokban

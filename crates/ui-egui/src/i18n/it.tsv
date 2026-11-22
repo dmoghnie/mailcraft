@@ -2129,3 +2129,16 @@ count	occurrences	ripetizioni
 	Stack each sender's mail in one row	Raggruppa la posta di ogni mittente in una riga
 	In Transactions, Updates and Promotions	In Transazioni, Aggiornamenti e Promozioni
 	Always move to a group	Sposta sempre in un gruppo
+	All files	Tutti i file
+	Documents	Documenti
+	PDFs	PDF
+	Archives	Archivi compressi
+	Other files	Altri file
+	{n} files	{n} file
+	Looking through your mail…	Ricerca nella posta…
+	From or to	Da o a
+	No file matches.	Nessun file corrisponde.
+	No files: the files of the mail kept on this computer are listed here.	Nessun file: qui sono elencati i file della posta conservata su questo computer.
+	To {name}	A {name}
+	Go to the message	Vai al messaggio
+	Search files	Cerca nei file

@@ -2129,3 +2129,16 @@ count	occurrences	次
 	Stack each sender's mail in one row	將每位寄件者的郵件疊成一列
 	In Transactions, Updates and Promotions	在交易、動態和促銷中
 	Always move to a group	一律移至群組
+	All files	所有檔案
+	Documents	文件
+	PDFs	PDF 檔案
+	Archives	壓縮檔
+	Other files	其他檔案
+	{n} files	{n} 個檔案
+	Looking through your mail…	正在查看郵件…
+	From or to	寄件者或收件者
+	No file matches.	沒有符合的檔案。
+	No files: the files of the mail kept on this computer are listed here.	沒有檔案：此處會列出這部電腦上保存的郵件中的檔案。
+	To {name}	收件者：{name}
+	Go to the message	移至郵件
+	Search files	搜尋檔案

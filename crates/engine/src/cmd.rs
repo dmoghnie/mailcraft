@@ -89,11 +89,16 @@ fn set_module(s: &mut Session, module: crate::Module) -> CmdResult {
     if module != crate::Module::Mail && s.search.is_some() && s.open_search_folder_name().is_none() {
         s.run_search("", crate::SearchScope::All);
     }
+    // The Files view read again as it opens: the mail kept here changes while it's away.
+    if module == crate::Module::Files && s.module != module {
+        s.files_restart();
+    }
     s.module = module;
     Ok(json!({"module": s.module}))
 }
 
 mod accounts;
+mod attached;
 mod compose;
 pub use compose::insert_picture_at;
 mod data_files;
@@ -123,6 +128,7 @@ pub fn registry() -> Registry {
     all.extend(tasks::commands());
     all.extend(meetings::commands());
     all.extend(files::commands());
+    all.extend(attached::commands());
     all.extend(security::commands());
     all.extend(pgp::commands());
     all.extend(accounts::commands());

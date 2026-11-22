@@ -2130,3 +2130,16 @@ count	occurrences	Terminen
 	Stack each sender's mail in one row	Nachrichten jedes Absenders in einer Zeile stapeln
 	In Transactions, Updates and Promotions	In Transaktionen, Neuigkeiten und Werbung
 	Always move to a group	Immer in eine Gruppe verschieben
+	All files	Alle Dateien
+	Documents	Dokumente
+	PDFs	PDFs
+	Archives	Archive
+	Other files	Andere Dateien
+	{n} files	{n} Dateien
+	Looking through your mail…	Ihre E-Mails werden durchgesehen…
+	From or to	Von oder an
+	No file matches.	Keine Datei passt.
+	No files: the files of the mail kept on this computer are listed here.	Keine Dateien: Hier stehen die Dateien der E-Mails, die auf diesem Computer gespeichert sind.
+	To {name}	An {name}
+	Go to the message	Zur Nachricht
+	Search files	Dateien durchsuchen

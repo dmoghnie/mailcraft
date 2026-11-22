@@ -2144,3 +2144,16 @@ count	occurrences	opakovaní
 	Stack each sender's mail in one row	Zoskupiť poštu každého odosielateľa do jedného riadka
 	In Transactions, Updates and Promotions	V Transakciách, Novinkách a Akciách a ponukách
 	Always move to a group	Vždy presúvať do skupiny
+	All files	Všetky súbory
+	Documents	Dokumenty
+	PDFs	Súbory PDF
+	Archives	Archívy
+	Other files	Ostatné súbory
+	{n} files	Súbory: {n}
+	Looking through your mail…	Prezerá sa pošta…
+	From or to	Od alebo komu
+	No file matches.	Žiadny súbor nezodpovedá.
+	No files: the files of the mail kept on this computer are listed here.	Žiadne súbory: tu sa zobrazujú súbory z pošty uloženej v tomto počítači.
+	To {name}	Komu: {name}
+	Go to the message	Prejsť na správu
+	Search files	Hľadať v súboroch

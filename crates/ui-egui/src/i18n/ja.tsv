@@ -2126,3 +2126,16 @@ count	occurrences	回
 	Stack each sender's mail in one row	差出人ごとのメールを 1 行にまとめる
 	In Transactions, Updates and Promotions	取引、新着情報、プロモーションで
 	Always move to a group	常にグループへ移動
+	All files	すべてのファイル
+	Documents	ドキュメント
+	PDFs	PDF
+	Archives	圧縮ファイル
+	Other files	その他のファイル
+	{n} files	{n} 個のファイル
+	Looking through your mail…	メールを確認しています…
+	From or to	差出人または宛先
+	No file matches.	一致するファイルはありません。
+	No files: the files of the mail kept on this computer are listed here.	ファイルはありません。このコンピューターに保存されたメールのファイルがここに表示されます。
+	To {name}	宛先: {name}
+	Go to the message	メッセージへ移動
+	Search files	ファイルを検索

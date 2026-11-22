@@ -27,6 +27,7 @@ impl MailApp {
             Module::Calendar => calendar_views(ui, s, t, acts),
             Module::Tasks => tasks_arrangement(ui, s, t, acts),
             Module::Notes => notes_arrangement(ui, s, t, acts),
+            Module::Files => {}
             _ => people_views(ui, &mut self.ui, t),
         }
         widgets::group_sep(ui, &t);
@@ -95,6 +96,33 @@ impl MailApp {
         });
         widgets::group_sep(ui, &t);
         notes_arrangement(ui, s, t, acts);
+    }
+
+    /// Files': the file previewed opened, saved, or its message gone to.
+    pub(super) fn ribbon_files(&mut self, ui: &mut Ui, acts: &mut Vec<Action>) {
+        let t = self.ui.tokens;
+        let previewed = self.ui.attachment_view.clone();
+        let name = previewed
+            .as_ref()
+            .and_then(|(k, i)| self.session.files_shown().into_iter().find(|f| f.key == *k && f.index == *i).map(|f| f.name.clone()));
+        let on = name.is_some();
+        let file = |open: bool| previewed.clone().zip(name.clone()).map(|((key, index), name)| Action::MailFile { key, index, name, open });
+        if widgets::tool_button(ui, Icon::File, "Open", &t, on).clicked()
+            && let Some(a) = file(true)
+        {
+            acts.push(a);
+        }
+        if widgets::tool_button(ui, Icon::Move, "Save As…", &t, on).clicked()
+            && let Some(a) = file(false)
+        {
+            acts.push(a);
+        }
+        widgets::group_sep(ui, &t);
+        if widgets::tool_button(ui, Icon::Inbox, "Go to the message", &t, on).clicked()
+            && let Some((key, index)) = &previewed
+        {
+            acts.push(Action::Run("files.goTo", json!({"key": key.to_id(), "index": index})));
+        }
     }
 
     /// People's: New contact, the one picked edited or deleted, and how they're shown.

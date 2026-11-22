@@ -2129,3 +2129,16 @@ count	occurrences	회
 	Stack each sender's mail in one row	보낸 사람별 메일을 한 행으로 묶기
 	In Transactions, Updates and Promotions	거래, 업데이트, 프로모션에서
 	Always move to a group	항상 그룹으로 이동
+	All files	모든 파일
+	Documents	문서
+	PDFs	PDF
+	Archives	압축 파일
+	Other files	기타 파일
+	{n} files	파일 {n}개
+	Looking through your mail…	메일을 살펴보는 중…
+	From or to	보낸 사람 또는 받는 사람
+	No file matches.	일치하는 파일이 없습니다.
+	No files: the files of the mail kept on this computer are listed here.	파일이 없습니다. 이 컴퓨터에 보관된 메일의 파일이 여기에 표시됩니다.
+	To {name}	받는 사람: {name}
+	Go to the message	메시지로 이동
+	Search files	파일 검색

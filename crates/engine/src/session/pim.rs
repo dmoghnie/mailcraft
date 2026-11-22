@@ -48,6 +48,8 @@ pub enum Module {
     Notes,
     /// Outlook's Tasks.
     Tasks,
+    /// Every file mail brought or took (`organize/attached.rs`).
+    Files,
 }
 
 /// How much of the calendar is shown.

@@ -18,6 +18,30 @@ const LIST_LEAST: f32 = 280.0;
 const READING_LEAST: f32 = 300.0;
 
 impl MailApp {
+    /// The Files view: its list, and beside it the file previewed (in the reading pane, its
+    /// message shown), as the reading pane is beside the mail.
+    fn files_panes(&mut self, ui: &mut Ui, list_frame: egui::Frame, acts: &mut Vec<Action>) {
+        let t = self.ui.tokens;
+        let previewing = self.ui.attachment_view.as_ref().is_some_and(|(k, _)| self.session.reading.as_ref().is_some_and(|r| r.key == *k));
+        if !previewing {
+            let main = egui::CentralPanel::default().frame(list_frame).show(ui, |ui| files::show(&self.session, &mut self.ui, ui, acts));
+            self.ui.panes.push((Pane::List, main.response.rect));
+            return;
+        }
+        let start = if i18n::current().rtl() { egui::Panel::right("files-list") } else { egui::Panel::left("files-list") };
+        let most = (ui.available_width() - READING_LEAST).clamp(LIST_LEAST, 720.0);
+        let list = start
+            .resizable(true)
+            .default_size(self.ui.pane_sizes.list.unwrap_or(420.0))
+            .size_range(LIST_LEAST..=most)
+            .frame(list_frame)
+            .show(ui, |ui| files::show(&self.session, &mut self.ui, ui, acts));
+        let reading = egui::CentralPanel::default().frame(egui::Frame::new().fill(t.surface)).show(ui, |ui| {
+            reading::show(&mut self.session, &mut self.ui, ui, acts);
+        });
+        self.ui.panes.extend([(Pane::List, list.response.rect), (Pane::Reading, reading.response.rect)]);
+    }
+
     /// Every frame, the window minimized or hidden too: eframe runs only `logic` then, and closes
     /// the window unless `logic` cancels, so the close is decided here, not in `ui` alone (craft-libs'
     /// quit crate found this: a close from the taskbar lost the messages being written).
@@ -522,6 +546,7 @@ impl MailApp {
                     Module::People => people::nav(&self.session, &mut self.ui, ui, acts),
                     Module::Tasks => tasks::nav(&self.session, &mut self.ui, ui, acts),
                     Module::Notes => notes::nav(&self.session, &mut self.ui, ui, acts),
+                    Module::Files => files::nav(&self.session, &mut self.ui, ui, acts),
                 }
             });
             self.ui.panes.push((Pane::Folders, nav.response.rect));
@@ -546,9 +571,10 @@ impl MailApp {
                 Module::People => Some(people::show),
                 Module::Tasks => Some(tasks::show),
                 Module::Notes => Some(notes::show),
-                Module::Mail => None,
+                Module::Mail | Module::Files => None,
             };
             match (other, pane) {
+                _ if module == Module::Files => self.files_panes(ui, list_frame, acts),
                 (Some(show), _) => {
                     let main = egui::CentralPanel::default().frame(egui::Frame::new().fill(t.surface)).show(ui, |ui| {
                         show(&self.session, &mut self.ui, ui, acts);
@@ -679,6 +705,10 @@ impl MailApp {
             // Flagged mail's (gap 9) are found in every folder's flagged mail, read a folder a
             // frame as the To-Do Bar reads it, when there may be some.
             if self.session.mail_reminders_wanted() && self.session.todo_step() {
+                ctx.request_repaint();
+            }
+            // The Files view's files, read a step a frame while it's open.
+            if self.session.module == Module::Files && self.session.files_step() {
                 ctx.request_repaint();
             }
             for r in reminders::refresh(&mut self.ui.reminders, &self.session, false) {

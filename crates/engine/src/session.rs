@@ -63,7 +63,7 @@ pub(crate) use mailboxes::arrange_list;
 pub use mailboxes::{ARRANGE_HEADINGS, Arrange, ListFilter, PINNED_HEADING, Row};
 // Organizing mail's own parts, named here as before.
 pub use opening::SenderMarks;
-pub use organize::{junk, quick_steps, search_folders, server_rules, sweep, vips};
+pub use organize::{attached, junk, quick_steps, search_folders, server_rules, sweep, vips};
 pub use prefs::{
     ACCENTS, CtrlEnter, DICTIONARY_MAX, FolderDensity, HOME_BUTTONS, InboxGroup, NotesOrder, Prefs, RIBBON_ADDED_MOST, RIBBON_MOST, RIBBON_ROW,
     ReadInPane, ReadingPane, SenderAddresses, StartIn, SwipeAction, accent_code, accent_rgb, dictionary_word,
@@ -455,6 +455,8 @@ pub struct Session {
     pub(crate) pim_unread: HashSet<String>,
     /// The flagged mail of every folder, for the To-Do Bar's task list.
     pub(crate) todo: pim::TodoMail,
+    /// The Files view's files, and what it shows of them.
+    pub files: attached::FilesBook,
     /// Colleagues' free/busy times, asked for while the calendar shows them (issue #140).
     pub(crate) free_busy: pim::FreeBusyKept,
     /// The documents (`rules.json`, `snoozes.json`, `pending-marks.json`) that couldn't be read
@@ -608,6 +610,7 @@ impl Session {
             pim: HashMap::new(),
             pim_unread: HashSet::new(),
             todo: pim::TodoMail::default(),
+            files: attached::FilesBook::default(),
             free_busy: Default::default(),
             docs_unread: HashSet::new(),
             module: pim::Module::Mail,

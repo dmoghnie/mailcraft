@@ -123,6 +123,7 @@ impl MailApp {
                     (Module::Calendar, _) => self.ribbon_calendar(ui, acts),
                     (Module::Tasks, _) => self.ribbon_tasks(ui, acts),
                     (Module::Notes, _) => self.ribbon_notes(ui, acts),
+                    (Module::Files, _) => self.ribbon_files(ui, acts),
                     _ => self.ribbon_people(ui, acts),
                 }
             });
@@ -240,13 +241,14 @@ pub(crate) const RIBBON_H: f32 = 30.0;
 /// The classic ribbon's: its tabs, then big buttons with the groups' names under them.
 pub(crate) const RIBBON_H_CLASSIC: f32 = widgets::CLASSIC_BUTTON_H + widgets::CLASSIC_CAPTION_H;
 
-/// The modules (Mail, Calendar, People, Tasks, Notes), as Outlook orders them.
-const MODULES: [(Module, Icon, &str, &str); 5] = [
+/// The modules (Mail, Calendar, People, Tasks, Notes, as Outlook orders them), and Files.
+const MODULES: [(Module, Icon, &str, &str); 6] = [
     (Module::Mail, Icon::Unread, "Mail", "mail"),
     (Module::Calendar, Icon::Calendar, "Calendar", "calendar"),
     (Module::People, Icon::People, "People", "people"),
     (Module::Tasks, Icon::Task, "Tasks", "tasks"),
     (Module::Notes, Icon::Note, "Notes", "notes"),
+    (Module::Files, Icon::Attach, "Files", "files"),
 ];
 
 /// Mail, Calendar, People, Tasks and Notes, at the bottom of the side pane: narrower buttons
