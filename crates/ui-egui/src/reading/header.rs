@@ -269,6 +269,11 @@ fn more_items(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut V
         acts.push(Action::Run("mail.forwardAsAttachment", json!({})));
         ui.close();
     }
+    // One the user sent, as a new message with the same recipients, text and files.
+    if s.sent_by_me(&r.key) && ui.button(tl!("Send again")).clicked() {
+        acts.push(Action::Run("mail.sendAgain", json!({"key": r.key.to_id()})));
+        ui.close();
+    }
     if ui.button(tl!("View message source")).clicked() {
         acts.push(Action::Run("message.source", json!({"key": r.key.to_id()})));
         ui.close();

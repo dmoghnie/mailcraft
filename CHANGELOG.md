@@ -39,6 +39,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - AI agents can drive MailCraft through MCP: an agent's app starts `mailcraft mcp`, which reaches the running window and offers two tools, list_commands and run_command, for every command the window has. It's off until you turn on File › Options › Safety › Let AI agents control MailCraft, and an agent then only reads and searches until **Let AI agents send, delete and change settings** is on too ([docs/mcp.md](docs/mcp.md)).
 - Adding an account: a JMAP server the domain names in DNS (its `_jmap._tcp` record, as Fastmail publishes) is found. The dialog says "It offers JMAP too" with Use JMAP, and picks JMAP when it's the only server named; `mailcraft-cli add` says so too.
 - Sending asks first when the text you wrote says a file is attached and none is, with **Attach a file** beside **Send anyway**: the word in the original under a reply, or in the signature, doesn't count, and it's found in each of MailCraft's languages.
+- **Send again** in a sent message's More menu (Reading pane): it opens as a new message with the same recipients, subject, text and files, to change or send as it is.
 
 ### Changed
 

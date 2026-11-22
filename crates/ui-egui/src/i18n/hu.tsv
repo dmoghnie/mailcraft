@@ -2005,3 +2005,4 @@ count	occurrences	előfordulás
 	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	Enélkül egy ügynök csak olvashatja és keresheti a leveleidet. Bekapcsolva bármilyen parancsot futtathat: küldhet, válaszolhat, törölhet, áthelyezhet és módosíthatja a beállításokat. Csak olyan ügynökhöz kapcsold be, amelyben megbízol
 	The message says a file is attached, but none is.	Az üzenet szerint csatolva van egy fájl, de nincs csatolva semmi.
 	Attach a file	Fájl csatolása
+	Send again	Küldés újra

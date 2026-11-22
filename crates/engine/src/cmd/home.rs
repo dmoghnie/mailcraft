@@ -82,6 +82,10 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         CommandSpec::new("mail.replyAll", "Reply all", "Home › Respond", |s, _| s.reply_compose(ReplyMode::ReplyAll)).key("Mod+Shift+R").when(has_reading),
         CommandSpec::new("mail.forward", "Forward", "Home › Respond", |s, _| s.reply_compose(ReplyMode::Forward)).key("Mod+F").when(has_reading),
         CommandSpec::new("mail.forwardAsAttachment", "Forward as attachment", "Reading pane › More", |s, _| s.forward_as_attachment()).when(has_reading),
+        // A message the user sent, as a new one to change or send again as it is.
+        CommandSpec::new("mail.sendAgain", "Send again", "Reading pane › More", |s, v| s.send_again(parse_key(v)))
+            .params(r#"{"key"?: string (a message you sent; default: the one shown)}"#)
+            .when(has_reading),
         // A reaction (issue #39, RFC 9078): an emoji to the sender and everyone else it went to.
         CommandSpec::new("mail.react", "React", "Reading pane › Reactions", |s, v| s.react(parse_key(v), p::req_str(v, "emoji")?))
             .params(r#"{"emoji": string (👍 ❤️ 🎉 😆 😮 😢, or other emoji), "key"?: string (the message shown)}"#)

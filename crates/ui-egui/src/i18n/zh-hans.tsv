@@ -2001,3 +2001,4 @@ count	occurrences	次
 	Still reading {n} messages…	仍在读取 {n} 封邮件…
 	The message says a file is attached, but none is.	邮件中提到附有文件，但没有附加任何文件。
 	Attach a file	附加文件
+	Send again	再次发送
