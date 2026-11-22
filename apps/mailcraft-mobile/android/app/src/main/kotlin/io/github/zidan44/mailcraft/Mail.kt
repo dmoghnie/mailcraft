@@ -22,6 +22,8 @@ data class View(
     val compose: Compose? = null,
     val searching: String? = null,
     val adding: Boolean = false,
+    val addingStep: String? = null,
+    val canAddAnyway: Boolean = false,
     val notice: String? = null,
 )
 
@@ -61,6 +63,8 @@ fun parseView(o: JSONObject): View = View(
     },
     searching = o.textOrNull("searching"),
     adding = o.optBoolean("adding"),
+    addingStep = o.textOrNull("addingStep"),
+    canAddAnyway = o.optBoolean("canAddAnyway"),
     notice = o.textOrNull("notice"),
 )
 

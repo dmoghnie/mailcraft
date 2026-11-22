@@ -122,7 +122,19 @@ fun AddAccountScreen(mail: Mail, snack: SnackbarHostState) {
                 },
                 enabled = !busy && email.isNotBlank() && password.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            ) { Text(if (busy) "Looking up the servers…" else "Add") }
+            ) {
+                Text(
+                    when (mail.view.addingStep) {
+                        "lookingUp" -> "Looking up the servers…"
+                        "checking" -> "Checking the sign-in…"
+                        else -> "Add"
+                    }
+                )
+            }
+            // The servers refused the sign-in (said above it): the person may still add it.
+            if (mail.view.canAddAnyway) {
+                TextButton(onClick = { mail.act("addAnyway") }, modifier = Modifier.fillMaxWidth()) { Text("Add anyway") }
+            }
         }
     }
 }

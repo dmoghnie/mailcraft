@@ -78,6 +78,8 @@ pub enum Action {
         imap: Option<String>,
         smtp: Option<String>,
     },
+    /// The account whose sign-in the servers refused, added all the same.
+    AddAnyway,
     RemoveAccount {
         account: String,
     },
@@ -290,6 +292,7 @@ fn act(model: &mut Model, a: Action) {
             model.place.screen = Screen::AddAccount;
         }
         Action::AddAccount { email, password, name, imap, smtp } => adding::start(model, adding::Form { email, password, name, imap, smtp }),
+        Action::AddAnyway => adding::add_anyway(model),
         Action::RemoveAccount { account } => {
             if run(model, "account.remove", json!({"account": account})).is_some() {
                 model.place = Place::default();

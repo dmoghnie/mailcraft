@@ -248,7 +248,7 @@ struct AddAccountView: View {
                 TextField("Incoming (IMAP) host:port", text: $imap).textInputAutocapitalization(.never)
                 TextField("Outgoing (SMTP) host:port", text: $smtp).textInputAutocapitalization(.never)
             }
-            if mail.view.adding { ProgressView("Looking up the servers…") }
+            if mail.view.adding { ProgressView(mail.view.addingStep == "checking" ? "Checking the sign-in…" : "Looking up the servers…") }
             Button("Add") {
                 mail.act("addAccount", [
                     "email": email.trimmingCharacters(in: .whitespaces), "password": password,
@@ -257,6 +257,8 @@ struct AddAccountView: View {
                 ])
             }
             .disabled(mail.view.adding || email.isEmpty || password.isEmpty)
+            // The servers refused the sign-in (said in the alert): the person may still add it.
+            if mail.view.canAddAnyway { Button("Add anyway") { mail.act("addAnyway") } }
         }
         .navigationTitle("Add account")
     }

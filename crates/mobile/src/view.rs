@@ -34,8 +34,12 @@ pub struct ViewModel {
     pub message: Option<Value>,
     pub compose: Option<ComposeView>,
     pub searching: Option<String>,
-    /// An add-account lookup under way.
+    /// An add-account lookup or sign-in check under way.
     pub adding: bool,
+    /// Which: `lookingUp` (the servers) or `checking` (the sign-in).
+    pub adding_step: Option<String>,
+    /// The servers refused the sign-in: Add anyway is offered.
+    pub can_add_anyway: bool,
     /// What went wrong last, or what the engine said (a sync that failed, a message held).
     pub notice: Option<String>,
 }
@@ -95,7 +99,9 @@ pub(crate) fn view(model: &Model) -> ViewModel {
         message: model.reading.is_object().then(|| model.reading.clone()),
         compose,
         searching: model.query.clone(),
-        adding: model.adding.busy(),
+        adding: model.adding.step().is_some(),
+        adding_step: model.adding.step().map(str::to_string),
+        can_add_anyway: model.adding.refused(),
         notice: model.problem.clone().or(engine),
     }
 }

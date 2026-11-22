@@ -98,20 +98,71 @@ fn a_reply_is_written_and_back_keeps_it_in_drafts() {
     assert!(v.compose.is_none());
 }
 
+/// The check job an action asked for: its id.
+fn check_id(effects: Vec<Effect>) -> u64 {
+    jobs(effects).iter().find_map(|j| if let Job::CheckSignIn { id, .. } = j { Some(*id) } else { None }).expect("a sign-in check")
+}
+
+const ZOE: &str =
+    r#"{"type":"addAccount","email":"zoe@example.org","password":"pw-not-shown","imap":"mail.example.org:993","smtp":"mail.example.org:465"}"#;
+
 #[test]
-fn an_account_added_with_its_servers_starts_and_its_password_stays_out_of_the_view() {
+fn an_account_is_added_once_its_sign_in_is_taken_and_its_password_stays_out_of_the_view() {
     let core = sample();
     act(&core, r#"{"type":"startAdding"}"#);
     assert_eq!(core.view().screen, Screen::AddAccount);
-    let e = act(
-        &core,
-        r#"{"type":"addAccount","email":"zoe@example.org","password":"pw-not-shown","imap":"mail.example.org:993","smtp":"mail.example.org:465"}"#,
-    );
+    let id = check_id(act(&core, ZOE));
+    let v = core.view();
+    assert_eq!((v.adding, v.adding_step.as_deref()), (true, Some("checking")));
+    assert_eq!(v.accounts.len(), 1, "nothing added before the servers answer");
+
+    let e = core.process_event(Event::Engine(vec![mailcraft_engine::model::Event::SignInChecked { id, failure: None }]));
     assert!(jobs(e).iter().any(|j| matches!(j, Job::Start { account, .. } if account.imap.host == "mail.example.org")));
     let v = core.view();
     assert_eq!(v.screen, Screen::Folders);
+    assert!(!v.adding);
     assert!(v.accounts.iter().any(|a| a.email == "zoe@example.org"));
     assert!(!serde_json::to_string(&v).unwrap().contains("pw-not-shown"));
+}
+
+#[test]
+fn a_refused_sign_in_says_which_server_and_why_and_can_be_added_anyway() {
+    let core = sample();
+    act(&core, r#"{"type":"startAdding"}"#);
+    let id = check_id(act(&core, ZOE));
+    let failure = mailcraft_engine::model::SignInFailure {
+        server: "mail.example.org".into(),
+        outgoing: true,
+        error: "535 authentication failed".into(),
+        certificate: None,
+    };
+    core.process_event(Event::Engine(vec![mailcraft_engine::model::Event::SignInChecked { id, failure: Some(Box::new(failure)) }]));
+    let v = core.view();
+    assert_eq!(v.screen, Screen::AddAccount);
+    assert!(v.can_add_anyway && !v.adding);
+    let notice = v.notice.unwrap();
+    assert!(notice.contains("outgoing server mail.example.org") && notice.contains("535"), "{notice}");
+    assert_eq!(v.accounts.len(), 1);
+
+    act(&core, r#"{"type":"addAnyway"}"#);
+    let v = core.view();
+    assert_eq!(v.screen, Screen::Folders);
+    assert!(!v.can_add_anyway);
+    assert!(v.accounts.iter().any(|a| a.email == "zoe@example.org"));
+    act(&core, r#"{"type":"addAnyway"}"#);
+    assert_eq!(core.view().accounts.len(), 2, "added once");
+}
+
+#[test]
+fn an_answer_to_an_older_check_isnt_taken_for_this_one() {
+    let core = sample();
+    let first = check_id(act(&core, ZOE));
+    let second = check_id(act(&core, &ZOE.replace("zoe@", "sam@")));
+    assert_ne!(first, second);
+    core.process_event(Event::Engine(vec![mailcraft_engine::model::Event::SignInChecked { id: first, failure: None }]));
+    let v = core.view();
+    assert_eq!(v.adding_step.as_deref(), Some("checking"), "still waiting for sam's");
+    assert_eq!(v.accounts.len(), 1);
 }
 
 #[test]

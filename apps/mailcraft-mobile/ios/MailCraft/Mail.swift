@@ -14,6 +14,8 @@ struct ViewModel: Decodable {
     var compose: Compose?
     var searching: String?
     var adding: Bool = false
+    var addingStep: String?
+    var canAddAnyway: Bool = false
     var notice: String?
 }
 
