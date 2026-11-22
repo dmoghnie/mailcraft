@@ -2,8 +2,8 @@
 //!
 //! There's no root list to read on Android (`rustls-native-certs` finds none), so "the system's
 //! roots" are asked of the platform instead: its TrustManager, through `rustls-platform-verifier`,
-//! which trusts the system's CAs and those the person installed (as the app's network security
-//! config allows), less any they turned off. A server is then trusted as on the desktop: by
+//! which trusts the system's CAs (the app's network security config leaves out those a person,
+//! an app or a VPN installed: the owner's decision), less any the person turned off. A server is then trusted as on the desktop: by
 //! Mozilla's roots or the system's. Only an unknown issuer is asked about again; a certificate
 //! that's expired, revoked or for another name stays refused.
 //!
