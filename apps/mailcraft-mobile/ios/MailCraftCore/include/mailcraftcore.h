@@ -19,6 +19,8 @@ char *mailcraft_poll(uint64_t timeout_ms);
 char *mailcraft_view(void);
 // The phone's offset (seconds east of UTC) or time zone changed.
 char *mailcraft_zone(int32_t offset, const char *zone);
+// The app went to the background: the data files are sealed (a phone may end it unannounced).
+char *mailcraft_background(void);
 void mailcraft_free(char *s);
 
 #endif

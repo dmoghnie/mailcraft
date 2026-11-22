@@ -30,6 +30,7 @@ fn starts_takes_actions_and_draws() {
     let _ = std::fs::remove_dir_all(&dir);
 
     assert!(send(r#"{"type":"folders"}"#).is_err(), "nothing before start");
+    assert!(background().is_err());
     assert!(start(dir.to_str().unwrap(), "not json", 0, "UTC").is_err(), "damaged secrets are said");
     start(dir.to_str().unwrap(), r#"{"a1": "pw"}"#, 3600, "Europe/Paris").unwrap();
     start(dir.to_str().unwrap(), "", 0, "").unwrap();
@@ -49,6 +50,10 @@ fn starts_takes_actions_and_draws() {
 
     // The cache as the desktop's: the data files' folder made in the app's folder.
     assert!(dir.join("Data Files").is_dir());
+    // Out of sight: sealed, and still working after.
+    background().unwrap();
+    send(r#"{"type":"startAdding"}"#).unwrap();
+    until(|v| v["kind"] == "render" && v["view"]["screen"] == "addAccount");
 
     let _ = std::fs::remove_dir_all(&dir);
 }

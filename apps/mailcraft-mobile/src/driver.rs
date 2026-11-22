@@ -24,6 +24,8 @@ use crate::outbox::Outbox;
 enum Input {
     Action(String),
     Zone(i32, String),
+    /// The app went to the background: the data files sealed (see [`App::background`]).
+    Background,
     /// The pool has events.
     Woke,
 }
@@ -80,6 +82,10 @@ impl Driver {
         self.input(Input::Zone(offset, zone.to_string()))
     }
 
+    pub(crate) fn background(&self) -> Result<(), String> {
+        self.input(Input::Background)
+    }
+
     pub(crate) fn outbox(&self) -> &Outbox {
         &self.outbox
     }
@@ -107,6 +113,7 @@ fn open_store(dir: &std::path::Path) -> Result<Store, String> {
 struct App {
     core: Core<Mail>,
     pool: Pool,
+    store: Store,
     outbox: Arc<Outbox>,
     offset: i32,
 }
@@ -123,12 +130,13 @@ impl App {
         let store = open_store(&dir)?;
         let creds = Arc::new(ShellCredentials::new(secrets, outbox.clone()));
         let pool = Pool::new(store.clone(), creds);
+        let kept = store.clone();
         let waker = Mutex::new(waker);
         pool.set_waker(Arc::new(move || {
             let _ = waker.lock().unwrap_or_else(PoisonError::into_inner).send(Input::Woke);
         }));
         let session = Session::open(Some(store), Clock::new(now(), offset));
-        let mut app = App { core: Core::new(), pool, outbox, offset };
+        let mut app = App { core: Core::new(), pool, store: kept, outbox, offset };
         app.event(Event::Opened(Box::new(session)));
         app.event(Event::Zone(zone));
         Ok(app)
@@ -143,6 +151,7 @@ impl App {
                         self.event(Event::Shell(a));
                     }
                 }
+                Ok(Input::Background) => self.background(),
                 Ok(Input::Zone(offset, zone)) => {
                     self.offset = offset;
                     self.event(Event::Clock { now: now(), offset });
@@ -158,6 +167,20 @@ impl App {
             if beat.elapsed() >= BEAT {
                 beat = Instant::now();
                 self.event(Event::Clock { now: now(), offset: self.offset });
+            }
+        }
+    }
+
+    /// The app left the screen. A phone ends a background app's process without warning, so
+    /// what the desktop does as it closes (`Store::seal_all`) is done now: the read marks handed
+    /// over written, and each data file sealed, so the next start opens them at once rather than
+    /// checking each in full. Each file alone (`Store::seal`): `seal_all` would also seal every
+    /// commit after it, slowing the app for the rest of its run, as it's meant to at an exit.
+    fn background(&self) {
+        let _ = self.store.flush_marks();
+        for a in self.core.view().accounts {
+            if let Err(e) = self.store.seal(&a.id) {
+                log::warn!("{}'s data file couldn't be sealed: {e}", a.id);
             }
         }
     }

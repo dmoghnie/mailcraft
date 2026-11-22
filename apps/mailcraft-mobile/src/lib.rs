@@ -1,8 +1,8 @@
 //! MailCraft's phone library: what the Android and iOS shells load.
 //!
 //! The app core ([`mailcraft_mobile::Mail`]) and `mailcraft-net`'s worker pool run on one thread
-//! of their own (the [`driver`]); the shells talk to it through five calls, the same on both
-//! phones ([`start`], [`send`], [`poll`], [`view`], [`zone`]), wrapped for JNI in `android.rs`
+//! of their own (the [`driver`]); the shells talk to it through six calls, the same on both
+//! phones ([`start`], [`send`], [`poll`], [`view`], [`zone`], [`background`]), wrapped for JNI in `android.rs`
 //! and for C (Swift) in `ios.rs`. Everything crosses as JSON text:
 //!
 //! * in: the person's [`mailcraft_mobile::Action`]s;
@@ -63,6 +63,12 @@ pub fn poll(timeout_ms: u64) -> String {
 /// The view model now, as JSON (what the last `render` message carried).
 pub fn view() -> String {
     DRIVER.get().map(|d| d.outbox().view()).unwrap_or_else(|| r#"{"screen":"folders","ready":false}"#.into())
+}
+
+/// The app went to the background (Android's `onStop`, iOS's scene going to the background):
+/// the data files are sealed, as the desktop seals them as it closes.
+pub fn background() -> Result<(), String> {
+    DRIVER.get().ok_or("not started")?.background()
 }
 
 /// The phone's offset or time zone changed.

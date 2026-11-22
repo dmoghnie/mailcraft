@@ -197,7 +197,7 @@ How it works:
 - The native library (`apps/mailcraft-mobile/src`) runs the Crux core and `net`'s worker pool on
   one thread of their own (`driver.rs`). It does the `Engine` effects itself, so jobs and
   passwords never cross into Kotlin or Swift that way; the shells see only the view model.
-- The shells talk to it through five calls (`start`, `send`, `poll`, `view`, `zone`), in JSON:
+- The shells talk to it through six calls (`start`, `send`, `poll`, `view`, `zone`, `background`), in JSON:
   JNI for Kotlin (`android.rs`), C for Swift (`ios.rs`). A shell polls from a thread of its own.
   No UniFFI or generated types: the view model is read as JSON on both sides.
 - Passwords are kept by the phone's keystore (the Android Keystore, the iOS Keychain). They're

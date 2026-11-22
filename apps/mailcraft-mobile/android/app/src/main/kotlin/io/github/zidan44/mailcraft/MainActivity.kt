@@ -33,6 +33,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // Android may end the app's process once it's out of sight, unannounced: its data files are
+    // sealed now, as the desktop seals them as it closes.
+    override fun onStop() {
+        super.onStop()
+        Core.background()
+    }
+
     override fun onDestroy() {
         unregisterReceiver(zoneChanged)
         super.onDestroy()

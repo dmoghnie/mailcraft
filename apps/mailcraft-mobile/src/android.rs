@@ -81,3 +81,8 @@ pub extern "system" fn Java_io_github_zidan44_mailcraft_Core_zone<'c>(
     })
     .resolve::<ThrowRuntimeExAndDefault>()
 }
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_io_github_zidan44_mailcraft_Core_background<'c>(mut env: EnvUnowned<'c>, _class: JClass<'c>) -> JString<'c> {
+    env.with_env(|env| -> Result<_, jni::errors::Error> { JString::from_str(env, said(crate::background())) }).resolve::<ThrowRuntimeExAndDefault>()
+}

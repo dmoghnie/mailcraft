@@ -44,7 +44,7 @@ Choose a signing team in Xcode, then run it on a phone or the simulator.
 
 ## The bridge
 
-The shells call five functions, the same on both phones, with JSON text both ways:
+The shells call six functions, the same on both phones, with JSON text both ways:
 
 | Call | Does |
 |---|---|
@@ -53,6 +53,7 @@ The shells call five functions, the same on both phones, with JSON text both way
 | `poll(timeoutMs)` | The next message, from a thread of the shell's own: `render` (the view model), `secret` / `forget` (a password for the keystore), `notice` |
 | `view()` | The view model now |
 | `zone(offset, zone)` | The phone's time zone changed |
+| `background()` | The app left the screen: the data files are sealed, as the desktop seals them as it closes |
 
 The actions are `Action` in `crates/mobile/src/lib.rs`; the view model is `ViewModel` in
 `crates/mobile/src/view.rs`.

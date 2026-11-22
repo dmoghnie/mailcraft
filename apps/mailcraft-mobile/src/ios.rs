@@ -66,6 +66,11 @@ pub extern "C" fn mailcraft_zone(offset: i32, zone: *const c_char) -> *mut c_cha
     said(crate::zone(offset, &text(zone)))
 }
 
+#[unsafe(no_mangle)]
+pub extern "C" fn mailcraft_background() -> *mut c_char {
+    said(crate::background())
+}
+
 /// A string one of these functions returned, given back. Null is ignored.
 #[unsafe(no_mangle)]
 pub extern "C" fn mailcraft_free(s: *mut c_char) {

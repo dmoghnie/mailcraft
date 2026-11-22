@@ -3,12 +3,16 @@ import SwiftUI
 @main
 struct MailCraftApp: App {
     @StateObject private var mail = Mail()
+    @Environment(\.scenePhase) private var phase
 
     var body: some Scene {
         WindowGroup {
             Screens(mail: mail)
                 .tint(Color(red: 0x0E / 255, green: 0x7C / 255, blue: 0x86 / 255))
         }
+        // iOS may end the app once it's in the background: its data files are sealed now, as
+        // the desktop seals them as it closes.
+        .onChange(of: phase) { _, p in if p == .background { mail.background() } }
     }
 }
 

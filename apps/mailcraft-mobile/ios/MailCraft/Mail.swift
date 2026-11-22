@@ -134,6 +134,10 @@ final class Mail: ObservableObject {
         if !said.isEmpty { problem = said }
     }
 
+    func background() {
+        _ = take(mailcraft_background())
+    }
+
     func dismiss() {
         problem = nil
         act("dismissNotice")
