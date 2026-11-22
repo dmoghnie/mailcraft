@@ -87,7 +87,9 @@ pub(super) fn invite_card(s: &Session, st: &mut UiState, ui: &mut Ui, key: &Mess
                         }
                     }
                     // Passed on to someone else, where the organizer allows it (issue #234).
-                    if mailcraft_engine::forwarding_allowed(e) && widgets::pill_button(ui, Icon::Forward, "Forward", &t).clicked() {
+                    if mailcraft_engine::forwarding_allowed(e)
+                        && widgets::pill_button_named(ui, Icon::Forward, "Forward", "Forward meeting", &t).clicked()
+                    {
                         acts.push(Action::Dialog(crate::Dialog::ForwardMeeting {
                             uid: e.uid.clone(),
                             summary: e.summary.clone(),

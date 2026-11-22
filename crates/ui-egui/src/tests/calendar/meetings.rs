@@ -426,8 +426,12 @@ fn a_meeting_is_forwarded_from_its_card_and_its_form() {
     for _ in 0..3 {
         frame(&ctx, &mut a, vec![]);
     }
-    // The card's, beside its Decline.
-    click_named_near(&ctx, &mut a, "Forward", "Decline");
+    // The card's, by a name of its own: the ribbon's and the reading pane's Forward forward the
+    // message, and a screen reader couldn't tell them apart (only where it was on the screen).
+    let size = windows::layout::SIZE.with(std::cell::Cell::get);
+    let all = named(&ctx, &mut a, size);
+    assert_eq!(all.iter().filter(|n| n.label.as_deref() == Some("Forward meeting")).count(), 1);
+    click_named(&ctx, &mut a, "Forward meeting");
     let Some(Dialog::ForwardMeeting { to, uid, .. }) = a.ui.dialog.as_mut() else { panic!("asked to whom: {:?}", a.ui.dialog) };
     *to = "Sam Okafor <sam@studio.example>".into();
     let uid = uid.clone();

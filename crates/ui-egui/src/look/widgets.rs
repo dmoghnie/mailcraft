@@ -493,11 +493,19 @@ pub fn one_line(ui: &Ui, text: &str, font: egui::FontId, color: Color32, width: 
 
 /// A labelled icon button for the reading pane's action row.
 pub fn pill_button(ui: &mut Ui, icon: Icon, label: &str, t: &Tokens) -> Response {
-    let label = tl!(label);
+    pill_button_named(ui, icon, label, label, t)
+}
+
+/// [`pill_button`] whose short `label` is said in full as `name` (to screen readers, and as its
+/// tooltip): an invitation's Forward is "Forward meeting", beside the ribbon's Forward of the
+/// message.
+pub fn pill_button_named(ui: &mut Ui, icon: Icon, label: &str, name: &str, t: &Tokens) -> Response {
+    let (label, name) = (tl!(label), tl!(name));
     let galley = ui.painter().layout_no_wrap(label.to_string(), theme::regular(13.0), t.text);
     let size = vec2(galley.size().x + 34.0, 28.0);
     let (rect, resp) = ui.allocate_exact_size(size, Sense::click());
-    named(ui, &resp, label, true, None);
+    named(ui, &resp, name, true, None);
+    let resp = if name == label { resp } else { resp.on_hover_text(name) };
     let fill = if resp.hovered() { t.hover } else { t.surface };
     ui.painter().rect(rect, 6.0, fill, Stroke::new(1.0, t.border), egui::StrokeKind::Inside);
     let m = crate::bidi::Mirror::new(rect);

@@ -98,6 +98,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - Adding an account: when no settings were found for an address (looked up while this computer was offline, say), leaving its box looks again. It said "No published settings" for that address until MailCraft was restarted.
 - A password typed into Sign in again goes into the keychain only once the server takes it: a mistyped one, refused, had already replaced the one kept there, which may have been right, so the account asked for its password at every start until the right one was typed.
 - Enter on a button presses that button alone: it also opened the message chosen in the list in a window of its own.
+- An invitation's Forward button is called **Forward meeting** by screen readers, and in its tooltip: it was one of several buttons called Forward, the others forwarding the message itself.
 
 ## 0.41.0 - 2026-11-20
 
