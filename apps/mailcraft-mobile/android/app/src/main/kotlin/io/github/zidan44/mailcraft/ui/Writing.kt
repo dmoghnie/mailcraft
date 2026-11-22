@@ -1,6 +1,9 @@
 package io.github.zidan44.mailcraft.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -69,7 +72,7 @@ fun ComposeScreen(mail: Mail, snack: SnackbarHostState) {
         Column(Modifier.fillMaxSize().padding(pad).imePadding().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp)) {
             if (c.sending) LinearProgressIndicator(Modifier.fillMaxWidth())
             c.error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(vertical = 4.dp)) }
-            if (c.from.isNotEmpty()) Text("From: " + c.from, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(vertical = 4.dp))
+            FromPicker(mail, c)
             val field = Modifier.fillMaxWidth().padding(vertical = 2.dp)
             val email = KeyboardOptions(keyboardType = KeyboardType.Email, capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false)
             OutlinedTextField(to, { to = it; mail.act("edit", "to" to it) }, field, label = { Text("To") }, keyboardOptions = email)
@@ -139,6 +142,42 @@ fun AddAccountScreen(mail: Mail, snack: SnackbarHostState) {
             // The servers refused the sign-in (said above it): the person may still add it.
             if (mail.view.canAddAnyway) {
                 TextButton(onClick = { mail.act("addAnyway") }, modifier = Modifier.fillMaxWidth()) { Text("Add anyway") }
+            }
+        }
+    }
+}
+
+/**
+ * Who the message goes from: the account's address, with every account's and its other
+ * addresses to choose from (the core's `senders`), as the desktop's From list.
+ */
+@Composable
+private fun FromPicker(mail: Mail, c: io.github.zidan44.mailcraft.Compose) {
+    var open by remember { mutableStateOf(false) }
+    val senders = mail.view.senders
+    androidx.compose.foundation.layout.Box {
+        androidx.compose.foundation.layout.Row(
+            Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                .clickable(enabled = senders.size > 1) { open = true }
+                .padding(horizontal = 4.dp, vertical = 8.dp),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        ) {
+            Text("From", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(56.dp))
+            Text(c.address, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, maxLines = 1)
+            if (senders.size > 1) Icon(Symbols.ExpandMore, "Choose who it's from")
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            for (s in senders) {
+                DropdownMenuItem(
+                    text = {
+                        androidx.compose.foundation.layout.Column {
+                            Text(s.address)
+                            if (s.name.isNotEmpty()) Text(s.name, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    },
+                    leadingIcon = { if (s.address.equals(c.address, ignoreCase = true)) Icon(Symbols.Check, null) else Spacer(Modifier.width(24.dp)) },
+                    onClick = { open = false; mail.act("from", "account" to s.account, "from" to s.from) },
+                )
             }
         }
     }

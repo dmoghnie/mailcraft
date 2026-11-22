@@ -197,6 +197,9 @@ fn junk_actions_are_refused_or_said_never_a_crash() {
         r#"{"type":"row","key":"x","action":"explode"}"#,
         r#"{"type":"row","key":"x","action":"archive"}"#,
         r#"{"type":"collapse","account":""}"#,
+        r#"{"type":"from","account":"nobody","from":"x@y"}"#,
+        r#"{"type":"undoSend"}"#,
+        r#"{"type":"dismissSent"}"#,
         r#"{"type":"collapse","account":"nobody","folder":"nowhere"}"#,
         r#"{"type":"compose","kind":"telegram"}"#,
         r#"{"type":"compose","kind":"reply"}"#,
@@ -273,4 +276,89 @@ fn a_row_is_archived_alone() {
     assert!(v.messages.iter().any(|m| m["key"] == keys[0].as_str()), "the open one stays");
     let archive = v.accounts[0].folders.iter().find(|f| f.role == "archive").unwrap();
     assert_eq!(archive.total, 2);
+}
+
+/// The sample mailbox with Zoe's account on a server added too (its sign-in taken), Zoe's id.
+fn with_server_account() -> (Core<Mail>, String) {
+    let core = sample();
+    let id = check_id(act(&core, ZOE));
+    core.process_event(Event::Engine(vec![mailcraft_engine::model::Event::SignInChecked { id, failure: None }]));
+    let zoe = core.view().accounts.iter().find(|a| a.email == "zoe@example.org").unwrap().id.clone();
+    (core, zoe)
+}
+
+/// A new message from Zoe's account to Sam, its id.
+fn write_from(core: &Core<Mail>, account: &str) -> u64 {
+    act(core, r#"{"type":"compose","kind":"new"}"#);
+    act(core, &format!(r#"{{"type":"from","account":"{account}","from":""}}"#));
+    act(core, r#"{"type":"edit","to":"sam@studio.example","subject":"Hi","body":"Hello"}"#);
+    core.view().compose.unwrap().id
+}
+
+#[test]
+fn every_account_is_a_sender_and_the_message_says_which_it_goes_from() {
+    let (core, zoe) = with_server_account();
+    let v = core.view();
+    let addresses: Vec<&str> = v.senders.iter().map(|s| s.address.as_str()).collect();
+    assert!(addresses.contains(&"riley@studio.example") && addresses.contains(&"zoe@example.org"), "{addresses:?}");
+    write_from(&core, &zoe);
+    let c = core.view().compose.unwrap();
+    assert_eq!((c.account.as_str(), c.address.as_str()), (zoe.as_str(), "zoe@example.org"));
+    act(&core, r#"{"type":"from","account":"sample","from":""}"#);
+    assert_eq!(core.view().compose.unwrap().address, "riley@studio.example");
+}
+
+#[test]
+fn a_message_sent_is_followed_until_the_server_takes_it() {
+    let (core, zoe) = with_server_account();
+    let id = write_from(&core, &zoe);
+    let e = act(&core, r#"{"type":"send"}"#);
+    assert!(jobs(e).iter().any(|j| matches!(j, Job::Send { id: sent, .. } if *sent == id)));
+    let v = core.view();
+    assert_eq!(v.outgoing.as_ref().map(|o| (o.id, o.stage)), Some((id, sending::Stage::Sending)));
+    assert_ne!(v.screen, Screen::Compose);
+
+    core.process_event(Event::Engine(vec![mailcraft_engine::model::Event::Sent { account: zoe, id }]));
+    assert_eq!(core.view().outgoing.unwrap().stage, sending::Stage::Sent);
+    act(&core, r#"{"type":"dismissSent"}"#);
+    assert!(core.view().outgoing.is_none());
+}
+
+#[test]
+fn a_refused_message_opens_again_with_why_said_once() {
+    let (core, zoe) = with_server_account();
+    let id = write_from(&core, &zoe);
+    act(&core, r#"{"type":"send"}"#);
+    let refused = mailcraft_engine::model::Event::SendFailed { account: zoe, id, error: "554 relay denied".into() };
+    core.process_event(Event::Engine(vec![refused]));
+    let v = core.view();
+    let o = v.outgoing.unwrap();
+    assert_eq!((o.stage, o.error.as_deref()), (sending::Stage::Failed, Some("554 relay denied")));
+    assert_eq!(v.screen, Screen::Compose, "back to the message, to fix and send again");
+    assert_eq!(v.compose.unwrap().id, id);
+    assert!(v.notice.is_none(), "said by outgoing, not as a notice too");
+}
+
+#[test]
+fn a_message_held_for_undo_comes_back_to_be_written_again() {
+    // Undo Send's wait set as File › Options › Mail sets it (the phone's settings will too).
+    let store = Store::memory();
+    assert!(mailcraft_engine::sample::seed_if_empty(&store, NOW).unwrap());
+    let mut session = Session::open(Some(store), Clock::new(NOW, 0));
+    session.run("options.undoSend", &json!({"seconds": 10})).unwrap();
+    let core: Core<Mail> = Core::new();
+    core.process_event(Event::Opened(Box::new(session)));
+    let id = check_id(act(&core, ZOE));
+    core.process_event(Event::Engine(vec![mailcraft_engine::model::Event::SignInChecked { id, failure: None }]));
+    let zoe = core.view().accounts.iter().find(|a| a.email == "zoe@example.org").unwrap().id.clone();
+
+    let id = write_from(&core, &zoe);
+    act(&core, r#"{"type":"send"}"#);
+    let o = core.view().outgoing.unwrap();
+    assert_eq!((o.id, o.stage, o.until), (id, sending::Stage::Held, Some(NOW + 10)));
+    act(&core, r#"{"type":"undoSend"}"#);
+    let v = core.view();
+    assert_eq!(v.screen, Screen::Compose);
+    assert!(v.outgoing.is_none());
+    assert_eq!(v.compose.unwrap().subject, "Hi");
 }

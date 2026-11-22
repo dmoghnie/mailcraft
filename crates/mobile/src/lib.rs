@@ -25,6 +25,7 @@ use serde_json::{Value, json};
 mod adding;
 pub mod avatar;
 pub mod drawer;
+pub mod sending;
 mod view;
 
 pub use view::{Screen, ViewModel};
@@ -74,6 +75,16 @@ pub enum Action {
         body: Option<String>,
     },
     Send,
+    /// The account and address the message being written goes from: `from` empty for the
+    /// account's own (`ViewModel::senders` lists them).
+    From {
+        account: String,
+        from: String,
+    },
+    /// The message just sent, held back for Undo Send, back into the compose screen.
+    UndoSend,
+    /// What was said of the message sent has been read.
+    DismissSent,
     /// The message being written thrown away.
     Discard,
     /// The add-account screen.
@@ -150,6 +161,8 @@ pub struct Model {
     pub(crate) limit: u64,
     pub(crate) query: Option<String>,
     pub(crate) adding: adding::Adding,
+    /// The message last sent, on its way.
+    pub(crate) outgoing: Option<sending::Outgoing>,
     /// The last thing that went wrong, until dismissed.
     pub(crate) problem: Option<String>,
 }
@@ -185,6 +198,7 @@ impl App for Mail {
                 }
             }
             Event::Engine(events) => {
+                sending::heard(model, &events);
                 if let Some(s) = model.session.as_mut() {
                     for e in events {
                         s.apply(e);
@@ -192,6 +206,7 @@ impl App for Mail {
                     s.tick();
                 }
                 adding::advance(model);
+                sending::settle(model);
             }
             Event::Shell(a) => act(model, a),
         }
@@ -301,11 +316,17 @@ fn act(model: &mut Model, a: Action) {
             if let Some(r) = run(model, "compose.send", json!({"allowEmptySubject": true}))
                 && r.get("check").is_none()
             {
+                sending::started(model, &r);
                 close_compose(model);
             } else if model.problem.is_none() {
                 model.problem = Some("This message needs checking before it goes: its addresses look unusual.".into());
             }
         }
+        Action::From { account, from } => {
+            run(model, "compose.update", json!({"account": account, "from": from}));
+        }
+        Action::UndoSend => sending::undo(model),
+        Action::DismissSent => model.outgoing = None,
         Action::Discard => {
             run(model, "compose.discard", json!({}));
             close_compose(model);

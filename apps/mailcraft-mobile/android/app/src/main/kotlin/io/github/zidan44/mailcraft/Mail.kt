@@ -25,7 +25,13 @@ data class View(
     val addingStep: String? = null,
     val canAddAnyway: Boolean = false,
     val notice: String? = null,
+    val outgoing: Outgoing? = null,
+    val senders: List<Sender> = emptyList(),
 )
+
+/** The message last sent, on its way (`crates/mobile/src/sending.rs`). */
+data class Outgoing(val id: Long, val stage: String, val until: Long?, val error: String?)
+data class Sender(val account: String, val from: String, val address: String, val name: String)
 
 /** Initials on a colour of their own (`crates/mobile/src/avatar.rs`). */
 data class Avatar(val initials: String, val hue: Int)
@@ -42,7 +48,7 @@ data class Row(
     val unread: Boolean, val flagged: Boolean, val attachments: Boolean, val avatar: Avatar,
 )
 data class Message(val key: String, val from: String, val to: String, val cc: String, val subject: String, val date: Long, val text: String, val attachments: List<String>)
-data class Compose(val id: Long, val from: String, val to: String, val cc: String, val subject: String, val body: String, val sending: Boolean, val error: String?)
+data class Compose(val id: Long, val account: String, val address: String, val from: String, val to: String, val cc: String, val subject: String, val body: String, val sending: Boolean, val error: String?)
 
 private fun JSONObject.text(k: String): String = if (isNull(k)) "" else optString(k, "")
 private fun JSONObject.avatar(): Avatar = optJSONObject("avatar").let { Avatar(it?.text("initials")?.ifEmpty { "?" } ?: "?", it?.optInt("hue") ?: 0) }
@@ -80,13 +86,17 @@ fun parseView(o: JSONObject): View = View(
         )
     },
     compose = o.optJSONObject("compose")?.let {
-        Compose(it.optLong("id"), it.text("from"), it.text("to"), it.text("cc"), it.text("subject"), it.text("body"), it.optBoolean("sending"), it.textOrNull("error"))
+        Compose(it.optLong("id"), it.text("account"), it.text("address"), it.text("from"), it.text("to"), it.text("cc"), it.text("subject"), it.text("body"), it.optBoolean("sending"), it.textOrNull("error"))
     },
     searching = o.textOrNull("searching"),
     adding = o.optBoolean("adding"),
     addingStep = o.textOrNull("addingStep"),
     canAddAnyway = o.optBoolean("canAddAnyway"),
     notice = o.textOrNull("notice"),
+    outgoing = o.optJSONObject("outgoing")?.let {
+        Outgoing(it.optLong("id"), it.text("stage"), if (it.isNull("until")) null else it.optLong("until"), it.textOrNull("error"))
+    },
+    senders = o.optJSONArray("senders").each { Sender(it.text("account"), it.text("from"), it.text("address"), it.text("name")) },
 )
 
 /**

@@ -19,6 +19,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
@@ -82,6 +83,31 @@ fun Screens(mail: Mail) {
         // Shown until read or timed out; either way the core forgets it.
         snack.showSnackbar(n, actionLabel = "OK", duration = SnackbarDuration.Long)
         mail.act("dismissNotice")
+    }
+    // The message last sent, as it goes: Sending…, a wait with Undo, Sent, or kept in the Outbox.
+    // A refused one is open again with its reason (the compose screen says it).
+    val out = v.outgoing
+    LaunchedEffect(out?.id, out?.stage) {
+        when (out?.stage) {
+            null -> {}
+            "sending" -> snack.showSnackbar("Sending…", duration = SnackbarDuration.Indefinite)
+            "held" -> {
+                val left = ((out.until ?: 0L) - System.currentTimeMillis() / 1000).coerceAtLeast(1)
+                val r = snack.showSnackbar("Sending in $left s", actionLabel = "Undo", duration = SnackbarDuration.Indefinite)
+                if (r == SnackbarResult.ActionPerformed) mail.act("undoSend")
+            }
+            "sent" -> { snack.showSnackbar("Sent"); mail.act("dismissSent") }
+            "queued" -> { snack.showSnackbar("In the Outbox: it goes when you're back online", duration = SnackbarDuration.Long); mail.act("dismissSent") }
+            else -> mail.act("dismissSent")
+        }
+    }
+    // A held message goes on its own once its wait is over: the snackbar's Undo goes with it.
+    LaunchedEffect(out?.id, out?.stage, out?.until) {
+        if (out?.stage == "held") {
+            val ms = ((out.until ?: 0L) * 1000 - System.currentTimeMillis()).coerceAtLeast(0)
+            kotlinx.coroutines.delay(ms)
+            snack.currentSnackbarData?.dismiss()
+        }
     }
     // The folders screen is the drawer here: open the inbox instead.
     LaunchedEffect(v.ready, v.screen, v.accounts.size) {

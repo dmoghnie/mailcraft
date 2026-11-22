@@ -43,6 +43,10 @@ pub struct ViewModel {
     pub can_add_anyway: bool,
     /// What went wrong last, or what the engine said (a sync that failed, a message held).
     pub notice: Option<String>,
+    /// The message last sent, on its way: sending, held for Undo, sent, in the Outbox, refused.
+    pub outgoing: Option<sending::Outgoing>,
+    /// Who a message can be sent as: each account's address and its others.
+    pub senders: Vec<sending::Sender>,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize)]
@@ -50,6 +54,10 @@ pub struct ViewModel {
 pub struct ComposeView {
     /// Which message is being written: a shell keeps what's typed while it stays the same.
     pub id: u64,
+    /// The account it goes from.
+    pub account: String,
+    /// The address it goes from: the account's own unless another of its addresses was chosen.
+    pub address: String,
     pub from: String,
     pub to: String,
     pub cc: String,
@@ -68,6 +76,8 @@ pub(crate) fn view(model: &Model) -> ViewModel {
     let messages = model.list.get("messages").and_then(Value::as_array).map(|m| m.iter().map(row).collect()).unwrap_or_default();
     let compose = s.compose.as_ref().map(|c| ComposeView {
         id: c.id,
+        account: c.account.clone(),
+        address: if c.from.is_empty() { s.account(&c.account).map(|a| a.config.email.clone()).unwrap_or_default() } else { c.from.clone() },
         from: c.from.clone(),
         to: c.to.clone(),
         cc: c.cc.clone(),
@@ -78,6 +88,8 @@ pub(crate) fn view(model: &Model) -> ViewModel {
     });
     // The engine's own last word, when it was an error and nothing of the app's is showing.
     let engine = s.notices.last().filter(|n| n.error && n.at >= s.clock.now.saturating_sub(60)).map(|n| n.text.clone());
+    // A refused message is said by `outgoing` already (with the engine's reason): not twice.
+    let engine = engine.filter(|_| !model.outgoing.as_ref().is_some_and(|o| o.stage == sending::Stage::Failed));
     ViewModel {
         screen: if model.place.screen == Screen::Compose && compose.is_none() { Screen::Folders } else { model.place.screen },
         ready: true,
@@ -92,6 +104,8 @@ pub(crate) fn view(model: &Model) -> ViewModel {
         adding_step: model.adding.step().map(str::to_string),
         can_add_anyway: model.adding.refused(),
         notice: model.problem.clone().or(engine),
+        outgoing: model.outgoing.clone(),
+        senders: sending::senders(s),
     }
 }
 
