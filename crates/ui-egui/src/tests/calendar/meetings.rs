@@ -271,6 +271,9 @@ fn an_invitation_says_what_it_clashes_with() {
     let strip = find("Grade check").expect("in the hours around it");
     let invite = find("Sound mix playback").expect("the invitation among them");
     assert!(strip.min.x > invite.min.x, "half an hour after it starts: {strip:?} {invite:?}");
+    // In a lane of its own above the events, its name clear of theirs (its comment on #194: they
+    // were written over each other).
+    assert!(invite.max.y <= strip.min.y + 1.0, "above the clashing event: {invite:?} {strip:?}");
     // Its own copy, already in the calendar, isn't a clash with itself.
     assert!(!texts.iter().any(|d| d.text.contains("Clashes with Sound mix")));
     // A click on the event opens it.
@@ -290,4 +293,217 @@ fn an_invitation_says_what_it_clashes_with() {
         "{:?}",
         texts.iter().filter(|d| d.text.contains("calendar")).map(|d| &d.text).collect::<Vec<_>>()
     );
+}
+
+/// Issue #194 (its comment): an invitation that repeats says so on its card, how often when it's
+/// once a day, week, month or year (on whichever days, until whenever), as Outlook's says it.
+#[test]
+fn an_invitation_says_it_repeats() {
+    let words = crate::reading::invite_repeats_for_tests;
+    assert_eq!(words("FREQ=WEEKLY;BYDAY=WE;INTERVAL=1;UNTIL=20270630T000000Z"), "Repeats · Every week");
+    assert_eq!(words("freq=daily;count=5"), "Repeats · Every day");
+    assert_eq!(words("FREQ=MONTHLY;BYMONTHDAY=3"), "Repeats · Every month");
+    assert_eq!(words("FREQ=YEARLY"), "Repeats · Every year");
+    assert_eq!(words("FREQ=WEEKLY;INTERVAL=2;BYDAY=MO"), "Repeats", "every other week: said only that it repeats");
+    assert_eq!(words("FREQ=HOURLY"), "Repeats");
+    assert_eq!(words(";;=;junk"), "Repeats");
+}
+
+/// Issue #236: a guest's answer to the user's meeting is recorded as it arrives, and its card says
+/// so, where it offered Record the answer, which said nothing once clicked.
+#[test]
+fn a_guests_answer_says_it_was_recorded() {
+    let (mut a, _) = app("answer-recorded");
+    let ctx = egui::Context::default();
+    let p = json!({"summary": "Mix", "start": NOW + 86_400, "end": NOW + 90_000, "attendees": "Zoe Park <zoe@studio.example>"});
+    let uid = a.session.run("event.create", &p).unwrap()["uid"].as_str().unwrap().to_string();
+    let mut own = a.session.find_event(&uid).unwrap().1.event.clone();
+    own.attendees = vec![mailcraft_engine::model::ical::Attendee {
+        email: "zoe@studio.example".into(),
+        name: "Zoe Park".into(),
+        partstat: "ACCEPTED".into(),
+        rsvp: false,
+    }];
+    let ics = mailcraft_engine::model::ical::write(&[own], Some("REPLY"), NOW);
+    let raw = format!(
+        "From: Zoe Park <zoe@studio.example>\r\nTo: riley@studio.example\r\nSubject: Accepted: Mix\r\nMessage-ID: <answer-236@x>\r\n\
+         Date: Mon, 16 Nov 2026 09:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/calendar; method=REPLY; charset=utf-8\r\n\r\n{ics}"
+    );
+    let key = arrive(&mut a, 9236, raw.as_bytes());
+    let zoe = a.session.find_event(&uid).unwrap().1.event.attendees.iter().find(|x| x.email == "zoe@studio.example").map(|x| x.partstat.clone());
+    assert_eq!(zoe.as_deref(), Some("ACCEPTED"), "recorded as it arrived");
+    a.run("folder.open", json!({"account": "sample", "folder": "INBOX"}));
+    a.run("list.open", json!({"key": key.to_id()}));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    let texts = drawn_strings(&ctx, &mut a, egui::vec2(1280.0, 900.0));
+    assert!(has(&texts, "Zoe Park accepted.") && has(&texts, "Recorded in your calendar."), "{texts:?}");
+    assert!(!has(&texts, "Record the answer"), "nothing left to do");
+}
+
+/// Issue #238: a guest's proposal of a new time shows who proposes what, and Accept proposal
+/// moves the meeting; an invitation offers Propose new time, whose form sends the proposal.
+#[test]
+fn a_new_time_is_proposed_and_taken() {
+    let (mut a, _) = app("propose-time");
+    let ctx = egui::Context::default();
+    ctx.enable_accesskit();
+    let p = json!({"summary": "Mix", "start": NOW + 86_400, "end": NOW + 90_000, "attendees": "Zoe Park <zoe@studio.example>"});
+    let uid = a.session.run("event.create", &p).unwrap()["uid"].as_str().unwrap().to_string();
+    let mut proposal = a.session.find_event(&uid).unwrap().1.event.clone();
+    proposal.start += 86_400;
+    proposal.end += 86_400;
+    proposal.attendees.retain(|x| x.email == "zoe@studio.example");
+    let ics = mailcraft_engine::model::ical::write(&[proposal.clone()], Some("COUNTER"), NOW);
+    let raw = format!(
+        "From: Zoe Park <zoe@studio.example>\r\nTo: riley@studio.example\r\nSubject: New time proposed: Mix\r\nMessage-ID: <counter-238@x>\r\n\
+         Date: Mon, 16 Nov 2026 09:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/calendar; method=COUNTER; charset=utf-8\r\n\r\n{ics}"
+    );
+    let key = arrive(&mut a, 9238, raw.as_bytes());
+    a.run("folder.open", json!({"account": "sample", "folder": "INBOX"}));
+    a.run("list.open", json!({"key": key.to_id()}));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    let texts = drawn_strings(&ctx, &mut a, egui::vec2(1280.0, 900.0));
+    assert!(texts.iter().any(|t| t.starts_with("Zoe Park proposes a new time: ")), "{texts:?}");
+    click_named(&ctx, &mut a, "Accept proposal");
+    frame(&ctx, &mut a, vec![]);
+    assert_eq!(a.session.find_event(&uid).unwrap().1.event.start, proposal.start, "moved");
+
+    // Invited: Propose new time opens its form, which sends the proposal.
+    let k = a.session.list.iter().find(|m| m.subject == "Sound mix, version 3").map(|m| m.key.clone()).unwrap();
+    a.run("list.open", json!({"key": k.to_id()}));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    click_named(&ctx, &mut a, "Propose new time");
+    let Some(Dialog::Propose(f)) = a.ui.dialog.as_mut() else { panic!("the form: {:?}", a.ui.dialog) };
+    let day = crate::pim_dialogs::pattern_day(&f.date).unwrap();
+    f.date = mailcraft_engine::model::dates::day_string(day + 1);
+    f.end_date = f.date.clone();
+    for _ in 0..2 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    click_named(&ctx, &mut a, "Send proposal");
+    frame(&ctx, &mut a, vec![]);
+    assert!(a.ui.dialog.is_none(), "sent: {:?}", a.ui.dialog);
+    let sent = a.session.store.as_ref().unwrap().load_folder("sample", "Sent").unwrap();
+    assert!(
+        sent.messages.iter().any(|m| m.subject.starts_with("New time proposed: ")),
+        "{:?}",
+        sent.messages.iter().map(|m| &m.subject).collect::<Vec<_>>()
+    );
+}
+
+/// A click on the control a screen reader names `label` nearest the one named `near`. An open
+/// invitation has a Forward on its card, beside the sender and in the ribbon, and the nodes a
+/// screen reader is told of don't come in the order they're drawn: the first Forward among them
+/// was whichever one's id came first.
+fn click_named_near(ctx: &egui::Context, a: &mut MailApp, label: &str, near: &str) {
+    let size = windows::layout::SIZE.with(std::cell::Cell::get);
+    let all = named(ctx, a, size);
+    let mark = all.iter().filter(|n| n.label.as_deref() == Some(near)).find_map(Named::centre).unwrap_or_else(|| panic!("no {near}"));
+    let at = all
+        .iter()
+        .filter(|n| n.label.as_deref() == Some(label) && !n.disabled)
+        .filter_map(Named::centre)
+        .min_by(|p, q| p.distance(mark).total_cmp(&q.distance(mark)))
+        .unwrap_or_else(|| panic!("no {label} to click"));
+    click(ctx, a, at);
+}
+
+/// Issue #234: Forward on an invitation asks to whom and sends the organizer's invitation there;
+/// the event form of the meeting, answered, offers Forward meeting… too.
+#[test]
+fn a_meeting_is_forwarded_from_its_card_and_its_form() {
+    let (mut a, _) = app("forward-meeting");
+    let ctx = egui::Context::default();
+    ctx.enable_accesskit();
+    let k = a.session.list.iter().find(|m| m.subject == "Sound mix, version 3").map(|m| m.key.clone()).unwrap();
+    a.run("list.open", json!({"key": k.to_id()}));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    // The card's, beside its Decline.
+    click_named_near(&ctx, &mut a, "Forward", "Decline");
+    let Some(Dialog::ForwardMeeting { to, uid, .. }) = a.ui.dialog.as_mut() else { panic!("asked to whom: {:?}", a.ui.dialog) };
+    *to = "Sam Okafor <sam@studio.example>".into();
+    let uid = uid.clone();
+    for _ in 0..2 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    // The dialog's, beside its Cancel.
+    click_named_near(&ctx, &mut a, "Forward", "Cancel");
+    frame(&ctx, &mut a, vec![]);
+    assert!(a.ui.dialog.is_none(), "sent: {:?}", a.ui.dialog);
+    let sent = a.session.store.as_ref().unwrap().load_folder("sample", "Sent").unwrap();
+    assert!(sent.messages.iter().any(|m| m.subject == "Fwd: Sound mix playback" && m.to.iter().any(|t| t.email == "sam@studio.example")));
+    // The form of the meeting: Forward meeting… there too.
+    let e = a.session.find_event(&uid).unwrap().1.event.clone();
+    let f = crate::pim_dialogs::EventForm::open(&a.session, &uid, e.start).expect("its form");
+    assert!(f.can_forward);
+    a.ui.dialog = Some(Dialog::Event(Box::new(f)));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    click_named(&ctx, &mut a, "Forward meeting…");
+    assert!(matches!(&a.ui.dialog, Some(Dialog::ForwardMeeting { uid: u, .. }) if *u == uid));
+    // One's own meeting: not offered.
+    let own = a.session.run("event.create", &json!({"summary": "Mine", "start": NOW + 86_400, "attendees": "sam@studio.example"})).unwrap();
+    let own = own["uid"].as_str().unwrap().to_string();
+    let f = crate::pim_dialogs::EventForm::open(&a.session, &own, NOW + 86_400).unwrap();
+    assert!(!f.can_forward);
+}
+
+/// Issue #237: Invitations in the Inbox… lists a meeting waiting there that the calendar hasn't
+/// got, and Put in calendar puts it there unanswered.
+#[test]
+fn invitations_waiting_in_the_inbox_are_put_in_the_calendar() {
+    let (mut a, _) = app("waiting-invites");
+    let ctx = egui::Context::default();
+    ctx.enable_accesskit();
+    // Mail from before the account came: not taken in as it arrived.
+    a.session.prefs.tentative_invites = false;
+    let e = mailcraft_engine::model::ical::CalEvent {
+        uid: "wait-237".into(),
+        summary: "Colour grade".into(),
+        start: NOW + 2 * 86_400,
+        end: NOW + 2 * 86_400 + 3600,
+        organizer: Some(mailcraft_engine::model::ical::Attendee {
+            email: "zoe@studio.example".into(),
+            name: "Zoe Park".into(),
+            ..Default::default()
+        }),
+        attendees: vec![mailcraft_engine::model::ical::Attendee {
+            email: "riley@studio.example".into(),
+            partstat: "NEEDS-ACTION".into(),
+            rsvp: true,
+            ..Default::default()
+        }],
+        ..Default::default()
+    };
+    let ics = mailcraft_engine::model::ical::write(&[e], Some("REQUEST"), NOW);
+    let raw = format!(
+        "From: Zoe Park <zoe@studio.example>\r\nTo: riley@studio.example\r\nSubject: Invitation: Colour grade\r\nMessage-ID: <wait-237@x>\r\n\
+         Date: Mon, 16 Nov 2026 09:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/calendar; method=REQUEST; charset=utf-8\r\n\r\n{ics}"
+    );
+    arrive(&mut a, 9237, raw.as_bytes());
+    assert!(a.session.find_event("wait-237").is_none(), "not in the calendar");
+    a.run("view.calendar", json!({}));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    click_named(&ctx, &mut a, "Invitations in the Inbox…");
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    let texts = drawn_strings(&ctx, &mut a, egui::vec2(1280.0, 900.0));
+    assert!(texts.iter().any(|t| t.starts_with("Colour grade · ")), "{texts:?}");
+    click_named(&ctx, &mut a, "Put in calendar");
+    frame(&ctx, &mut a, vec![]);
+    assert!(a.ui.dialog.is_none(), "{:?}", a.ui.dialog);
+    let placed = a.session.find_event("wait-237").expect("in the calendar").1.event.clone();
+    assert!(placed.attendees.iter().any(|x| x.email == "riley@studio.example" && x.partstat == "NEEDS-ACTION"), "unanswered");
 }

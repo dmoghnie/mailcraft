@@ -12,22 +12,31 @@ use crate::{Action, widgets};
 mod contact;
 mod date_pick;
 pub(crate) mod follow_up;
+mod labels;
 mod online_meeting;
 mod pattern;
+mod propose;
+mod reminders;
 pub(crate) use date_pick::date_field;
+#[cfg(test)]
+pub(crate) use labels::{CONTACT_FORM_LABELS, ICON_FORM_LABELS, LABEL_W_MAX};
+pub(crate) use labels::{ICON_W, label_column};
 pub(crate) use pattern::form_day as pattern_day;
 mod repeat;
 mod showing;
 mod task;
+mod waiting;
 pub use contact::{ContactForm, contact};
 pub use follow_up::{FollowUpForm, follow_up};
 pub use online_meeting::MeetingState;
 #[cfg(test)]
 pub(crate) use online_meeting::{add as online_meeting_add, remove as online_meeting_remove};
+pub use propose::{ProposeForm, propose};
 pub use repeat::Repeat;
 use repeat::repeat_row;
 use task::category_chips;
 pub use task::{TaskForm, status_label, task};
+pub use waiting::{WaitingForm, waiting};
 
 /// A new event's reminder (Outlook's default for appointments).
 pub const DEFAULT_REMINDER: i64 = 15;
@@ -102,6 +111,11 @@ pub struct EventForm {
     pub length: Option<i64>,
     /// Its reminder, in minutes before it starts (`None`: none).
     pub reminder: Option<i64>,
+    /// Its other reminders (issue #224: Google's calendar gives an event several), the earliest
+    /// first.
+    pub more_reminders: Vec<i64>,
+    /// The accounts whose calendars keep one reminder an event (Exchange's).
+    pub one_reminder: Vec<String>,
     /// Who sees what of it, and how it shows its time (issue #32).
     pub privacy: mailcraft_engine::model::ical::Privacy,
     pub show_as: mailcraft_engine::model::ical::ShowAs,
@@ -114,6 +128,8 @@ pub struct EventForm {
     pub can_invite: bool,
     /// The user was invited and hasn't answered.
     pub needs_reply: bool,
+    /// Someone else's meeting, which they let be forwarded (issue #234).
+    pub can_forward: bool,
     pub read_only: bool,
     /// Its categories, and every category there is (name, colour) to pick from.
     pub categories: Vec<String>,
@@ -189,9 +205,11 @@ impl EventForm {
             hours12: s.clock.style.hours12,
             dates: s.clock.style.order,
             can_invite: true,
+            can_forward: false,
             all_categories: all_categories(s, &[]),
             // As Outlook sets a new appointment's reminder.
             reminder: Some(DEFAULT_REMINDER),
+            one_reminder: reminders::one_reminder(s),
             meeting: MeetingState::new(s, None),
             ..Default::default()
         }
@@ -199,7 +217,8 @@ impl EventForm {
 
     /// A new event from `from` to `to` with `guests` invited, in `calendar` (account, id) when
     /// it can take one, else in that account's default: the Schedule view's (issue #141), for a
-    /// time chosen across people's calendars.
+    /// time chosen across people's calendars; the calendar's, for half hours dragged over in it
+    /// (issue #212).
     pub fn between(s: &Session, (from, to): (i64, i64), calendar: Option<(&str, &str)>, guests: &[String]) -> EventForm {
         let mut f = EventForm::new(s, Some(from));
         let to = to.max(from.saturating_add(60));
@@ -231,6 +250,7 @@ impl EventForm {
         let written = |a: &mailcraft_engine::model::ical::Attendee| mailcraft_engine::model::EmailAddress::new(&a.name, &a.email).to_string();
         let links = e.links();
         let pattern = e.rrule.as_deref().and_then(|r| mailcraft_engine::model::ical::Pattern::read(r, s.clock.local_day(start)));
+        let reminders = mailcraft_engine::model::ical::reminders_minutes(e);
         let until_text = match pattern.as_ref().map(|p| p.end) {
             Some(mailcraft_engine::model::ical::PatternEnd::Until(d)) => dates::day_string(d),
             _ => String::new(),
@@ -251,7 +271,9 @@ impl EventForm {
             all_day: e.all_day,
             hours12: s.clock.style.hours12,
             dates: s.clock.style.order,
-            reminder: mailcraft_engine::model::ical::reminder_minutes(e),
+            reminder: reminders.first().copied(),
+            more_reminders: reminders.get(1..).unwrap_or_default().to_vec(),
+            one_reminder: reminders::one_reminder(s),
             privacy: mailcraft_engine::model::ical::privacy(e),
             show_as: mailcraft_engine::model::ical::show_as(e),
             repeat: pattern.as_ref().map_or_else(|| Repeat::from_rrule(e.rrule.as_deref()), pattern::repeat_of),
@@ -263,6 +285,8 @@ impl EventForm {
             needs_reply: e.attendees.iter().any(|a| mine.contains(&a.email.to_ascii_lowercase()) && a.partstat == "NEEDS-ACTION"),
             guests: e.attendees.iter().map(written).collect::<Vec<_>>().join(", "),
             can_invite: e.organizer.as_ref().is_none_or(|o| mine.contains(&o.email.to_ascii_lowercase())),
+            can_forward: e.organizer.as_ref().is_some_and(|o| !mine.contains(&o.email.to_ascii_lowercase()))
+                && mailcraft_engine::forwarding_allowed(e),
             reading_notes: read_only || !links.is_empty(),
             links,
             join: s.join_link(e),
@@ -288,7 +312,7 @@ impl EventForm {
             "end": end,
             "allDay": self.all_day,
             "repeat": pattern::repeat_param(self),
-            "reminder": self.reminder.map_or_else(|| json!("none"), |m| json!(m)),
+            "reminders": self.reminder.into_iter().chain(self.more_reminders.iter().copied()).collect::<Vec<i64>>(),
             "categories": self.categories,
             "privacy": self.privacy.code(),
             "showAs": self.show_as.code(),
@@ -331,8 +355,6 @@ fn partstat_label(p: &str) -> &'static str {
     }
 }
 
-/// Width of the forms' label column.
-const LABEL_W: f32 = 104.0;
 /// Height of a one-line field.
 const FIELD_H: f32 = 30.0;
 
@@ -357,16 +379,16 @@ fn form_header(ui: &mut Ui, t: &Tokens, badge: Result<Icon, String>, title: &str
 /// field (or fields) after, lined up with the field's first line.
 /// `icons_used`: the form puts icons before labels, so a row without one is indented to match.
 fn form_row(ui: &mut Ui, t: &Tokens, icons_used: bool, icon: Option<Icon>, label: &str, add: impl FnOnce(&mut Ui)) {
+    let text = ui.painter().layout_no_wrap(tl!(label).to_string(), theme::regular(13.0), t.dim);
+    let indent = if icons_used { ICON_W } else { 0.0 };
+    let width = label_column(ui, icons_used);
     ui.horizontal_top(|ui| {
-        let (r, _) = ui.allocate_exact_size(vec2(LABEL_W, FIELD_H), Sense::hover());
-        let mut x = r.left();
+        let (r, _) = ui.allocate_exact_size(vec2(width, FIELD_H), Sense::hover());
         if let Some(icon) = icon {
-            icons::paint(ui.painter(), egui::Rect::from_center_size(egui::pos2(x + 8.0, r.center().y), vec2(16.0, 16.0)), icon, t.dim);
+            icons::paint(ui.painter(), egui::Rect::from_center_size(egui::pos2(r.left() + 8.0, r.center().y), vec2(16.0, 16.0)), icon, t.dim);
         }
-        if icons_used {
-            x += 24.0;
-        }
-        ui.painter().text(egui::pos2(x, r.center().y), egui::Align2::LEFT_CENTER, tl!(label), theme::regular(13.0), t.dim);
+        let at = egui::pos2(r.left() + indent, r.center().y - text.size().y / 2.0);
+        ui.painter().with_clip_rect(r.intersect(ui.clip_rect())).galley(at, text, t.dim);
         add(ui);
     });
     ui.add_space(8.0);
@@ -548,6 +570,7 @@ pub fn event(ui: &mut Ui, f: &mut EventForm, t: &Tokens, acts: &mut Vec<Action>)
                 crate::drop_down::keys(ui, &r, &mut f.reminder, &choices);
             });
         });
+        reminders::more_rows(ui, t, f);
         showing::show_as_row(ui, t, f);
         form_row(ui, t, true, Some(Icon::Location), "Location", |ui| {
             field(ui, &mut f.location, tl!("Add a place"), f32::INFINITY);
@@ -633,6 +656,15 @@ pub fn event(ui: &mut Ui, f: &mut EventForm, t: &Tokens, acts: &mut Vec<Action>)
                 }
             }
         });
+    }
+    // Someone else's meeting, passed on to another (issue #234).
+    if f.can_forward
+        && let Some(uid) = &f.uid
+    {
+        ui.add_space(4.0);
+        if ui.button(tl!("Forward meeting…")).clicked() {
+            acts.push(Action::Dialog(crate::Dialog::ForwardMeeting { uid: uid.clone(), summary: f.summary.clone(), to: String::new() }));
+        }
     }
     if let Some(e) = &f.error {
         ui.add_space(6.0);

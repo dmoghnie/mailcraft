@@ -178,12 +178,15 @@ impl Pool {
                 self.queue_offline_send(account, id, raw, from, recipients, sent_folder);
             }
             // Offline: changes wait in the cache for the next sync.
-            Job::SyncDav { .. } if !running => {}
+            Job::SyncDav { .. } | Job::ReadShared { .. } if !running => {}
             Job::SearchServer { account, query, .. } if mail_offline => {
                 self.sink.emit(Event::ServerSearched { account, query, keys: Vec::new(), error: Some(OFFLINE.into()), done: true });
             }
             Job::SearchDirectory { account, query } if mail_offline => {
                 self.sink.emit(Event::Directory { account, query, people: Vec::new(), error: Some(OFFLINE.into()), consent: false });
+            }
+            Job::FetchPhoto { account, email } if mail_offline => {
+                self.sink.emit(Event::Photo { account, email, photo: None, error: Some(OFFLINE.into()) });
             }
             // Working offline: nothing connects, by choice.
             Job::SyncAll { .. } | Job::SyncFolder { .. } | Job::FlushOutbox { .. } if self.offline && !running => {}
@@ -330,7 +333,9 @@ impl Pool {
         let Some(config) = self.configs.get(id).filter(|c| c.check_by_hand).cloned() else { return };
         let needs_server = match job {
             Job::SyncAll { .. } | Job::SyncFolder { .. } | Job::Send { .. } | Job::FlushOutbox { .. } | Job::MoreMail { .. } => true,
-            Job::SearchServer { .. } | Job::SearchDirectory { .. } | Job::GetVacation { .. } | Job::SetVacation { .. } => true,
+            Job::SearchServer { .. } | Job::SearchDirectory { .. } | Job::FetchPhoto { .. } | Job::GetVacation { .. } | Job::SetVacation { .. } => {
+                true
+            }
             Job::GetServerRules { .. } | Job::SetServerRules { .. } | Job::FreeBusy { .. } => true,
             Job::FindIdentities { .. } => true,
             Job::FetchBody { key } => self.store.read_body(key).is_none(),

@@ -249,6 +249,7 @@ mod mail;
 mod mcp;
 mod opening;
 mod organize;
+mod photos;
 mod safety;
 mod smime;
 mod writing;

@@ -199,3 +199,79 @@ fn a_broken_events_answer_is_read_safely() {
     assert!(crate::ews::watch_events(&gone).is_err());
     assert!(crate::ews::watch_events(&parse("")).is_err());
 }
+
+/// Issue #208: people opened while a long calendar pass is under way (a calendar group made) have
+/// their calendars read between its steps, and their free/busy times asked then too: they came
+/// after the pass, minutes later on a big mailbox. The pass goes on after, and its own result
+/// isn't theirs alone.
+#[test]
+fn people_just_opened_dont_wait_for_the_calendars() {
+    let mut m = mailbox("watch-people", &["ana@contoso.example", "ben@contoso.example", "cleo@contoso.example"], |d| {
+        d.pim_slow = Some(Duration::from_millis(400));
+        let item = parse(
+            "<t:CalendarItem><t:Subject>Dana's review</t:Subject><t:Start>2026-11-20T09:00:00Z</t:Start><t:UID>dana-1</t:UID></t:CalendarItem>",
+        );
+        d.pim.push(PimItem::new("D1", "mailbox:dana@contoso.example", item.kids[0].clone()));
+    });
+    until(&m.pool, "the calendars read", |e| matches!(e, Event::DavSynced { .. }));
+    m.pool.submit(Job::SyncAll { account: "watch-people".into() });
+    until(&m.pool, "online again", |e| matches!(e, Event::Status { status: SyncStatus::Online { .. }, .. }));
+    // The calendars are being read: Dana opened, as the engine opens her (kept, then asked for).
+    let mut pim: Pim = m.store.load_account_doc("watch-people", PIM_DOC).unwrap();
+    pim.shared.push("dana@contoso.example".into());
+    m.store.save_account_doc("watch-people", PIM_DOC, &pim).unwrap();
+    m.pool.submit(Job::ReadShared { account: "watch-people".into(), people: vec!["dana@contoso.example".into()] });
+    let (from, to) = (1_795_000_000, 1_795_086_400);
+    m.pool.submit(Job::FreeBusy { account: "watch-people".into(), people: vec!["ben@contoso.example".into()], from, to });
+    let seen = until(&m.pool, "the whole pass", |e| matches!(e, Event::DavSynced { sync, .. } if !sync.people_only));
+    let hers = seen.iter().position(|e| matches!(e, Event::DavSynced { sync, .. } if sync.people_only));
+    let times = seen.iter().position(|e| matches!(e, Event::FreeBusy { .. }));
+    assert!(hers.is_some() && times.is_some(), "both before the pass ended: {seen:?}");
+    let Some(Event::DavSynced { sync, .. }) = hers.and_then(|i| seen.get(i)) else { panic!("{seen:?}") };
+    let dana = mailcraft_model::pim::shared_calendar_id("dana@contoso.example");
+    assert_eq!(sync.calendars.as_ref().map(|c| c.iter().map(|c| c.id.clone()).collect::<Vec<_>>()), Some(vec![dana.clone()]), "hers alone");
+    assert_eq!(sync.synced_calendars, [dana]);
+    assert_eq!(sync.events.iter().map(|e| e.event.summary.as_str()).collect::<Vec<_>>(), ["Dana's review"]);
+}
+
+/// Issue #145: behind a load balancer, the subscription is kept by the mailbox server it was made
+/// on, and the looks go there (affinity asked for, its cookie sent back): a look that reached the
+/// other server was told it wasn't found, twice an hour, and the mail a rule filed meanwhile
+/// waited for the next full sync.
+#[test]
+fn the_subscription_keeps_to_its_server() {
+    let m = mailbox("watch-balanced", &[], |d| d.balanced = true);
+    until(&m.pool, "the calendars read", |e| matches!(e, Event::DavSynced { .. }));
+    eventually("subscribed", || !m.data.lock().unwrap().subscriptions.is_empty());
+    let full_syncs = listings(&m.data);
+    for n in 0..3 {
+        let subject = format!("Filed by a rule {n}");
+        m.data.lock().unwrap().deliver(&m.projects, &mail(&subject), false, "2026-11-18T08:30:00Z");
+        eventually("the message in Projects", || subjects(&m.store, "watch-balanced", "Projects").contains(&subject));
+    }
+    assert_eq!(listings(&m.data), full_syncs, "by looks, not a full sync");
+    assert_eq!(m.data.lock().unwrap().subscriptions.len(), 1, "never lost");
+}
+
+/// Issue #231: an Exchange account's Send / Receive says its folders as they're read, n of m, and
+/// how it ended, and its Outbox's; the window said nothing was going on while they were read.
+#[test]
+fn send_receive_says_an_exchange_accounts_folders() {
+    use mailcraft_model::job::{TransferKind, TransferState};
+    let mut m = mailbox("watch-progress", &[], |_| {});
+    m.pool.submit(Job::SyncAll { account: "watch-progress".into() });
+    let ended = |e: &Event, kind: TransferKind| matches!(e, Event::Transfer { transfer, .. } if transfer.kind == kind && !transfer.state.is_open());
+    let seen = until(&m.pool, "the folders read", |e| ended(e, TransferKind::Receiving));
+    let receiving: Vec<_> = seen
+        .iter()
+        .filter_map(|e| match e {
+            Event::Transfer { transfer, .. } if transfer.kind == TransferKind::Receiving => Some(transfer.clone()),
+            _ => None,
+        })
+        .collect();
+    assert!(receiving.iter().any(|t| t.state == TransferState::Working && !t.folder.is_empty() && t.folders_total == 3), "{receiving:?}");
+    let last = receiving.last().cloned().unwrap_or_default();
+    assert_eq!((last.state, last.folders_done, last.folders_total), (TransferState::Done, 3, 3));
+    let done_sending = seen.iter().any(|e| ended(e, TransferKind::Sending));
+    assert!(done_sending || until(&m.pool, "the Outbox", |e| ended(e, TransferKind::Sending)).iter().any(|e| ended(e, TransferKind::Sending)));
+}

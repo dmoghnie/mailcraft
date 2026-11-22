@@ -209,6 +209,7 @@
 	Pictures from the web are hidden to protect your privacy.	為保護您的隱私，已隱藏來自網路的圖片。
 	Picture…	圖片…
 	Pin	釘選
+	Pinned	已釘選
 	Plain text	純文字
 	Preview	預覽
 	Print	列印
@@ -231,7 +232,7 @@
 	Results for “{query}”	「{query}」的結果
 	Right	右側
 	Rules	規則
-	Rules run on new mail as it arrives in an Inbox, in this order.	新郵件抵達收件匣時，依此順序套用規則。
+	Rules run in this order, on new mail as it arrives in an Inbox, and on mail you send as its copy reaches Sent.	規則依此順序執行：新郵件送達收件匣時，以及你寄出的郵件副本送達「寄件備份」時。
 	Rules…	規則…
 	Run now	立即執行
 	Run on the folder on screen	在目前顯示的資料夾上執行
@@ -443,7 +444,7 @@
 	Formatting, colours and pictures are left out. Show formatted, above a message, shows that one as it was sent.	將略去格式、色彩和圖片。郵件上方的「以格式顯示」可按原樣顯示該郵件。
 	Show mail without its formatting	顯示郵件但不帶格式
 	Show a line of each message in the list	在清單中顯示每封郵件的一行內容
-	Sort new mail as it arrives: move it, flag it, categorize it.	在新郵件抵達時整理: 移動、加上標幟、分類。
+	Sort mail as it arrives, or as you send it: move it, flag it, categorize it.	在郵件送達或寄出時整理：移動、標幟、分類。
 	Source code and issues	原始程式碼和問題回報
 	Subject (optional)	主旨 (選填)
 	Tell people you're away: each sender gets one reply while they're on, even when this computer is off.	讓別人知道您不在: 開啟期間每位寄件者收到一次回覆，即使這台電腦關機也有效。
@@ -938,7 +939,6 @@
 	Rules saved in {file}: {n}	已將 {n} 條規則儲存到 {file}
 	Save {n} Selected…	儲存所選的 {n} 個…
 	Run all	全部執行
-	Run every rule that's on, on the mail already in the Inbox	對收件匣中已有的郵件執行所有已開啟的規則
 	Find a rule	尋找規則
 	No rule matches.	沒有符合的規則。
 	 and {n} more	 等另外 {n} 人
@@ -1964,3 +1964,41 @@ count	occurrences	次
 	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	透過 mailcraft mcp 命令連線的 AI 應用程式可以讀取和搜尋你的郵件。僅對你信任的代理程式開啟
 	Let AI agents send, delete and change settings	允許 AI 代理程式傳送、刪除和變更設定
 	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	未開啟時，代理程式只能讀取和搜尋你的郵件。開啟後，它可以執行任何命令：傳送、回覆、刪除、移動和變更設定。僅對你信任的代理程式開啟
+	Copy link	複製連結
+	Add people…	新增人員…
+	Add people to the group	將人員新增至群組
+	Department	部門
+	Only work hours	僅工作時間
+	Add reminder	新增提醒
+	Remove reminder	移除提醒
+	Recorded in your calendar.	已記錄到行事曆。
+	Record guests' answers to your meetings as they arrive	收到時記錄來賓對你的會議的回覆
+	One from someone not on the guest list, or to an earlier version, waits for Record the answer	來自來賓名單以外的人或針對先前版本的回覆，等待「記錄回覆」
+	Check Names	檢查姓名
+	Ctrl+K in To, Cc or Bcc	在收件者、副本或密件副本中按 Ctrl+K
+	No one found for {names}	找不到 {names}
+	Still looking up {names} in the directory	仍在目錄中尋找 {names}
+	More than one person could be “{typed}”. Pick the one you meant:	「{typed}」可能是多個人。請選擇你要的那位：
+	Applies to	套用到
+	Mail that arrives	收到的郵件
+	Mail you send	你寄出的郵件
+	Run it now on the mail already in Sent	立即對「寄件備份」中的郵件執行
+	If mail you send {condition}: {action}	如果你寄出的郵件{condition}: {action}
+	Run every rule that's on, on the mail already in the Inbox (and in Sent, for mail you send)	對收件匣中已有的郵件執行每條已開啟的規則（對你寄出的郵件，則在「寄件備份」中）
+	Accept proposal	接受提議
+	Decline proposal	拒絕提議
+	Propose new time	提議新時間
+	Send proposal	傳送提議
+	Start	開始
+	End	結束
+	The organizer declined your proposed time: the meeting stays as it was.	召集人拒絕了你提議的時間：會議維持不變。
+	Your answer	你的回覆
+	{name} proposes a new time: {when}	{name} 提議了新時間：{when}
+	Forward meeting	轉寄會議
+	Forward meeting…	轉寄會議…
+	Invitations in the Inbox	收件匣中的邀請
+	Invitations in the Inbox…	收件匣中的邀請…
+	Meetings waiting for your answer that your calendar doesn't have yet. Those you tick go in unanswered.	等待你回覆、行事曆中還沒有的會議。勾選的會以未回覆狀態加入。
+	None: every invitation in the Inbox is in your calendar or answered.	沒有：收件匣中的每個邀請都已在行事曆中或已回覆。
+	Put in calendar	放入行事曆
+	Still reading {n} messages…	仍在讀取 {n} 封郵件…

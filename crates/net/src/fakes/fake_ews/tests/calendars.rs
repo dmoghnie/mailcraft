@@ -135,3 +135,100 @@ fn appointments_the_server_fails_on_are_said() {
     assert_eq!(sync.errors, ["Calendar: 1 items couldn't be read (ErrorInternalServerError)"]);
     assert_eq!(sync.cards.iter().map(|k| k.card.display()).collect::<Vec<_>>(), ["Ana Silva"]);
 }
+
+/// Issue #204: a series' changed occurrence, which the listing doesn't give, is read by the id
+/// the series names and comes as the occurrence it stands for; one taken out is the series'
+/// exception. One gone meanwhile is left to its series, and the calendar is read all the same.
+#[test]
+fn a_series_changed_occurrences_are_read() {
+    let (mut d, cal, _) = mailbox();
+    let series = parse(
+        "<t:CalendarItem><t:Subject>Weekly review</t:Subject><t:UID>weekly-1</t:UID>\
+         <t:Start>2026-10-05T09:00:00Z</t:Start><t:End>2026-10-05T10:00:00Z</t:End>\
+         <t:CalendarItemType>RecurringMaster</t:CalendarItemType>\
+         <t:Recurrence><t:WeeklyRecurrence><t:Interval>1</t:Interval><t:DaysOfWeek>Monday</t:DaysOfWeek></t:WeeklyRecurrence>\
+         <t:NoEndRecurrence><t:StartDate>2026-10-05Z</t:StartDate></t:NoEndRecurrence></t:Recurrence>\
+         <t:ModifiedOccurrences>\
+         <t:Occurrence><t:ItemId Id=\"X1\"/><t:Start>2026-10-13T14:00:00Z</t:Start><t:End>2026-10-13T15:00:00Z</t:End><t:OriginalStart>2026-10-12T09:00:00Z</t:OriginalStart></t:Occurrence>\
+         <t:Occurrence><t:ItemId Id=\"X2\"/><t:Start>2026-11-02T11:00:00Z</t:Start><t:End>2026-11-02T12:00:00Z</t:End><t:OriginalStart>2026-11-02T09:00:00Z</t:OriginalStart></t:Occurrence>\
+         </t:ModifiedOccurrences>\
+         <t:DeletedOccurrences><t:DeletedOccurrence><t:Start>2026-10-19T09:00:00Z</t:Start></t:DeletedOccurrence></t:DeletedOccurrences>\
+         </t:CalendarItem>",
+    );
+    d.pim.push(PimItem::new("S1", cal.clone(), series.kids[0].clone()));
+    let moved = parse(
+        "<t:CalendarItem><t:Subject>Weekly review, Tuesday</t:Subject><t:UID>weekly-1</t:UID>\
+         <t:Start>2026-10-13T14:00:00Z</t:Start><t:End>2026-10-13T15:00:00Z</t:End>\
+         <t:CalendarItemType>Exception</t:CalendarItemType></t:CalendarItem>",
+    );
+    d.pim.push(PimItem::new("X1", cal, moved.kids[0].clone()));
+    let server = serve(d);
+    let c = crate::ews::Client::connect(&server.url, &format!("{DOMAIN}\\{USER}"), PASSWORD, "riley@contoso.example").unwrap();
+    let sync = crate::ews_pim::sync(&c, &Pim::default(), 1_792_000_000).unwrap();
+    assert!(sync.errors.is_empty(), "{:?}", sync.errors);
+    let t = |s: &str| mailcraft_jmap::utc_date(s).unwrap();
+    let mut weekly: Vec<_> = sync.events.iter().filter(|e| e.event.uid == "weekly-1").map(|e| &e.event).collect();
+    weekly.sort_by_key(|e| e.recurrence_id);
+    let [series, moved] = weekly[..] else { panic!("{weekly:?}") };
+    assert_eq!((series.recurrence_id, series.exdates.as_slice()), (None, [t("2026-10-19T09:00:00Z")].as_slice()));
+    assert_eq!(
+        (moved.recurrence_id, moved.start, moved.summary.as_str()),
+        (Some(t("2026-10-12T09:00:00Z")), t("2026-10-13T14:00:00Z"), "Weekly review, Tuesday")
+    );
+    assert!(moved.rrule.is_none());
+    assert!(sync.events.iter().any(|e| e.event.summary == "Review"), "the rest of the calendar");
+}
+
+/// Issue #229: a series whose every occurrence was deleted, which Exchange won't give
+/// (`ErrorRecurrenceHasNoOccurrence`), has nothing to show and isn't said to be unreadable: it
+/// was counted as an item the server refused, in a red notice at every start.
+#[test]
+fn a_series_with_no_occurrences_left_is_no_error() {
+    let (mut d, cal, _) = mailbox();
+    let empty = parse(
+        "<t:CalendarItem><t:Subject>Old stand-up</t:Subject><t:UID>old-1</t:UID>\
+         <t:Start>2026-10-05T09:00:00Z</t:Start><t:End>2026-10-05T09:15:00Z</t:End>\
+         <t:CalendarItemType>RecurringMaster</t:CalendarItemType>\
+         <t:Recurrence><t:DailyRecurrence><t:Interval>1</t:Interval></t:DailyRecurrence>\
+         <t:NumberedRecurrence><t:StartDate>2026-10-05Z</t:StartDate><t:NumberOfOccurrences>2</t:NumberOfOccurrences></t:NumberedRecurrence></t:Recurrence>\
+         <t:DeletedOccurrences><t:DeletedOccurrence><t:Start>2026-10-05T09:00:00Z</t:Start></t:DeletedOccurrence>\
+         <t:DeletedOccurrence><t:Start>2026-10-06T09:00:00Z</t:Start></t:DeletedOccurrence></t:DeletedOccurrences></t:CalendarItem>",
+    );
+    d.pim.push(PimItem::new("S9", cal, empty.kids[0].clone()));
+    let server = serve(d);
+    let c = crate::ews::Client::connect(&server.url, &format!("{DOMAIN}\\{USER}"), PASSWORD, "riley@contoso.example").unwrap();
+    let sync = crate::ews_pim::sync(&c, &Pim::default(), 1_792_000_000).unwrap();
+    assert!(sync.errors.is_empty(), "{:?}", sync.errors);
+    assert_eq!(sync.events.iter().map(|e| e.event.summary.as_str()).collect::<Vec<_>>(), ["Review"]);
+}
+
+/// Issue #144: a series the user accepted, sent to another of the account's addresses than its
+/// own, comes accepted: it came still waiting for their answer (and drawn as one), Exchange's
+/// answer being put only on the guest with the account's own address.
+#[test]
+fn an_answer_to_a_meeting_sent_to_another_address_is_the_users() {
+    let (mut d, cal, _) = mailbox();
+    let series = parse(
+        "<t:CalendarItem><t:Subject>Sprint planning</t:Subject><t:UID>sprint-1</t:UID>\
+         <t:Start>2026-10-05T13:00:00Z</t:Start><t:End>2026-10-05T14:00:00Z</t:End>\
+         <t:CalendarItemType>RecurringMaster</t:CalendarItemType><t:MyResponseType>Accept</t:MyResponseType>\
+         <t:Recurrence><t:WeeklyRecurrence><t:Interval>1</t:Interval><t:DaysOfWeek>Monday</t:DaysOfWeek></t:WeeklyRecurrence>\
+         <t:NoEndRecurrence><t:StartDate>2026-10-05Z</t:StartDate></t:NoEndRecurrence></t:Recurrence>\
+         <t:RequiredAttendees>\
+         <t:Attendee><t:Mailbox><t:EmailAddress>Riley.Lee@contoso.example</t:EmailAddress></t:Mailbox><t:ResponseType>Unknown</t:ResponseType></t:Attendee>\
+         <t:Attendee><t:Mailbox><t:EmailAddress>ana@contoso.example</t:EmailAddress></t:Mailbox><t:ResponseType>Unknown</t:ResponseType></t:Attendee>\
+         </t:RequiredAttendees></t:CalendarItem>",
+    );
+    d.pim.push(PimItem::new("S2", cal, series.kids[0].clone()));
+    let server = serve(d);
+    let store = store("answer-elsewhere");
+    let mut pool = crate::worker::Pool::new(store, Arc::new(crate::worker::MemoryCredentials::default()));
+    let mut account = account("a1", &server.url);
+    account.identities.push(mailcraft_model::Identity { email: "riley.lee@contoso.example".into(), ..Default::default() });
+    pool.submit(Job::Start { account, password: Some(Secret(PASSWORD.into())) });
+    let seen = until(&pool, "the calendar", |e| matches!(e, Event::DavSynced { .. }));
+    let Some(Event::DavSynced { sync, .. }) = seen.into_iter().next_back() else { panic!("no calendar") };
+    let sprint = sync.events.iter().find(|e| e.event.uid == "sprint-1").expect("the series");
+    let answers: Vec<(&str, &str)> = sprint.event.attendees.iter().map(|a| (a.email.as_str(), a.partstat.as_str())).collect();
+    assert_eq!(answers, [("Riley.Lee@contoso.example", "ACCEPTED"), ("ana@contoso.example", "NEEDS-ACTION")]);
+}

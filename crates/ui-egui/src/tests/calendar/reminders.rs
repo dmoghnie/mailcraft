@@ -209,3 +209,113 @@ fn the_ribbons_follow_up_menu_gives_a_reminder() {
         a.ui.dialog = None;
     }
 }
+
+/// Issue #220: Follow Up › Custom… is as tall as its fields, OK and Cancel under them at its
+/// bottom; it was as tall as the screen, the buttons halfway down. The new contact form's buttons
+/// too, on a tall window.
+#[test]
+fn small_forms_are_as_tall_as_their_fields() {
+    let (mut a, _) = app("follow-up-height");
+    let ctx = egui::Context::default();
+    frame(&ctx, &mut a, vec![]);
+    frame(&ctx, &mut a, vec![key(Key::Home, Modifiers::NONE)]);
+    let size = egui::vec2(1280.0, 2000.0);
+    let gap = |a: &mut MailApp, dialog: Dialog, last: &str| {
+        a.ui.dialog = Some(dialog);
+        let mut shown = Vec::new();
+        for _ in 0..4 {
+            shown = drawn_text(&ctx, a, size);
+        }
+        let at = |what: &str| shown.iter().find(|d| d.text == what).map(|d| d.rect).unwrap_or_else(|| panic!("no {what:?}"));
+        let (field, ok) = (at(last), at("Cancel"));
+        a.ui.dialog = None;
+        ok.top() - field.bottom()
+    };
+    let form = crate::pim_dialogs::FollowUpForm::for_selection(&a.session, false).expect("the form");
+    let custom = gap(&mut a, Dialog::FollowUp(Box::new(form)), "Remind me");
+    assert!(custom < 120.0, "Cancel {custom} below the reminder");
+    let contact = gap(&mut a, Dialog::Contact(Box::default()), "Notes");
+    assert!(contact < 400.0, "Cancel {contact} below the notes");
+}
+
+/// Issue #239: an online meeting's reminder has Join meeting beside Open Item, which opens its
+/// link at once; a meeting with no link, a task or flagged mail has none.
+#[test]
+fn a_meetings_reminder_joins_it() {
+    let (mut a, _) = app("reminder-join");
+    let ctx = egui::Context::default();
+    frame(&ctx, &mut a, vec![]);
+    let day = mailcraft_engine::model::dates::day_string(NOW.div_euclid(86_400));
+    let at = |s: i64| format!("{day}T{:02}:{:02}", s.div_euclid(3600).rem_euclid(24), s.div_euclid(60).rem_euclid(60));
+    let link = "https://teams.microsoft.com/l/meetup-join/19%3ameeting_abc%40thread.v2/0";
+    a.run("event.create", json!({"summary": "Stand-up", "start": at(NOW + 600), "reminder": 15, "location": link}));
+    a.run("event.create", json!({"summary": "Lunch", "start": at(NOW + 660), "reminder": 15}));
+    let size = egui::vec2(1280.0, 800.0);
+    let joins = |a: &mut MailApp, summary: &str| {
+        frame(&ctx, a, vec![]);
+        let key = a.ui.reminders.due.iter().find(|r| r.summary == summary).map(|r| r.key.clone()).expect("due");
+        a.ui.reminders.selected = Some(key);
+        let mut shown = Vec::new();
+        for _ in 0..3 {
+            shown = drawn_text(&ctx, a, size);
+        }
+        shown.iter().find(|d| d.text == "Join meeting").map(|d| d.rect.center())
+    };
+    assert!(joins(&mut a, "Lunch").is_none(), "no link, no Join");
+    let at = joins(&mut a, "Stand-up").expect("Join meeting");
+    a.session.notices.clear();
+    click(&ctx, &mut a, at);
+    frame(&ctx, &mut a, vec![]);
+    // The test's services open nothing: that they were asked to is the notice they give.
+    assert!(a.session.notices.iter().any(|n| n.text.contains("The link couldn't be opened")), "{:?}", a.session.notices);
+}
+
+/// Issue #224: an event's several reminders (Google's "an hour before and 2 minutes before") each
+/// have a list in its form; Add reminder gives one more and its button takes one away, and the
+/// form saves them all. A calendar that keeps one an event (Exchange's) isn't offered more.
+#[test]
+fn an_events_reminders_each_have_a_list_in_its_form() {
+    let (mut a, _) = app("several-reminders");
+    let ctx = egui::Context::default();
+    ctx.enable_accesskit();
+    a.run("event.create", json!({"summary": "Standup", "start": "2026-11-23T10:00", "reminders": [60, 2]}));
+    let e = a.session.pim_mut("sample").events.iter().find(|e| e.event.summary == "Standup").map(|e| e.event.clone()).expect("made");
+    let f = crate::pim_dialogs::EventForm::open(&a.session, &e.uid, e.start).expect("its form");
+    assert_eq!((f.reminder, f.more_reminders.clone()), (Some(60), vec![2]));
+    a.ui.dialog = Some(Dialog::Event(Box::new(f)));
+    let size = windows::layout::SIZE.with(std::cell::Cell::get);
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    let texts = drawn_strings(&ctx, &mut a, size);
+    assert!(has(&texts, "1 hour") && has(&texts, "2 minutes") && has(&texts, "Add reminder"), "{texts:?}");
+    let form = |a: &MailApp| match &a.ui.dialog {
+        Some(Dialog::Event(f)) => (f.reminder, f.more_reminders.clone()),
+        other => panic!("{other:?}"),
+    };
+    let add = drawn_text(&ctx, &mut a, size).into_iter().find(|d| d.text == "Add reminder").map(|d| d.rect.center()).expect("Add reminder");
+    click(&ctx, &mut a, add);
+    frame(&ctx, &mut a, vec![]);
+    assert_eq!(form(&a), (Some(60), vec![2, 15]), "one more, of Outlook's default");
+    // The topmost one's button (a screen reader's list of them isn't in the order they're drawn).
+    let first = named(&ctx, &mut a, size)
+        .iter()
+        .filter(|n| n.label.as_deref() == Some("Remove reminder"))
+        .filter_map(crate::tests::Named::centre)
+        .min_by(|x, y| x.y.total_cmp(&y.y))
+        .expect("Remove reminder");
+    click(&ctx, &mut a, first);
+    frame(&ctx, &mut a, vec![]);
+    assert_eq!(form(&a), (Some(60), vec![15]), "the first after the first gone");
+    let Some(Dialog::Event(f)) = &a.ui.dialog else { panic!("no form") };
+    let p = f.params();
+    assert_eq!(p["reminders"], json!([60, 15]));
+    a.act(crate::Action::Submit("event.update", p));
+    let back = a.session.find_event(&e.uid).map(|(_, e)| mailcraft_engine::model::ical::reminders_minutes(&e.event));
+    assert_eq!(back, Some(vec![60, 15]));
+    // On a calendar that keeps one an event: none offered past it.
+    let Some(Dialog::Event(f)) = &mut a.ui.dialog else { return };
+    f.one_reminder = vec!["sample".into()];
+    let texts = drawn_strings(&ctx, &mut a, size);
+    assert!(!has(&texts, "Add reminder"), "{texts:?}");
+}

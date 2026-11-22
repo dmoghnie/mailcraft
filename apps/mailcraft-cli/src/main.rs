@@ -399,6 +399,15 @@ fn sender_warning_text(w: &serde_json::Value) -> String {
 mod real_meetings;
 
 #[cfg(test)]
+mod real_names;
+
+#[cfg(test)]
+mod real_photos;
+
+#[cfg(test)]
+mod real_sent_rules;
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use mailcraft_engine::model::job::Op;

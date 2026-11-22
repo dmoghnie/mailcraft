@@ -8,10 +8,33 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 version is a milestone, named in italics under its heading. Numbers like (#11) are tester issues
 on GitHub.
 
-## Unreleased
+## 0.42.0
+
+*What testers met in their first days with 0.41.*
+
+Thanks to kzoli and kovadam69 for the Hungarian translation and dates written year first (#198).
 
 ### Added
 
+- Hungarian as an interface language (#198): **File › Options › General › Language › Magyar**, and a Hungarian system picks it.
+- Polish as an interface language (#226): **File › Options › General › Language › Polski**, and a Polish system picks it.
+- Dates can be written year first, with dots (2026.10.28), as Hungary writes them (#198): **File › Options › General › Dates**; a date typed in a form is read so, and MailCraft's own 2026-10-28 still is.
+- Invitations in the Inbox… in the calendar (#237) finds the meetings waiting for your answer there that your calendar hasn't got (mail from before the account was added here, which nothing took in): still to come, not called off since, not answered already, each in its newest version. Those you tick go into the calendar unanswered, on its server too, with no answer sent.
+- Forward on a meeting you're invited to (#234), on its invitation and in its form: the organizer's invitation goes to the people you name, with them among its guests, so their program shows it as a meeting to answer; your own answer stays. Their answer reaches the organizer, whose copy offers to add them. A meeting whose organizer doesn't allow forwarding isn't forwarded.
+- Propose new time, on a meeting invitation (#238), as Outlook's: the time you'd rather have goes to the organizer, with Tentative or Decline beside it if you like. As organizer, a proposal shows who proposes what, with Accept proposal (the meeting moves, and every guest is sent it) and Decline proposal (the guest is told). An organizer who takes no proposals isn't offered one.
+- People's photos show where their initials were (#223): a contact's own photo, as the card in your address book has it, and on on-premises Exchange the photo your organisation has for them, in the message list, above the message, on the contact card and in People. A photo kept at a web address isn't fetched.
+- Rules can be for mail you send (#202), as Outlook's can: Applies to › Mail you send in the rule editor. As each message's copy reaches Sent, the rule files it in a folder, archives, categorizes, flags or deletes it; Run now runs it on what's in Sent already. Mail you move into Sent yourself is left alone.
+- Check Names, as Outlook's (#211): Ctrl+K in To, Cc or Bcc, or Check Names beside Address Book, puts in the one person a name typed is, from the people you know and the organisation's directory (Exchange, Microsoft 365); a name that could be several people offers them to pick from, and one found nowhere is said. A name the directory is still being asked about is checked again once it answers.
+- On an IMAP server that offers NOTIFY (Dovecot, so Mailcow too), mail the server's own rules file into another folder shows as it arrives (#232), not at the next look: only the Inbox was watched. A server without it (Gmail, Exchange…) is looked at as before.
+- Guests' answers to your meetings are recorded in the calendar as they arrive (#236), as Outlook records them: Record guests' answers in File › Options (on). One from someone not on the guest list, or to an earlier version, still waits for Record the answer, and an answer's card says when it's recorded (the button said nothing once clicked).
+- An event can have several reminders (#224): each comes in turn, so Google's "an hour before and 2 minutes before" reminds twice (only the first reminded), and the event form shows each, with Add reminder and a button to take one away. Not on an Exchange calendar, which keeps one an event, as Outlook does.
+- A reminder of an online meeting (Teams, Zoom, Webex, your own rooms…) has Join meeting beside Open Item (#239).
+- A calendar group's menu has Add people…, to put more people in it (#209): it had only Delete.
+- Picking people for a calendar group or a shared calendar shows them as names, in rows that grow and then scroll, each with its × (#210): the box kept one size and showed names and addresses.
+- The Address Book shows people's job titles and departments where the organisation's directory gives them (Exchange, Microsoft 365), as Outlook's does (#213).
+- In the calendar's Day, Work week and Week, dragging over the hours makes a new event that long (#212): a click made half an hour's, and a longer one needed its end changed in the form.
+- The Schedule view has Only work hours: its time line over the hours anyone shown works, from the earliest start to the latest end, as Outlook's Scheduling Assistant can show (#206).
+- On Exchange, a colleague's calendar opened here (on its own, or in a calendar group) is named as the directory names them, in the calendar list and the Schedule view (#222): it was labelled with their address.
 - MailCraft follows the system's setting for less motion: **Reduce motion** on a Mac (System Settings › Accessibility › Display), **Animation effects** on Windows (Settings › Accessibility › Visual effects), and on Linux and the BSDs the desktop's own, as its desktop portal passes it on. Nothing slides or fades while it's on, as with Play animations off.
 - AI agents can drive MailCraft through MCP: an agent's app starts `mailcraft mcp`, which reaches the running window and offers two tools, list_commands and run_command, for every command the window has. It's off until you turn on File › Options › Safety › Let AI agents control MailCraft, and an agent then only reads and searches until **Let AI agents send, delete and change settings** is on too ([docs/mcp.md](docs/mcp.md)).
 - Adding an account: a JMAP server the domain names in DNS (its `_jmap._tcp` record, as Fastmail publishes) is found. The dialog says "It offers JMAP too" with Use JMAP, and picks JMAP when it's the only server named; `mailcraft-cli add` says so too.
@@ -28,11 +51,35 @@ on GitHub.
 
 ### Fixed
 
+- The message list's Pinned heading is in your language: it showed in English in every language (#198).
+- The labels of the event, task and contact forms no longer run into their fields (#198): the labels' column is as wide as the longest label in your language (Hungarian, German, Spanish, Polish, Russian, Slovak and Arabic had some too long for it, and English its Repeats every).
+- Compact now gives back what File › Info says can be reclaimed, and the room stays given back (#221): a data file under 4 GB is copied into a new file (compacted in place, its database doubled it again at its next write, so it grew: 1.5 GB became 1.8 GB), and what the card offers is only what compacting gives back for good (it offered room the database fills again at once, then said "Nothing to give back").
+- Mail moved to another folder no longer leaves a copy of itself behind in the data file (#221): each move kept the moved messages' old copies for good, in no folder, so the file only grew (2,453 messages moved to Deleted Items and emptied kept their 2 GB). Any account, Exchange, IMAP or a data file kept here.
+- A message written in Calibri, or another font with built-in pictures of its letters for some sizes, shows every letter (#166): most of Calibri's letters were drawn in white, whatever the text's colour, and didn't show on the page.
+- On Exchange, a repeating meeting you accepted shows as accepted when it was sent to another of your addresses (#144): Exchange's answer was put only on your account's own address, so a meeting sent to an address you added to the account, or to the name you sign in with, kept waiting for your answer and was drawn as one.
+- On Exchange, a single occurrence of a repeating meeting moved or cancelled shows as it is (#204): MailCraft kept the series' usual time on that day, and a cancelled occurrence stayed. A moved one is read with its own time, subject and guests, in place of the occurrence it stands for.
+- On Exchange, a repeating meeting with every occurrence deleted no longer brings a red notice at each start (#229): Exchange won't give such a series, and MailCraft counted it as an appointment it couldn't read. It has nothing to show, and is left out quietly.
+- On Exchange, a task deleted in MailCraft is deleted on the server too (#230): Exchange refused the deletion ("AffectedTaskOccurrences attribute is required for Task items"), the task stayed there, and the refusal came back as a red notice at each start.
+- The To-Do Bar's appointments are from your own calendars (#205): a colleague's calendar opened here put their events among yours, a holiday of theirs under Today, and made their days bold in the bar's month. They stay in the Calendar.
+- On Exchange, the people of a new calendar group, or a colleague's calendar opened, show in seconds (#208): they were read with the next whole calendar pass, minutes later on a big mailbox, after any pass under way. Their free/busy times are asked at once too, not after a pass.
+- On Exchange behind a load balancer, mail an Inbox rule files comes with the next look for new mail, every time (#145): the server's word on which folders changed was kept by one of its servers, and a look that reached another was told it wasn't found; what came meanwhile waited for the next full sync. MailCraft now asks to keep to the server that has it, as Exchange wants.
+- Send / Receive's progress shows an Exchange account too (#231): its folders as they're read (n of m) and its Outbox, as an IMAP account's. The window said nothing had been sent or received while the status bar said its folders were being updated.
+- A search's heading above the message list is cut short where it's too long, the whole of it on hover (#200): a long query widened the list as far as it goes, and the heading still ran past its edge.
+- In Rules, a rule made in another program is cut short before its row's buttons (#214): its note ran under ↑, ↓ and Delete, and past the dialog's edge. The local rules and Categories were the same.
+- The read, flag and delete buttons on a message's row act on that message alone (#216): they selected it too, and what was selected and open before was lost.
+- The subject above a message can be selected and copied, as its text can (#217).
+- Follow Up › Custom… is as tall as its fields, OK and Cancel at its bottom (#220): it opened as tall as the screen, its buttons halfway down. The contact form's buttons were the same.
+- In Russian, the message list's weekday headings start with a capital (Понедельник, under Сегодня and Вчера), and a month after its day number takes the form it has there (четверг, 17 декабря 2026); in Slovak too (17. decembra) (#215).
+- In the dark theme, a pale highlight behind text stays (#227): Jira's pale pink and green marks of what changed were dropped with the grey boxes, and the old and new values read as one. Grey and white boxes still go.
+- An Apple Mail link card (a shared album, a web page) shows its picture and opens its link when clicked, with Open link and Copy link on its menu (#225): only an empty box was drawn. Pictures written into a message's HTML show as those sent with it do, and what a link around a box holds opens it.
+- In the To-Do Bar, an appointment's "In N min" sits above its time, and its title keeps all its room (#195): at the row's end it hid the end of the title.
+- An invitation's card says how it repeats (Repeats · Every week), and draws the invitation on a line of its own above your events, its name and theirs no longer written over each other (#194).
+- The guests of a repeating meeting told that one occurrence is called off are told which, by its date and time (#235): the message read as if the whole series were cancelled.
 - Sending, and checking a new account's sign-in: an outgoing server's address that takes no connection (an IPv6 one, often) holds MailCraft a few seconds before the next is tried, not a minute.
 - A Gmail or Google Workspace account no longer spends a minute looking for calendars and contacts when it's added and once a day after: Google's take only Google sign-in, so none are looked for. An address given in **File › Info › Account settings › Calendar server…** is still used.
 - Adding an account: when no settings were found for an address (looked up while this computer was offline, say), leaving its box looks again. It said "No published settings" for that address until MailCraft was restarted.
 
-## 0.41.0
+## 0.41.0 - 2026-11-20
 
 *What testers met in their first days with 0.40.*
 

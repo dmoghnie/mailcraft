@@ -209,6 +209,7 @@
 	Pictures from the web are hidden to protect your privacy.	Obrázky z webu sú skryté kvôli ochrane vášho súkromia.
 	Picture…	Obrázok…
 	Pin	Pripnúť
+	Pinned	Pripnuté
 	Plain text	Obyčajný text
 	Preview	Ukážka
 	Print	Tlačiť
@@ -231,7 +232,7 @@
 	Results for “{query}”	Výsledky pre „{query}“
 	Right	Vpravo
 	Rules	Pravidlá
-	Rules run on new mail as it arrives in an Inbox, in this order.	Pravidlá sa v tomto poradí spúšťajú na novú poštu, keď príde do priečinka Doručená pošta.
+	Rules run in this order, on new mail as it arrives in an Inbox, and on mail you send as its copy reaches Sent.	Pravidlá sa spúšťajú v tomto poradí na novú poštu, keď príde do Doručenej pošty, a na poštu, ktorú odosielate, keď jej kópia príde do Odoslanej pošty.
 	Rules…	Pravidlá…
 	Run now	Spustiť teraz
 	Run on the folder on screen	Spustiť na zobrazenom priečinku
@@ -444,7 +445,7 @@
 	Formatting, colours and pictures are left out. Show formatted, above a message, shows that one as it was sent.	Formátovanie, farby a obrázky sa vynechajú. Príkaz Zobraziť formátované nad správou zobrazí danú správu tak, ako bola odoslaná.
 	Show mail without its formatting	Zobrazovať poštu bez formátovania
 	Show a line of each message in the list	V zozname zobrazovať riadok z každej správy
-	Sort new mail as it arrives: move it, flag it, categorize it.	Triedenie novej pošty pri príchode: presunúť, označiť príznakom, zaradiť do kategórie.
+	Sort mail as it arrives, or as you send it: move it, flag it, categorize it.	Triediť poštu pri doručení alebo odoslaní: presunúť, označiť príznakom, zaradiť do kategórie.
 	Source code and issues	Zdrojový kód a hlásenia chýb
 	Subject (optional)	Predmet (nepovinné)
 	Tell people you're away: each sender gets one reply while they're on, even when this computer is off.	Dajte ľuďom vedieť, že ste preč: každý odosielateľ dostane jednu odpoveď, kým sú zapnuté, aj keď je tento počítač vypnutý.
@@ -939,7 +940,6 @@
 	Rules saved in {file}: {n}	Pravidlá uložené do {file}: {n}
 	Save {n} Selected…	Uložiť vybrané ({n})…
 	Run all	Spustiť všetky
-	Run every rule that's on, on the mail already in the Inbox	Spustiť každé zapnuté pravidlo na poštu, ktorá už je v priečinku Doručená pošta
 	Find a rule	Nájsť pravidlo
 	No rule matches.	Žiadne pravidlo nezodpovedá.
 	 and {n} more	 a ďalšie ({n})
@@ -977,6 +977,20 @@ folder	Archive	Archív
 
 # A month's full name, where it differs from its short form.
 month	May	máj
+
+# A month's name in a date, after its day (17 December 2026), where that differs.
+date	January	januára
+date	February	februára
+date	March	marca
+date	April	apríla
+date	May	mája
+date	June	júna
+date	July	júla
+date	August	augusta
+date	September	septembra
+date	October	októbra
+date	November	novembra
+date	December	decembra
 	Add shared mailbox…	Pridať zdieľanú schránku…
 	Remove shared mailbox	Odstrániť zdieľanú schránku
 	Opened by the server for your access to it	Otvorené serverom na základe vášho prístupu
@@ -1965,3 +1979,41 @@ count	occurrences	opakovaní
 	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	Aplikácia AI pripojená príkazom mailcraft mcp môže čítať a prehľadávať vašu poštu. Zapnite to len pre agenta, ktorému dôverujete
 	Let AI agents send, delete and change settings	Povoliť agentom AI odosielať, odstraňovať a meniť nastavenia
 	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	Bez tohto môže agent vašu poštu len čítať a prehľadávať. S týmto môže spúšťať ľubovoľné príkazy: odosielať, odpovedať, odstraňovať, presúvať a meniť nastavenia. Zapnite to len pre agenta, ktorému dôverujete
+	Copy link	Kopírovať odkaz
+	Add people…	Pridať ľudí…
+	Add people to the group	Pridať ľudí do skupiny
+	Department	Oddelenie
+	Only work hours	Iba pracovný čas
+	Add reminder	Pridať pripomenutie
+	Remove reminder	Odstrániť pripomenutie
+	Recorded in your calendar.	Zaznamenané v kalendári.
+	Record guests' answers to your meetings as they arrive	Zaznamenávať odpovede hostí na vaše schôdze pri príchode
+	One from someone not on the guest list, or to an earlier version, waits for Record the answer	Odpoveď od niekoho, kto nie je v zozname hostí, alebo na staršiu verziu čaká na „Zaznamenať odpoveď“
+	Check Names	Skontrolovať mená
+	Ctrl+K in To, Cc or Bcc	Ctrl+K v poli Komu, Kópia alebo Skrytá kópia
+	No one found for {names}	Pre {names} sa nikto nenašiel
+	Still looking up {names} in the directory	{names} sa ešte hľadá v adresári
+	More than one person could be “{typed}”. Pick the one you meant:	„{typed}“ môže byť viac ako jedna osoba. Vyberte tú, ktorú ste mysleli:
+	Applies to	Platí pre
+	Mail that arrives	Prichádzajúcu poštu
+	Mail you send	Poštu, ktorú odosielate
+	Run it now on the mail already in Sent	Spustiť teraz na poštu, ktorá už je v Odoslanej pošte
+	If mail you send {condition}: {action}	Ak pošta, ktorú odosielate, {condition}: {action}
+	Run every rule that's on, on the mail already in the Inbox (and in Sent, for mail you send)	Spustí každé zapnuté pravidlo na poštu, ktorá už je v Doručenej pošte (a v Odoslanej pošte pre poštu, ktorú odosielate)
+	Accept proposal	Prijať návrh
+	Decline proposal	Odmietnuť návrh
+	Propose new time	Navrhnúť nový čas
+	Send proposal	Odoslať návrh
+	Start	Začiatok
+	End	Koniec
+	The organizer declined your proposed time: the meeting stays as it was.	Organizátor odmietol vami navrhnutý čas: schôdza zostáva tak, ako bola.
+	Your answer	Vaša odpoveď
+	{name} proposes a new time: {when}	{name} navrhuje nový čas: {when}
+	Forward meeting	Preposlať schôdzu
+	Forward meeting…	Preposlať schôdzu…
+	Invitations in the Inbox	Pozvánky v Doručenej pošte
+	Invitations in the Inbox…	Pozvánky v Doručenej pošte…
+	Meetings waiting for your answer that your calendar doesn't have yet. Those you tick go in unanswered.	Schôdze, ktoré čakajú na vašu odpoveď a ešte nie sú v kalendári. Označené sa pridajú bez odpovede.
+	None: every invitation in the Inbox is in your calendar or answered.	Žiadne: každá pozvánka v Doručenej pošte je v kalendári alebo zodpovedaná.
+	Put in calendar	Pridať do kalendára
+	Still reading {n} messages…	Ešte sa číta správ: {n}…

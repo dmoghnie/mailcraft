@@ -164,9 +164,16 @@ pub enum Job {
     /// Sync the account's calendars and address books with its CalDAV / CardDAV server (changes
     /// made here first).
     SyncDav { account: String },
+    /// Read the calendars of these people just opened (Open shared calendar, a calendar group;
+    /// addresses, lower-case) on their own, not with the whole calendar pass (issue #208: they
+    /// came minutes later, after it); answered by [`Event::DavSynced`] with only theirs.
+    ReadShared { account: String, people: Vec<String> },
     /// Look people up in the account's organisation directory (Exchange's Global Address List,
     /// issue #9), asked of the server each time; answered by [`Event::Directory`].
     SearchDirectory { account: String, query: String },
+    /// Ask the account's server for the photo the organisation has for someone (issue #223,
+    /// Exchange's `GetUserPhoto`); answered by [`Event::Photo`].
+    FetchPhoto { account: String, email: String },
     /// Ask the server when these people's calendars are taken, between `from` and `to` (issue
     /// #140, Exchange's availability service); answered by [`Event::FreeBusy`].
     FreeBusy { account: String, people: Vec<String>, from: i64, to: i64 },
@@ -366,7 +373,9 @@ impl Job {
             | Job::GetServerRules { account }
             | Job::SetServerRules { account, .. }
             | Job::SyncDav { account }
+            | Job::ReadShared { account, .. }
             | Job::SearchDirectory { account, .. }
+            | Job::FetchPhoto { account, .. }
             | Job::FreeBusy { account, .. }
             | Job::FetchCalendar { account, .. }
             | Job::ImportPst { account, .. }
@@ -726,15 +735,22 @@ pub enum Event {
         error: Option<String>,
         done: bool,
     },
-    /// Who the directory found for a [`Job::SearchDirectory`]: (name, address) each, or why it
-    /// couldn't look. `consent`: the account needs the user's permission first
-    /// ([`Job::AllowDirectory`]).
+    /// Who the directory found for a [`Job::SearchDirectory`], or why it couldn't look.
+    /// `consent`: the account needs the user's permission first ([`Job::AllowDirectory`]).
     Directory {
         account: String,
         query: String,
-        people: Vec<(String, String)>,
+        people: Vec<DirectoryPerson>,
         error: Option<String>,
         consent: bool,
+    },
+    /// The photo a [`Job::FetchPhoto`] found (`None`: the server has none), or why it couldn't
+    /// ask.
+    Photo {
+        account: String,
+        email: String,
+        photo: Option<Vec<u8>>,
+        error: Option<String>,
     },
     /// What [`Job::AllowDirectory`] came to: allowed, or why not.
     DirectoryAllowed {
@@ -797,3 +813,16 @@ pub enum Event {
 
 #[cfg(test)]
 mod tests;
+
+/// Someone the organisation's directory found (Outlook's Global Address List, issue #9): their
+/// name and address, and their job title and department where it says (issue #213: namesakes
+/// couldn't be told apart).
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DirectoryPerson {
+    pub name: String,
+    pub email: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub title: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub department: String,
+}

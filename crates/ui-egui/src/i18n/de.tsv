@@ -209,6 +209,7 @@
 	Pictures from the web are hidden to protect your privacy.	Bilder aus dem Web werden zum Schutz Ihrer Privatsphäre ausgeblendet.
 	Picture…	Bild…
 	Pin	Anheften
+	Pinned	Angeheftet
 	Plain text	Nur-Text
 	Preview	Vorschau
 	Print	Drucken
@@ -231,7 +232,7 @@
 	Results for “{query}”	Ergebnisse für „{query}“
 	Right	Rechts
 	Rules	Regeln
-	Rules run on new mail as it arrives in an Inbox, in this order.	Regeln werden in dieser Reihenfolge auf neue E-Mails angewendet, sobald sie in einem Posteingang eintreffen.
+	Rules run in this order, on new mail as it arrives in an Inbox, and on mail you send as its copy reaches Sent.	Regeln werden in dieser Reihenfolge angewendet: auf neue E-Mails, sobald sie in einem Posteingang eintreffen, und auf gesendete E-Mails, sobald ihre Kopie in „Gesendete Elemente“ liegt.
 	Rules…	Regeln…
 	Run now	Jetzt ausführen
 	Run on the folder on screen	Auf den angezeigten Ordner anwenden
@@ -444,7 +445,7 @@
 	Formatting, colours and pictures are left out. Show formatted, above a message, shows that one as it was sent.	Formatierung, Farben und Bilder werden weggelassen. „Formatiert anzeigen“ über einer Nachricht zeigt diese so, wie sie gesendet wurde.
 	Show mail without its formatting	E-Mails ohne Formatierung anzeigen
 	Show a line of each message in the list	Eine Zeile jeder Nachricht in der Liste anzeigen
-	Sort new mail as it arrives: move it, flag it, categorize it.	Neue E-Mails beim Eintreffen sortieren: verschieben, kennzeichnen, kategorisieren.
+	Sort mail as it arrives, or as you send it: move it, flag it, categorize it.	E-Mails beim Eintreffen oder Senden sortieren: verschieben, kennzeichnen, kategorisieren.
 	Source code and issues	Quellcode und Fehlermeldungen
 	Subject (optional)	Betreff (optional)
 	Tell people you're away: each sender gets one reply while they're on, even when this computer is off.	Teilen Sie mit, dass Sie abwesend sind: Jeder Absender erhält eine Antwort, solange sie aktiv sind, auch wenn dieser Computer aus ist.
@@ -939,7 +940,6 @@
 	Rules saved in {file}: {n}	In {file} gespeicherte Regeln: {n}
 	Save {n} Selected…	{n} ausgewählte speichern…
 	Run all	Alle ausführen
-	Run every rule that's on, on the mail already in the Inbox	Führt alle eingeschalteten Regeln für die E-Mails aus, die schon im Posteingang sind
 	Find a rule	Regel suchen
 	No rule matches.	Keine Regel passt.
 	 and {n} more	 und {n} weitere
@@ -1965,3 +1965,41 @@ count	occurrences	Terminen
 	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	Eine KI-App, die mit dem Befehl mailcraft mcp verbunden ist, kann Ihre E-Mails lesen und durchsuchen. Schalten Sie dies nur für einen Agenten ein, dem Sie vertrauen
 	Let AI agents send, delete and change settings	KI-Agenten senden, löschen und Einstellungen ändern lassen
 	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	Ohne dies kann ein Agent Ihre E-Mails nur lesen und durchsuchen. Damit kann er jeden Befehl ausführen: senden, antworten, löschen, verschieben und Einstellungen ändern. Schalten Sie dies nur für einen Agenten ein, dem Sie vertrauen
+	Copy link	Link kopieren
+	Add people…	Personen hinzufügen…
+	Add people to the group	Personen zur Gruppe hinzufügen
+	Department	Abteilung
+	Only work hours	Nur Arbeitszeit
+	Add reminder	Erinnerung hinzufügen
+	Remove reminder	Erinnerung entfernen
+	Recorded in your calendar.	In Ihren Kalender übernommen.
+	Record guests' answers to your meetings as they arrive	Antworten der Gäste auf Ihre Besprechungen beim Eintreffen übernehmen
+	One from someone not on the guest list, or to an earlier version, waits for Record the answer	Eine Antwort von jemandem, der nicht eingeladen ist, oder auf eine frühere Fassung wartet auf „Antwort übernehmen“
+	Check Names	Namen überprüfen
+	Ctrl+K in To, Cc or Bcc	Strg+K in An, Cc oder Bcc
+	No one found for {names}	Niemand gefunden für {names}
+	Still looking up {names} in the directory	{names} wird noch im Verzeichnis gesucht
+	More than one person could be “{typed}”. Pick the one you meant:	„{typed}“ könnte mehr als eine Person sein. Wählen Sie die gemeinte:
+	Applies to	Gilt für
+	Mail that arrives	Eingehende E-Mails
+	Mail you send	E-Mails, die Sie senden
+	Run it now on the mail already in Sent	Jetzt auf die E-Mails in „Gesendete Elemente“ anwenden
+	If mail you send {condition}: {action}	Wenn eine gesendete E-Mail {condition}: {action}
+	Run every rule that's on, on the mail already in the Inbox (and in Sent, for mail you send)	Führt alle eingeschalteten Regeln für die E-Mails aus, die schon im Posteingang sind (und für gesendete E-Mails in „Gesendete Elemente“)
+	Accept proposal	Vorschlag annehmen
+	Decline proposal	Vorschlag ablehnen
+	Propose new time	Neue Zeit vorschlagen
+	Send proposal	Vorschlag senden
+	Start	Beginn
+	End	Ende
+	The organizer declined your proposed time: the meeting stays as it was.	Der Organisator hat Ihre vorgeschlagene Zeit abgelehnt: Die Besprechung bleibt, wie sie war.
+	Your answer	Ihre Antwort
+	{name} proposes a new time: {when}	{name} schlägt eine neue Zeit vor: {when}
+	Forward meeting	Besprechung weiterleiten
+	Forward meeting…	Besprechung weiterleiten…
+	Invitations in the Inbox	Einladungen im Posteingang
+	Invitations in the Inbox…	Einladungen im Posteingang…
+	Meetings waiting for your answer that your calendar doesn't have yet. Those you tick go in unanswered.	Besprechungen, die auf Ihre Antwort warten und noch nicht in Ihrem Kalender sind. Die angehakten werden unbeantwortet eingetragen.
+	None: every invitation in the Inbox is in your calendar or answered.	Keine: Jede Einladung im Posteingang ist in Ihrem Kalender oder beantwortet.
+	Put in calendar	In den Kalender
+	Still reading {n} messages…	{n} Nachrichten werden noch gelesen…

@@ -12,8 +12,14 @@ impl Data {
             if self.unrouted(&folder) || self.refuses_folder(&folder) {
                 return vec![err(if self.unrouted(&folder) { "ErrorFolderNotFound" } else { "ErrorAccessDenied" })];
             }
-            let items: String =
-                self.pim.iter().filter(|p| p.folder == folder).map(|p| format!("<t:Item><t:ItemId Id=\"{}\"/></t:Item>", p.id)).collect();
+            // A series' changed occurrences aren't listed, as Exchange's listing (with no
+            // calendar view) gives the series alone: they're read by the ids it names.
+            let items: String = self
+                .pim
+                .iter()
+                .filter(|p| p.folder == folder && p.el.text_of("CalendarItemType") != Some("Exception"))
+                .map(|p| format!("<t:Item><t:ItemId Id=\"{}\"/></t:Item>", p.id))
+                .collect();
             return vec![ok(format!("<m:RootFolder IncludesLastItemInRange=\"true\"><t:Items>{items}</t:Items></m:RootFolder>"))];
         }
         // A folder the mailbox hasn't (a Notes folder, say): as Exchange answers.
@@ -261,6 +267,12 @@ impl Data {
             }
             if !self.items.iter().any(|i| i.id == id) && !self.pim.iter().any(|p| p.id == id) {
                 out.push(err("ErrorItemNotFound"));
+                continue;
+            }
+            // A task is deleted only with `AffectedTaskOccurrences` said, as Exchange wants it
+            // (issue #230); other items take it too.
+            if op.attr("AffectedTaskOccurrences").is_none() && self.pim.iter().any(|p| p.id == id && p.el.name == "Task") {
+                out.push(err("ErrorInvalidRequest"));
                 continue;
             }
             self.items.retain(|i| i.id != id);

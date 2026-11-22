@@ -209,6 +209,7 @@
 	Pictures from the web are hidden to protect your privacy.	为保护你的隐私，已隐藏来自网络的图片。
 	Picture…	图片…
 	Pin	置顶
+	Pinned	已置顶
 	Plain text	纯文本
 	Preview	预览
 	Print	打印
@@ -231,7 +232,7 @@
 	Results for “{query}”	“{query}”的结果
 	Right	右侧
 	Rules	规则
-	Rules run on new mail as it arrives in an Inbox, in this order.	新邮件到达收件箱时，按此顺序运行规则。
+	Rules run in this order, on new mail as it arrives in an Inbox, and on mail you send as its copy reaches Sent.	规则按此顺序运行：新邮件到达收件箱时，以及你发送的邮件副本到达“已发送邮件”时。
 	Rules…	规则…
 	Run now	立即运行
 	Run on the folder on screen	在当前显示的文件夹上运行
@@ -443,7 +444,7 @@
 	Formatting, colours and pictures are left out. Show formatted, above a message, shows that one as it was sent.	将省略格式、颜色和图片。邮件上方的“显示格式”可按原样显示该邮件。
 	Show mail without its formatting	显示邮件但不带格式
 	Show a line of each message in the list	在列表中显示每封邮件的一行内容
-	Sort new mail as it arrives: move it, flag it, categorize it.	在新邮件到达时整理: 移动、标记、分类。
+	Sort mail as it arrives, or as you send it: move it, flag it, categorize it.	在邮件到达或发送时整理：移动、标记、分类。
 	Source code and issues	源代码和问题反馈
 	Subject (optional)	主题 (可选)
 	Tell people you're away: each sender gets one reply while they're on, even when this computer is off.	告知他人你不在: 开启期间每位发件人收到一次答复，即使这台电脑关机也有效。
@@ -941,7 +942,6 @@ month	May	5月
 	Rules saved in {file}: {n}	已将 {n} 条规则保存到 {file}
 	Save {n} Selected…	保存所选的 {n} 个…
 	Run all	全部运行
-	Run every rule that's on, on the mail already in the Inbox	对收件箱中已有的邮件运行所有已打开的规则
 	Find a rule	查找规则
 	No rule matches.	没有匹配的规则。
 	 and {n} more	 等另外 {n} 人
@@ -1961,3 +1961,41 @@ count	occurrences	次
 	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	通过 mailcraft mcp 命令连接的 AI 应用可以读取和搜索你的邮件。仅对你信任的代理开启
 	Let AI agents send, delete and change settings	允许 AI 代理发送、删除和更改设置
 	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	未开启时，代理只能读取和搜索你的邮件。开启后，它可以运行任何命令：发送、回复、删除、移动和更改设置。仅对你信任的代理开启
+	Copy link	复制链接
+	Add people…	添加人员…
+	Add people to the group	将人员添加到组
+	Department	部门
+	Only work hours	仅工作时间
+	Add reminder	添加提醒
+	Remove reminder	移除提醒
+	Recorded in your calendar.	已记录到日历。
+	Record guests' answers to your meetings as they arrive	收到时记录来宾对你的会议的答复
+	One from someone not on the guest list, or to an earlier version, waits for Record the answer	来自来宾名单以外的人或针对早先版本的答复，等待“记录答复”
+	Check Names	检查姓名
+	Ctrl+K in To, Cc or Bcc	在收件人、抄送或密送中按 Ctrl+K
+	No one found for {names}	找不到 {names}
+	Still looking up {names} in the directory	仍在目录中查找 {names}
+	More than one person could be “{typed}”. Pick the one you meant:	“{typed}”可能是多个人。请选择你要的那位：
+	Applies to	适用于
+	Mail that arrives	收到的邮件
+	Mail you send	你发送的邮件
+	Run it now on the mail already in Sent	立即对“已发送邮件”中的邮件运行
+	If mail you send {condition}: {action}	如果你发送的邮件{condition}: {action}
+	Run every rule that's on, on the mail already in the Inbox (and in Sent, for mail you send)	对收件箱中已有的邮件运行每条已开启的规则（对你发送的邮件，则在“已发送邮件”中）
+	Accept proposal	接受提议
+	Decline proposal	拒绝提议
+	Propose new time	提议新时间
+	Send proposal	发送提议
+	Start	开始
+	End	结束
+	The organizer declined your proposed time: the meeting stays as it was.	组织者拒绝了你提议的时间：会议保持不变。
+	Your answer	你的答复
+	{name} proposes a new time: {when}	{name} 提议了新时间：{when}
+	Forward meeting	转发会议
+	Forward meeting…	转发会议…
+	Invitations in the Inbox	收件箱中的邀请
+	Invitations in the Inbox…	收件箱中的邀请…
+	Meetings waiting for your answer that your calendar doesn't have yet. Those you tick go in unanswered.	等待你答复、日历中还没有的会议。勾选的会以未答复状态加入。
+	None: every invitation in the Inbox is in your calendar or answered.	没有：收件箱中的每个邀请都已在日历中或已答复。
+	Put in calendar	放入日历
+	Still reading {n} messages…	仍在读取 {n} 封邮件…

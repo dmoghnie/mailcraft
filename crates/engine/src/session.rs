@@ -26,6 +26,7 @@ mod events;
 mod mailboxes;
 mod opening;
 mod organize;
+mod photos;
 mod prefs;
 mod searching;
 mod security;
@@ -56,7 +57,7 @@ pub use writing::{Compose, Drafted, Quote, Reactions, SendBlock, SendCheck, UNDO
 // The message list's arrangement and rows, named here as before.
 #[cfg(test)]
 pub(crate) use mailboxes::arrange_list;
-pub use mailboxes::{ARRANGE_HEADINGS, Arrange, ListFilter, Row};
+pub use mailboxes::{ARRANGE_HEADINGS, Arrange, ListFilter, PINNED_HEADING, Row};
 // Organizing mail's own parts, named here as before.
 pub use opening::SenderMarks;
 pub use organize::{junk, quick_steps, search_folders, server_rules};
@@ -357,6 +358,8 @@ pub struct Session {
     contacts_kept: Option<(ContactBook, i64)>,
     /// The organisation directory's answers (issue #9).
     pub directory: pim::Directory,
+    /// People's photos (issue #223).
+    pub photos: photos::Photos,
     /// Address books counted so far (each count starts the sender check again).
     pub(crate) contacts_built: u64,
     /// The sender check ([`Session::keep_senders`]): kept a while, since the address book is
@@ -385,6 +388,9 @@ pub struct Session {
     pub(crate) seen_uid: HashMap<(String, String), (u32, u32)>,
     /// Mail the user put in a server account's Inbox or Junk, not mail arriving there.
     pub(crate) moved_in: changing::MovedIn,
+    /// Mail sent from here whose copy in Sent the rules for mail sent wait for (issue #202), by
+    /// (account, "", Message-ID).
+    pub(crate) sent_here: changing::MovedIn,
     /// When mail was last moved (Unix seconds): its Undo waits for a server to have moved it.
     pub(crate) moved_at: i64,
     /// Mail moved or copied into a folder on this computer, waiting for its source (issue #82).
@@ -546,6 +552,7 @@ impl Session {
             contacts_at: 0,
             contacts_kept: None,
             directory: pim::Directory::default(),
+            photos: photos::Photos::default(),
             contacts_built: 0,
             senders: None,
             smime: HashMap::new(),
@@ -561,6 +568,7 @@ impl Session {
             pgp: Default::default(),
             seen_uid: HashMap::new(),
             moved_in: changing::MovedIn::default(),
+            sent_here: changing::MovedIn::default(),
             moved_at: 0,
             transfers: Vec::new(),
             archiving: None,

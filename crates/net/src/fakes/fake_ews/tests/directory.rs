@@ -130,7 +130,10 @@ fn someone_new_in_the_directory_is_found_without_a_restart() {
     assert!(found.is_empty() && error.is_none(), "{found:?} {error:?}");
     data.lock().unwrap().directory.push(("Dana Whitfield".into(), "dana@contoso.example".into()));
     let (found, _) = search(&mut pool, "dana");
-    assert_eq!(found, [("Dana Whitfield".to_string(), "dana@contoso.example".to_string())]);
+    assert_eq!(
+        found.iter().map(|p| (p.name.clone(), p.email.clone())).collect::<Vec<_>>(),
+        [("Dana Whitfield".to_string(), "dana@contoso.example".to_string())]
+    );
     assert!(data.lock().unwrap().agents.iter().all(|a| a == EVOLUTION));
 
     // The server refusing the search (its User-Agent rule changed): why, and no one.
@@ -269,8 +272,72 @@ fn against_grommunio() {
     };
     let (dana, error) = search("dana");
     println!("dana: {dana:?} {error:?}");
-    assert_eq!(dana, [("Dana Whitfield".to_string(), "dana.noname@studio.test".to_string())]);
+    assert_eq!(
+        dana.iter().map(|p| (p.name.clone(), p.email.clone())).collect::<Vec<_>>(),
+        [("Dana Whitfield".to_string(), "dana.noname@studio.test".to_string())]
+    );
     let (john, error) = search("john");
     println!("john: {john:?} {error:?}");
-    assert_eq!(john, [("John Doe".to_string(), "john.doe@studio.test".to_string())]);
+    assert_eq!(
+        john.iter().map(|p| (p.name.clone(), p.email.clone())).collect::<Vec<_>>(),
+        [("John Doe".to_string(), "john.doe@studio.test".to_string())]
+    );
+}
+
+/// Issue #222: a colleague's calendar opened here is named as the directory names them, not by
+/// their address; one the directory doesn't know keeps the address. Each is asked once on the
+/// connection, not at every sync.
+#[test]
+fn a_colleagues_calendar_has_their_name() {
+    use mailcraft_model::pim::{Pim, shared_calendar_id};
+    let mut d = Data::default();
+    people(&mut d);
+    d.folder("Inbox", None, Some("inbox"), "IPF.Note");
+    d.folder("Calendar", None, Some("calendar"), "IPF.Appointment");
+    d.folder("Contacts", None, Some("contacts"), "IPF.Contact");
+    let server = serve(d);
+    let c = crate::ews::Client::connect(&server.url, &format!("{DOMAIN}\\{USER}"), PASSWORD, "riley@contoso.example").unwrap();
+    let pim = Pim { shared: vec!["bob@contoso.example".into(), "zed@contoso.example".into()], ..Default::default() };
+    let names = |c: &crate::ews::Client| {
+        let sync = crate::ews_pim::sync(c, &pim, 1_792_000_000).unwrap();
+        let calendars = sync.calendars.unwrap_or_default();
+        let name = |who: &str| calendars.iter().find(|x| x.id == shared_calendar_id(who)).map(|x| x.name.clone());
+        (name("bob@contoso.example"), name("zed@contoso.example"))
+    };
+    assert_eq!(names(&c), (Some("Bob Stone".into()), Some("zed@contoso.example".into())));
+    let asked = server.data.lock().unwrap().calls.iter().filter(|op| *op == "ResolveNames").count();
+    assert_eq!(names(&c), (Some("Bob Stone".into()), Some("zed@contoso.example".into())));
+    assert_eq!(server.data.lock().unwrap().calls.iter().filter(|op| *op == "ResolveNames").count(), asked, "not asked again");
+}
+
+/// Issue #213: the directory's people come with their job title and department, as the full
+/// contact data gives them; one without says none.
+#[test]
+fn the_directory_gives_titles_and_departments() {
+    let mut d = Data::default();
+    people(&mut d);
+    d.directory_titles.push(("alice.moreno@contoso.example".into(), "Colourist".into(), "Post-production".into()));
+    d.folder("Inbox", None, Some("inbox"), "IPF.Note");
+    let server = serve(d);
+    let c = crate::ews::Client::connect(&server.url, &format!("{DOMAIN}\\{USER}"), PASSWORD, "riley@contoso.example").unwrap();
+    let found = c.search_directory_full("ali").unwrap();
+    let of = |a: &str| found.iter().find(|p| p.email == a).map(|p| (p.name.as_str(), p.title.as_str(), p.department.as_str()));
+    assert_eq!(of("alice.moreno@contoso.example"), Some(("Alice Moreno", "Colourist", "Post-production")));
+    assert_eq!(of("alicia@contoso.example"), Some(("Alicia Keyes", "", "")));
+}
+
+/// Issue #223: a person's photo, as the organisation has it (`GetUserPhoto`): one with none is
+/// HTTP 404 and no photo, not a failure; what isn't an address isn't asked.
+#[test]
+fn a_persons_photo_comes_from_the_server() {
+    let photo = b"\x89PNG\r\n\x1a\nAlice".to_vec();
+    let mut d = Data::default();
+    d.folder("Inbox", None, Some("inbox"), "IPF.Note");
+    d.photos.push(("alice.moreno@contoso.example".into(), photo.clone()));
+    let server = serve(d);
+    let c = crate::ews::Client::connect(&server.url, &format!("{DOMAIN}\\{USER}"), PASSWORD, "riley@contoso.example").unwrap();
+    assert_eq!(c.user_photo("Alice.Moreno@contoso.example").unwrap(), Some(photo.clone()));
+    assert_eq!(c.user_photo("bob@contoso.example").unwrap(), None, "none: HTTP 404");
+    assert_eq!(c.user_photo("not an address").unwrap(), None);
+    assert_eq!(server.data.lock().unwrap().calls.iter().filter(|c| *c == "GetUserPhoto").count(), 2, "an address only");
 }

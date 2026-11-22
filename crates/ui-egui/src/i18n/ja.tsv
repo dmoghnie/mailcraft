@@ -209,6 +209,7 @@
 	Pictures from the web are hidden to protect your privacy.	プライバシー保護のため、Web 上の画像は表示されません。
 	Picture…	画像…
 	Pin	ピン留め
+	Pinned	ピン留め済み
 	Plain text	プレーン テキスト
 	Preview	プレビュー
 	Print	印刷
@@ -231,7 +232,7 @@
 	Results for “{query}”	「{query}」の検索結果
 	Right	右
 	Rules	ルール
-	Rules run on new mail as it arrives in an Inbox, in this order.	新しいメールが受信トレイに届くと、この順番でルールが適用されます。
+	Rules run in this order, on new mail as it arrives in an Inbox, and on mail you send as its copy reaches Sent.	ルールはこの順番で、受信トレイに届いた新しいメールと、送信したメールのコピーが送信済みアイテムに入ったときに適用されます。
 	Rules…	ルール…
 	Run now	今すぐ実行
 	Run on the folder on screen	表示中のフォルダーで実行
@@ -443,7 +444,7 @@
 	Formatting, colours and pictures are left out. Show formatted, above a message, shows that one as it was sent.	書式、色、画像は省かれます。メッセージの上の [書式付きで表示] で、そのメッセージを送信されたとおりに表示できます。
 	Show mail without its formatting	メールを書式なしで表示
 	Show a line of each message in the list	一覧に各メッセージの 1 行目を表示
-	Sort new mail as it arrives: move it, flag it, categorize it.	新着メールを届いたときに整理: 移動、フラグ、分類。
+	Sort mail as it arrives, or as you send it: move it, flag it, categorize it.	届いたときや送信したときにメールを整理: 移動、フラグ、分類。
 	Source code and issues	ソース コードと問題報告
 	Subject (optional)	件名 (省略可)
 	Tell people you're away: each sender gets one reply while they're on, even when this computer is off.	不在を知らせます: オンの間は送信者ごとに 1 回返信し、このコンピューターの電源が切れていても動作します。
@@ -941,7 +942,6 @@ month	May	5月
 	Rules saved in {file}: {n}	{n} 件のルールを {file} に保存しました
 	Save {n} Selected…	選択した {n} 件を保存…
 	Run all	すべて実行
-	Run every rule that's on, on the mail already in the Inbox	オンになっているすべてのルールを、受信トレイに既にあるメールに対して実行します
 	Find a rule	ルールを検索
 	No rule matches.	一致するルールはありません。
 	 and {n} more	 ほか {n} 名
@@ -1961,3 +1961,41 @@ count	occurrences	回
 	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	コマンド mailcraft mcp で接続した AI アプリは、メールを閲覧し検索できます。信頼できるエージェントに対してのみオンにしてください
 	Let AI agents send, delete and change settings	AI エージェントによる送信、削除、設定の変更を許可
 	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	オフのとき、エージェントはメールの閲覧と検索だけができます。オンにすると、送信、返信、削除、移動、設定の変更を含むあらゆるコマンドを実行できます。信頼できるエージェントに対してのみオンにしてください
+	Copy link	リンクをコピー
+	Add people…	ユーザーを追加…
+	Add people to the group	グループにユーザーを追加
+	Department	部署
+	Only work hours	勤務時間のみ
+	Add reminder	アラームを追加
+	Remove reminder	アラームを削除
+	Recorded in your calendar.	予定表に反映しました。
+	Record guests' answers to your meetings as they arrive	会議への出席者の回答を届いた時点で予定表に反映する
+	One from someone not on the guest list, or to an earlier version, waits for Record the answer	出席者一覧にない人からの回答や、以前の版への回答は「回答を反映」を待ちます
+	Check Names	名前の確認
+	Ctrl+K in To, Cc or Bcc	宛先、CC、BCC で Ctrl+K
+	No one found for {names}	{names} に該当する人が見つかりません
+	Still looking up {names} in the directory	{names} をディレクトリで検索しています
+	More than one person could be “{typed}”. Pick the one you meant:	「{typed}」に該当する人が複数います。目的の人を選んでください:
+	Applies to	適用対象
+	Mail that arrives	受信するメール
+	Mail you send	送信するメール
+	Run it now on the mail already in Sent	送信済みアイテムにあるメールに今すぐ実行する
+	If mail you send {condition}: {action}	送信するメールが{condition}場合: {action}
+	Run every rule that's on, on the mail already in the Inbox (and in Sent, for mail you send)	オンになっているすべてのルールを、受信トレイに既にあるメール (送信するメール用のルールは送信済みアイテム) に対して実行します
+	Accept proposal	提案を承諾
+	Decline proposal	提案を辞退
+	Propose new time	新しい日時を提案
+	Send proposal	提案を送信
+	Start	開始
+	End	終了
+	The organizer declined your proposed time: the meeting stays as it was.	主催者があなたの提案した日時を辞退しました。会議は元のままです。
+	Your answer	あなたの返答
+	{name} proposes a new time: {when}	{name} が新しい日時を提案しています: {when}
+	Forward meeting	会議を転送
+	Forward meeting…	会議を転送…
+	Invitations in the Inbox	受信トレイの招待
+	Invitations in the Inbox…	受信トレイの招待…
+	Meetings waiting for your answer that your calendar doesn't have yet. Those you tick go in unanswered.	返答待ちで、まだ予定表にない会議です。チェックしたものは未返答のまま追加されます。
+	None: every invitation in the Inbox is in your calendar or answered.	ありません。受信トレイの招待はすべて予定表にあるか、返答済みです。
+	Put in calendar	予定表に追加
+	Still reading {n} messages…	まだ {n} 件のメッセージを読み込んでいます…

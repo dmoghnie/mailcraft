@@ -99,7 +99,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             }
             Ok(r)
         })
-        .params(r#"{"summary": string, "start": "YYYY-MM-DD[THH:MM]", "end"?: …, "allDay"?: bool, "location"?: string, "description"?: string, "repeat"?: "daily"|"weekly"|"monthly"|"yearly"|RRULE, "attendees"?: "a@x, Name <b@y>" (invited by mail), "categories"?: [string] | "Work, Clients" (colour it as those categories), "reminder"?: minutes before | "none", "privacy"?: "public"|"private"|"confidential" (show time only), "showAs"?: "free"|"workingElsewhere"|"tentative"|"busy"|"oof", "onlineMeeting"?: a saved room's name | true (the first room) | false (take it out) | {"url": string, "name"?, "code"?, "details"?, "labels"?: {"heading"?, "join"?, "code"?}}, "account"?: string, "calendar"?: string}"#),
+        .params(r#"{"summary": string, "start": "YYYY-MM-DD[THH:MM]", "end"?: …, "allDay"?: bool, "location"?: string, "description"?: string, "repeat"?: "daily"|"weekly"|"monthly"|"yearly"|RRULE, "attendees"?: "a@x, Name <b@y>" (invited by mail), "categories"?: [string] | "Work, Clients" (colour it as those categories), "reminder"?: minutes before | "none", "reminders"?: [minutes before, …] (each, at most ten; [] none: in place of "reminder"), "privacy"?: "public"|"private"|"confidential" (show time only), "showAs"?: "free"|"workingElsewhere"|"tentative"|"busy"|"oof", "onlineMeeting"?: a saved room's name | true (the first room) | false (take it out) | {"url": string, "name"?, "code"?, "details"?, "labels"?: {"heading"?, "join"?, "code"?}}, "account"?: string, "calendar"?: string}"#),
         CommandSpec::new("reminders.list", "Reminders", "File › Reminders", |s, _| {
             let now = s.clock.now;
             Ok(json!(s
@@ -198,6 +198,57 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             .when(has_reading),
         CommandSpec::new("invite.apply", "Update the calendar", "Reading pane › Invitation", |s, _| s.apply_invite())
             .params("(an answer from a guest, or a cancellation)")
+            .when(has_reading),
+        // A new time proposed for a meeting (issue #238): by a guest, taken or turned down by its
+        // organizer.
+        CommandSpec::new("invite.propose", "Propose new time", "Reading pane › Invitation", |s, v| {
+            let uid = match p::str(v, "uid") {
+                Some(u) => u.to_string(),
+                None => s.invite().map(|i| i.event.uid).ok_or_else(|| CmdError::Disabled("open the invitation first".into()))?,
+            };
+            let current = s.newest_meeting(&uid).map(|(_, e, _)| e).ok_or_else(|| CmdError::Params(format!("no meeting `{uid}`")))?;
+            if v.get("start").is_none() {
+                return Err(CmdError::Params("`start` is required".into()));
+            }
+            let proposal = event_from(s, v, current)?;
+            s.propose_time(&uid, &proposal, p::str(v, "answer"))
+        })
+        .params(r#"{"start": string|number, "end"?: string|number (else as long as the meeting), "uid"?: string (a meeting in the calendar; else the open invitation's), "answer"?: "tentative"|"declined"}"#),
+        // A meeting the user is invited to, forwarded to someone else (issue #234).
+        CommandSpec::new("invite.forward", "Forward meeting", "Reading pane › Invitation", |s, v| {
+            let uid = match p::str(v, "uid") {
+                Some(u) => u.to_string(),
+                None => s.invite().map(|i| i.event.uid).ok_or_else(|| CmdError::Disabled("open the invitation first".into()))?,
+            };
+            s.forward_meeting(&uid, p::req_str(v, "to")?)
+        })
+        .params(r#"{"to": string (addresses, as a recipient box has them), "uid"?: string (a meeting in the calendar; else the open invitation's)}"#),
+        // Invitations already in the Inbox when the account came (issue #237).
+        CommandSpec::new("invite.findWaiting", "Invitations in the Inbox", "Calendar › Home", |s, v| {
+            let account = account_param(s, v)?;
+            let (found, reading) = s.waiting_invitations(&account, &mut Default::default());
+            let found: Vec<Value> = found
+                .iter()
+                .map(|w| json!({"key": w.key.to_id(), "uid": w.uid, "summary": w.summary, "start": w.start, "end": w.end, "organizer": w.organizer}))
+                .collect();
+            Ok(json!({"found": found, "reading": reading}))
+        })
+        .params(r#"{"account"?: string} (the meetings waiting for an answer in its Inbox and not in the calendar; "reading": messages still to be read for them)"#)
+        .when(has_account),
+        CommandSpec::new("invite.placeWaiting", "Put in the calendar", "Calendar › Home › Invitations in the Inbox", |s, v| {
+            let keys: Vec<mailcraft_model::MessageKey> =
+                v.get("keys").and_then(Value::as_array).map(|a| a.iter().filter_map(Value::as_str).filter_map(mailcraft_model::MessageKey::from_id).collect()).unwrap_or_default();
+            if keys.is_empty() {
+                return Err(CmdError::Params("`keys`: the invitations' messages".into()));
+            }
+            Ok(json!({"placed": s.place_waiting_invitations(&keys)}))
+        })
+        .params(r#"{"keys": [string] (the messages' keys, as invite.findWaiting gives them): their meetings into the calendar, unanswered}"#),
+        CommandSpec::new("invite.acceptProposal", "Accept proposal", "Reading pane › Invitation", |s, _| s.accept_proposal())
+            .params("(a guest's proposal of a new time, in the open message: the meeting moves, and every guest is told)")
+            .when(has_reading),
+        CommandSpec::new("invite.declineProposal", "Decline proposal", "Reading pane › Invitation", |s, _| s.decline_proposal())
+            .params("(a guest's proposal of a new time, in the open message: they're told)")
             .when(has_reading),
         CommandSpec::new("event.respond", "Answer an invitation", "Calendar › Event", |s, v| {
             let uid = p::req_str(v, "uid")?.to_string();
@@ -427,6 +478,22 @@ pub(super) fn event_from(s: &Session, v: &Value, mut e: mailcraft_model::ical::C
             _ => return Err(CmdError::Params("`reminder` is minutes before it starts (0 to four weeks) or none".into())),
         },
         None => {}
+    }
+    // Its reminders, each (issue #224: Google's "an hour before and 2 minutes before"), in place
+    // of the one `reminder` sets: kept as they are when they're the ones it has.
+    if let Some(x) = v.get("reminders") {
+        let wrong = || {
+            CmdError::Params(format!(
+                "`reminders` is a list of at most {} times, minutes before it starts (0 to four weeks)",
+                mailcraft_model::ical::REMINDERS_MAX
+            ))
+        };
+        let list = x.as_array().filter(|l| l.len() <= mailcraft_model::ical::REMINDERS_MAX).ok_or_else(wrong)?;
+        let minutes = list
+            .iter()
+            .map(|m| m.as_i64().filter(|m| (0..=mailcraft_model::ical::REMINDER_MAX_MINUTES).contains(m)).ok_or_else(wrong))
+            .collect::<Result<Vec<i64>, CmdError>>()?;
+        mailcraft_model::ical::set_reminders(&mut e, &minutes);
     }
     // Private, and how it shows its time (issue #32): a classification set elsewhere stays
     // unless one is asked for.

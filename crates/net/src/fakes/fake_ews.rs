@@ -140,9 +140,13 @@ pub struct Data {
     pub anchors: Vec<String>,
     /// The organisation's directory (Active Directory): (name, address).
     pub directory: Vec<(String, String)>,
+    /// Some of them's job titles and departments (issue #213): (address, title, department).
+    pub directory_titles: Vec<(String, String, String)>,
     /// A server whose directory answers name each mailbox by its alias (the address's user part,
     /// issue #9): the full name is only in the contact, when one is asked for.
     pub directory_aliases: bool,
+    /// People's photos (issue #223): (address, the picture's bytes).
+    pub photos: Vec<(String, Vec<u8>)>,
     /// The `User-Agent` of each request.
     pub agents: Vec<String>,
     /// Refuse (HTTP 403) every request naming another `User-Agent` (issue #9: a server that lets
@@ -187,6 +191,10 @@ pub struct Data {
     /// A subscription to every folder at once is refused (Exchange 2010 before its first
     /// service pack): one naming the folders is taken.
     pub subscribe_all_refused: bool,
+    /// Two mailbox servers behind a load balancer (issue #145): a subscription is kept by the one
+    /// it was made on, which a look reaches only with the cookie it gave.
+    pub balanced: bool,
+    balance_turn: bool,
     /// The folders a `GetEvents` answer says at most, the rest said as more (`None`: all).
     pub events_per_answer: Option<usize>,
     /// `GetEvents` asked.
@@ -234,7 +242,9 @@ impl Default for Data {
             shared: Vec::new(),
             anchors: Vec::new(),
             directory: Vec::new(),
+            directory_titles: Vec::new(),
             directory_aliases: false,
+            photos: Vec::new(),
             agents: Vec::new(),
             only_agent: None,
             open: false,
@@ -254,6 +264,8 @@ impl Default for Data {
             availability_asks: Vec::new(),
             subscriptions: Vec::new(),
             subscribe_all_refused: false,
+            balanced: false,
+            balance_turn: false,
             events_per_answer: None,
             get_events_asked: 0,
             pim_slow: None,

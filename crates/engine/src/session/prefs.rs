@@ -115,6 +115,10 @@ pub struct Prefs {
     /// Day and week show each calendar in a column of its own (Outlook's side-by-side view)
     /// rather than all of them together.
     pub calendars_side_by_side: bool,
+    /// The Schedule view's time line runs over the hours anyone shown works, not the whole day
+    /// (issue #206: most of it was night and off hours, the part that matters a piece to scroll
+    /// to), as Outlook's Scheduling Assistant can show only working hours.
+    pub schedule_work_hours: bool,
     /// Months shown one under another in the calendar's side pane (1 to 6).
     pub calendar_months: u8,
     /// The days and hours worked (issue #185): the work week shows those days, and the day and
@@ -242,6 +246,10 @@ pub struct Prefs {
     /// Meeting invitations go into the calendar as tentative when they arrive, before they're
     /// answered, as Outlook shows them (issue #20).
     pub tentative_invites: bool,
+    /// Guests' answers to the user's meetings are recorded in the calendar as they arrive, as
+    /// Outlook, Exchange and SOGo do (issue #236): one that's genuine, from a guest on the list,
+    /// for the meeting as it is. Any other waits for Record the answer.
+    pub record_answers: bool,
     /// What becomes of a meeting invitation's mail (and its earlier versions in the Inbox) once
     /// it's answered, in the message or the calendar, and of a cancellation once it's taken in
     /// (issue #31), as Outlook's "Delete meeting requests and notifications from Inbox after
@@ -408,6 +416,7 @@ impl Default for Prefs {
             tasks_hide_done: false,
             hidden_calendars: BTreeSet::new(),
             calendars_side_by_side: false,
+            schedule_work_hours: false,
             calendar_months: 1,
             work_time: mailcraft_model::pim::work_hours::WorkPeriod::default(),
             free_time_minutes: 30,
@@ -455,6 +464,7 @@ impl Default for Prefs {
             reply_window: false,
             show_favorites: true,
             tentative_invites: true,
+            record_answers: true,
             answered_invites: AnsweredInvites::Delete,
             answered_folders: BTreeMap::new(),
             answered_replies: false,

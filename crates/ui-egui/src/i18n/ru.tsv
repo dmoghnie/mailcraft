@@ -209,6 +209,7 @@
 	Pictures from the web are hidden to protect your privacy.	Изображения из интернета скрыты для защиты вашей конфиденциальности.
 	Picture…	Изображение…
 	Pin	Закрепить
+	Pinned	Закреплённые
 	Plain text	Обычный текст
 	Preview	Предпросмотр
 	Print	Печать
@@ -231,7 +232,7 @@
 	Results for “{query}”	Результаты для «{query}»
 	Right	Справа
 	Rules	Правила
-	Rules run on new mail as it arrives in an Inbox, in this order.	Правила применяются к новой почте при поступлении во «Входящие», в этом порядке.
+	Rules run in this order, on new mail as it arrives in an Inbox, and on mail you send as its copy reaches Sent.	Правила применяются в этом порядке к новой почте, когда она приходит во «Входящие», и к отправляемой почте, когда её копия попадает в «Отправленные».
 	Rules…	Правила…
 	Run now	Выполнить сейчас
 	Run on the folder on screen	Выполнить для открытой папки
@@ -443,7 +444,7 @@
 	Formatting, colours and pictures are left out. Show formatted, above a message, shows that one as it was sent.	Форматирование, цвета и рисунки опускаются. «Показать с форматированием» над письмом показывает это письмо таким, каким оно было отправлено.
 	Show mail without its formatting	Показывать письма без форматирования
 	Show a line of each message in the list	Показывать строку каждого письма в списке
-	Sort new mail as it arrives: move it, flag it, categorize it.	Сортируйте новую почту при поступлении: перемещайте, помечайте, распределяйте по категориям.
+	Sort mail as it arrives, or as you send it: move it, flag it, categorize it.	Сортировать почту при получении или отправке: перемещать, помечать флажком, назначать категорию.
 	Source code and issues	Исходный код и сообщения об ошибках
 	Subject (optional)	Тема (необязательно)
 	Tell people you're away: each sender gets one reply while they're on, even when this computer is off.	Сообщите, что вас нет: каждый отправитель получит один ответ, пока они включены, даже если этот компьютер выключен.
@@ -938,7 +939,6 @@
 	Rules saved in {file}: {n}	Правил сохранено в {file}: {n}
 	Save {n} Selected…	Сохранить выбранные ({n})…
 	Run all	Выполнить все
-	Run every rule that's on, on the mail already in the Inbox	Выполняет все включённые правила для писем, которые уже во «Входящих»
 	Find a rule	Найти правило
 	No rule matches.	Нет подходящих правил.
 	 and {n} more	 и ещё {n}
@@ -976,6 +976,20 @@ folder	Archive	Архив
 
 # A month's full name, where it differs from its short form.
 month	May	Май
+
+# A month's name in a date, after its day (17 December 2026), where that differs.
+date	January	января
+date	February	февраля
+date	March	марта
+date	April	апреля
+date	May	мая
+date	June	июня
+date	July	июля
+date	August	августа
+date	September	сентября
+date	October	октября
+date	November	ноября
+date	December	декабря
 	Add shared mailbox…	Добавить общий почтовый ящик…
 	Remove shared mailbox	Удалить общий почтовый ящик
 	Opened by the server for your access to it	Открыт сервером, так как у вас есть доступ
@@ -1964,3 +1978,41 @@ count	occurrences	повторений
 	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	Приложение ИИ, подключённое командой mailcraft mcp, может читать вашу почту и искать в ней. Включайте только для агента, которому доверяете
 	Let AI agents send, delete and change settings	Разрешить ИИ-агентам отправлять, удалять и менять настройки
 	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	Без этого агент может только читать вашу почту и искать в ней. С этим он может выполнять любые команды: отправлять, отвечать, удалять, перемещать и менять настройки. Включайте только для агента, которому доверяете
+	Copy link	Копировать ссылку
+	Add people…	Добавить людей…
+	Add people to the group	Добавить людей в группу
+	Department	Отдел
+	Only work hours	Только рабочие часы
+	Add reminder	Добавить напоминание
+	Remove reminder	Удалить напоминание
+	Recorded in your calendar.	Записано в календарь.
+	Record guests' answers to your meetings as they arrive	Записывать ответы гостей на ваши встречи при получении
+	One from someone not on the guest list, or to an earlier version, waits for Record the answer	Ответ от того, кого нет в списке гостей, или на прежнюю версию ждёт кнопки «Записать ответ»
+	Check Names	Проверить имена
+	Ctrl+K in To, Cc or Bcc	Ctrl+K в полях «Кому», «Копия» или «Скрытая копия»
+	No one found for {names}	Никто не найден для {names}
+	Still looking up {names} in the directory	{names} ещё ищется в каталоге
+	More than one person could be “{typed}”. Pick the one you meant:	«{typed}» может означать несколько человек. Выберите нужного:
+	Applies to	Применяется к
+	Mail that arrives	Входящей почте
+	Mail you send	Почте, которую вы отправляете
+	Run it now on the mail already in Sent	Применить сейчас к почте в «Отправленных»
+	If mail you send {condition}: {action}	Если отправляемое письмо {condition}: {action}
+	Run every rule that's on, on the mail already in the Inbox (and in Sent, for mail you send)	Выполняет все включённые правила для писем, которые уже во «Входящих» (и в «Отправленных» — для отправляемой почты)
+	Accept proposal	Принять предложение
+	Decline proposal	Отклонить предложение
+	Propose new time	Предложить новое время
+	Send proposal	Отправить предложение
+	Start	Начало
+	End	Окончание
+	The organizer declined your proposed time: the meeting stays as it was.	Организатор отклонил предложенное вами время: встреча остаётся как была.
+	Your answer	Ваш ответ
+	{name} proposes a new time: {when}	{name} предлагает новое время: {when}
+	Forward meeting	Переслать встречу
+	Forward meeting…	Переслать встречу…
+	Invitations in the Inbox	Приглашения во «Входящих»
+	Invitations in the Inbox…	Приглашения во «Входящих»…
+	Meetings waiting for your answer that your calendar doesn't have yet. Those you tick go in unanswered.	Встречи, ждущие вашего ответа, которых ещё нет в календаре. Отмеченные добавляются без ответа.
+	None: every invitation in the Inbox is in your calendar or answered.	Нет: каждое приглашение во «Входящих» есть в календаре или на него ответили.
+	Put in calendar	Добавить в календарь
+	Still reading {n} messages…	Ещё читается сообщений: {n}…

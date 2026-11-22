@@ -613,6 +613,16 @@ impl MailApp {
     fn end_frame(&mut self, ui: &mut Ui, mut acts: Vec<Action>) {
         let ctx = ui.ctx().clone();
         let t = self.ui.tokens;
+        self.recheck_names(&mut acts);
+        // The people shown: their photos asked after (issue #223).
+        let shown = crate::photos::take_shown(&ctx);
+        if !shown.is_empty() {
+            self.session.want_photos(&shown);
+        }
+        // Invitations in the Inbox: looked for in the session (issue #237).
+        if let Some(Dialog::WaitingInvites(f)) = self.ui.dialog.as_mut() {
+            f.refresh(&mut self.session, ctx.input(|i| i.time));
+        }
         // The address book reads the session's people.
         if let Some(Dialog::SelectNames(f)) = self.ui.dialog.as_mut()
             && (f.stale || f.directory_rev != self.session.directory.rev)
@@ -628,6 +638,11 @@ impl MailApp {
             // The person selected stays selected when answers come in and the list moves.
             let picked = f.selected.and_then(|i| f.list.get(i)).map(|a| a.email.clone());
             f.list = self.session.address_book(&f.source, &f.query);
+            f.details = f
+                .list
+                .iter()
+                .map(|a| self.session.directory_details(&a.email).map(|(t, d)| (t.to_string(), d.to_string())).unwrap_or_default())
+                .collect();
             f.selected = picked.and_then(|e| f.list.iter().position(|a| a.email.eq_ignore_ascii_case(&e)));
             let asks = f.directory && (f.source == "all" || f.source == "directory");
             f.searching = asks && self.session.directory_pending(&f.query);

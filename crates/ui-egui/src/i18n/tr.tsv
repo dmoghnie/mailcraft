@@ -209,6 +209,7 @@
 	Pictures from the web are hidden to protect your privacy.	Gizliliğinizi korumak için web'den gelen resimler gizlendi.
 	Picture…	Resim…
 	Pin	Sabitle
+	Pinned	Sabitlenenler
 	Plain text	Düz metin
 	Preview	Önizleme
 	Print	Yazdır
@@ -231,7 +232,7 @@
 	Results for “{query}”	“{query}” için sonuçlar
 	Right	Sağ
 	Rules	Kurallar
-	Rules run on new mail as it arrives in an Inbox, in this order.	Kurallar, bir Gelen Kutusuna gelen yeni postalarda bu sırayla çalışır.
+	Rules run in this order, on new mail as it arrives in an Inbox, and on mail you send as its copy reaches Sent.	Kurallar bu sırayla, bir Gelen Kutusu'na gelen yeni postalara ve gönderdiğiniz postaların kopyası Gönderilmiş Öğeler'e ulaştığında onlara uygulanır.
 	Rules…	Kurallar…
 	Run now	Şimdi çalıştır
 	Run on the folder on screen	Ekrandaki klasörde çalıştır
@@ -444,7 +445,7 @@
 	Formatting, colours and pictures are left out. Show formatted, above a message, shows that one as it was sent.	Biçimlendirme, renkler ve resimler dışarıda bırakılır. Bir iletinin üstündeki Biçimli göster, o iletiyi gönderildiği gibi gösterir.
 	Show mail without its formatting	Postayı biçimlendirmesi olmadan göster
 	Show a line of each message in the list	Listede her iletiden bir satır göster
-	Sort new mail as it arrives: move it, flag it, categorize it.	Yeni postaları geldikçe düzenleyin: taşıyın, bayraklayın, kategori atayın.
+	Sort mail as it arrives, or as you send it: move it, flag it, categorize it.	Postaları gelince veya gönderince sıralayın: taşıyın, bayrak koyun, kategorilere ayırın.
 	Source code and issues	Kaynak kodu ve sorunlar
 	Subject (optional)	Konu (isteğe bağlı)
 	Tell people you're away: each sender gets one reply while they're on, even when this computer is off.	İnsanlara uzakta olduğunuzu bildirin: açık oldukları sürece her gönderici bir yanıt alır, bu bilgisayar kapalıyken bile.
@@ -939,7 +940,6 @@
 	Rules saved in {file}: {n}	{file} dosyasına kaydedilen kural: {n}
 	Save {n} Selected…	Seçili {n} Öğeyi Kaydet…
 	Run all	Tümünü çalıştır
-	Run every rule that's on, on the mail already in the Inbox	Açık olan her kuralı Gelen Kutusundaki mevcut postalarda çalıştır
 	Find a rule	Kural bul
 	No rule matches.	Eşleşen kural yok.
 	 and {n} more	 ve {n} tane daha
@@ -1965,3 +1965,41 @@ count	occurrences	kez
 	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	mailcraft mcp komutuyla bağlanan bir yapay zekâ uygulaması postanızı okuyabilir ve arayabilir. Yalnızca güvendiğiniz bir ajan için açın
 	Let AI agents send, delete and change settings	Yapay zekâ ajanlarının göndermesine, silmesine ve ayarları değiştirmesine izin ver
 	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	Bu kapalıyken bir ajan postanızı yalnızca okuyabilir ve arayabilir. Açıkken gönderme, yanıtlama, silme, taşıma ve ayarları değiştirme dahil her komutu çalıştırabilir. Yalnızca güvendiğiniz bir ajan için açın
+	Copy link	Bağlantıyı kopyala
+	Add people…	Kişi ekle…
+	Add people to the group	Gruba kişi ekle
+	Department	Departman
+	Only work hours	Yalnızca çalışma saatleri
+	Add reminder	Anımsatıcı ekle
+	Remove reminder	Anımsatıcıyı kaldır
+	Recorded in your calendar.	Takviminize kaydedildi.
+	Record guests' answers to your meetings as they arrive	Toplantılarınıza konukların yanıtlarını geldiklerinde kaydet
+	One from someone not on the guest list, or to an earlier version, waits for Record the answer	Konuk listesinde olmayan birinden ya da önceki bir sürüme gelen yanıt «Yanıtı kaydet»i bekler
+	Check Names	Adları Denetle
+	Ctrl+K in To, Cc or Bcc	Kime, Bilgi veya Gizli alanında Ctrl+K
+	No one found for {names}	{names} için kimse bulunamadı
+	Still looking up {names} in the directory	{names} dizinde hâlâ aranıyor
+	More than one person could be “{typed}”. Pick the one you meant:	“{typed}” birden fazla kişi olabilir. Kastettiğiniz kişiyi seçin:
+	Applies to	Uygulandığı
+	Mail that arrives	Gelen postalar
+	Mail you send	Gönderdiğiniz postalar
+	Run it now on the mail already in Sent	Şimdi Gönderilmiş Öğeler'deki postalara uygula
+	If mail you send {condition}: {action}	Gönderdiğiniz posta {condition}: {action}
+	Run every rule that's on, on the mail already in the Inbox (and in Sent, for mail you send)	Açık olan her kuralı Gelen Kutusu'ndaki postalara (gönderdiğiniz postalar için Gönderilmiş Öğeler'dekilere) uygular
+	Accept proposal	Öneriyi kabul et
+	Decline proposal	Öneriyi reddet
+	Propose new time	Yeni zaman öner
+	Send proposal	Öneriyi gönder
+	Start	Başlangıç
+	End	Bitiş
+	The organizer declined your proposed time: the meeting stays as it was.	Düzenleyici önerdiğiniz zamanı reddetti: toplantı olduğu gibi kalıyor.
+	Your answer	Yanıtınız
+	{name} proposes a new time: {when}	{name} yeni bir zaman öneriyor: {when}
+	Forward meeting	Toplantıyı ilet
+	Forward meeting…	Toplantıyı ilet…
+	Invitations in the Inbox	Gelen Kutusu'ndaki davetler
+	Invitations in the Inbox…	Gelen Kutusu'ndaki davetler…
+	Meetings waiting for your answer that your calendar doesn't have yet. Those you tick go in unanswered.	Yanıtınızı bekleyen ve takviminizde henüz olmayan toplantılar. İşaretledikleriniz yanıtsız eklenir.
+	None: every invitation in the Inbox is in your calendar or answered.	Yok: Gelen Kutusu'ndaki her davet takviminizde ya da yanıtlanmış.
+	Put in calendar	Takvime ekle
+	Still reading {n} messages…	Hâlâ {n} ileti okunuyor…

@@ -191,6 +191,26 @@ Test builds update themselves ([how test builds update](updates.md)). These part
   calendar change the whole series, and the series moved for one occurrence went wrong on its
   days (Monday's moved to Tuesday, the rule still said Mondays).
 
+### 16. People's photos: what isn't shown yet
+
+- **Impact:** On Exchange Online (Microsoft 365) and Gmail, colleagues show their initials, not
+  the photos their organisation has. Your own photo isn't shown for your account, and a
+  contact's photo can't be added or changed in MailCraft.
+- **Workaround:** Save the photo in the person's contact elsewhere (Outlook, a phone, the
+  address book's website): it shows here once the address book syncs.
+- **Cause:** Only on-premises Exchange is asked for photos (`GetUserPhoto`); Microsoft Graph's
+  own photo request isn't made yet, and the contact form has no picture in it.
+
+### 17. Meetings: what isn't done yet
+
+- **Impact:** A new time for one occurrence of a series can't be proposed from its invitation,
+  nor taken when a guest proposes one. Your place in a meeting can't be handed to someone else
+  (delegated), as SOGo offers. Invitations already in the Inbox aren't offered as an account is
+  added: Invitations in the Inbox… in the calendar finds them.
+- **Workaround:** Change the occurrence in the calendar: its guests are sent it.
+- **Cause:** Taking a proposal moves the meeting as a whole; an occurrence's proposal needs that
+  occurrence changed on its own.
+
 ## Not planned
 
 These are outside MailCraft's control, or accepted as they are.

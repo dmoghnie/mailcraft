@@ -27,7 +27,8 @@ const BY_HAND: Duration = Duration::from_secs(365 * 24 * 3600);
 const QUIET_MINUTES: u32 = 10;
 
 impl Worker {
-    /// Wait for new mail: IDLE on the Inbox when the server supports it, else poll.
+    /// Wait for new mail: IDLE on the Inbox when the server supports it, told of the other folders
+    /// too where it offers NOTIFY; else poll.
     pub(crate) fn wait_for_mail(&mut self, rx: &Receiver<Job>) {
         self.working(false);
         // Whatever was asked to stop has stopped.
@@ -74,6 +75,9 @@ impl Worker {
         let Some(inbox) = inbox else { return };
         let result = (|| -> Result<bool> {
             let Some(Conn::Imap(c)) = self.conn.as_mut() else { return Err(NetError::Closed("not connected".into())) };
+            // Told of every folder where the server can (NOTIFY, issue #232): mail its own rules
+            // filed elsewhere is read as it comes, not at the next look.
+            c.notify()?;
             // Mail that came after the Inbox was synced and before IDLE starts is never pushed
             // during IDLE: the server already said it (or will only say it to a command). Look
             // now: the Inbox grew since the sync's SELECT, or a command's answer said it did.
@@ -104,8 +108,20 @@ impl Worker {
             })
         })();
         match result {
-            Ok(true) => self.sync_one(&inbox),
-            Ok(false) => {}
+            Ok(changed) => {
+                if changed {
+                    self.sync_one(&inbox);
+                }
+                let others = match self.conn.as_mut() {
+                    Some(Conn::Imap(c)) => c.take_notified(),
+                    _ => Vec::new(),
+                };
+                let known: Vec<String> =
+                    others.into_iter().filter(|f| *f != inbox && self.folders.iter().any(|k| k.path == *f && k.selectable)).collect();
+                for f in known {
+                    self.sync_one(&f);
+                }
+            }
             Err(e) => self.failed(e),
         }
     }
@@ -383,16 +399,16 @@ impl Worker {
         // mail, as ever.
         let mut calendars_due = self.last_full.is_none() && !self.calendars_read_before();
         let mut calendars_read = false;
-        // An IMAP account's Send / Receive: its folders, one by one (a POP account says its
-        // download as it goes, `transfers.rs`).
-        let imap = matches!(self.conn, Some(Conn::Imap(_)));
+        // An IMAP or Exchange (EWS, issue #231) account's Send / Receive: its folders, one by one
+        // (a POP account says its download as it goes, `transfers.rs`).
+        let told = matches!(self.conn, Some(Conn::Imap(_) | Conn::Ews(_)));
         let mut going = Transfer { folders_total: u32::try_from(paths.len()).unwrap_or(u32::MAX), ..Transfer::working(TransferKind::Receiving) };
         let mut pace = transfers::Pace::default();
         for path in paths {
             if self.cancel_asked() {
                 break;
             }
-            if imap && pace.due() {
+            if told && pace.due() {
                 self.tell_transfer(Transfer { folder: path.clone(), ..going.clone() });
             }
             if !self.counts_unsaid.is_empty() && said.elapsed() >= COUNTS_EVERY {
@@ -428,7 +444,7 @@ impl Worker {
             self.serve_between_folders(rx);
         }
         self.say_counts();
-        if imap && !self.closed {
+        if told && !self.closed {
             // Its connection lost on the way: failed, the account's status saying why.
             let lost = self.conn.is_none().then(String::new);
             self.transfer_ended(Transfer { folder: String::new(), ..going }, lost);

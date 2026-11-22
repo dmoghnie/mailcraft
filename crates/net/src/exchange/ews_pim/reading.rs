@@ -9,7 +9,7 @@ pub(super) fn read_calendar(c: &Client, out: &mut DavSync) -> Result<CalendarInf
     match items(c, "calendar") {
         Ok(read) => {
             read.say(out, "Calendar");
-            out.events.extend(stored_events(read.items, CALENDAR, c.email()));
+            out.events.extend(stored_events(read.items, CALENDAR, &c.own_addresses()));
             out.synced_calendars.push(CALENDAR.into());
         }
         // A mailbox without the folder has no calendar. One the server won't give is said, not
@@ -59,7 +59,7 @@ pub(super) fn read_shared_calendar(c: &Client, (email, name, asked): SharedCalen
             if !can_edit && let Err(e) = &folder_rights {
                 log::info!("{email}'s calendar rights: {e}");
             }
-            out.events.extend(stored_events(read.items, &id, &email));
+            out.events.extend(stored_events(read.items, &id, &[email.as_str()]));
             out.synced_calendars.push(id.clone());
         }
         // One asked for by hand says why it's missing; a shared mailbox whose calendar
@@ -78,6 +78,8 @@ pub(super) fn read_shared_calendar(c: &Client, (email, name, asked): SharedCalen
             return;
         }
     }
+    // One opened by hand by their address: their name, as the directory gives it (issue #222).
+    let name = if asked && name.eq_ignore_ascii_case(&email) { c.directory_name_of(&email).unwrap_or(name) } else { name };
     calendars.push(CalendarInfo {
         id,
         name,
@@ -152,7 +154,7 @@ pub(super) fn read_public(c: &Client, out: &mut DavSync, calendars: &mut Vec<Cal
             books.push(BookInfo { id: key.clone(), name, read_only: true, ctag: String::new() });
             out.synced_books.push(key);
         } else {
-            out.events.extend(stored_events(found, &key, "").map(|e| StoredEvent { etag: String::new(), ..e }));
+            out.events.extend(stored_events(found, &key, &[]).map(|e| StoredEvent { etag: String::new(), ..e }));
             calendars.push(CalendarInfo {
                 id: key.clone(),
                 name,
@@ -242,9 +244,13 @@ pub(super) fn items_in(c: &Client, parent: &str, extra: &str) -> Result<Read> {
         ))?;
         for m in crate::ews::into_messages(doc) {
             if m.attr("ResponseClass") == Some("Error") {
-                // One deleted since the folder was listed is simply gone.
+                // One deleted since the folder was listed is simply gone; a series whose every
+                // occurrence was deleted, which Exchange won't give, has nothing to show (issue
+                // #229: it was said at every start).
                 let code = m.text_of("ResponseCode").unwrap_or("");
-                if code != "ErrorItemNotFound" {
+                if code == "ErrorRecurrenceHasNoOccurrence" {
+                    log::info!("a series with no occurrences left, not shown");
+                } else if code != "ErrorItemNotFound" {
                     if read.refused == 0 {
                         read.why = m.text_of("MessageText").unwrap_or(code).trim().chars().take(200).collect();
                     }
@@ -257,7 +263,70 @@ pub(super) fn items_in(c: &Client, parent: &str, extra: &str) -> Result<Read> {
             }
         }
     }
+    // A calendar's: its series' changed occurrences too (issue #204).
+    if extra.contains(RECURRENCE) {
+        with_changed_occurrences(c, &mut read.items, extra)?;
+    }
     Ok(read)
+}
+
+/// The changed occurrences of the series among `items` (moved, cancelled, given a subject or an
+/// answer of their own), read and put with them, each with the start its series gave it
+/// (`OriginalStart`, from the series' `ModifiedOccurrences`), which names it. A listing gives a
+/// series alone, and the changes made to one occurrence were lost: it stayed at the series'
+/// usual time, a cancelled one too (issue #204). One the server won't give is left to its
+/// series, as it was.
+pub(super) fn with_changed_occurrences(c: &Client, items: &mut Vec<El>, extra: &str) -> Result<()> {
+    // One a server listed with its series is read once.
+    let listed: std::collections::HashSet<&str> = items.iter().filter_map(|it| it.child("ItemId")?.attr("Id")).collect();
+    let mut original: Vec<(String, String)> = Vec::new();
+    for it in items.iter().filter(|it| it.text_of("CalendarItemType") == Some("RecurringMaster")) {
+        let Some(changed) = it.child("ModifiedOccurrences") else { continue };
+        for o in changed.children("Occurrence").take(MAX_EXDATES) {
+            if let (Some(id), Some(start)) = (o.child("ItemId").and_then(|i| i.attr("Id")), o.text_of("OriginalStart"))
+                && !listed.contains(id)
+            {
+                original.push((id.to_string(), start.trim().to_string()));
+            }
+        }
+        if original.len() >= MAX_ITEMS {
+            break;
+        }
+    }
+    original.truncate(MAX_ITEMS);
+    for chunk in original.chunks(BATCH) {
+        let ids: Vec<String> = chunk.iter().map(|(id, _)| id.clone()).collect();
+        let asked = c.call(&format!(
+            "<m:GetItem><m:ItemShape><t:BaseShape>AllProperties</t:BaseShape><t:BodyType>Text</t:BodyType>\
+             <t:AdditionalProperties><t:FieldURI FieldURI=\"item:EffectiveRights\"/>{extra}</t:AdditionalProperties></m:ItemShape>\
+             <m:ItemIds>{}</m:ItemIds></m:GetItem>",
+            crate::ews::item_ids(&ids)
+        ));
+        // Refused as a whole: the series keep their usual times, as before; the calendar is
+        // read all the same. A connection lost is the calendar's failure.
+        let doc = match asked {
+            Ok(doc) => doc,
+            Err(e @ (NetError::Protocol(_) | NetError::No(_) | NetError::Bad(_))) => {
+                log::info!("changed occurrences not read: {e}");
+                return Ok(());
+            }
+            Err(e) => return Err(e),
+        };
+        for (m, (_, start)) in crate::ews::into_messages(doc).into_iter().zip(chunk) {
+            if m.attr("ResponseClass") == Some("Error") {
+                log::info!("a changed occurrence not read: {}", m.text_of("MessageText").unwrap_or("").trim());
+                continue;
+            }
+            let Some(list) = m.kids.into_iter().find(|k| k.name == "Items") else { continue };
+            for mut it in list.kids.into_iter().filter(|it| it.text_of("CalendarItemType") == Some("Exception")) {
+                if it.child("OriginalStart").is_none() {
+                    it.kids.push(El { name: "OriginalStart".into(), text: start.clone(), ..Default::default() });
+                }
+                items.push(it);
+            }
+        }
+    }
+    Ok(())
 }
 
 /// A public folder's items. On Exchange 2013 and later its content is kept in a public folder

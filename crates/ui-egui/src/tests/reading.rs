@@ -744,7 +744,7 @@ fn a_picture_is_copied_or_saved_from_its_menu() {
             egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(600.0, 400.0))), events, ..Default::default() };
         let mut out = ctx.run_ui(input, |ui| {
             let (_, resp) = ui.allocate_exact_size(egui::vec2(120.0, 120.0), egui::Sense::click());
-            crate::reading::picture_menu_for_tests(&resp, &a.session, &k, src, acts);
+            crate::reading::picture_menu_for_tests(&resp, &a.session, &k, src, None, acts);
         });
         out.textures_delta.clear();
         out
@@ -793,4 +793,30 @@ fn print_opens_the_message_as_it_will_print() {
     assert_eq!(made.len(), 1, "{made:?}");
     let pdf = std::fs::read(&made[0]).unwrap();
     assert!(pdf.starts_with(b"%PDF"), "a PDF");
+}
+
+/// Issue #217: the subject above the message is selected by dragging over it, and copied, as the
+/// text under it is; dragging over it selected nothing.
+#[test]
+fn the_subject_can_be_selected_and_copied() {
+    let (mut a, _) = app("subject-copied");
+    let ctx = egui::Context::default();
+    frame(&ctx, &mut a, vec![]);
+    frame(&ctx, &mut a, vec![key(Key::Home, Modifiers::NONE)]);
+    let subject = a.session.reading.as_ref().and_then(|r| a.session.summary(&r.key)).map(|m| m.subject.clone()).unwrap();
+    assert!(subject.len() > 4);
+    let mut drawn = Vec::new();
+    for _ in 0..3 {
+        drawn = drawn_text(&ctx, &mut a, egui::vec2(1280.0, 800.0));
+    }
+    let at =
+        drawn.iter().filter(|d| d.text == subject).map(|d| d.rect).max_by(|x, y| x.height().total_cmp(&y.height())).expect("the subject heading");
+    let (from, to) = (egui::pos2(at.left() + 1.0, at.center().y), egui::pos2(at.right() - 1.0, at.center().y));
+    let press = |pos, pressed| Event::PointerButton { pos, button: egui::PointerButton::Primary, pressed, modifiers: Modifiers::NONE };
+    frame(&ctx, &mut a, vec![Event::PointerMoved(from)]);
+    frame(&ctx, &mut a, vec![press(from, true)]);
+    frame(&ctx, &mut a, vec![Event::PointerMoved(to)]);
+    frame(&ctx, &mut a, vec![press(to, false)]);
+    let got = copied(&ctx, &mut a, vec![Event::Copy]).expect("copied");
+    assert!(got.len() >= subject.len() - 2 && subject.contains(got.trim()), "{got:?} of {subject:?}");
 }

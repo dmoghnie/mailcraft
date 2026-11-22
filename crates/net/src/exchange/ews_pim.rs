@@ -22,6 +22,8 @@ pub const CALENDAR: &str = "ews:calendar";
 pub const CONTACTS: &str = "ews:contacts";
 /// Items read from a folder at most, and per `GetItem`.
 const MAX_ITEMS: usize = 5000;
+/// A series' occurrences taken out, and its changed ones, kept at most.
+const MAX_EXDATES: usize = 1000;
 const BATCH: usize = 50;
 const MONTHS: [&str; 12] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const DAYS: [&str; 7] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -118,30 +120,35 @@ fn person(m: &El) -> Option<Attendee> {
     email.contains('@').then(|| Attendee { email, name: text(mb, "Name"), partstat: String::new(), rsvp: false })
 }
 
-/// The answer the mailbox's owner (`me`) gave a meeting, from the appointment's own
-/// `MyResponseType`, put on their place among its guests, as Outlook shows it. That place keeps
-/// the answer the invitation came with ("Unknown", or tentative) and isn't changed when the owner
-/// answers: some accepted series showed as tentative or not answered (#144).
-fn own_answer(event: &mut CalEvent, it: &El, me: &str) {
+/// The answer the mailbox's owner (`me`: their addresses) gave a meeting, from the appointment's
+/// own `MyResponseType`, put on their place among its guests, as Outlook shows it. That place
+/// keeps the answer the invitation came with ("Unknown", or tentative) and isn't changed when the
+/// owner answers: some accepted series showed as tentative or not answered (#144). The place is
+/// under whichever of their addresses the meeting was sent to, not only the account's own: under
+/// another, an accepted series still waited for an answer.
+fn own_answer(event: &mut CalEvent, it: &El, me: &[&str]) {
     let partstat = match it.text_of("MyResponseType") {
         Some("Accept") => "ACCEPTED",
         Some("Tentative") => "TENTATIVE",
         Some("Decline") => "DECLINED",
         _ => return,
     };
-    if me.is_empty() {
-        return;
-    }
-    if let Some(a) = event.attendees.iter_mut().find(|a| a.email.eq_ignore_ascii_case(me)) {
+    for a in event.attendees.iter_mut().filter(|a| me.iter().any(|m| !m.is_empty() && a.email.eq_ignore_ascii_case(m))) {
         a.partstat = partstat.to_string();
     }
 }
 
 /// An appointment as an event (occurrences and changed instances are left to their series).
 pub fn event_of(it: &El) -> Option<CalEvent> {
-    if matches!(it.text_of("CalendarItemType"), Some("Occurrence" | "Exception")) {
-        return None;
-    }
+    // A plain occurrence is its series'. A changed one (an exception: moved, cancelled, its own
+    // subject or answer) is the occurrence it stands for, by the start its series gave it
+    // (`OriginalStart`, which [`reading::with_changed_occurrences`] puts on it from the series'
+    // list): it was dropped, and the series kept its usual time there (issue #204).
+    let original = match it.text_of("CalendarItemType") {
+        Some("Occurrence") => return None,
+        Some("Exception") => Some(mailcraft_jmap::utc_date(&text(it, "OriginalStart"))?),
+        _ => None,
+    };
     let all_day = it.text_of("IsAllDayEvent").is_some_and(|v| v == "true");
     let start = mailcraft_jmap::utc_date(&text(it, "Start"))?;
     let end = mailcraft_jmap::utc_date(&text(it, "End")).unwrap_or(start + 3600).max(start);
@@ -187,7 +194,19 @@ pub fn event_of(it: &El) -> Option<CalEvent> {
         start,
         end,
         all_day,
-        rrule: it.child("Recurrence").and_then(recurrence_json).as_ref().and_then(rrule_of),
+        rrule: if original.is_some() { None } else { it.child("Recurrence").and_then(recurrence_json).as_ref().and_then(rrule_of) },
+        recurrence_id: original.map(|t| if all_day { day(t) } else { t }),
+        // The occurrences taken out of a series (issue #204): each by its start.
+        exdates: it
+            .child("DeletedOccurrences")
+            .map(|d| {
+                d.children("DeletedOccurrence")
+                    .filter_map(|o| mailcraft_jmap::utc_date(&text(o, "Start")))
+                    .map(|t| if all_day { day(t) } else { t })
+                    .take(MAX_EXDATES)
+                    .collect()
+            })
+            .unwrap_or_default(),
         organizer: it.child("Organizer").and_then(person),
         attendees,
         status: if it.text_of("IsCancelled") == Some("true") { "CANCELLED".into() } else { String::new() },
@@ -495,9 +514,9 @@ fn id_and_key(id: Option<&El>) -> (String, String) {
     (attr("Id"), attr("ChangeKey"))
 }
 
-/// The events among a calendar's items, as kept in `calendar`; `me`, the address of the mailbox
-/// it's in (empty for a public folder's), whose answers to meetings the items say.
-fn stored_events<'a>(items: Vec<El>, calendar: &'a str, me: &'a str) -> impl Iterator<Item = StoredEvent> + 'a {
+/// The events among a calendar's items, as kept in `calendar`; `me`, the addresses of the mailbox
+/// it's in (none for a public folder's), whose answers to meetings the items say.
+fn stored_events<'a>(items: Vec<El>, calendar: &'a str, me: &'a [&'a str]) -> impl Iterator<Item = StoredEvent> + 'a {
     items.into_iter().filter_map(move |it| {
         let mut event = event_of(&it)?;
         own_answer(&mut event, &it, me);
@@ -558,9 +577,9 @@ fn item_may_change(it: &El) -> bool {
 }
 
 mod pass;
-pub use pass::Pass;
 #[cfg(test)]
 pub use pass::sync;
+pub use pass::{Pass, read_people};
 mod pushing;
 mod reading;
 mod reminders;

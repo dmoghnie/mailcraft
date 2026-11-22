@@ -32,7 +32,7 @@ pub(crate) fn interface_strings() -> BTreeSet<String> {
     // and the catalogs' own code left out.
     let sources = ui_sources();
     // (prefix, which string literals after it are interface text)
-    let prefixes: [(&str, &[usize]); 22] = [
+    let prefixes: [(&str, &[usize]); 23] = [
         ("tl!(", &[0]),
         ("tf!(", &[0]),
         ("tool_button(ui, Icon::", &[0]),
@@ -54,6 +54,8 @@ pub(crate) fn interface_strings() -> BTreeSet<String> {
         ("group(ui, ", &[0]),
         ("check(ui, s.prefs.", &[0]),
         ("disclosure(ui, t, ", &[0]),
+        // A form's labels: `form_row(ui, t, true, Some(Icon::Clock), "Starts", |ui|`.
+        ("form_row(ui, t, ", &[0]),
         // Labels in tables of buttons drawn in a loop: `(Icon::Send, "Sent To", "to:")`.
         ("(Icon::", &[0]),
     ];
@@ -139,6 +141,9 @@ pub(crate) fn interface_strings() -> BTreeSet<String> {
         out.insert(a.label().to_string());
     }
     out.extend(mailcraft_engine::ARRANGE_HEADINGS.map(str::to_string));
+    out.insert(mailcraft_engine::PINNED_HEADING.to_string());
+    // The forms' labels, those given to a row by a variable too (a contact's emails and phones).
+    out.extend(crate::pim_dialogs::ICON_FORM_LABELS.iter().chain(&crate::pim_dialogs::CONTACT_FORM_LABELS).map(|s| s.to_string()));
     // The message editor's ribbon and dialogs; labels chosen at run time.
     for s in [
         "Ignore the conversation",
@@ -325,7 +330,7 @@ pub(crate) fn interface_strings() -> BTreeSet<String> {
         "Change this account's name, servers and sign-in, or its signature.",
         "Tell people you're away: each sender gets one reply while they're on, even when this computer is off.",
         "See how much space your mail takes, and empty Deleted Items and Junk Email.",
-        "Sort new mail as it arrives: move it, flag it, categorize it.",
+        "Sort mail as it arrives, or as you send it: move it, flag it, categorize it.",
         "Local-first: mail is cached on this computer for fast offline search. Passwords stay in the system keychain.",
         "MailCraft talks only to your own mail servers, over encrypted connections. Pictures from the web load only when you ask.",
         "Built in the open from the email standards: no code, icons or assets from other mail apps.",
@@ -467,6 +472,12 @@ fn tags_templates_and_dates() {
     assert_eq!(lang_from_tag("sk").map(Lang::code), Some("sk"));
     assert_eq!(lang_from_tag("sk-SK").map(Lang::code), Some("sk"));
     assert_eq!(lang_from_tag("sk_SK.UTF-8").map(Lang::code), Some("sk"));
+    assert_eq!(lang_from_tag("pl").map(Lang::code), Some("pl"));
+    assert_eq!(lang_from_tag("pl-PL").map(Lang::code), Some("pl"));
+    assert_eq!(lang_from_tag("pl_PL.UTF-8").map(Lang::code), Some("pl"));
+    assert_eq!(lang_from_tag("hu").map(Lang::code), Some("hu"));
+    assert_eq!(lang_from_tag("hu-HU").map(Lang::code), Some("hu"));
+    assert_eq!(lang_from_tag("hu_HU.UTF-8").map(Lang::code), Some("hu"));
     assert_eq!(lang_from_tag("de-AT").map(Lang::code), Some("de"));
     assert_eq!(lang_from_tag("C"), Some(Lang::EN));
     assert_eq!(lang_from_tag("xx"), None);
@@ -586,7 +597,8 @@ fn a_tour_in_the_pseudo_language_only_draws_known_strings() {
 fn the_language_list_reads_in_order() {
     let names: Vec<&str> = Lang::for_picker().iter().map(|l| l.name()).collect();
     assert_eq!(names.len(), LANGUAGES.len());
-    let latin = ["English", "Deutsch", "Español", "Français", "Italiano", "Nederlands", "Português (Brasil)", "Slovenčina", "Türkçe"];
+    let latin =
+        ["English", "Deutsch", "Español", "Français", "Italiano", "Magyar", "Nederlands", "Polski", "Português (Brasil)", "Slovenčina", "Türkçe"];
     assert_eq!(names.get(..latin.len()), Some(&latin[..]), "{names:?}");
     assert!(names.iter().skip(latin.len()).all(|n| !n.is_ascii()), "{names:?}");
 }

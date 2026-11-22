@@ -45,7 +45,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             let mut style = s.prefs.date_style;
             if let Some(code) = p::str(v, "order") {
                 style.order = mailcraft_model::dates::DateOrder::from_code(code)
-                    .ok_or_else(|| CmdError::Params(format!("`{code}` isn't one of iso, dmy, mdy and dmy. (with dots)")))?;
+                    .ok_or_else(|| CmdError::Params(format!("`{code}` isn't one of iso, dmy, mdy, dmy. and ymd. (with dots)")))?;
             }
             style.hours12 = p::bool(v, "hours12").unwrap_or(style.hours12);
             style.full_in_list = p::bool(v, "fullInList").unwrap_or(style.full_in_list);
@@ -53,7 +53,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.clock = s.clock.styled(style);
             Ok(json!({"order": style.order.code(), "hours12": style.hours12, "fullInList": style.full_in_list}))
         })
-        .params(r#"{"order"?: "iso"|"dmy"|"mdy"|"dmy." (2026-10-28, 28/10/2026, 10/28/2026, 28.10.2026), "hours12"?: bool, "fullInList"?: bool}"#),
+        .params(r#"{"order"?: "iso"|"dmy"|"mdy"|"dmy."|"ymd." (2026-10-28, 28/10/2026, 10/28/2026, 28.10.2026, 2026.10.28), "hours12"?: bool, "fullInList"?: bool}"#),
         CommandSpec::new("view.systemTitleBar", "Use the system title bar", "File › Options › General", |s, v| {
             s.prefs.system_title_bar = p::bool(v, "on").unwrap_or(!s.prefs.system_title_bar);
             Ok(json!({"on": s.prefs.system_title_bar, "atNextStart": true}))
@@ -163,6 +163,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         })
         .params(r#"{"does"?: "ask"|"send"|"nothing"}"#),
         toggle!("calendar.tentativeInvites", "Invitations into the calendar as tentative", "File › Options › Calendar", tentative_invites),
+        toggle!("calendar.recordAnswers", "Record guests' answers as they arrive", "File › Options › Calendar", record_answers),
         CommandSpec::new("options.answeredInvites", "After answering a meeting invitation", "File › Options › Mail", |s, v| {
             if let Some(after) = p::str(v, "after") {
                 s.prefs.answered_invites = match after {
@@ -250,6 +251,13 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         })
         .params(r#"{"account": string, "calendar": string, "shown"?: bool (default: the other way)}"#),
         toggle!("calendar.sideBySide", "Side by side", "Calendar › View", calendars_side_by_side, r#"{"on"?: bool (each calendar in a column of its own in day and week)}"#),
+        toggle!(
+            "calendar.scheduleWorkHours",
+            "Only work hours",
+            "Calendar › Schedule",
+            schedule_work_hours,
+            r#"{"on"?: bool (the Schedule view over the hours anyone shown works)}"#
+        ),
         CommandSpec::new("calendar.months", "Months in the side pane", "Calendar › Side pane", |s, v| {
             let n = p::u64(v, "count").ok_or_else(|| CmdError::Params("`count` is required (1 to 6)".into()))?;
             s.prefs.calendar_months = u8::try_from(n.clamp(1, 6)).unwrap_or(1);

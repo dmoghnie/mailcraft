@@ -1,4 +1,6 @@
-//! Dialogs: while writing (Address Book, saving changes, no subject, word count).
+//! Dialogs: while writing (Address Book, Check Names, saving changes, no subject, word count).
+
+use serde_json::Value;
 
 use super::*;
 use crate::icons::Icon;
@@ -6,6 +8,7 @@ use crate::icons::Icon;
 pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &mut Vec<Action>) -> bool {
     match d {
         Dialog::SelectNames(f) => select_names(ui, f, t, acts),
+        Dialog::CheckNames(f) => check_names(ui, f, t, acts),
         Dialog::SaveChanges => {
             ui.set_width(380.0);
             title(ui, t, "Want to save your changes?");
@@ -140,6 +143,76 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
     }
 }
 
+/// Check Names' question (issue #211): a name typed that could be several people, and who.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct NameChoice {
+    /// The box it's in (`to`, `cc`, `bcc`), as typed, and the people it could be (name, address).
+    pub field: String,
+    pub typed: String,
+    pub people: Vec<(String, String)>,
+}
+
+impl NameChoice {
+    /// One of `compose.checkNames`' `several`.
+    pub fn from_json(v: &Value) -> Option<NameChoice> {
+        let s = |v: &Value, k: &str| v.get(k).and_then(Value::as_str).map(str::to_string);
+        let people = v.get("people")?.as_array()?.iter().filter_map(|p| Some((s(p, "name").unwrap_or_default(), s(p, "email")?))).collect();
+        Some(NameChoice { field: s(v, "field")?, typed: s(v, "typed")?, people })
+    }
+}
+
+/// The names Check Names asks about, the first shown; which of its people is picked.
+#[derive(Clone, Debug, Default)]
+pub struct CheckNamesForm {
+    pub asks: Vec<NameChoice>,
+    pub picked: Option<usize>,
+}
+
+/// Check Names: the people a name typed could be, one picked (a double-click picks and goes on);
+/// then the next name. Cancel leaves the rest as typed.
+fn check_names(ui: &mut Ui, f: &mut CheckNamesForm, t: &Tokens, acts: &mut Vec<Action>) -> bool {
+    let Some(ask) = f.asks.first() else { return false };
+    ui.set_width(440.0);
+    title(ui, t, "Check Names");
+    ui.add(
+        egui::Label::new(RichText::new(tf!("More than one person could be “{typed}”. Pick the one you meant:", typed = ask.typed)).color(t.text))
+            .wrap(),
+    );
+    ui.add_space(6.0);
+    let mut go = false;
+    egui::Frame::new().stroke(egui::Stroke::new(1.0, t.border)).corner_radius(4.0).inner_margin(Margin::same(4)).show(ui, |ui| {
+        egui::ScrollArea::vertical().max_height(240.0).auto_shrink([false, true]).show(ui, |ui| {
+            // Rows the list's width, read from the start as the address book's are.
+            ui.with_layout(egui::Layout::top_down_justified(egui::Align::Min), |ui| {
+                for (i, (name, email)) in ask.people.iter().enumerate() {
+                    let label = if name.trim().is_empty() { email.clone() } else { format!("{name}  <{email}>") };
+                    let r = ui.add(egui::Button::selectable(f.picked == Some(i), label).min_size(vec2(0.0, 24.0)));
+                    if r.clicked() {
+                        f.picked = Some(i);
+                    }
+                    if r.double_clicked() {
+                        f.picked = Some(i);
+                        go = true;
+                    }
+                }
+            });
+        });
+    });
+    let (ok, cancel) = buttons(ui, t, "OK", f.picked.is_some());
+    if cancel {
+        return false;
+    }
+    if (ok || go)
+        && let Some((name, email)) = f.picked.and_then(|i| ask.people.get(i))
+    {
+        acts.push(Action::Run("compose.pickName", json!({"field": ask.field, "typed": ask.typed, "email": email, "name": name})));
+        f.asks.remove(0);
+        f.picked = None;
+        return !f.asks.is_empty();
+    }
+    true
+}
+
 /// The address book being looked at.
 #[derive(Clone, Debug, Default)]
 pub struct NamesForm {
@@ -152,6 +225,9 @@ pub struct NamesForm {
     /// Each account's address books: (source, name, the account's address).
     pub books: Vec<(String, String, String)>,
     pub list: Vec<mailcraft_engine::model::EmailAddress>,
+    /// Each one's job title and department, as the directory gave them (issue #213), in the
+    /// list's order: empty for one it didn't.
+    pub details: Vec<(String, String)>,
     /// The list must be read again (the search or the book changed).
     pub stale: bool,
     /// An account has an organisation directory to search (issue #9).
@@ -173,6 +249,9 @@ pub struct NamesForm {
     pub purpose: NamesFor,
     /// A calendar group's name, as typed ([`NamesFor::Group`]).
     pub group: String,
+    /// People are being added to the group already there, of that name (issue #209: its menu
+    /// had only Delete): said so, its name not to be changed here.
+    pub adding: bool,
     /// Why what was picked couldn't be done (a calendar's or group's command refused it).
     pub error: Option<String>,
 }
@@ -237,13 +316,18 @@ pub(super) fn select_names(ui: &mut Ui, f: &mut NamesForm, t: &Tokens, acts: &mu
         match f.purpose {
             NamesFor::Message => "Select Names",
             NamesFor::Calendars => "Open a shared calendar",
+            NamesFor::Group if f.adding => "Add people to the group",
             NamesFor::Group => "New calendar group",
         },
     );
     if f.purpose == NamesFor::Group {
         ui.horizontal(|ui| {
             ui.label(RichText::new(tl!("Group name")).strong());
-            ui.add(egui::TextEdit::singleline(&mut f.group).desired_width(240.0).hint_text(tl!("Design team")));
+            if f.adding {
+                ui.label(RichText::new(&f.group).color(t.text));
+            } else {
+                ui.add(egui::TextEdit::singleline(&mut f.group).desired_width(240.0).hint_text(tl!("Design team")));
+            }
         });
         ui.add_space(4.0);
     }
@@ -338,10 +422,19 @@ pub(super) fn select_names(ui: &mut Ui, f: &mut NamesForm, t: &Tokens, acts: &mu
     let mut add: Option<Recipients> = None;
     egui::Frame::new().stroke(egui::Stroke::new(1.0, t.border)).corner_radius(4).show(ui, |ui| {
         ui.set_min_size(vec2(ui.available_width(), 230.0));
-        egui::Grid::new("names-head").num_columns(2).min_col_width(250.0).show(ui, |ui| {
-            ui.label(RichText::new(tl!("Name")).color(t.dim).small());
-            ui.label(RichText::new(tl!("Email Address")).color(t.dim).small());
-        });
+        // A job title and department where the directory gives any (issue #213), as Outlook's
+        // Address Book has them: namesakes are told apart.
+        let titled = f.details.iter().any(|(title, department)| !title.is_empty() || !department.is_empty());
+        let cols: &[(&str, f32)] = if titled {
+            &[("Name", 6.0), ("Job title", 176.0), ("Department", 312.0), ("Email Address", 432.0)]
+        } else {
+            &[("Name", 6.0), ("Email Address", 256.0)]
+        };
+        let head = ui.allocate_exact_size(vec2(ui.available_width(), 18.0), egui::Sense::hover()).0;
+        for (label, x) in cols {
+            let g = ui.painter().layout_no_wrap(tl!(label).to_string(), egui::TextStyle::Small.resolve(ui.style()), t.dim);
+            ui.painter().galley(egui::pos2(head.min.x + x, head.center().y - g.size().y / 2.0), g, t.dim);
+        }
         ui.separator();
         // Only the rows in view are laid out: the list holds up to 2,000 people. A row is as tall
         // as `horizontal` makes it: its 22 points, or a control's height if that's more.
@@ -379,10 +472,22 @@ pub(super) fn select_names(ui: &mut Ui, f: &mut NamesForm, t: &Tokens, acts: &mu
                             .galley(pos, g, c);
                         cut
                     };
-                    let name_w = 244.0;
-                    let cut_name = cell(ui, &name, 6.0, name_w, t.text);
-                    let cut_email = cell(ui, &a.email, 256.0, (rect.width() - 262.0).max(40.0), t.dim);
-                    if cut_name || cut_email { r.on_hover_text(format!("{name} <{}>", a.email)) } else { r }
+                    let (name_w, email_x) = if titled { (164.0, 432.0) } else { (244.0, 256.0) };
+                    let mut cut = cell(ui, &name, 6.0, name_w, t.text);
+                    let (title, department) = f.details.get(i).map(|(t, d)| (t.as_str(), d.as_str())).unwrap_or_default();
+                    if titled {
+                        cut |= cell(ui, title, 176.0, 128.0, t.dim);
+                        cut |= cell(ui, department, 312.0, 112.0, t.dim);
+                    }
+                    cut |= cell(ui, &a.email, email_x, (rect.width() - email_x - 6.0).max(40.0), t.dim);
+                    let more = [title, department].iter().filter(|s| !s.is_empty()).copied().collect::<Vec<_>>().join(", ");
+                    if !cut {
+                        r
+                    } else if more.is_empty() {
+                        r.on_hover_text(format!("{name} <{}>", a.email))
+                    } else {
+                        r.on_hover_text(format!("{name} <{}>\n{more}", a.email))
+                    }
                 });
                 if r.inner.clicked() {
                     f.selected = Some(i);
@@ -424,7 +529,11 @@ pub(super) fn select_names(ui: &mut Ui, f: &mut NamesForm, t: &Tokens, acts: &mu
             if ui.add_sized(vec2(72.0, 24.0), egui::Button::new(tl!(label))).clicked() {
                 add = Some(*field);
             }
-            ui.add(egui::TextEdit::singleline(field.of(&mut f.to, &mut f.cc, &mut f.bcc)).desired_width(f32::INFINITY));
+            if f.purpose == NamesFor::Message {
+                ui.add(egui::TextEdit::singleline(field.of(&mut f.to, &mut f.cc, &mut f.bcc)).desired_width(f32::INFINITY));
+            } else {
+                crate::bidi::vertical(ui, |ui| people_field(ui, t, &mut f.to));
+            }
         });
     }
     if let (Some(target), Some(a)) = (add, f.selected.and_then(|i| f.list.get(i)).cloned()) {
@@ -448,6 +557,63 @@ pub(super) fn select_names(ui: &mut Ui, f: &mut NamesForm, t: &Tokens, acts: &mu
         return true;
     }
     !cancel
+}
+
+/// The people picked to open the calendars of or put in a group (issue #210): each a chip with
+/// their name (their address on hover, × takes them out), in rows that wrap and scroll past four,
+/// and the box under them for who's still being typed (after the last `;`). The box kept one
+/// size, so not everyone added could be seen, each as name and address.
+fn people_field(ui: &mut Ui, t: &Tokens, to: &mut String) {
+    let (done, typing) = match to.rfind(';') {
+        Some(i) => (to.get(..i).unwrap_or(""), to.get(i + 1..).unwrap_or("")),
+        None => ("", to.as_str()),
+    };
+    let mut people: Vec<mailcraft_engine::model::EmailAddress> = Vec::new();
+    let mut unread: Vec<String> = Vec::new();
+    // Read whole first: a name in quotes may hold a `;` of its own.
+    let whole = mailcraft_engine::model::addr::parse_list(done).ok().filter(|l| l.iter().all(|a| a.email.contains('@')));
+    let parts: Vec<&str> = if whole.is_some() { Vec::new() } else { done.split(';').map(str::trim).filter(|p| !p.is_empty()).collect() };
+    people.extend(whole.into_iter().flatten());
+    for part in parts {
+        match mailcraft_engine::model::addr::parse_list(part) {
+            Ok(list) if !list.is_empty() && list.iter().all(|a| a.email.contains('@')) => people.extend(list),
+            _ => unread.push(part.to_string()),
+        }
+    }
+    let mut typing = [unread.join("; "), typing.trim().to_string()].into_iter().filter(|s| !s.is_empty()).collect::<Vec<_>>().join("; ");
+    let mut remove = None;
+    widgets::chip_grid(ui, ui.scope_id().with("people"), people.len(), 150.0, 240.0, 26.0, 4, |ui, i, w| {
+        let Some(a) = people.get(i) else { return };
+        let (rect, resp) = ui.allocate_exact_size(vec2(w, 26.0), Sense::hover());
+        let x_rect = Rect::from_center_size(egui::pos2(rect.right() - 13.0, rect.center().y), vec2(20.0, 20.0));
+        let x = ui.interact(x_rect, resp.id.with("remove"), Sense::click()).on_hover_text(tl!("Remove"));
+        let name = if a.name.trim().is_empty() { a.email.as_str() } else { a.name.trim() };
+        widgets::named(ui, &x, &format!("{}: {name}", tl!("Remove")), true, None);
+        let p = ui.painter();
+        p.rect(
+            rect,
+            4.0,
+            if resp.hovered() { t.hover_row } else { t.surface },
+            egui::Stroke::new(1.0, t.faint.gamma_multiply(0.55)),
+            egui::StrokeKind::Inside,
+        );
+        if x.hovered() {
+            p.rect_filled(x_rect, 3.0, t.hover);
+        }
+        crate::icons::paint(p, crate::icons::centered(x_rect, 10.0), crate::icons::Icon::Close, if x.hovered() { t.text } else { t.dim });
+        let g = widgets::one_line(ui, name, theme::regular(12.5), t.text, x_rect.left() - 4.0 - (rect.left() + 8.0));
+        p.galley(egui::pos2(rect.left() + 8.0, rect.center().y - g.size().y / 2.0), g, t.text);
+        resp.on_hover_text(a.email.clone());
+        if x.clicked() {
+            remove = Some(i);
+        }
+    });
+    ui.add(egui::TextEdit::singleline(&mut typing).desired_width(f32::INFINITY));
+    if let Some(i) = remove.filter(|i| *i < people.len()) {
+        people.remove(i);
+    }
+    let picked: String = people.iter().map(|a| format!("{a}; ")).collect();
+    *to = format!("{picked}{}", typing.trim_start());
 }
 
 /// Select Names adds someone whose address is part of another's, or of a name, in the field;

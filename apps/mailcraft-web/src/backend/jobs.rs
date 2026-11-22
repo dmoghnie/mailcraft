@@ -75,13 +75,16 @@ pub(super) async fn job(sh: &Rcs, id: &str, j: Job) {
         Job::GetVacation { .. } => vacation(sh, id, None).await,
         Job::SetVacation { vacation: v, .. } => vacation(sh, id, Some(v)).await,
         // Nothing to do in the browser: no Outbox (sending needs the server), no CalDAV, and no
-        // Send / Receive to stop (its JMAP accounts sync on their own).
-        Job::FlushOutbox { .. } | Job::SyncDav { .. } | Job::CancelTransfers { .. } => {}
+        // Send / Receive to stop (its JMAP accounts sync on their own), nor other people's
+        // calendars (an Exchange account's).
+        Job::FlushOutbox { .. } | Job::SyncDav { .. } | Job::ReadShared { .. } | Job::CancelTransfers { .. } => {}
         // The browser's accounts are JMAP ones, with no organisation directory (issue #9).
         Job::SearchDirectory { query, .. } => {
             emit(sh, Event::Directory { account: id.to_string(), query, people: Vec::new(), error: Some(NO_DIRECTORY.into()), consent: false })
         }
         Job::AllowDirectory { account } => emit(sh, Event::DirectoryAllowed { account: account.id, error: Some(NO_DIRECTORY.into()) }),
+        // People's photos are asked of on-premises Exchange (issue #223): the browser's accounts are JMAP.
+        Job::FetchPhoto { email, .. } => emit(sh, Event::Photo { account: id.to_string(), email, photo: None, error: None }),
         // Rules on a server are an Exchange mailbox's (issue #139): the browser's accounts are JMAP.
         Job::GetServerRules { .. } | Job::SetServerRules { .. } => emit(
             sh,

@@ -43,6 +43,8 @@ pub enum Dialog {
     AddAccount(Box<AccountForm>),
     /// Outlook's Select Names: the address book, to add people to To, Cc and Bcc.
     SelectNames(Box<NamesForm>),
+    /// Check Names' question: who a name typed is, of the people it could be (issue #211).
+    CheckNames(Box<CheckNamesForm>),
     /// Closing a message window with something written in it.
     SaveChanges,
     Password {
@@ -213,6 +215,16 @@ pub enum Dialog {
     Task(Box<crate::pim_dialogs::TaskForm>),
     /// Follow Up › Custom… on a flagged message of the To-Do Bar (issue #160).
     FollowUp(Box<crate::pim_dialogs::FollowUpForm>),
+    /// Propose new time, for a meeting the user is invited to (issue #238).
+    Propose(Box<crate::pim_dialogs::ProposeForm>),
+    /// Invitations in the Inbox the calendar hasn't got (issue #237).
+    WaitingInvites(Box<crate::pim_dialogs::WaitingForm>),
+    /// Forward a meeting the user is invited to (issue #234): to whom.
+    ForwardMeeting {
+        uid: String,
+        summary: String,
+        to: String,
+    },
     Contact(Box<crate::pim_dialogs::ContactForm>),
     /// File › Info › Clean up old items: old mail archived to a data file (issue #179).
     Archive(Box<ArchiveForm>),
@@ -339,6 +351,7 @@ impl Dialog {
         matches!(
             self,
             Dialog::SelectNames(_)
+                | Dialog::CheckNames(_)
                 | Dialog::SaveChanges
                 | Dialog::EmptySubject
                 | Dialog::CtrlEnter { .. }
@@ -543,6 +556,7 @@ impl Dialog {
             account: None,
             stop: false,
             run_now: true,
+            sent: false,
             error: None,
             original: None,
             server: None,
@@ -721,6 +735,7 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         Dialog::NewCategory { .. } | Dialog::Categories => categories::draw(ui, d, s, t, acts),
         Dialog::Rules | Dialog::EditRule(..) | Dialog::SearchFolder(..) | Dialog::QuickStep(..) => organize::draw(ui, d, s, t, acts),
         Dialog::SelectNames(..)
+        | Dialog::CheckNames(..)
         | Dialog::SaveChanges
         | Dialog::EmptySubject
         | Dialog::CtrlEnter { .. }
@@ -737,6 +752,9 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         | Dialog::Event(..)
         | Dialog::Task(..)
         | Dialog::FollowUp(..)
+        | Dialog::Propose(..)
+        | Dialog::ForwardMeeting { .. }
+        | Dialog::WaitingInvites(..)
         | Dialog::Contact(..) => other::draw(ui, d, s, pics, t, acts),
     }
 }
