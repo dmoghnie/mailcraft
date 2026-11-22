@@ -171,6 +171,14 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         CommandSpec::new("mail.unsnooze", "Unsnooze", "Home › Tags", |s, _| s.unsnooze_selection()).when(has_selection),
         CommandSpec::new("mail.moveToFocused", "Move to Focused", "Home › Move", |s, _| s.set_focus_for_selection(true)).when(has_selection),
         CommandSpec::new("mail.moveToOther", "Move to Other", "Home › Move", |s, _| s.set_focus_for_selection(false)).when(has_selection),
+        CommandSpec::new("mail.moveToGroup", "Always move to a group", "Home › Move", |s, v| {
+            let code = p::req_str(v, "group")?;
+            let group = crate::InboxGroup::from_code(code)
+                .ok_or_else(|| CmdError::Params(format!("`{code}` isn't primary, transactions, updates or promotions")))?;
+            s.move_senders_to_group(group)
+        })
+        .params(r#"{"group": "primary"|"transactions"|"updates"|"promotions"} (the selection's senders, all their mail)"#)
+        .when(has_selection),
         // Categories
         CommandSpec::new("category.list", "Categories", "Home › Tags › Categorize", |s, _| {
             Ok(json!(s.prefs.categories.iter().map(|c| json!({"name": c.name, "keyword": c.keyword, "color": c.color})).collect::<Vec<_>>()))

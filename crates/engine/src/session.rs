@@ -65,8 +65,8 @@ pub use mailboxes::{ARRANGE_HEADINGS, Arrange, ListFilter, PINNED_HEADING, Row};
 pub use opening::SenderMarks;
 pub use organize::{junk, quick_steps, search_folders, server_rules, sweep, vips};
 pub use prefs::{
-    ACCENTS, CtrlEnter, DICTIONARY_MAX, FolderDensity, HOME_BUTTONS, NotesOrder, Prefs, RIBBON_ADDED_MOST, RIBBON_MOST, RIBBON_ROW, ReadInPane,
-    ReadingPane, SenderAddresses, StartIn, SwipeAction, accent_code, accent_rgb, dictionary_word,
+    ACCENTS, CtrlEnter, DICTIONARY_MAX, FolderDensity, HOME_BUTTONS, InboxGroup, NotesOrder, Prefs, RIBBON_ADDED_MOST, RIBBON_MOST, RIBBON_ROW,
+    ReadInPane, ReadingPane, SenderAddresses, StartIn, SwipeAction, accent_code, accent_rgb, dictionary_word,
 };
 pub mod pim;
 pub use pim::invite;
@@ -419,8 +419,11 @@ pub struct Session {
     pub(crate) snoozes_looked: organize::SnoozesLooked,
     #[cfg(test)]
     pub(crate) snooze_looks: u64,
-    /// The Other tab of a Focused/Other Inbox is showing.
+    /// The Other tab of a Focused/Other Inbox is showing (with the four groups, one of the
+    /// groups after Primary).
     pub focus_other: bool,
+    /// With the four groups, the one after Primary last chosen ([`Session::shown_group`]).
+    pub group_tab: InboxGroup,
     /// Pictures from the web, by address: downloaded only after the user asked.
     pub pictures: HashMap<String, Picture>,
     /// Messages whose pictures the user asked to see this time.
@@ -588,6 +591,7 @@ impl Session {
             #[cfg(test)]
             snooze_looks: 0,
             focus_other: false,
+            group_tab: InboxGroup::Primary,
             pictures: HashMap::new(),
             pictures_for: BTreeSet::new(),
             discovered: HashMap::new(),

@@ -4,6 +4,7 @@ use super::*;
 
 mod categories;
 mod folder_pane;
+mod inbox_groups;
 mod no_answer;
 mod sent_rules;
 mod server_rules;

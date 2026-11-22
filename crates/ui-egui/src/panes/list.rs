@@ -76,7 +76,7 @@ fn list_head(s: &Session, t: &theme::Tokens, ui: &mut Ui, acts: &mut Vec<Action>
     });
     ui.add_space(4.0);
     if s.focus_split() {
-        ui.horizontal(|ui| focus_tabs(s, t, ui, 14.0, [false, true], acts));
+        ui.horizontal(|ui| focus_tabs(s, t, ui, 14.0, false, acts));
         ui.add_space(2.0);
     }
     ui.horizontal(|ui| {
@@ -162,12 +162,21 @@ fn list_head(s: &Session, t: &theme::Tokens, ui: &mut Ui, acts: &mut Vec<Action>
     search_status(s, t, ui);
 }
 
-/// The Inbox's Focused and Other (`others` in the order they're laid out), the one shown
-/// underlined; text `size` points.
-fn focus_tabs(s: &Session, t: &theme::Tokens, ui: &mut Ui, size: f32, others: [bool; 2], acts: &mut Vec<Action>) {
-    for other in others {
-        let label = if other { "Other" } else { "Focused" };
-        let on = s.focus_other == other;
+/// The Inbox's Focused and Other, or its four groups, the one shown underlined (laid out
+/// backwards, `from_end`, in a row laid out from its end); text `size` points.
+fn focus_tabs(s: &Session, t: &theme::Tokens, ui: &mut Ui, size: f32, from_end: bool, acts: &mut Vec<Action>) {
+    let mut tabs: Vec<(&str, &str, bool)> = if s.groups_split() {
+        let shown = s.shown_group();
+        mailcraft_engine::InboxGroup::ALL.iter().map(|g| (g.label(), g.code(), *g == shown)).collect()
+    } else {
+        vec![("Focused", "focused", !s.focus_other), ("Other", "other", s.focus_other)]
+    };
+    // Four take less room each.
+    let size = if tabs.len() > 2 { size - 1.0 } else { size };
+    if from_end {
+        tabs.reverse();
+    }
+    for (label, code, on) in tabs {
         let text = RichText::new(tl!(label)).color(if on { t.text } else { t.dim }).font(if on { theme::bold(size) } else { theme::regular(size) });
         let r = ui.add(egui::Button::new(text).frame_when_inactive(false));
         if on {
@@ -177,7 +186,7 @@ fn focus_tabs(s: &Session, t: &theme::Tokens, ui: &mut Ui, size: f32, others: [b
             );
         }
         if r.clicked() && !on {
-            acts.push(Action::Run("list.focusTab", json!({"value": if other { "other" } else { "focused" }})));
+            acts.push(Action::Run("list.focusTab", json!({"value": code})));
         }
     }
 }
@@ -226,7 +235,7 @@ fn list_head_line(s: &Session, t: &theme::Tokens, ui: &mut Ui, acts: &mut Vec<Ac
             });
             // The Inbox's Focused and Other, before the filter (laid out from the end: Other first).
             if s.focus_split() {
-                focus_tabs(s, t, ui, 12.5, [true, false], acts);
+                focus_tabs(s, t, ui, 12.5, true, acts);
             }
             // The name has what's left, cut short where it's too long.
             ui.with_layout(crate::bidi::row_from_start(egui::Align::Center), |ui| {

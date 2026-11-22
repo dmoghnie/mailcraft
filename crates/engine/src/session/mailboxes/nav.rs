@@ -312,7 +312,7 @@ impl Session {
     /// The conversation a message is in, shown above it in the reading pane: only while the list
     /// is grouped by conversation (as Outlook's reading pane shows one message otherwise).
     pub(crate) fn thread_of(&self, key: &MessageKey) -> Vec<MessageKey> {
-        if !self.prefs.conversations {
+        if !self.stacked() {
             return Vec::new();
         }
         let Some(i) = self.index_of(key) else { return Vec::new() };
@@ -330,7 +330,7 @@ impl Session {
     /// conversation, with no row of its own, stays itself, as Outlook deletes one message picked
     /// inside a conversation.
     pub fn with_conversations(&self, keys: &[MessageKey]) -> Vec<MessageKey> {
-        if !self.prefs.conversations {
+        if !self.stacked() {
             return keys.to_vec();
         }
         let mut seen: HashSet<MessageKey> = HashSet::with_capacity(keys.len());

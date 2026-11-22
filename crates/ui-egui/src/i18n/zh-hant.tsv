@@ -2119,3 +2119,13 @@ count	occurrences	次
 	Swipe right	向右滑動
 	Two fingers sideways over a message on a trackpad	在觸控板上用兩根手指在郵件上橫向滑動
 	Swipe actions	滑動動作
+	Primary	主要
+	Transactions	交易
+	Updates	動態
+	Promotions	促銷
+	Always move to	一律移至
+	Sort Other into Transactions, Updates and Promotions	將「其他」分為交易、動態和促銷
+	Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk	「焦點」會變成「主要」。在這台電腦上依每封郵件的寄件者、主旨以及是否大量寄送來分類
+	Stack each sender's mail in one row	將每位寄件者的郵件疊成一列
+	In Transactions, Updates and Promotions	在交易、動態和促銷中
+	Always move to a group	一律移至群組

@@ -2134,3 +2134,13 @@ count	occurrences	opakovaní
 	Swipe right	Potiahnutie doprava
 	Two fingers sideways over a message on a trackpad	Dvoma prstami nabok nad správou na touchpade
 	Swipe actions	Akcie potiahnutia
+	Primary	Hlavné
+	Transactions	Transakcie
+	Updates	Novinky
+	Promotions	Akcie a ponuky
+	Always move to	Vždy presúvať do
+	Sort Other into Transactions, Updates and Promotions	Triediť Ostatné na Transakcie, Novinky a Akcie a ponuky
+	Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk	Prioritné sa stanú Hlavnými. Triedi sa na tomto počítači podľa odosielateľa, predmetu a toho, či bola správa hromadná
+	Stack each sender's mail in one row	Zoskupiť poštu každého odosielateľa do jedného riadka
+	In Transactions, Updates and Promotions	V Transakciách, Novinkách a Akciách a ponukách
+	Always move to a group	Vždy presúvať do skupiny

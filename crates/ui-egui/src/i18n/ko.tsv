@@ -2119,3 +2119,13 @@ count	occurrences	회
 	Swipe right	오른쪽으로 살짝 밀기
 	Two fingers sideways over a message on a trackpad	트랙패드에서 메시지 위로 두 손가락을 옆으로
 	Swipe actions	살짝 밀기 동작
+	Primary	기본
+	Transactions	거래
+	Updates	업데이트
+	Promotions	프로모션
+	Always move to	항상 이동
+	Sort Other into Transactions, Updates and Promotions	기타를 거래, 업데이트, 프로모션으로 분류
+	Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk	집중이 기본이 됩니다. 이 컴퓨터에서 각 메시지의 보낸 사람, 제목, 대량 발송 여부로 분류합니다
+	Stack each sender's mail in one row	보낸 사람별 메일을 한 행으로 묶기
+	In Transactions, Updates and Promotions	거래, 업데이트, 프로모션에서
+	Always move to a group	항상 그룹으로 이동

@@ -2115,3 +2115,13 @@ count	occurrences	פעמים
 	Swipe right	החלקה ימינה
 	Two fingers sideways over a message on a trackpad	שתי אצבעות הצידה מעל הודעה במשטח המגע
 	Swipe actions	פעולות החלקה
+	Primary	ראשי
+	Transactions	עסקאות
+	Updates	עדכונים
+	Promotions	מבצעים
+	Always move to	העבר תמיד אל
+	Sort Other into Transactions, Updates and Promotions	מיין את „אחר” לעסקאות, עדכונים ומבצעים
+	Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk	„ממוקד” הופך לראשי. המיון נעשה במחשב הזה, לפי השולח, הנושא והאם ההודעה נשלחה בתפוצה המונית
+	Stack each sender's mail in one row	ערום את הדואר של כל שולח בשורה אחת
+	In Transactions, Updates and Promotions	בעסקאות, בעדכונים ובמבצעים
+	Always move to a group	העבר תמיד לקבוצה

@@ -46,6 +46,46 @@ impl SwipeAction {
     }
 }
 
+/// The groups the Inbox is sorted into, with the Focused Inbox and the four groups on
+/// (`organize::inbox_groups`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum InboxGroup {
+    #[default]
+    Primary,
+    Transactions,
+    Updates,
+    Promotions,
+}
+
+impl InboxGroup {
+    pub const ALL: [InboxGroup; 4] = [InboxGroup::Primary, InboxGroup::Transactions, InboxGroup::Updates, InboxGroup::Promotions];
+
+    /// Its name in commands (`list.focusTab`, `mail.moveToGroup`).
+    pub fn code(self) -> &'static str {
+        match self {
+            InboxGroup::Primary => "primary",
+            InboxGroup::Transactions => "transactions",
+            InboxGroup::Updates => "updates",
+            InboxGroup::Promotions => "promotions",
+        }
+    }
+
+    /// Its name on screen (translated there).
+    pub fn label(self) -> &'static str {
+        match self {
+            InboxGroup::Primary => "Primary",
+            InboxGroup::Transactions => "Transactions",
+            InboxGroup::Updates => "Updates",
+            InboxGroup::Promotions => "Promotions",
+        }
+    }
+
+    pub fn from_code(code: &str) -> Option<InboxGroup> {
+        InboxGroup::ALL.into_iter().find(|g| g.code().eq_ignore_ascii_case(code))
+    }
+}
+
 /// How notes are listed (Outlook's Arrange by for notes).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -278,6 +318,13 @@ pub struct Prefs {
     pub focused_inbox: bool,
     /// Senders the user moved: `true` always Focused, `false` always Other.
     pub focus_overrides: std::collections::BTreeMap<String, bool>,
+    /// With the Focused Inbox, the Inbox in four groups (Primary, Transactions, Updates and
+    /// Promotions); off, Focused and Other.
+    pub inbox_groups: bool,
+    /// Senders the user put in a group: all their mail goes there.
+    pub group_overrides: std::collections::BTreeMap<String, InboxGroup>,
+    /// In a group other than Primary, each sender's mail stacked into one row.
+    pub group_digest: bool,
     /// Show HTML mail formatted (`false`: as plain text).
     pub show_html: bool,
     /// Senders whose pictures from the web load without asking (lower-case addresses).
@@ -593,6 +640,9 @@ impl Default for Prefs {
             categories: mailcraft_model::organize::default_categories(),
             focused_inbox: false,
             focus_overrides: std::collections::BTreeMap::new(),
+            inbox_groups: false,
+            group_overrides: std::collections::BTreeMap::new(),
+            group_digest: false,
             show_html: true,
             trusted_senders: BTreeSet::new(),
             blocked_senders: BTreeSet::new(),

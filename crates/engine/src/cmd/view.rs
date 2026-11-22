@@ -106,22 +106,39 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         CommandSpec::new("view.focused", "Focused Inbox", "View › Messages", |s, v| {
             s.prefs.focused_inbox = p::bool(v, "on").unwrap_or(!s.prefs.focused_inbox);
             s.focus_other = false;
+            s.group_tab = crate::InboxGroup::Primary;
             s.refresh_list();
             Ok(json!({"on": s.prefs.focused_inbox}))
         })
         .params(r#"{"on"?: bool}"#),
         CommandSpec::new("list.focusTab", "Focused / Other", "Message list", |s, v| {
-            s.focus_other = match p::req_str(v, "value")? {
-                x if x.eq_ignore_ascii_case("other") => true,
-                x if x.eq_ignore_ascii_case("focused") => false,
-                x => return Err(CmdError::Params(format!("unknown tab `{x}`"))),
-            };
-            s.selection.clear();
-            s.reading = None;
-            s.refresh_list();
+            let value = p::req_str(v, "value")?;
+            if value.eq_ignore_ascii_case("other") {
+                s.focus_other = true;
+                s.selection.clear();
+                s.reading = None;
+                s.refresh_list();
+            } else {
+                let group = if value.eq_ignore_ascii_case("focused") { Some(crate::InboxGroup::Primary) } else { crate::InboxGroup::from_code(value) };
+                s.show_group(group.ok_or_else(|| CmdError::Params(format!("unknown tab `{value}`")))?);
+            }
             Ok(json!({"messages": s.list.len()}))
         }).leaves_body()
-        .params(r#"{"value": "focused"|"other"}"#),
+        .params(r#"{"value": "focused"|"other"|"primary"|"transactions"|"updates"|"promotions"} (with the four groups, Focused is Primary)"#),
+        CommandSpec::new("view.inboxGroups", "Sort Other into Transactions, Updates and Promotions", "File › Options › Mail", |s, v| {
+            s.prefs.inbox_groups = p::bool(v, "on").unwrap_or(!s.prefs.inbox_groups);
+            s.group_tab = crate::InboxGroup::Primary;
+            s.focus_other = false;
+            s.refresh_list();
+            Ok(json!({"on": s.prefs.inbox_groups}))
+        })
+        .params(r#"{"on"?: bool} (with the Focused Inbox: Focused becomes Primary)"#),
+        CommandSpec::new("view.groupDigest", "Stack each sender's mail in one row", "File › Options › Mail", |s, v| {
+            s.prefs.group_digest = p::bool(v, "on").unwrap_or(!s.prefs.group_digest);
+            s.refresh_list();
+            Ok(json!({"on": s.prefs.group_digest}))
+        })
+        .params(r#"{"on"?: bool} (in Transactions, Updates and Promotions)"#),
         toggle!("view.confirmDelete", "Ask before deleting for good", "File › Options › Mail", confirm_permanent_delete),
         toggle!("view.notifications", "Desktop notifications", "File › Options › Mail", notify),
         toggle!("view.notifyOther", "Notify of mail in Other too", "File › Options › Mail", notify_other),

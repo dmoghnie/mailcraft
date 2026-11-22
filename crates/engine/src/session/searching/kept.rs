@@ -14,8 +14,9 @@ pub(crate) struct ListFrom {
     arrange: Arrange,
     reverse: bool,
     conversations: bool,
-    /// Focused or Other, when the list is split.
-    focus: Option<bool>,
+    /// Focused or Other, when the list is split: with the four groups, the group, and whether
+    /// its senders are stacked.
+    focus: Option<(bool, Option<InboxGroup>, bool)>,
     /// The address book (Focused is worked out from it).
     contacts: u64,
     /// [`SearchState::changes`] then.
@@ -48,7 +49,7 @@ impl Session {
             arrange: self.prefs.arrange,
             reverse: self.prefs.reverse_sort,
             conversations: self.prefs.conversations,
-            focus: self.focus_split().then_some(self.focus_other),
+            focus: self.focus_split().then(|| (self.focus_other, self.groups_split().then(|| self.shown_group()), self.digest_shown())),
             contacts: self.contacts_built,
             changes: self.search_state.changes,
         })

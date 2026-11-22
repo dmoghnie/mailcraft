@@ -232,7 +232,7 @@ impl Session {
         let pins = self.search.is_none();
         let pinned = |i: usize| pins && self.list.get(i).is_some_and(|m| m.flags.pinned());
         let (mut pinned_rows, mut pinned_of) = (Vec::new(), Vec::new());
-        if self.prefs.conversations && !self.threads.is_empty() {
+        if self.stacked() && !self.threads.is_empty() {
             for (ti, t) in self.threads.iter().enumerate() {
                 let Some(&newest) = t.messages.iter().max_by_key(|&&i| self.list.get(i).map_or(0, |m| m.when())) else { continue };
                 let unread = t.messages.iter().filter(|&&i| self.list.get(i).is_some_and(|m| !m.flags.seen)).count();

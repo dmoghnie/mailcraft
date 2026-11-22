@@ -129,7 +129,7 @@ impl Session {
         let i = self.index_of(key)?;
         let m = self.list.get(i)?;
         // Its conversation's, when the list shows them: pinned with any of it, dated by its newest.
-        let thread = self.thread_at(i).filter(|_| self.prefs.conversations);
+        let thread = self.thread_at(i).filter(|_| self.stacked());
         let pinned = match thread {
             Some(t) => t.messages.iter().any(|&j| self.list.get(j).is_some_and(|m| m.flags.pinned())),
             None => m.flags.pinned(),

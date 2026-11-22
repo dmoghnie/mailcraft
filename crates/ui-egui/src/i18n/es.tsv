@@ -2120,3 +2120,13 @@ count	occurrences	repeticiones
 	Swipe right	Deslizar a la derecha
 	Two fingers sideways over a message on a trackpad	Dos dedos de lado sobre un mensaje en el trackpad
 	Swipe actions	Acciones al deslizar
+	Primary	Principal
+	Transactions	Transacciones
+	Updates	Novedades
+	Promotions	Promociones
+	Always move to	Mover siempre a
+	Sort Other into Transactions, Updates and Promotions	Ordenar Otros en Transacciones, Novedades y Promociones
+	Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk	Prioritarios pasa a ser Principal. Se ordena en este equipo según el remitente, el asunto y si el mensaje se envió de forma masiva
+	Stack each sender's mail in one row	Agrupar el correo de cada remitente en una fila
+	In Transactions, Updates and Promotions	En Transacciones, Novedades y Promociones
+	Always move to a group	Mover siempre a un grupo

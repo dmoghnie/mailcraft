@@ -2133,3 +2133,13 @@ count	occurrences	повторений
 	Swipe right	Смахивание вправо
 	Two fingers sideways over a message on a trackpad	Двумя пальцами вбок над письмом на трекпаде
 	Swipe actions	Действия при смахивании
+	Primary	Основное
+	Transactions	Транзакции
+	Updates	Новости
+	Promotions	Промоакции
+	Always move to	Всегда перемещать в
+	Sort Other into Transactions, Updates and Promotions	Разделять «Другие» на транзакции, новости и промоакции
+	Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk	«Важные» становятся основным. Сортировка выполняется на этом компьютере — по отправителю, теме и массовой рассылке
+	Stack each sender's mail in one row	Собирать письма каждого отправителя в одну строку
+	In Transactions, Updates and Promotions	В транзакциях, новостях и промоакциях
+	Always move to a group	Всегда перемещать в группу

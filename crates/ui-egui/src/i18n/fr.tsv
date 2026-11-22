@@ -2120,3 +2120,13 @@ count	occurrences	occurrences
 	Swipe right	Balayer vers la droite
 	Two fingers sideways over a message on a trackpad	Deux doigts sur le côté au-dessus d'un message, sur le pavé tactile
 	Swipe actions	Actions de balayage
+	Primary	Principal
+	Transactions	Transactions
+	Updates	Mises à jour
+	Promotions	Promotions
+	Always move to	Toujours déplacer vers
+	Sort Other into Transactions, Updates and Promotions	Trier Autres en Transactions, Mises à jour et Promotions
+	Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk	Prioritaire devient Principal. Le tri se fait sur cet ordinateur, d'après l'expéditeur, l'objet et l'envoi en masse de chaque message
+	Stack each sender's mail in one row	Empiler le courrier de chaque expéditeur sur une ligne
+	In Transactions, Updates and Promotions	Dans Transactions, Mises à jour et Promotions
+	Always move to a group	Toujours déplacer vers un groupe

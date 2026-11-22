@@ -26,6 +26,9 @@ pub(super) fn inbox(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>
         ];
         for (i, (label, about, on, cmd)) in switches.into_iter().enumerate() {
             switch_row(ui, t, i == 0, Switch { label, about, on, cmd }, acts);
+            if cmd == "view.focused" && s.prefs.focused_inbox {
+                groups(s, t, ui, acts);
+            }
             // With both on, Other's mail is announced only when asked (issue #199).
             if cmd == "view.focused" && s.prefs.focused_inbox && s.prefs.notify {
                 let (label, about) = (tl!("Notify of mail in Other too"), Some(tl!("Off, only mail that goes to Focused is announced")));
@@ -51,6 +54,19 @@ pub(super) fn inbox(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>
             switch_row(ui, t, false, Switch { label, about, on, cmd }, acts);
         }
     });
+}
+
+/// The Focused Inbox's four groups, and each sender's mail stacked in them.
+fn groups(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
+    let (label, about) = (
+        tl!("Sort Other into Transactions, Updates and Promotions"),
+        Some(tl!("Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk")),
+    );
+    switch_row(ui, t, false, Switch { label, about, on: s.prefs.inbox_groups, cmd: "view.inboxGroups" }, acts);
+    if s.prefs.inbox_groups {
+        let (label, about) = (tl!("Stack each sender's mail in one row"), Some(tl!("In Transactions, Updates and Promotions")));
+        switch_row(ui, t, false, Switch { label, about, on: s.prefs.group_digest, cmd: "view.groupDigest" }, acts);
+    }
 }
 
 /// Sent mail nobody answered, brought back to the top of the Inbox after a few days.

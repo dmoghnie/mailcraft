@@ -2120,3 +2120,13 @@ count	occurrences	Terminen
 	Swipe right	Nach rechts wischen
 	Two fingers sideways over a message on a trackpad	Mit zwei Fingern seitwärts über eine Nachricht auf dem Trackpad
 	Swipe actions	Wischaktionen
+	Primary	Allgemein
+	Transactions	Transaktionen
+	Updates	Neuigkeiten
+	Promotions	Werbung
+	Always move to	Immer verschieben nach
+	Sort Other into Transactions, Updates and Promotions	„Sonstige“ in Transaktionen, Neuigkeiten und Werbung sortieren
+	Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk	„Relevant“ wird zu Allgemein. Sortiert auf diesem Computer, nach Absender, Betreff und ob eine Nachricht als Massenmail kam
+	Stack each sender's mail in one row	Nachrichten jedes Absenders in einer Zeile stapeln
+	In Transactions, Updates and Promotions	In Transaktionen, Neuigkeiten und Werbung
+	Always move to a group	Immer in eine Gruppe verschieben

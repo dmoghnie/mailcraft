@@ -1,4 +1,5 @@
-//! Organising mail: categories, pinning, snoozing, inbox rules and the Focused/Other split.
+//! Organising mail: categories, pinning, snoozing, inbox rules and the Focused/Other split (and
+//! its four groups, `inbox_groups`).
 
 use mailcraft_model::organize::{Rule, RuleAction, Snooze, actions_for};
 use mailcraft_model::{PINNED, is_keyword};
@@ -6,6 +7,7 @@ use mailcraft_model::{PINNED, is_keyword};
 use super::*;
 
 pub mod categories;
+pub mod inbox_groups;
 pub mod junk;
 pub mod quick_steps;
 pub mod search_folders;
@@ -655,6 +657,8 @@ impl Session {
         for m in &sel {
             let sender = m.from.email.trim().to_ascii_lowercase();
             if !sender.is_empty() && self.prefs.focus_overrides.len() < 10_000 {
+                // Put in Focused or Other: a group it was put in gives way.
+                self.prefs.group_overrides.remove(&sender);
                 self.prefs.focus_overrides.insert(sender, focused);
             }
         }

@@ -2116,3 +2116,13 @@ count	occurrences	回
 	Swipe right	右にスワイプ
 	Two fingers sideways over a message on a trackpad	トラックパッドでメッセージの上を 2 本指で横に
 	Swipe actions	スワイプ操作
+	Primary	メイン
+	Transactions	取引
+	Updates	新着情報
+	Promotions	プロモーション
+	Always move to	常に移動
+	Sort Other into Transactions, Updates and Promotions	その他を取引、新着情報、プロモーションに分ける
+	Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk	優先はメインになります。並べ替えはこのコンピューターで、各メッセージの差出人、件名、一斉送信かどうかで行われます
+	Stack each sender's mail in one row	差出人ごとのメールを 1 行にまとめる
+	In Transactions, Updates and Promotions	取引、新着情報、プロモーションで
+	Always move to a group	常にグループへ移動

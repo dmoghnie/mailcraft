@@ -228,7 +228,7 @@ impl Session {
     fn patch_unread(&mut self, i: usize) -> bool {
         let Some(key) = self.list.get(i).map(|m| m.key.clone()) else { return false };
         let unread = |j: &usize| self.list.get(*j).is_some_and(|m| !m.flags.seen);
-        let count = if self.prefs.conversations && !self.threads.is_empty() {
+        let count = if self.stacked() && !self.threads.is_empty() {
             match self.thread_at(i) {
                 Some(t) => t.messages.iter().filter(|j| unread(j)).count(),
                 None => return false,

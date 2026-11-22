@@ -2120,3 +2120,13 @@ count	occurrences	kez
 	Swipe right	Sağa kaydırma
 	Two fingers sideways over a message on a trackpad	İzleme dörtgeninde bir iletinin üzerinde iki parmakla yana
 	Swipe actions	Kaydırma eylemleri
+	Primary	Birincil
+	Transactions	İşlemler
+	Updates	Güncellemeler
+	Promotions	Promosyonlar
+	Always move to	Her zaman şuraya taşı
+	Sort Other into Transactions, Updates and Promotions	Diğer kutusunu İşlemler, Güncellemeler ve Promosyonlar olarak ayır
+	Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk	Odaklanmış, Birincil olur. Bu bilgisayarda, her iletinin göndereni, konusu ve toplu gönderilip gönderilmediğine göre sıralanır
+	Stack each sender's mail in one row	Her gönderenin postalarını tek satırda topla
+	In Transactions, Updates and Promotions	İşlemler, Güncellemeler ve Promosyonlar'da
+	Always move to a group	Her zaman bir gruba taşı

@@ -5,6 +5,7 @@ use super::*;
 mod categories;
 mod focused;
 mod folder_order;
+mod inbox_groups;
 mod junk;
 mod many;
 mod sent_rules;

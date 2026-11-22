@@ -335,7 +335,7 @@ impl Session {
         // Only VIPs' mail, when that's asked for.
         let announced = |m: &Summary| {
             (!self.prefs.notify_vips_only || self.is_vip(&m.from.email))
-                && (!self.prefs.focused_inbox || self.prefs.notify_other || self.is_focused(m))
+                && (!self.prefs.focused_inbox || self.prefs.notify_other || self.in_first_pane(m))
         };
         let fresh: Vec<Summary> =
             arrived.into_iter().filter(|m| !m.flags.seen && m.when() >= cutoff && !quiet.contains(&m.key) && announced(m)).collect();
@@ -582,7 +582,11 @@ impl Session {
         // under Unread, say), as Outlook's: it goes once another is chosen (`show_message`).
         let reading = self.reading.as_ref().map(|r| r.key.clone()).filter(|k| self.index_of(k).is_some());
         list.retain(|m| self.filter_keeps(filter, m) || reading.as_ref() == Some(&m.key));
-        if self.focus_split() {
+        if self.groups_split() {
+            self.ensure_focus_book();
+            let shown = self.shown_group();
+            list.retain(|m| self.inbox_group(m) == shown);
+        } else if self.focus_split() {
             self.ensure_focus_book();
             let other = self.focus_other;
             list.retain(|m| self.is_focused(m) != other);
@@ -603,11 +607,12 @@ impl Session {
         // Conversations are worked out once here when the list shows them (arranged by date);
         // arranged otherwise, the reading pane still shows the open message's, worked out once
         // with the first message opened (`thread_at`) rather than with every rebuild.
-        let conversations = self.prefs.conversations;
+        // A group's senders stacked are worked out the same way.
+        let conversations = self.stacked();
         let shown = threads_now && conversations && self.prefs.arrange == Arrange::Date;
         let all = if shown {
             self.nav.threaded();
-            threads(&list)
+            if self.digest_shown() { organize::inbox_groups::sender_stacks(&list) } else { threads(&list) }
         } else {
             Vec::new()
         };
@@ -622,7 +627,7 @@ impl Session {
     /// with its rows, message rows and each message's row as they were merged (what
     /// [`Session::build_rows`] would make of it).
     pub(super) fn take_list_rows(&mut self, list: Vec<SharedSummary>, hashes: Vec<u64>, rows: (Vec<Row>, Vec<u32>, Vec<u32>)) {
-        self.nav.build_hashed(&list, hashes, &[], self.prefs.conversations, true);
+        self.nav.build_hashed(&list, hashes, &[], self.stacked(), true);
         self.threads = Vec::new();
         self.list = list;
         self.take_rows(rows);

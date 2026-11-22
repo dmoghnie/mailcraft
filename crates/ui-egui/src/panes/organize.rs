@@ -132,7 +132,18 @@ pub fn context_items(ui: &mut Ui, s: &Session, t: &Tokens, acts: &mut Vec<Action
         ui.close();
     }
     ui.menu_button(tl!("Snooze"), |ui| snooze_menu(ui, s, t, acts));
-    if s.focus_split() {
+    if s.groups_split() {
+        // Every later message of the senders chosen goes there too.
+        ui.menu_button(tl!("Always move to"), |ui| {
+            let shown = s.shown_group();
+            for g in mailcraft_engine::InboxGroup::ALL.into_iter().filter(|g| *g != shown) {
+                if ui.button(tl!(g.label())).clicked() {
+                    acts.push(Action::Run("mail.moveToGroup", json!({"group": g.code()})));
+                    ui.close();
+                }
+            }
+        });
+    } else if s.focus_split() {
         let (id, label) = if s.focus_other { ("mail.moveToFocused", "Always move to Focused") } else { ("mail.moveToOther", "Always move to Other") };
         if ui.button(tl!(label)).clicked() {
             acts.push(Action::Run(id, json!({})));

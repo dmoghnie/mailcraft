@@ -2120,3 +2120,13 @@ count	occurrences	előfordulás
 	Swipe right	Húzás jobbra
 	Two fingers sideways over a message on a trackpad	Két ujjal oldalra egy üzenet fölött az érintőpadon
 	Swipe actions	Húzási műveletek
+	Primary	Elsődleges
+	Transactions	Tranzakciók
+	Updates	Frissítések
+	Promotions	Ajánlatok
+	Always move to	Mindig ide kerüljön
+	Sort Other into Transactions, Updates and Promotions	Az Egyéb rendezése Tranzakciók, Frissítések és Ajánlatok szerint
+	Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk	A Fontos lesz az Elsődleges. A rendezés ezen a számítógépen történik, az üzenetek feladója, tárgya és tömeges küldése alapján
+	Stack each sender's mail in one row	Az egyes feladók leveleinek egy sorba gyűjtése
+	In Transactions, Updates and Promotions	A Tranzakciók, Frissítések és Ajánlatok között
+	Always move to a group	Mindig egy csoportba kerüljön
