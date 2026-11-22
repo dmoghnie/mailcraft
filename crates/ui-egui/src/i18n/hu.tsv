@@ -2069,3 +2069,13 @@ count	occurrences	előfordulás
 	Bring back sent mail nobody answered	Megválaszolatlan elküldött levelek visszahozása
 	At the top of the Inbox, to follow up or dismiss	A Beérkezett üzenetek tetején, emlékeztetőhöz vagy elvetéshez
 	When nobody has answered after	Válasz nélkül eltelt
+	Subjects	Tárgyak
+	Files	Fájlok
+	Files with {text} in their name	Fájlok, amelyek nevében szerepel: {text}
+	From: {name}	Feladó: {name}
+	Subject: {subject}	Tárgy: {subject}
+	Attachment: {name}	Melléklet: {name}
+	Remove {name} from the search	{name} eltávolítása a keresésből
+	This month	Ebben a hónapban
+	This year	Ebben az évben
+	Last year	Tavaly

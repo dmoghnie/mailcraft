@@ -2082,3 +2082,13 @@ count	occurrences	wystąpieniach
 	Bring back sent mail nobody answered	Przypominaj o wysłanej poczcie bez odpowiedzi
 	At the top of the Inbox, to follow up or dismiss	Na górze Skrzynki odbiorczej, by przypomnieć lub odrzucić
 	When nobody has answered after	Gdy nikt nie odpowiedział po
+	Subjects	Tematy
+	Files	Pliki
+	Files with {text} in their name	Pliki z {text} w nazwie
+	From: {name}	Od: {name}
+	Subject: {subject}	Temat: {subject}
+	Attachment: {name}	Załącznik: {name}
+	Remove {name} from the search	Usuń {name} z wyszukiwania
+	This month	W tym miesiącu
+	This year	W tym roku
+	Last year	W zeszłym roku

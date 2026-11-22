@@ -306,6 +306,7 @@ fn the_commands_that_leave_the_body_waiting_are_these() {
         "search.clear",
         "search.remember",
         "search.forgetRecent",
+        "search.suggest",
         "searchFolder.open",
         "view.arrange",
         "view.reverseSort",

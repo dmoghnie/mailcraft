@@ -2064,3 +2064,13 @@ count	occurrences	مرات
 	Bring back sent mail nobody answered	إعادة إظهار البريد المرسل الذي لم يرد عليه أحد
 	At the top of the Inbox, to follow up or dismiss	في أعلى علبة الوارد، للمتابعة أو التجاهل
 	When nobody has answered after	عندما لا يرد أحد خلال
+	Subjects	المواضيع
+	Files	الملفات
+	Files with {text} in their name	ملفات يتضمن اسمها {text}
+	From: {name}	من: {name}
+	Subject: {subject}	الموضوع: {subject}
+	Attachment: {name}	مرفق: {name}
+	Remove {name} from the search	إزالة {name} من البحث
+	This month	هذا الشهر
+	This year	هذا العام
+	Last year	العام الماضي

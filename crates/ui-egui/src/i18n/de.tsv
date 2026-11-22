@@ -2069,3 +2069,13 @@ count	occurrences	Terminen
 	Bring back sent mail nobody answered	Gesendete E-Mails ohne Antwort wieder anzeigen
 	At the top of the Inbox, to follow up or dismiss	Oben im Posteingang, zum Nachfassen oder Verwerfen
 	When nobody has answered after	Ohne Antwort nach
+	Subjects	Betreffs
+	Files	Dateien
+	Files with {text} in their name	Dateien mit {text} im Namen
+	From: {name}	Von: {name}
+	Subject: {subject}	Betreff: {subject}
+	Attachment: {name}	Anlage: {name}
+	Remove {name} from the search	{name} aus der Suche entfernen
+	This month	Dieser Monat
+	This year	Dieses Jahr
+	Last year	Letztes Jahr

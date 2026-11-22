@@ -20,6 +20,7 @@ mod merge;
 pub mod no_answer;
 mod publish;
 mod run;
+pub mod suggest;
 mod work;
 
 pub use run::{SearchProgress, SearchStats};

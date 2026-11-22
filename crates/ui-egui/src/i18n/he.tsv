@@ -2064,3 +2064,13 @@ count	occurrences	פעמים
 	Bring back sent mail nobody answered	החזרת דואר שנשלח ולא נענה
 	At the top of the Inbox, to follow up or dismiss	בראש הדואר הנכנס, למעקב או לביטול
 	When nobody has answered after	כשאיש לא ענה במשך
+	Subjects	נושאים
+	Files	קבצים
+	Files with {text} in their name	קבצים ששמם כולל {text}
+	From: {name}	מאת: {name}
+	Subject: {subject}	נושא: {subject}
+	Attachment: {name}	קובץ מצורף: {name}
+	Remove {name} from the search	הסרת {name} מהחיפוש
+	This month	החודש
+	This year	השנה
+	Last year	השנה שעברה

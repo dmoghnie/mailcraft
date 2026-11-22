@@ -2065,3 +2065,13 @@ count	occurrences	回
 	Bring back sent mail nobody answered	返信のない送信済みメールを再表示する
 	At the top of the Inbox, to follow up or dismiss	受信トレイの一番上に表示され、フォローアップするか閉じるかを選べます
 	When nobody has answered after	返信がないまま
+	Subjects	件名
+	Files	ファイル
+	Files with {text} in their name	名前に {text} を含むファイル
+	From: {name}	差出人: {name}
+	Subject: {subject}	件名: {subject}
+	Attachment: {name}	添付ファイル: {name}
+	Remove {name} from the search	検索から {name} を削除
+	This month	今月
+	This year	今年
+	Last year	昨年

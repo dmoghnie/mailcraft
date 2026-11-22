@@ -2065,3 +2065,13 @@ count	occurrences	次
 	Bring back sent mail nobody answered	重新显示无人回复的已发送邮件
 	At the top of the Inbox, to follow up or dismiss	显示在收件箱顶部，可跟进或忽略
 	When nobody has answered after	无人回复超过
+	Subjects	主题
+	Files	文件
+	Files with {text} in their name	名称中含有 {text} 的文件
+	From: {name}	发件人: {name}
+	Subject: {subject}	主题: {subject}
+	Attachment: {name}	附件: {name}
+	Remove {name} from the search	从搜索中移除 {name}
+	This month	本月
+	This year	今年
+	Last year	去年

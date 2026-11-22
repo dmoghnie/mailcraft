@@ -5,6 +5,9 @@ use mailcraft_engine::model::search::Advanced;
 
 use crate::*;
 
+mod suggest;
+pub(crate) use suggest::{Chip, Suggested};
+
 /// How long the search box waits after the last key before searching, in seconds.
 const SEARCH_PAUSE: f64 = 0.25;
 /// Most of a frame a search's work takes (the rest draws it): a unit of it is begun only while one
@@ -83,7 +86,8 @@ pub(crate) fn scope_label(scope: SearchScope) -> &'static str {
     }
 }
 
-/// The search box's dropdowns: the recent searches, or advanced search.
+/// The search box's dropdowns: the recent searches and the suggestions for what's typed, or
+/// advanced search.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub(crate) enum SearchDrop {
     #[default]
@@ -154,20 +158,31 @@ impl MailApp {
             }
         });
         menu.response.on_hover_text(tl!("Look in"));
+        // The suggestions chosen, as chips: the box edits what's typed after them.
+        self.suggestion_keys(ui, acts);
+        let mut typed = self.search_chips(ui, acts);
+        let had = typed.clone();
         // The words get what's left: the box keeps one width whatever the menu says, and room for
         // its two buttons (Clear's kept when it isn't shown).
         let button = 22.0 + ui.spacing().item_spacing.x;
         // An id of its own: one counted from its place on the bar changed as the Search tab came
         // before it, and the box lost the focus it had just been given, the tab going as the
         // pointer left (issue #158).
-        let te = egui::TextEdit::singleline(&mut self.ui.search_text)
+        let hint = if self.ui.search_chips.is_empty() { tl!("Search mail (from:, subject:, has:attachment…)") } else { "" };
+        let te = egui::TextEdit::singleline(&mut typed)
             .id(egui::Id::unique("mailcraft-mail-search"))
-            .hint_text(tl!("Search mail (from:, subject:, has:attachment…)"))
+            .hint_text(hint)
             .frame(egui::Frame::NONE)
             .align(if i18n::current().rtl() { egui::Align2::RIGHT_CENTER } else { egui::Align2::LEFT_CENTER })
             .desired_width((width - ui.min_rect().width() - 2.0 * button - ui.spacing().item_spacing.x).max(80.0))
             .text_color(t.text);
         let resp = ui.add(te);
+        if resp.changed() {
+            self.ui.search_text = suggest::joined(&self.ui.search_chips, &typed);
+        }
+        self.backspace_chip(ui, &had, resp.has_focus(), acts);
+        let typed = suggest::typed_after(&mut self.ui.search_chips, &self.ui.search_text);
+        self.refresh_suggestions(&typed);
         #[cfg(test)]
         ui.ctx().data_mut(|d| d.insert_temp(egui::Id::unique("mailcraft-top-search-input-rect"), resp.rect));
         if let Some(letters) = crate::keytips::table::letters(crate::keytips::table::Top::Search).filter(|_| self.ui.keytips.prefix() == Some("")) {
@@ -177,14 +192,16 @@ impl MailApp {
         if resp.gained_focus() {
             self.ui.tab = RibbonTab::Search;
         }
-        if (resp.gained_focus() || resp.clicked()) && !self.session.recent_searches().is_empty() && self.ui.search_drop == SearchDrop::None {
+        let offered = !self.session.recent_searches().is_empty() || !self.ui.search_suggest.list.is_empty();
+        let into = (resp.gained_focus() || resp.clicked()) && offered;
+        if (into || resp.changed()) && self.ui.search_drop == SearchDrop::None {
             self.ui.search_drop = SearchDrop::Recent;
         }
         self.ui.search_focused = resp.has_focus();
         if self.ui.search_cursor_end {
             self.ui.search_cursor_end = false;
             if let Some(mut state) = egui::TextEdit::load_state(ui.ctx(), resp.id) {
-                let end = egui::text::CCursor::new(self.ui.search_text.chars().count());
+                let end = egui::text::CCursor::new(typed.chars().count());
                 state.cursor.set_char_range(Some(egui::text::CCursorRange::one(end)));
                 state.store(ui.ctx(), resp.id);
             }
@@ -237,6 +254,7 @@ impl MailApp {
         let below = egui::Rect::from_min_size(row.left_bottom() + vec2(-8.0, 6.0), vec2(row.width() + 16.0, 0.0));
         if ui.input(|i| i.key_pressed(egui::Key::Escape)) {
             self.ui.search_drop = SearchDrop::None;
+            self.ui.search_suggest.unpick();
         }
         let area = match std::mem::take(&mut self.ui.search_drop) {
             SearchDrop::None => None,
@@ -253,10 +271,9 @@ impl MailApp {
         }
     }
 
-    /// The recent searches, the ones with what's typed so far; picking one searches it. Where it
-    /// was drawn (`None`: nothing to show, closed).
+    /// The recent searches, the ones with what's typed so far (picking one searches it), then the
+    /// suggestions for it. Where it was drawn (`None`: nothing to show, closed).
     fn recent_searches(&mut self, ctx: &egui::Context, at: egui::Rect, acts: &mut Vec<Action>) -> Option<egui::Rect> {
-        let t = self.ui.tokens;
         let typed = self.ui.search_text.trim().to_lowercase();
         let shown: Vec<String> = self
             .session
@@ -265,31 +282,46 @@ impl MailApp {
             .filter(|r| r.to_lowercase().contains(&typed) && r.trim() != self.ui.search_text.trim())
             .cloned()
             .collect();
-        if shown.is_empty() {
+        let suggested = !self.ui.search_suggest.list.is_empty();
+        if shown.is_empty() && !suggested {
             return None;
         }
         self.ui.search_drop = SearchDrop::Recent;
         let area = egui::Area::new(egui::Id::unique("search-recent")).order(egui::Order::Foreground).fixed_pos(at.min).show(ctx, |ui| {
             egui::Frame::popup(ui.style()).inner_margin(Margin::same(6)).show(ui, |ui| {
                 ui.set_width(at.width() - 12.0);
-                ui.label(RichText::new(tl!("Recent searches")).small().color(t.dim));
-                for r in shown {
-                    let item = ui.add(egui::Button::selectable(false, RichText::new(&r).color(t.text)).min_size(vec2(ui.available_width(), 0.0)));
-                    if item.clicked() {
-                        self.ui.search_text = r.clone();
-                        self.ui.search_due = None;
-                        self.ui.search_drop = SearchDrop::None;
-                        acts.push(Action::Run("search.run", json!({"query": r, "remember": true})));
-                    }
+                let recent = !shown.is_empty();
+                if recent {
+                    self.recent_rows(ui, shown, acts);
                 }
-                ui.separator();
-                if ui.link(RichText::new(tl!("Clear recent searches")).small().color(t.accent)).clicked() {
-                    acts.push(Action::Run("search.forgetRecent", json!({})));
-                    self.ui.search_drop = SearchDrop::None;
+                if recent && suggested {
+                    ui.separator();
                 }
+                self.suggestion_rows(ui, acts);
             });
         });
         Some(area.response.rect)
+    }
+
+    /// The recent searches with what's typed so far (picking one searches it), and Clear recent
+    /// searches.
+    fn recent_rows(&mut self, ui: &mut Ui, shown: Vec<String>, acts: &mut Vec<Action>) {
+        let t = self.ui.tokens;
+        ui.label(RichText::new(tl!("Recent searches")).small().color(t.dim));
+        for r in shown {
+            let item = ui.add(egui::Button::selectable(false, RichText::new(&r).color(t.text)).min_size(vec2(ui.available_width(), 0.0)));
+            if item.clicked() {
+                self.ui.search_text = r.clone();
+                self.ui.search_due = None;
+                self.ui.search_drop = SearchDrop::None;
+                acts.push(Action::Run("search.run", json!({"query": r, "remember": true})));
+            }
+        }
+        ui.separator();
+        if ui.link(RichText::new(tl!("Clear recent searches")).small().color(t.accent)).clicked() {
+            acts.push(Action::Run("search.forgetRecent", json!({})));
+            self.ui.search_drop = SearchDrop::None;
+        }
     }
 
     /// Advanced search: a field for each part of the query, filled from what's in the box.

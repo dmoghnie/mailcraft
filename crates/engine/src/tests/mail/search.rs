@@ -4,6 +4,7 @@ use super::*;
 
 mod no_answer;
 mod run;
+mod suggest;
 
 /// Bring `account`'s search index up to its mail at once, as the indexer does in the
 /// background ([`sample::big::index`]): its generation.

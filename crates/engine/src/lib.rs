@@ -48,6 +48,7 @@ pub use session::{
     search_folders::SearchFolder,
     server_rules::{OUTLOOK_LIST, ServerRulesState},
     signature_parts,
+    suggest::{DATE_WORDS, MONTHS, SuggestKind, Suggestion},
     sweep::{SWEEP_DAYS, StandingSweep, SweepChoice, SweepOf},
     vips::{VIP_FOLDER, VIPS_MAX},
 };

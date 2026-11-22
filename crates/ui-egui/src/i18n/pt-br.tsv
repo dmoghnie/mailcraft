@@ -2069,3 +2069,13 @@ count	occurrences	ocorrências
 	Bring back sent mail nobody answered	Trazer de volta emails enviados sem resposta
 	At the top of the Inbox, to follow up or dismiss	No topo da Caixa de entrada, para lembrar ou dispensar
 	When nobody has answered after	Quando ninguém respondeu após
+	Subjects	Assuntos
+	Files	Arquivos
+	Files with {text} in their name	Arquivos com {text} no nome
+	From: {name}	De: {name}
+	Subject: {subject}	Assunto: {subject}
+	Attachment: {name}	Anexo: {name}
+	Remove {name} from the search	Remover {name} da pesquisa
+	This month	Este mês
+	This year	Este ano
+	Last year	Ano passado

@@ -2068,3 +2068,13 @@ count	occurrences	ripetizioni
 	Bring back sent mail nobody answered	Riproponi la posta inviata senza risposta
 	At the top of the Inbox, to follow up or dismiss	In cima alla Posta in arrivo, per sollecitare o ignorare
 	When nobody has answered after	Quando nessuno ha risposto dopo
+	Subjects	Oggetti
+	Files	File
+	Files with {text} in their name	File con {text} nel nome
+	From: {name}	Da: {name}
+	Subject: {subject}	Oggetto: {subject}
+	Attachment: {name}	Allegato: {name}
+	Remove {name} from the search	Rimuovi {name} dalla ricerca
+	This month	Questo mese
+	This year	Quest'anno
+	Last year	L'anno scorso

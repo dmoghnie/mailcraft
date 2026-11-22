@@ -226,6 +226,11 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             Ok(json!({}))
         }).leaves_body()
         .when(|s| s.recent_searches().is_empty().then_some("no recent searches")),
+        CommandSpec::new("search.suggest", "Suggest searches", "Search box (as it's typed)", |s, v| {
+            Ok(json!(s.search_suggestions(p::req_str(v, "text")?)))
+        })
+        .leaves_body()
+        .params(r#"{"text": string (what's typed after the suggestions chosen)}"#),
         // Home › Quick Steps
         CommandSpec::new("quickStep.list", "Quick Steps", "Home › Quick Steps", |s, _| Ok(json!(s.prefs.quick_steps))),
         CommandSpec::new("quickStep.create", "New Quick Step", "Home › Quick Steps", |s, v| {

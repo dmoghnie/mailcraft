@@ -2082,3 +2082,13 @@ count	occurrences	повторений
 	Bring back sent mail nobody answered	Возвращать отправленные письма без ответа
 	At the top of the Inbox, to follow up or dismiss	Вверху папки «Входящие»: напомнить или скрыть
 	When nobody has answered after	Если никто не ответил за
+	Subjects	Темы
+	Files	Файлы
+	Files with {text} in their name	Файлы, в имени которых есть {text}
+	From: {name}	От: {name}
+	Subject: {subject}	Тема: {subject}
+	Attachment: {name}	Вложение: {name}
+	Remove {name} from the search	Убрать {name} из поиска
+	This month	В этом месяце
+	This year	В этом году
+	Last year	В прошлом году

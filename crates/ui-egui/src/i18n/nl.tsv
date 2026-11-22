@@ -2064,3 +2064,13 @@ count	occurrences	keer
 	Bring back sent mail nobody answered	Verzonden e-mail zonder antwoord terughalen
 	At the top of the Inbox, to follow up or dismiss	Boven aan Postvak IN, om een herinnering te schrijven of te negeren
 	When nobody has answered after	Als niemand heeft geantwoord na
+	Subjects	Onderwerpen
+	Files	Bestanden
+	Files with {text} in their name	Bestanden met {text} in de naam
+	From: {name}	Van: {name}
+	Subject: {subject}	Onderwerp: {subject}
+	Attachment: {name}	Bijlage: {name}
+	Remove {name} from the search	{name} uit de zoekopdracht verwijderen
+	This month	Deze maand
+	This year	Dit jaar
+	Last year	Vorig jaar

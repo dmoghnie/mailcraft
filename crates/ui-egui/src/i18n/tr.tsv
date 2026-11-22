@@ -2069,3 +2069,13 @@ count	occurrences	kez
 	Bring back sent mail nobody answered	Yanıtlanmamış gönderilen postaları geri getir
 	At the top of the Inbox, to follow up or dismiss	Gelen Kutusu'nun en üstünde; hatırlatmak ya da kapatmak için
 	When nobody has answered after	Yanıt gelmeden geçen
+	Subjects	Konular
+	Files	Dosyalar
+	Files with {text} in their name	Adında {text} geçen dosyalar
+	From: {name}	Kimden: {name}
+	Subject: {subject}	Konu: {subject}
+	Attachment: {name}	Ek: {name}
+	Remove {name} from the search	{name} aramadan kaldır
+	This month	Bu ay
+	This year	Bu yıl
+	Last year	Geçen yıl

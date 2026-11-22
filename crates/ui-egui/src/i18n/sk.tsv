@@ -2083,3 +2083,13 @@ count	occurrences	opakovaní
 	Bring back sent mail nobody answered	Pripomínať odoslanú poštu bez odpovede
 	At the top of the Inbox, to follow up or dismiss	Navrchu Doručenej pošty, na pripomenutie alebo zrušenie
 	When nobody has answered after	Bez odpovede viac ako
+	Subjects	Predmety
+	Files	Súbory
+	Files with {text} in their name	Súbory s {text} v názve
+	From: {name}	Od: {name}
+	Subject: {subject}	Predmet: {subject}
+	Attachment: {name}	Príloha: {name}
+	Remove {name} from the search	Odstrániť {name} z hľadania
+	This month	Tento mesiac
+	This year	Tento rok
+	Last year	Minulý rok

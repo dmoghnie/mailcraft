@@ -107,6 +107,10 @@ pub struct UiState {
     pub(crate) search_due: Option<f64>,
     /// The search box's recent searches or advanced search, when open.
     pub(crate) search_drop: SearchDrop,
+    /// The suggestions chosen, as chips before what's typed: their syntax starts `search_text`.
+    pub(crate) search_chips: Vec<app::Chip>,
+    /// The suggestions for what's typed after the chips.
+    pub(crate) search_suggest: app::Suggested,
     /// The time the last frame spent on the search's work.
     pub(crate) search_spent: web_time::Duration,
     /// In a test, the time each look at the clock adds while a search is stepped, in place of

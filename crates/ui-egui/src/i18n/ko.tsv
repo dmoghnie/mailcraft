@@ -2068,3 +2068,13 @@ count	occurrences	회
 	Bring back sent mail nobody answered	답장 없는 보낸 메일 다시 보여 주기
 	At the top of the Inbox, to follow up or dismiss	받은 편지함 맨 위에 표시되며 후속 메일을 쓰거나 닫을 수 있습니다
 	When nobody has answered after	답장 없이
+	Subjects	제목
+	Files	파일
+	Files with {text} in their name	이름에 {text}이(가) 있는 파일
+	From: {name}	보낸 사람: {name}
+	Subject: {subject}	제목: {subject}
+	Attachment: {name}	첨부 파일: {name}
+	Remove {name} from the search	검색에서 {name} 제거
+	This month	이번 달
+	This year	올해
+	Last year	작년
