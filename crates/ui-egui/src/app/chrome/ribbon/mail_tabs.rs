@@ -58,6 +58,16 @@ pub(super) fn ribbon_home(ui: &mut Ui, s: &Session, t: Tokens, acts: &mut Vec<Ac
             acts.push(Action::Run("folder.cleanUp", json!({})));
             ui.close();
         }
+        // Sweep: the sender's mail in this folder, cleared out in one step.
+        ui.separator();
+        let sweep = Dialog::sweep(s);
+        let tip = tl!("Clear out the sender's mail in this folder in one step");
+        if ui.add_enabled(sweep.is_some(), egui::Button::new(tl!("Sweep…"))).on_hover_text(tip).clicked()
+            && let Some(d) = sweep
+        {
+            acts.push(Action::Dialog(d));
+            ui.close();
+        }
     });
     if widgets::tool_button(ui, Icon::Archive, "Archive", &t, enabled(s, "mail.archive")).on_hover_text(tl!("Archive (Backspace)")).clicked() {
         acts.push(Action::Run("mail.archive", json!({})));

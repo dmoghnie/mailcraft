@@ -305,6 +305,9 @@ pub struct Prefs {
     /// Quick Steps: actions done to the selection in one go ([`quick_steps`]).
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub quick_steps: Vec<quick_steps::QuickStep>,
+    /// Sweeps run each day: a sender's old mail in a folder to Deleted Items ([`sweep`]).
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub sweeps: Vec<sweep::StandingSweep>,
     /// Play animations: hovers and selections easing, panes sliding, notices sliding in (off:
     /// everything changes at once).
     pub animations: bool,
@@ -496,6 +499,7 @@ impl Default for Prefs {
             meeting_hosts: Vec::new(),
             meeting_for_all: false,
             quick_steps: Vec::new(),
+            sweeps: Vec::new(),
             folder_pane_minimized: false,
             collapsed: BTreeSet::new(),
             pane_order: Vec::new(),

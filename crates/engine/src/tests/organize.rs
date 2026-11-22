@@ -9,6 +9,7 @@ mod junk;
 mod many;
 mod sent_rules;
 mod server_rules;
+mod sweep;
 
 #[test]
 fn every_command_survives_junk_params() {

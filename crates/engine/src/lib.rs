@@ -46,6 +46,7 @@ pub use session::{
     search_folders::SearchFolder,
     server_rules::{OUTLOOK_LIST, ServerRulesState},
     signature_parts,
+    sweep::{SWEEP_DAYS, StandingSweep, SweepChoice, SweepOf},
 };
 
 /// What `--version` prints for the program `name` (`mailcraft`, `mailcraft-cli`): its version,

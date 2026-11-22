@@ -2040,3 +2040,14 @@ count	occurrences	次
 	Unsubscribe from this list?	退订此邮件列表?
 	A message asking to leave it goes to {address}, from your account.	一封请求退出的邮件将从你的帐户发送到 {address}。
 	Its page for leaving it opens in your browser: {site}.	该列表的退订页面将在浏览器中打开: {site}。
+	Sweep	清扫
+	Sweep…	清扫…
+	Mail from {sender} in this folder.	此文件夹中来自 {sender} 的邮件。
+	Remove all their messages	删除此发件人的所有邮件
+	Remove all their messages, and those still to come	删除此发件人的所有邮件，以及以后收到的邮件
+	Keep only their newest message	只保留此发件人的最新邮件
+	Always remove those older than {days} days	始终删除超过 {days} 天的邮件
+	Removed now: {n}	本次删除: {n}
+	Their mail here is swept each day.	此发件人在这里的邮件每天都会清扫。
+	Stop sweeping	停止清扫
+	Clear out the sender's mail in this folder in one step	一步清除此文件夹中该发件人的邮件

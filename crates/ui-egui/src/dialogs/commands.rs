@@ -40,7 +40,7 @@ const HIDDEN: &[&str] = &[
 
 /// Commands that need something given, which the window asks for first, in the dialog their
 /// button opens ([`dialog_for`]).
-const OPENS: &[&str] = &["mail.move", "mail.copy", "category.list", "rules.list", "event.create", "contact.create", "task.create"];
+const OPENS: &[&str] = &["mail.move", "mail.copy", "mail.sweep", "category.list", "rules.list", "event.create", "contact.create", "task.create"];
 
 /// Commands that take one of a few values, a row for each: (id, parameter, value, name).
 const CHOICES: &[(&str, &str, &str, &str)] = &[
@@ -56,6 +56,7 @@ fn dialog_for(id: &str, s: &Session) -> Option<Dialog> {
     Some(match id {
         "mail.move" => Dialog::move_to(),
         "mail.copy" => Dialog::copy_to(),
+        "mail.sweep" => Dialog::sweep(s)?,
         "category.list" => Dialog::Categories,
         "rules.list" => Dialog::Rules,
         "event.create" => Dialog::new_event(s, None),
@@ -323,7 +324,9 @@ mod tests {
 
     #[test]
     fn what_is_offered_can_be_picked() {
-        let (a, _) = crate::tests::app("palette-offers");
+        let (mut a, _) = crate::tests::app("palette-offers");
+        // A message selected: Sweep asks about its sender.
+        a.run("list.open", json!({"key": "sample:1:1:INBOX"}));
         let all = offers(&a.session);
         let ids: Vec<&str> = all.iter().map(|o| o.id).collect();
         assert!(ids.contains(&"mail.markAllRead") && ids.contains(&"view.calendar") && ids.contains(&"mail.move"), "{ids:?}");

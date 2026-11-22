@@ -476,6 +476,10 @@ impl MessageRow<'_> {
             item(ui, acts, tl!("Report junk"), Action::Run("mail.junk", json!({})));
             ui.menu_button(tl!("Junk"), |ui| crate::junk_menu(ui, s, acts));
             item(ui, acts, tl!("Ignore"), Action::Run("mail.ignore", json!({})));
+            if s.sweep_of(Some(key)).is_some() {
+                let sweep = Dialog::Sweep { key: key.clone(), choice: mailcraft_engine::SweepChoice::All };
+                item(ui, acts, tl!("Sweep…"), Action::Dialog(sweep));
+            }
             item(ui, acts, tl!("Delete"), Action::Run("mail.delete", json!({})));
             ui.separator();
             // Find related, as Outlook's: the conversation, or everything from the sender.

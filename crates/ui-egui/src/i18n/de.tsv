@@ -2044,3 +2044,14 @@ count	occurrences	Terminen
 	Unsubscribe from this list?	Von dieser Liste abmelden?
 	A message asking to leave it goes to {address}, from your account.	Eine Nachricht mit der Bitte um Abmeldung geht von Ihrem Konto an {address}.
 	Its page for leaving it opens in your browser: {site}.	Die Abmeldeseite der Liste öffnet sich in Ihrem Browser: {site}.
+	Sweep	Aufräumen
+	Sweep…	Aufräumen…
+	Mail from {sender} in this folder.	E-Mails von {sender} in diesem Ordner.
+	Remove all their messages	Alle Nachrichten dieses Absenders entfernen
+	Remove all their messages, and those still to come	Alle Nachrichten dieses Absenders entfernen, auch künftige
+	Keep only their newest message	Nur die neueste Nachricht dieses Absenders behalten
+	Always remove those older than {days} days	Immer die entfernen, die älter als {days} Tage sind
+	Removed now: {n}	Jetzt entfernt: {n}
+	Their mail here is swept each day.	Die E-Mails dieses Absenders werden hier täglich aufgeräumt.
+	Stop sweeping	Nicht mehr aufräumen
+	Clear out the sender's mail in this folder in one step	Die E-Mails des Absenders in diesem Ordner in einem Schritt aufräumen

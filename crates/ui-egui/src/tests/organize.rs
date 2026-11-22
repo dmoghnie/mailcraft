@@ -6,6 +6,7 @@ mod categories;
 mod folder_pane;
 mod sent_rules;
 mod server_rules;
+mod sweep;
 
 #[test]
 fn organising_renders_and_rules_save() {

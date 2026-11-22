@@ -2040,3 +2040,14 @@ count	occurrences	回
 	Unsubscribe from this list?	このリストの登録を解除しますか?
 	A message asking to leave it goes to {address}, from your account.	退会を求めるメッセージが、このアカウントから {address} に送られます。
 	Its page for leaving it opens in your browser: {site}.	リストの退会ページがブラウザーで開きます: {site}。
+	Sweep	一括削除
+	Sweep…	一括削除…
+	Mail from {sender} in this folder.	このフォルダー内の {sender} からのメール。
+	Remove all their messages	この差出人のメッセージをすべて削除
+	Remove all their messages, and those still to come	この差出人のメッセージをすべて削除し、今後届くものも削除
+	Keep only their newest message	この差出人の最新のメッセージだけを残す
+	Always remove those older than {days} days	{days} 日より古いものを常に削除
+	Removed now: {n}	今回削除: {n}
+	Their mail here is swept each day.	この差出人のここにあるメールは毎日一括削除されます。
+	Stop sweeping	一括削除を停止
+	Clear out the sender's mail in this folder in one step	このフォルダー内の差出人のメールを一度に片付けます

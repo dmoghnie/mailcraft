@@ -2043,3 +2043,14 @@ count	occurrences	회
 	Unsubscribe from this list?	이 리스트의 구독을 취소할까요?
 	A message asking to leave it goes to {address}, from your account.	탈퇴를 요청하는 메시지가 이 계정에서 {address}(으)로 전송됩니다.
 	Its page for leaving it opens in your browser: {site}.	리스트의 탈퇴 페이지가 브라우저에서 열립니다: {site}.
+	Sweep	일괄 정리
+	Sweep…	일괄 정리…
+	Mail from {sender} in this folder.	이 폴더에 있는 {sender}의 메일.
+	Remove all their messages	이 보낸 사람의 메시지 모두 제거
+	Remove all their messages, and those still to come	이 보낸 사람의 메시지를 모두 제거하고, 앞으로 올 메시지도 제거
+	Keep only their newest message	이 보낸 사람의 최신 메시지만 유지
+	Always remove those older than {days} days	{days}일보다 오래된 메시지를 항상 제거
+	Removed now: {n}	지금 제거: {n}
+	Their mail here is swept each day.	이 보낸 사람의 메일은 여기서 매일 정리됩니다.
+	Stop sweeping	정리 중지
+	Clear out the sender's mail in this folder in one step	이 폴더에 있는 보낸 사람의 메일을 한 번에 정리

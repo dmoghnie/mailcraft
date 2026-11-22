@@ -60,7 +60,7 @@ pub(crate) use mailboxes::arrange_list;
 pub use mailboxes::{ARRANGE_HEADINGS, Arrange, ListFilter, PINNED_HEADING, Row};
 // Organizing mail's own parts, named here as before.
 pub use opening::SenderMarks;
-pub use organize::{junk, quick_steps, search_folders, server_rules};
+pub use organize::{junk, quick_steps, search_folders, server_rules, sweep};
 pub use prefs::{
     ACCENTS, CtrlEnter, DICTIONARY_MAX, FolderDensity, NotesOrder, Prefs, ReadInPane, ReadingPane, SenderAddresses, StartIn, accent_code, accent_rgb,
     dictionary_word,

@@ -2058,3 +2058,14 @@ count	occurrences	opakovaní
 	Unsubscribe from this list?	Odhlásiť sa z tohto mailing listu?
 	A message asking to leave it goes to {address}, from your account.	Správa so žiadosťou o odhlásenie odíde z vášho konta na {address}.
 	Its page for leaving it opens in your browser: {site}.	Stránka na odhlásenie z listu sa otvorí v prehliadači: {site}.
+	Sweep	Vymiesť
+	Sweep…	Vymiesť…
+	Mail from {sender} in this folder.	Pošta od {sender} v tomto priečinku.
+	Remove all their messages	Odstrániť všetky správy odosielateľa
+	Remove all their messages, and those still to come	Odstrániť všetky správy odosielateľa aj tie, ktoré ešte prídu
+	Keep only their newest message	Ponechať len najnovšiu správu odosielateľa
+	Always remove those older than {days} days	Vždy odstrániť správy staršie ako {days} dní
+	Removed now: {n}	Odstránené teraz: {n}
+	Their mail here is swept each day.	Pošta odosielateľa sa tu vymetá každý deň.
+	Stop sweeping	Prestať vymetať
+	Clear out the sender's mail in this folder in one step	Vymiesť poštu odosielateľa z tohto priečinka jedným krokom

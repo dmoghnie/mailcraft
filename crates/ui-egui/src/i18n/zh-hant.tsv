@@ -2043,3 +2043,14 @@ count	occurrences	次
 	Unsubscribe from this list?	要取消訂閱此郵寄清單嗎?
 	A message asking to leave it goes to {address}, from your account.	一封要求退出的郵件會從你的帳戶寄到 {address}。
 	Its page for leaving it opens in your browser: {site}.	該清單的退訂頁面會在瀏覽器中開啟: {site}。
+	Sweep	清掃
+	Sweep…	清掃…
+	Mail from {sender} in this folder.	此資料夾中來自 {sender} 的郵件。
+	Remove all their messages	移除此寄件者的所有郵件
+	Remove all their messages, and those still to come	移除此寄件者的所有郵件，以及之後收到的郵件
+	Keep only their newest message	只保留此寄件者的最新郵件
+	Always remove those older than {days} days	一律移除超過 {days} 天的郵件
+	Removed now: {n}	本次移除: {n}
+	Their mail here is swept each day.	此寄件者在這裡的郵件每天都會清掃。
+	Stop sweeping	停止清掃
+	Clear out the sender's mail in this folder in one step	一步清除此資料夾中該寄件者的郵件

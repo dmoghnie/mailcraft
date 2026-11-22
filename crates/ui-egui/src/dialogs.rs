@@ -127,6 +127,11 @@ pub enum Dialog {
     /// What `compose.send` held the message for (a lookalike recipient, many people seeing each
     /// other's addresses).
     SendCheck(Vec<mailcraft_engine::SendCheck>),
+    /// Sweep: message `key`'s sender's mail in its folder, cleared out the way `choice` says.
+    Sweep {
+        key: mailcraft_engine::model::MessageKey,
+        choice: mailcraft_engine::SweepChoice,
+    },
     /// Leave the mailing list message `key` came from, `way` said first (a message sent from the
     /// account, or the list's page opened in the browser).
     Unsubscribe {
@@ -753,7 +758,9 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         | Dialog::ConfirmEmpty { .. } => folders::draw(ui, d, s, t, acts),
         Dialog::NewCategory { .. } | Dialog::Categories => categories::draw(ui, d, s, t, acts),
         Dialog::Commands { .. } => commands::draw(ui, d, s, t, acts),
-        Dialog::Rules | Dialog::EditRule(..) | Dialog::SearchFolder(..) | Dialog::QuickStep(..) => organize::draw(ui, d, s, t, acts),
+        Dialog::Rules | Dialog::EditRule(..) | Dialog::SearchFolder(..) | Dialog::QuickStep(..) | Dialog::Sweep { .. } => {
+            organize::draw(ui, d, s, t, acts)
+        }
         Dialog::SelectNames(..)
         | Dialog::CheckNames(..)
         | Dialog::SaveChanges

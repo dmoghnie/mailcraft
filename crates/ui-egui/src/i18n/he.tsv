@@ -2039,3 +2039,14 @@ count	occurrences	פעמים
 	Unsubscribe from this list?	לבטל את המינוי לרשימה הזו?
 	A message asking to leave it goes to {address}, from your account.	הודעה שמבקשת לעזוב אותה תישלח אל {address}, מהחשבון שלך.
 	Its page for leaving it opens in your browser: {site}.	דף העזיבה של הרשימה ייפתח בדפדפן שלך: {site}.
+	Sweep	טאטוא
+	Sweep…	טאטוא…
+	Mail from {sender} in this folder.	דואר מ-{sender} בתיקייה הזו.
+	Remove all their messages	הסרת כל ההודעות של השולח
+	Remove all their messages, and those still to come	הסרת כל ההודעות של השולח, גם אלה שעוד יגיעו
+	Keep only their newest message	השארת ההודעה האחרונה של השולח בלבד
+	Always remove those older than {days} days	תמיד להסיר הודעות ישנות מ-{days} ימים
+	Removed now: {n}	יוסרו עכשיו: {n}
+	Their mail here is swept each day.	הדואר של השולח מטואטא כאן כל יום.
+	Stop sweeping	הפסקת הטאטוא
+	Clear out the sender's mail in this folder in one step	פינוי הדואר של השולח בתיקייה הזו בצעד אחד

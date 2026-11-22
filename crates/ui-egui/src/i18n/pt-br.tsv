@@ -2044,3 +2044,14 @@ count	occurrences	ocorrências
 	Unsubscribe from this list?	Cancelar a inscrição nesta lista?
 	A message asking to leave it goes to {address}, from your account.	Uma mensagem pedindo para sair vai para {address}, da sua conta.
 	Its page for leaving it opens in your browser: {site}.	A página da lista para sair abre no navegador: {site}.
+	Sweep	Varrer
+	Sweep…	Varrer…
+	Mail from {sender} in this folder.	Emails de {sender} nesta pasta.
+	Remove all their messages	Remover todas as mensagens do remetente
+	Remove all their messages, and those still to come	Remover todas as mensagens do remetente, e também as que chegarem depois
+	Keep only their newest message	Manter só a mensagem mais recente do remetente
+	Always remove those older than {days} days	Sempre remover as com mais de {days} dias
+	Removed now: {n}	Removidas agora: {n}
+	Their mail here is swept each day.	As mensagens do remetente aqui são varridas todo dia.
+	Stop sweeping	Parar de varrer
+	Clear out the sender's mail in this folder in one step	Limpar de uma vez as mensagens do remetente nesta pasta

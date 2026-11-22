@@ -2057,3 +2057,14 @@ count	occurrences	wystąpieniach
 	Unsubscribe from this list?	Wypisać się z tej listy?
 	A message asking to leave it goes to {address}, from your account.	Wiadomość z prośbą o wypisanie trafi z konta na adres {address}.
 	Its page for leaving it opens in your browser: {site}.	Strona listy do wypisania się otworzy się w przeglądarce: {site}.
+	Sweep	Wymieć
+	Sweep…	Wymieć…
+	Mail from {sender} in this folder.	Poczta od {sender} w tym folderze.
+	Remove all their messages	Usuń wszystkie wiadomości od tego nadawcy
+	Remove all their messages, and those still to come	Usuń wszystkie wiadomości od tego nadawcy, także przyszłe
+	Keep only their newest message	Zachowaj tylko najnowszą wiadomość od tego nadawcy
+	Always remove those older than {days} days	Zawsze usuwaj starsze niż {days} dni
+	Removed now: {n}	Usunięte teraz: {n}
+	Their mail here is swept each day.	Poczta od tego nadawcy jest tu wymiatana codziennie.
+	Stop sweeping	Przestań wymiatać
+	Clear out the sender's mail in this folder in one step	Wymieć jednym krokiem pocztę od nadawcy z tego folderu

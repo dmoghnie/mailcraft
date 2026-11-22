@@ -44,6 +44,19 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.clean_up(&folders, None)
         })
         .params(r#"{"account"?: string, "folder"?: string (none: the folder on screen)}"#),
+        // A sender's mail in a folder, cleared out in one step (one Undo).
+        CommandSpec::new("mail.sweep", "Sweep", "Home › Delete", |s, v| {
+            let choice = p::str(v, "choice")
+                .and_then(crate::SweepChoice::parse)
+                .ok_or_else(|| CmdError::Params("choice: all, allAndLater, keepNewest or olderThan".into()))?;
+            s.sweep(parse_key(v), choice)
+        })
+        .params(r#"{"choice": "all"|"allAndLater"|"keepNewest"|"olderThan", "key"?: string (default: the first message selected)} (its sender's mail in its folder to Deleted Items: all of it; all of it and a rule for what they send later; all but their newest; or what's older than 10 days, now and each day)"#)
+        .when(has_selection),
+        CommandSpec::new("mail.stopSweep", "Stop sweeping", "Home › Delete › Sweep", |s, v| {
+            s.stop_sweep(p::req_str(v, "account")?, p::req_str(v, "folder")?, p::req_str(v, "sender")?)
+        })
+        .params(r#"{"account": string, "folder": string, "sender": string (an address)} (its mail there is no longer swept each day)"#),
         CommandSpec::new("mail.junk", "Report junk", "Home › Delete", |s, _| s.move_selection(MoveTarget::Role(FolderRole::Junk))).when(has_selection),
         CommandSpec::new("mail.notJunk", "Not junk", "Home › Delete", |s, v| {
             // "Always trust mail from this sender", as Outlook asks.

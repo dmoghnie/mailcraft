@@ -2043,3 +2043,14 @@ count	occurrences	ripetizioni
 	Unsubscribe from this list?	Annullare l'iscrizione a questa lista?
 	A message asking to leave it goes to {address}, from your account.	Un messaggio che chiede di uscirne va a {address}, dal tuo account.
 	Its page for leaving it opens in your browser: {site}.	La pagina della lista per uscirne si apre nel browser: {site}.
+	Sweep	Sgombera
+	Sweep…	Sgombera…
+	Mail from {sender} in this folder.	Posta da {sender} in questa cartella.
+	Remove all their messages	Rimuovi tutti i suoi messaggi
+	Remove all their messages, and those still to come	Rimuovi tutti i suoi messaggi, anche quelli futuri
+	Keep only their newest message	Tieni solo il suo messaggio più recente
+	Always remove those older than {days} days	Rimuovi sempre quelli più vecchi di {days} giorni
+	Removed now: {n}	Rimossi ora: {n}
+	Their mail here is swept each day.	La sua posta qui viene sgomberata ogni giorno.
+	Stop sweeping	Smetti di sgomberare
+	Clear out the sender's mail in this folder in one step	Sgombera in un passo la posta del mittente in questa cartella

@@ -11,6 +11,7 @@ pub mod quick_steps;
 pub mod search_folders;
 mod sent_rules;
 pub mod server_rules;
+pub mod sweep;
 
 /// The folder snoozed mail waits in.
 const SNOOZED: &str = "Snoozed";
@@ -165,6 +166,7 @@ impl Session {
         self.free_busy_due();
         self.archive_waits_due();
         self.auto_archive_due();
+        self.sweeps_due();
         // The sender check follows contacts saved, accounts and the directory (cheap when not).
         self.keep_senders_when(false);
         self.held_invitations_due();

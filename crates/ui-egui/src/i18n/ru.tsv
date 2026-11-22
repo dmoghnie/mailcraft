@@ -2057,3 +2057,14 @@ count	occurrences	повторений
 	Unsubscribe from this list?	Отписаться от этой рассылки?
 	A message asking to leave it goes to {address}, from your account.	Письмо с просьбой отписать вас уйдёт на {address} с вашей учётной записи.
 	Its page for leaving it opens in your browser: {site}.	Страница отписки откроется в браузере: {site}.
+	Sweep	Расчистить
+	Sweep…	Расчистить…
+	Mail from {sender} in this folder.	Письма от {sender} в этой папке.
+	Remove all their messages	Удалить все письма отправителя
+	Remove all their messages, and those still to come	Удалить все письма отправителя, и будущие тоже
+	Keep only their newest message	Оставить только последнее письмо отправителя
+	Always remove those older than {days} days	Всегда удалять письма старше {days} дней
+	Removed now: {n}	Будет удалено сейчас: {n}
+	Their mail here is swept each day.	Письма отправителя здесь расчищаются каждый день.
+	Stop sweeping	Больше не расчищать
+	Clear out the sender's mail in this folder in one step	Расчистить письма отправителя в этой папке за один шаг

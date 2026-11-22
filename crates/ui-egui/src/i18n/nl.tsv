@@ -2039,3 +2039,14 @@ count	occurrences	keer
 	Unsubscribe from this list?	Afmelden voor deze lijst?
 	A message asking to leave it goes to {address}, from your account.	Een bericht met het verzoek om af te melden gaat vanaf je account naar {address}.
 	Its page for leaving it opens in your browser: {site}.	De afmeldpagina van de lijst opent in je browser: {site}.
+	Sweep	Opruimen
+	Sweep…	Opruimen…
+	Mail from {sender} in this folder.	E-mail van {sender} in deze map.
+	Remove all their messages	Al hun berichten verwijderen
+	Remove all their messages, and those still to come	Al hun berichten verwijderen, ook die nog komen
+	Keep only their newest message	Alleen hun nieuwste bericht bewaren
+	Always remove those older than {days} days	Altijd verwijderen wat ouder is dan {days} dagen
+	Removed now: {n}	Nu verwijderd: {n}
+	Their mail here is swept each day.	Hun e-mail hier wordt elke dag opgeruimd.
+	Stop sweeping	Stoppen met opruimen
+	Clear out the sender's mail in this folder in one step	De e-mail van de afzender in deze map in één keer opruimen

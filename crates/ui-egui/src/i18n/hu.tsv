@@ -2044,3 +2044,14 @@ count	occurrences	előfordulás
 	Unsubscribe from this list?	Leiratkozol erről a listáról?
 	A message asking to leave it goes to {address}, from your account.	A kilépést kérő üzenet a fiókodból megy ide: {address}.
 	Its page for leaving it opens in your browser: {site}.	A lista leiratkozási oldala a böngésződben nyílik meg: {site}.
+	Sweep	Söprés
+	Sweep…	Söprés…
+	Mail from {sender} in this folder.	{sender} levelei ebben a mappában.
+	Remove all their messages	Az összes levelének eltávolítása
+	Remove all their messages, and those still to come	Az összes levelének eltávolítása, a később érkezőkkel együtt
+	Keep only their newest message	Csak a legújabb levelének megtartása
+	Always remove those older than {days} days	Mindig eltávolítja, ami {days} napnál régebbi
+	Removed now: {n}	Most eltávolítva: {n}
+	Their mail here is swept each day.	Az itteni leveleit minden nap eltakarítja.
+	Stop sweeping	Söprés leállítása
+	Clear out the sender's mail in this folder in one step	A feladó leveleinek eltakarítása ebből a mappából egy lépésben

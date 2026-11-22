@@ -8,7 +8,8 @@
 //! `ui.settings`), `ui.openExport`, `ui.options` and `ui.about` open the File page at that page;
 //! `ui.addAccount` (optionally `={"email":…,"advanced":true,"graph":true}`, `"pop":true` or
 //! `"calendarOnly":true`), `ui.newEvent`,
-//! `ui.newContact`, `ui.newTask`, `ui.openTask` (`={"uid":…}`) and `ui.commands` (Find a command)
+//! `ui.newContact`, `ui.newTask`, `ui.openTask` (`={"uid":…}`), `ui.commands` (Find a command) and
+//! `ui.sweep` (Sweep, for the message selected)
 //! open those dialogs.
 #![cfg_attr(all(target_os = "windows", not(debug_assertions)), windows_subsystem = "windows")]
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]

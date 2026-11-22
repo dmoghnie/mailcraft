@@ -2044,3 +2044,14 @@ count	occurrences	repeticiones
 	Unsubscribe from this list?	¿Cancelar la suscripción a esta lista?
 	A message asking to leave it goes to {address}, from your account.	Se envía un mensaje pidiendo la baja a {address}, desde tu cuenta.
 	Its page for leaving it opens in your browser: {site}.	La página de la lista para darse de baja se abre en tu navegador: {site}.
+	Sweep	Barrer
+	Sweep…	Barrer…
+	Mail from {sender} in this folder.	Correo de {sender} en esta carpeta.
+	Remove all their messages	Quitar todos sus mensajes
+	Remove all their messages, and those still to come	Quitar todos sus mensajes, y también los que lleguen después
+	Keep only their newest message	Conservar solo su mensaje más reciente
+	Always remove those older than {days} days	Quitar siempre los que tengan más de {days} días
+	Removed now: {n}	Se quitan ahora: {n}
+	Their mail here is swept each day.	Su correo aquí se barre cada día.
+	Stop sweeping	Dejar de barrer
+	Clear out the sender's mail in this folder in one step	Despejar en un paso el correo del remitente en esta carpeta

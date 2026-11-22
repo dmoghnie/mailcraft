@@ -2044,3 +2044,14 @@ count	occurrences	kez
 	Unsubscribe from this list?	Bu listeden çıkılsın mı?
 	A message asking to leave it goes to {address}, from your account.	Listeden çıkmayı isteyen bir ileti hesabınızdan {address} adresine gider.
 	Its page for leaving it opens in your browser: {site}.	Listenin çıkış sayfası tarayıcınızda açılır: {site}.
+	Sweep	Süpür
+	Sweep…	Süpür…
+	Mail from {sender} in this folder.	Bu klasördeki {sender} postaları.
+	Remove all their messages	Göndericinin tüm iletilerini kaldır
+	Remove all their messages, and those still to come	Göndericinin tüm iletilerini ve bundan sonra gelecekleri kaldır
+	Keep only their newest message	Göndericinin yalnızca en yeni iletisini tut
+	Always remove those older than {days} days	{days} günden eski olanları her zaman kaldır
+	Removed now: {n}	Şimdi kaldırılacak: {n}
+	Their mail here is swept each day.	Göndericinin buradaki postaları her gün süpürülür.
+	Stop sweeping	Süpürmeyi durdur
+	Clear out the sender's mail in this folder in one step	Göndericinin bu klasördeki postalarını tek adımda temizle

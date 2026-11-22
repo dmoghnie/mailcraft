@@ -5,6 +5,7 @@ use super::*;
 mod quick_steps;
 mod search_folders;
 mod server_rules;
+mod sweep;
 pub use quick_steps::{QuickStepForm, StepMove};
 pub use search_folders::{PresetKind, SEARCH_PRESETS, SearchFolderForm};
 pub use server_rules::ServerTarget;
@@ -366,6 +367,7 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
             }
             !cancel
         }
+        Dialog::Sweep { .. } => sweep::draw(ui, d, s, t, acts),
         Dialog::QuickStep(f) => {
             ui.set_width(440.0);
             title(ui, t, if f.original.is_some() { "Edit Quick Step" } else { "New Quick Step" });

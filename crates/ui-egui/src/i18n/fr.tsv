@@ -2044,3 +2044,14 @@ count	occurrences	occurrences
 	Unsubscribe from this list?	Se désabonner de cette liste ?
 	A message asking to leave it goes to {address}, from your account.	Un message demandant à la quitter part vers {address}, depuis votre compte.
 	Its page for leaving it opens in your browser: {site}.	La page de la liste pour se désabonner s'ouvre dans votre navigateur : {site}.
+	Sweep	Balayer
+	Sweep…	Balayer…
+	Mail from {sender} in this folder.	Courrier envoyé par {sender} dans ce dossier.
+	Remove all their messages	Supprimer tous ses messages
+	Remove all their messages, and those still to come	Supprimer tous ses messages, et ceux à venir
+	Keep only their newest message	Ne garder que son message le plus récent
+	Always remove those older than {days} days	Toujours supprimer ceux dont l'âge dépasse {days} jours
+	Removed now: {n}	Supprimés maintenant : {n}
+	Their mail here is swept each day.	Son courrier est balayé ici chaque jour.
+	Stop sweeping	Arrêter le balayage
+	Clear out the sender's mail in this folder in one step	Débarrasser ce dossier du courrier de l'expéditeur en une fois

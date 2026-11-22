@@ -2039,3 +2039,14 @@ count	occurrences	مرات
 	Unsubscribe from this list?	إلغاء الاشتراك في هذه القائمة؟
 	A message asking to leave it goes to {address}, from your account.	تُرسَل رسالة تطلب الخروج منها إلى {address}، من حسابك.
 	Its page for leaving it opens in your browser: {site}.	تُفتح صفحة الخروج من القائمة في متصفحك: {site}.
+	Sweep	تنظيف
+	Sweep…	تنظيف…
+	Mail from {sender} in this folder.	البريد من {sender} في هذا المجلد.
+	Remove all their messages	إزالة جميع رسائل هذا المرسل
+	Remove all their messages, and those still to come	إزالة جميع رسائل هذا المرسل، والرسائل القادمة أيضًا
+	Keep only their newest message	الإبقاء على أحدث رسالة من هذا المرسل فقط
+	Always remove those older than {days} days	إزالة الرسائل الأقدم من {days} يومًا دائمًا
+	Removed now: {n}	تُزال الآن: {n}
+	Their mail here is swept each day.	يُنظَّف بريد هذا المرسل هنا كل يوم.
+	Stop sweeping	إيقاف التنظيف
+	Clear out the sender's mail in this folder in one step	تنظيف بريد المرسل في هذا المجلد بخطوة واحدة

@@ -413,6 +413,7 @@ pub(crate) fn tour() {
                 mailcraft_engine::SendCheck::Exposed { count: 12 },
                 mailcraft_engine::SendCheck::NoAttachment,
             ]),
+            Dialog::Sweep { key: a.session.list[0].key.clone(), choice: mailcraft_engine::SweepChoice::KeepNewest },
             Dialog::Unsubscribe {
                 key: a.session.list[0].key.clone(),
                 way: mailcraft_engine::Leaving::Mail { to: "leave@gallery.example".into(), subject: "unsubscribe".into(), body: String::new() },
