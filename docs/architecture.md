@@ -47,7 +47,8 @@ In the browser (`apps/mailcraft-web`), the same `ui-egui` and engine run over JM
   browser.
 - `net` covers IMAP, POP3, SMTP, JMAP push, Microsoft Graph, EWS with NTLM (Windows sign-in over
   HTTP, and over IMAP, POP3 and SMTP when an account asks for it), CalDAV/CardDAV, ManageSieve,
-  HTTP, DNS and OAuth.
+  HTTP, DNS and OAuth. It also holds the log file (`logfile.rs`, `mailcraft.log` in the data
+  folder), which the desktop app and the phone library both write.
 - `keys` and the phone library `apps/mailcraft-mobile` are the crates with `unsafe`. Each denies
   it; in `keys` only `windows/cng.rs` and `macos/sec.rs` allow it, in the phone library only
   `android.rs` and `ios.rs` (the exported entry points, and the C strings iOS hands over).

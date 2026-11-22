@@ -218,7 +218,7 @@ fn line(stamp: &str, level: Level, target: &str, msg: &str) -> String {
 fn stamp() -> String {
     let secs = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
     let secs = i64::try_from(secs).unwrap_or(0);
-    let (y, m, d) = mailcraft_engine::model::dates::civil_from_days(secs.div_euclid(86_400));
+    let (y, m, d) = mailcraft_model::dates::civil_from_days(secs.div_euclid(86_400));
     let t = secs.rem_euclid(86_400);
     format!("{y:04}-{m:02}-{d:02} {:02}:{:02}:{:02}Z", t / 3600, t % 3600 / 60, t % 60)
 }
