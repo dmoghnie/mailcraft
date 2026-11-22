@@ -47,6 +47,7 @@ pub use session::{
     server_rules::{OUTLOOK_LIST, ServerRulesState},
     signature_parts,
     sweep::{SWEEP_DAYS, StandingSweep, SweepChoice, SweepOf},
+    vips::{VIP_FOLDER, VIPS_MAX},
 };
 
 /// What `--version` prints for the program `name` (`mailcraft`, `mailcraft-cli`): its version,

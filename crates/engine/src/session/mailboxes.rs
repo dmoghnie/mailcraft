@@ -330,7 +330,11 @@ impl Session {
         let cutoff = self.clock.now.saturating_sub(86_400);
         // With the Focused Inbox on, Other's mail comes in quietly unless asked for (issue #199):
         // the newsletters it holds are what Focused is for.
-        let announced = |m: &Summary| !self.prefs.focused_inbox || self.prefs.notify_other || self.is_focused(m);
+        // Only VIPs' mail, when that's asked for.
+        let announced = |m: &Summary| {
+            (!self.prefs.notify_vips_only || self.is_vip(&m.from.email))
+                && (!self.prefs.focused_inbox || self.prefs.notify_other || self.is_focused(m))
+        };
         let fresh: Vec<Summary> =
             arrived.into_iter().filter(|m| !m.flags.seen && m.when() >= cutoff && !quiet.contains(&m.key) && announced(m)).collect();
         if self.prefs.notify {

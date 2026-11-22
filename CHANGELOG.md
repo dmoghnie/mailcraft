@@ -43,6 +43,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - **Find a command** (Ctrl+Shift+P, ⌘⇧P on a Mac, or `>` typed first in the search box): type part of a command's name and press Enter to run it. Each row says where the command lives and its shortcut; one that can't be used now is dimmed with the reason, and those run last come first.
 - **Unsubscribe** above a mailing-list message's text (and in Find a command): after asking, it sends the message the list asks for from your account, or opens the list's own page in your browser. In Junk Email it offers Block sender instead, since unsubscribing tells a junk sender that the address is read.
 - **Sweep…** (Home › Delete drop-down, a message's right-click menu, or Find a command) clears out a sender's mail in the folder in one step: all of it, all of it and what they send later (a rule), all but their newest, or what's older than 10 days, now and each day. The dialog says how many messages each way removes, and Undo brings them back.
+- **VIPs**: Mark as VIP on a sender's card or a message's right-click menu. A VIP's mail always goes to Focused and has a star before their name in the list, the **VIP** folder under Favorites holds their mail from every account, and File › Options › Mail can keep notifications to their mail alone.
 
 ### Changed
 

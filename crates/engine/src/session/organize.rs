@@ -12,6 +12,7 @@ pub mod search_folders;
 mod sent_rules;
 pub mod server_rules;
 pub mod sweep;
+pub mod vips;
 
 /// The folder snoozed mail waits in.
 const SNOOZED: &str = "Snoozed";
@@ -626,10 +627,13 @@ impl Session {
 
     // ----- Focused / Other -----
 
-    /// Whether a message belongs in Focused: the user's choice for its sender, else anything not
-    /// sent in bulk, and bulk mail from people the user writes to.
+    /// Whether a message belongs in Focused: a VIP's always, then the user's choice for its
+    /// sender, else anything not sent in bulk, and bulk mail from people the user writes to.
     pub fn is_focused(&self, m: &Summary) -> bool {
         let sender = m.from.email.trim().to_ascii_lowercase();
+        if self.is_vip(&sender) {
+            return true;
+        }
         if let Some(&f) = self.prefs.focus_overrides.get(&sender) {
             return f;
         }

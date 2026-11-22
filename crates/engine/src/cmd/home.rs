@@ -44,6 +44,14 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.clean_up(&folders, None)
         })
         .params(r#"{"account"?: string, "folder"?: string (none: the folder on screen)}"#),
+        // VIPs: the people whose mail always matters (Focused, the VIP folder, notices).
+        CommandSpec::new("people.vip", "Mark as VIP", "Reading pane › Sender", |s, v| s.set_vip(p::str(v, "address"), true))
+            .params(r#"{"address"?: string (default: the sender of the first message selected)}"#),
+        CommandSpec::new("people.unvip", "Remove from VIPs", "Reading pane › Sender", |s, v| s.set_vip(p::str(v, "address"), false))
+            .params(r#"{"address"?: string (default: the sender of the first message selected)}"#),
+        CommandSpec::new("people.vips", "VIPs", "Folder pane › Favorites", |s, _| Ok(json!({"vips": s.vips()}))),
+        CommandSpec::new("folder.vip", "VIP", "Folder pane › Favorites", |s, _| s.open_vip_folder())
+            .when(|s| s.prefs.vips.is_empty().then_some("no VIPs yet")),
         // A sender's mail in a folder, cleared out in one step (one Undo).
         CommandSpec::new("mail.sweep", "Sweep", "Home › Delete", |s, v| {
             let choice = p::str(v, "choice")

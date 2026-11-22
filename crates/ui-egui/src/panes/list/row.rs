@@ -128,6 +128,7 @@ impl MessageRow<'_> {
         }
         for (on, word) in [
             (marks.warning, "Check who sent it"),
+            (!self.sent_view && s.is_vip(&m.from.email), "VIP"),
             (marks.external, "External"),
             (self.unread, "Unread"),
             (m.flags.flagged, "Flagged"),
@@ -228,6 +229,12 @@ impl MessageRow<'_> {
         if marks.warning {
             let ir = mr.rect(Rect::from_min_size(egui::pos2(who_x, line1 + 1.0), vec2(15.0, 15.0)));
             icons::paint(p, ir, Icon::Warning, t.danger);
+            who_x += 19.0;
+        }
+        // A VIP's: a star before the name.
+        if !self.sent_view && self.s.is_vip(&m.from.email) {
+            let ir = mr.rect(Rect::from_min_size(egui::pos2(who_x, line1 + 1.0), vec2(15.0, 15.0)));
+            icons::paint(p, ir, Icon::Star, t.accent);
             who_x += 19.0;
         }
         // A reply begun and left in Drafts: [Draft] before the name, in red, as Outlook writes it.
@@ -475,6 +482,11 @@ impl MessageRow<'_> {
             item(ui, acts, tl!("Archive"), Action::Run("mail.archive", json!({})));
             item(ui, acts, tl!("Report junk"), Action::Run("mail.junk", json!({})));
             ui.menu_button(tl!("Junk"), |ui| crate::junk_menu(ui, s, acts));
+            if !m.from.email.trim().is_empty() {
+                let (label, id) = if s.is_vip(&m.from.email) { ("Remove from VIPs", "people.unvip") } else { ("Mark as VIP", "people.vip") };
+                let vip = Action::Run(id, json!({"address": m.from.email}));
+                item(ui, acts, tl!(label), vip);
+            }
             item(ui, acts, tl!("Ignore"), Action::Run("mail.ignore", json!({})));
             if s.sweep_of(Some(key)).is_some() {
                 let sweep = Dialog::Sweep { key: key.clone(), choice: mailcraft_engine::SweepChoice::All };

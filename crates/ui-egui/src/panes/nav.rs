@@ -148,6 +148,13 @@ pub fn show(s: &Session, t: &Tokens, ui: &mut Ui, minimize: bool, acts: &mut Vec
                 acts.push(Action::Run("folder.unified", json!({"role": "sent"})));
             }
         }
+        // The VIPs' mail from every account, once there are VIPs.
+        if favorites_open && !s.prefs.vips.is_empty() {
+            let r = row(ui, t, Icon::Star, tl!("VIP"), Count::Unread(0), 0, RowIs::selected(s.vip_folder_shown()));
+            if r.on_hover_text(tl!("Mail from your VIPs, in every account")).clicked() {
+                acts.push(Action::Run("folder.vip", json!({})));
+            }
+        }
         for fav in s.favorites().into_iter().filter(|_| favorites_open) {
             if let Some(f) = s.folder(&fav.account, &fav.folder) {
                 folder_row(s, t, ui, acts, f, 0, true, None);

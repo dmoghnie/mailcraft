@@ -2055,3 +2055,9 @@ count	occurrences	előfordulás
 	Their mail here is swept each day.	Az itteni leveleit minden nap eltakarítja.
 	Stop sweeping	Söprés leállítása
 	Clear out the sender's mail in this folder in one step	A feladó leveleinek eltakarítása ebből a mappából egy lépésben
+	Mark as VIP	Megjelölés VIP-ként
+	Remove from VIPs	Eltávolítás a VIP-ek közül
+	VIP	VIP
+	Mail from your VIPs, in every account	A VIP-jeid levelei, minden fiókból
+	Notify only of mail from VIPs	Értesítés csak a VIP-ek leveleiről
+	Other mail still arrives, without a notification	A többi levél is megérkezik, értesítés nélkül

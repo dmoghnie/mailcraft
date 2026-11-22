@@ -31,6 +31,10 @@ pub(super) fn inbox(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>
                 let (label, about) = (tl!("Notify of mail in Other too"), Some(tl!("Off, only mail that goes to Focused is announced")));
                 switch_row(ui, t, false, Switch { label, about, on: s.prefs.notify_other, cmd: "view.notifyOther" }, acts);
             }
+            if cmd == "view.notifications" && s.prefs.notify {
+                let (label, about) = (tl!("Notify only of mail from VIPs"), Some(tl!("Other mail still arrives, without a notification")));
+                switch_row(ui, t, false, Switch { label, about, on: s.prefs.notify_vips_only, cmd: "view.notifyVipsOnly" }, acts);
+            }
         }
         answered_invites(s, t, ui, acts);
         let switches = [

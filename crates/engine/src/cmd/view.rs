@@ -121,6 +121,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         toggle!("view.confirmDelete", "Ask before deleting for good", "File › Options › Mail", confirm_permanent_delete),
         toggle!("view.notifications", "Desktop notifications", "File › Options › Mail", notify),
         toggle!("view.notifyOther", "Notify of mail in Other too", "File › Options › Mail", notify_other),
+        toggle!("view.notifyVipsOnly", "Notify only of mail from VIPs", "File › Options › Mail", notify_vips_only),
         toggle!("options.spelling", "Check spelling as you type", "File › Options › Mail", spelling),
         CommandSpec::new("options.composeFont", "Font for new messages", "File › Options › Mail", |s, v| {
             s.prefs.compose_font = match v.get("font") {

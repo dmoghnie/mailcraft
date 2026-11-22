@@ -187,6 +187,11 @@ pub struct Prefs {
     /// With the Focused Inbox on, new mail in Other is announced too (issue #199): off, only
     /// Focused mail is, as Outlook does.
     pub notify_other: bool,
+    /// Only VIPs' new mail is announced; the rest arrives quietly.
+    pub notify_vips_only: bool,
+    /// The people whose mail always matters, by address (lower case): [`vips`].
+    #[serde(skip_serializing_if = "std::collections::BTreeSet::is_empty")]
+    pub vips: std::collections::BTreeSet<String>,
     /// Check spelling as you type (issue #174): misspelled words underlined in the message
     /// editor, as Outlook does (on unless turned off).
     pub spelling: bool,
@@ -450,6 +455,8 @@ impl Default for Prefs {
             favorites: None,
             notify: true,
             notify_other: false,
+            notify_vips_only: false,
+            vips: std::collections::BTreeSet::new(),
             spelling: true,
             dictionary: BTreeSet::new(),
             compose_font: None,

@@ -32,6 +32,7 @@ const HIDDEN: &[&str] = &[
     "note.list",
     "options.composeFont",
     "options.startIn",
+    "people.vips",
     "search.run",
     "searchFolder.list",
     "security.certificates",

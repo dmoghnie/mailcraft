@@ -2051,3 +2051,9 @@ count	occurrences	回
 	Their mail here is swept each day.	この差出人のここにあるメールは毎日一括削除されます。
 	Stop sweeping	一括削除を停止
 	Clear out the sender's mail in this folder in one step	このフォルダー内の差出人のメールを一度に片付けます
+	Mark as VIP	VIP に設定
+	Remove from VIPs	VIP から削除
+	VIP	VIP
+	Mail from your VIPs, in every account	すべてのアカウントの VIP からのメール
+	Notify only of mail from VIPs	VIP からのメールだけを通知
+	Other mail still arrives, without a notification	ほかのメールも届きますが、通知はされません

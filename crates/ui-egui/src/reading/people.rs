@@ -48,12 +48,22 @@ pub(super) fn person_menus(s: &Session, t: &Tokens, r: &egui::Response, a: &Emai
                 }
             }
         }
+        vip_button(ui, s, a, acts);
         ui.separator();
         if ui.button(tl!("Copy address")).clicked() {
             ui.ctx().copy_text(a.email.clone());
             ui.close();
         }
     });
+}
+
+/// Mark as VIP, or Remove from VIPs.
+fn vip_button(ui: &mut Ui, s: &Session, a: &EmailAddress, acts: &mut Vec<Action>) {
+    let (label, id) = if s.is_vip(&a.email) { ("Remove from VIPs", "people.unvip") } else { ("Mark as VIP", "people.vip") };
+    if ui.button(tl!(label)).clicked() {
+        acts.push(Action::Run(id, json!({"address": a.email})));
+        ui.close();
+    }
 }
 
 /// A small card for someone (Outlook's contact card): who they are, their address (a click
@@ -110,6 +120,7 @@ pub(super) fn contact_card(
             ui.ctx().copy_text(a.email.clone());
             ui.close();
         }
+        vip_button(ui, s, a, acts);
     });
 }
 
