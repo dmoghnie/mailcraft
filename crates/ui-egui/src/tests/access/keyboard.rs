@@ -369,3 +369,24 @@ fn f6_round(todo_bar: bool) {
         assert!(role == Role::TreeItem && label.starts_with("Inbox"), "Ctrl+F1 kept the keyboard on the folder: {role:?} {label:?}");
     }
 }
+
+/// Enter on a button presses that button alone: it opened the message chosen in the list in a
+/// window of its own as well (Enter is the list's key for that), whatever the button was.
+#[test]
+fn enter_on_a_button_presses_it_alone() {
+    let (mut a, _) = app("access-enter-button");
+    a.session.prefs.new_mail_window = false;
+    let ctx = egui::Context::default();
+    ctx.enable_accesskit();
+    settled(&ctx, &mut a, vec![]);
+    let k = a.session.list.first().map(|m| m.key.clone()).expect("the sample has mail");
+    a.run("list.open", json!({"key": k.to_id()}));
+    let out = settled(&ctx, &mut a, vec![]);
+    // The reading pane's Reply: the last button of that name (the ribbon's comes first).
+    let reply = nodes(&out).into_iter().filter(|(_, n)| n.role() == Role::Button && n.label() == Some("Reply")).map(|(id, _)| id).next_back();
+    settled(&ctx, &mut a, vec![focus_request(reply.expect("Reply"))]);
+    assert_eq!(focused(&settled(&ctx, &mut a, vec![])).1, "Reply");
+    settled(&ctx, &mut a, vec![key(Key::Enter, Modifiers::NONE)]);
+    assert!(a.session.compose.is_some(), "Enter pressed Reply");
+    assert!(a.session.windows.is_empty(), "and opened no message window: {:?}", a.session.windows.iter().map(|w| &w.key).collect::<Vec<_>>());
+}

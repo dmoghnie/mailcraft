@@ -206,8 +206,10 @@ impl MailApp {
         // The list's arrows, Home, End and pages, while another control has the keyboard, are
         // that control's (issue #175): egui's arrows go from control to control, a drop-down's
         // choose, and with a screen reader they read a message's text. The list moved too, to
-        // another message under the one being read. A message row's are the list's.
-        if moves_focus(id) && ctx.memory(|m| m.focused()).is_some_and(|f| Some(f) != self.ui.row_keyboard) {
+        // another message under the one being read. Enter too: it pressed the button with the
+        // keyboard and opened the list's message in a window as well. A message row's are the
+        // list's.
+        if (moves_focus(id) || combo == "Enter") && ctx.memory(|m| m.focused()).is_some_and(|f| Some(f) != self.ui.row_keyboard) {
             return true;
         }
         if id == "mail.delete" && self.ask_before_deleting() {
