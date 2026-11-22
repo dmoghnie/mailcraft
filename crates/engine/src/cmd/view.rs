@@ -32,6 +32,10 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         toggle!("view.singleLine", "Single-line list", "View › Layout", single_line),
         toggle!("view.classicRibbon", "Classic ribbon", "View › Layout", classic_ribbon),
         toggle!("view.hideRibbon", "Hide the ribbon", "View › Layout", ribbon_hidden).key("Mod+F1"),
+        toggle!("view.simpleRibbon", "Simplified ribbon", "File › Options › Mail (or right-click the ribbon)", simple_ribbon),
+        CommandSpec::new("view.arrangeRibbon", "Customize the ribbon", "File › Options › Mail (or right-click the ribbon)", arrange_ribbon).params(
+            r#"{"buttons": [string] (the simplified ribbon's buttons by command id, in order: Home's own, and up to 9 others that need no parameters; [] puts back those it starts with)}"#,
+        ),
         CommandSpec::new("view.accent", "Accent colour", "File › Options › Personalize", |s, v| {
             let given = p::req_str(v, "color")?;
             s.prefs.accent = crate::session::accent_code(given)
@@ -439,4 +443,34 @@ pub(super) fn reading_pane(s: &mut Session, v: &Value) -> CmdResult {
         other => return Err(CmdError::Params(format!("unknown reading pane position `{other}`"))),
     };
     Ok(json!({"value": p::req_str(v, "value")?}))
+}
+
+/// The simplified ribbon's buttons, in order (Customize the ribbon), and that ribbon shown.
+fn arrange_ribbon(s: &mut Session, v: &Value) -> CmdResult {
+    let given = v.get("buttons").and_then(Value::as_array).ok_or_else(|| CmdError::Params("`buttons` is a list of command ids".into()))?;
+    if given.len() > crate::RIBBON_MOST {
+        return Err(CmdError::Params(format!("the ribbon takes at most {} buttons", crate::RIBBON_MOST)));
+    }
+    let reg = s.registry();
+    let mut ids: Vec<String> = Vec::new();
+    for b in given {
+        let id = b.as_str().ok_or_else(|| CmdError::Params("`buttons` holds command ids, as strings".into()))?;
+        let spec = reg.get(id).ok_or_else(|| CmdError::Params(format!("`{id}` isn't a command")))?;
+        // Another command runs as it is from its button: one that needs something given has
+        // nowhere to ask for it.
+        if !crate::HOME_BUTTONS.contains(&spec.id) && spec.params.contains("\":") {
+            return Err(CmdError::Params(format!("`{id}` needs parameters: the ribbon takes Home's own buttons and commands that need none")));
+        }
+        if !ids.iter().any(|i| i == id) {
+            ids.push(id.to_string());
+        }
+    }
+    let added = ids.iter().filter(|i| !crate::HOME_BUTTONS.contains(&i.as_str())).count();
+    if added > crate::RIBBON_ADDED_MOST {
+        return Err(CmdError::Params(format!("the ribbon takes at most {} commands besides Home's own", crate::RIBBON_ADDED_MOST)));
+    }
+    let as_it_starts = ids.is_empty() || ids.iter().map(String::as_str).eq(crate::RIBBON_ROW);
+    s.prefs.ribbon_buttons = if as_it_starts { Vec::new() } else { ids };
+    s.prefs.simple_ribbon = true;
+    Ok(json!({"buttons": s.ribbon_row()}))
 }

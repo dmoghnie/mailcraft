@@ -22,6 +22,7 @@ mod mailbox;
 mod organize;
 mod other;
 pub(crate) mod pim_dialogs;
+mod ribbon;
 mod signatures;
 #[cfg(test)]
 pub(crate) use signatures::has_web_pictures;
@@ -113,6 +114,13 @@ pub enum Dialog {
     Commands {
         filter: String,
         picked: usize,
+    },
+    /// Customize the ribbon: the simplified ribbon's `buttons` in order, the one `picked`, and
+    /// what's typed to find a command to add (`dialogs/ribbon.rs`).
+    CustomizeRibbon {
+        buttons: Vec<&'static str>,
+        picked: Option<usize>,
+        filter: String,
     },
     /// Pick the folder the selection is moved to, or (`copy`) copied to.
     MoveTo {
@@ -758,6 +766,7 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         | Dialog::ConfirmEmpty { .. } => folders::draw(ui, d, s, t, acts),
         Dialog::NewCategory { .. } | Dialog::Categories => categories::draw(ui, d, s, t, acts),
         Dialog::Commands { .. } => commands::draw(ui, d, s, t, acts),
+        Dialog::CustomizeRibbon { .. } => ribbon::draw(ui, d, s, t, acts),
         Dialog::Rules | Dialog::EditRule(..) | Dialog::SearchFolder(..) | Dialog::QuickStep(..) | Dialog::Sweep { .. } => {
             organize::draw(ui, d, s, t, acts)
         }

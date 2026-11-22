@@ -1,8 +1,10 @@
-//! UI tests: windows of their own, where they open, fonts and the browser, a message's source.
+//! UI tests: windows of their own, where they open, fonts and the browser, a message's source,
+//! the simplified ribbon.
 
 use super::*;
 
 pub(super) mod layout;
+mod simple_ribbon;
 mod source;
 
 #[test]

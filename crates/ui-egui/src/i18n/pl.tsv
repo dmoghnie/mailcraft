@@ -2094,3 +2094,14 @@ count	occurrences	wystąpieniach
 	Last year	W zeszłym roku
 	Show or hide the formatting	Pokaż lub ukryj formatowanie
 	Ctrl+S	Ctrl+S
+	Simplified ribbon	Uproszczona wstążka
+	Customize the ribbon	Dostosuj wstążkę
+	Customize the ribbon…	Dostosuj wstążkę…
+	More commands	Więcej poleceń
+	The simplified ribbon's buttons, in order. Home's others are in its More commands.	Przyciski uproszczonej wstążki, po kolei. Pozostałe z karty Narzędzia główne są w Więcej poleceń.
+	Reset	Resetuj
+	The buttons it starts with	Przyciski, od których zaczyna
+	Add a command	Dodaj polecenie
+	Add {command}	Dodaj: {command}
+	At most {n} commands besides Home's own	Najwyżej {n} polecenia poza tymi z karty Narzędzia główne
+	Home in one row of the buttons you use most; right-click the ribbon to choose them	Narzędzia główne w jednym wierszu najczęściej używanych przycisków; kliknij wstążkę prawym przyciskiem myszy, aby je wybrać

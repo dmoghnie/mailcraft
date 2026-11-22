@@ -2081,3 +2081,14 @@ count	occurrences	kez
 	Last year	Geçen yıl
 	Show or hide the formatting	Biçimlendirmeyi göster veya gizle
 	Ctrl+S	Ctrl+S
+	Simplified ribbon	Basitleştirilmiş şerit
+	Customize the ribbon	Şeridi özelleştir
+	Customize the ribbon…	Şeridi özelleştir…
+	More commands	Diğer komutlar
+	The simplified ribbon's buttons, in order. Home's others are in its More commands.	Basitleştirilmiş şeridin düğmeleri, sırasıyla. Giriş'in diğerleri Diğer komutlar'dadır.
+	Reset	Sıfırla
+	The buttons it starts with	Başlangıçtaki düğmeler
+	Add a command	Komut ekle
+	Add {command}	{command} ekle
+	At most {n} commands besides Home's own	Giriş'in kendi komutları dışında en çok {n} komut
+	Home in one row of the buttons you use most; right-click the ribbon to choose them	Giriş'i en çok kullandığınız düğmelerden tek satırda gösterir; seçmek için şeride sağ tıklayın

@@ -2077,3 +2077,14 @@ count	occurrences	回
 	Last year	昨年
 	Show or hide the formatting	書式の表示/非表示
 	Ctrl+S	Ctrl+S
+	Simplified ribbon	シンプル リボン
+	Customize the ribbon	リボンのカスタマイズ
+	Customize the ribbon…	リボンのカスタマイズ…
+	More commands	その他のコマンド
+	The simplified ribbon's buttons, in order. Home's others are in its More commands.	シンプル リボンのボタン (順番どおり)。ホームのその他のボタンは [その他のコマンド] にあります。
+	Reset	リセット
+	The buttons it starts with	最初のボタンに戻す
+	Add a command	コマンドの追加
+	Add {command}	{command} を追加
+	At most {n} commands besides Home's own	ホーム以外のコマンドは {n} 個まで
+	Home in one row of the buttons you use most; right-click the ribbon to choose them	ホームをよく使うボタンの 1 行で表示します。ボタンを選ぶにはリボンを右クリックします

@@ -42,6 +42,7 @@ pub const BUTTONS: &[(RibbonTab, &str, &str)] = &[
     (RibbonTab::Home, "G", "Categorize"),
     (RibbonTab::Home, "U", "Flag"),
     (RibbonTab::Home, "L", "Filter"),
+    (RibbonTab::Home, "Y", "More commands"),
     (RibbonTab::SendReceive, "S", "Send / Receive all folders"),
     (RibbonTab::SendReceive, "A", "Send all"),
     (RibbonTab::SendReceive, "D", "Update folder"),
@@ -52,6 +53,10 @@ pub const BUTTONS: &[(RibbonTab, &str, &str)] = &[
     (RibbonTab::View, "U", "Compact"),
     (RibbonTab::View, "Y2", "Reading pane"),
 ];
+
+/// The letters of the commands added to the simplified ribbon's Home besides its own, in order,
+/// after Home's (as Outlook numbers what's added to its toolbar).
+pub const ADDED: [&str; 9] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
 /// The letters that reach `top`.
 pub fn letters(top: Top) -> Option<&'static str> {
@@ -70,6 +75,14 @@ pub fn button_letters(tab: RibbonTab, label: &str) -> Option<(&'static str, &'st
     Some((tab_letters(tab)?, own))
 }
 
+/// The whole sequence of the `n`th command added to the simplified ribbon (from 0), on `tab`.
+pub fn added_letters(tab: RibbonTab, n: usize) -> Option<(&'static str, &'static str)> {
+    if tab != RibbonTab::Home {
+        return None;
+    }
+    Some((tab_letters(tab)?, ADDED.get(n).copied()?))
+}
+
 /// What a whole sequence reaches.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Entry {
@@ -79,22 +92,24 @@ pub enum Entry {
 }
 
 /// Every whole sequence, in two parts (a button's: its tab's letters, then its own), and the
-/// top it reaches (none: a button).
-fn all() -> impl Iterator<Item = (&'static str, &'static str, Option<Top>)> {
+/// top it reaches (none: a button); `added`: how many commands the simplified ribbon has besides
+/// Home's.
+fn all(added: usize) -> impl Iterator<Item = (&'static str, &'static str, Option<Top>)> {
     let tops = TOPS.iter().map(|(letters, top)| (*letters, "", Some(*top)));
     let buttons = BUTTONS.iter().filter_map(|(tab, letters, _)| Some((tab_letters(*tab)?, *letters, None)));
-    tops.chain(buttons)
+    let numbered = (0..added).filter_map(|n| added_letters(RibbonTab::Home, n)).map(|(head, own)| (head, own, None));
+    tops.chain(buttons).chain(numbered)
 }
 
-/// What `sequence` reaches, if it's whole.
-pub fn lookup(sequence: &str) -> Option<Entry> {
-    let (_, _, top) = all().find(|(head, tail, _)| sequence.strip_prefix(head) == Some(tail))?;
+/// What `sequence` reaches, if it's whole (`added`: as in [`all`]).
+pub fn lookup(sequence: &str, added: usize) -> Option<Entry> {
+    let (_, _, top) = all(added).find(|(head, tail, _)| sequence.strip_prefix(head) == Some(tail))?;
     Some(top.map_or_else(|| Entry::Button(sequence.to_string()), Entry::Top))
 }
 
 /// Whether a longer sequence starts with `prefix` (more letters are waited for).
-pub fn has_deeper(prefix: &str) -> bool {
-    all().any(|(head, tail, _)| head.len() + tail.len() > prefix.len() && starts_with(head, tail, prefix))
+pub fn has_deeper(prefix: &str, added: usize) -> bool {
+    all(added).any(|(head, tail, _)| head.len() + tail.len() > prefix.len() && starts_with(head, tail, prefix))
 }
 
 /// Whether `head` then `tail` starts with `prefix`.

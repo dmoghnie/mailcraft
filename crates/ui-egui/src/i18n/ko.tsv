@@ -2080,3 +2080,14 @@ count	occurrences	회
 	Last year	작년
 	Show or hide the formatting	서식 표시 또는 숨기기
 	Ctrl+S	Ctrl+S
+	Simplified ribbon	간소화된 리본
+	Customize the ribbon	리본 사용자 지정
+	Customize the ribbon…	리본 사용자 지정…
+	More commands	추가 명령
+	The simplified ribbon's buttons, in order. Home's others are in its More commands.	간소화된 리본의 단추(순서대로)입니다. 홈의 나머지 단추는 추가 명령에 있습니다.
+	Reset	다시 설정
+	The buttons it starts with	처음 단추로 되돌리기
+	Add a command	명령 추가
+	Add {command}	{command} 추가
+	At most {n} commands besides Home's own	홈 외의 명령은 최대 {n}개
+	Home in one row of the buttons you use most; right-click the ribbon to choose them	자주 쓰는 단추만 홈에 한 줄로 표시합니다. 리본을 마우스 오른쪽 단추로 클릭하여 고르세요

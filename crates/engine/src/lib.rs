@@ -28,12 +28,12 @@ pub use mailcraft_smime as smime;
 pub use mailcraft_store as store;
 pub use session::{
     ACCENTS, ARRANGE_HEADINGS, AccountState, AgeUnit, ArchiveRule, Arrange, AutoArchive, BodyWork, CardSearch, Changes, Compacting, Compaction,
-    Compose, CtrlEnter, Drafted, Filed, FolderArchive, FolderDensity, FolderRef, IDLE_AFTER_S, ImportState, Imports, IndexPass, KeySource, KnownCert,
-    KnownKey, Leaving, ListFilter, Lock, MoveTarget, NotesOrder, Notice, PANICS_CAUGHT, PGP_DOC, PINNED_HEADING, PaneSection, PgpSettings, Picture,
-    Prefs, PreparedBody, Quote, Reach, Reactions, ReadInPane, Reading, ReadingPane, RevocationCheck, Row, SMIME_DOC, SOURCE_SHOWN, Scheme, Seal,
-    SearchProgress, SearchScope, SearchStats, SearchWork, Security, SendBlock, SendCheck, SendReceive, SenderAddresses, SenderMarks, ServerSearch,
-    Session, SignInCheck, SignedBy, SmimeSettings, SourceView, StartIn, TransferRow, TrustedCertificate, UNDO_SEND_MAX, UndoHold, UpdateCheck,
-    VacationState, View, accent_code, accent_rgb,
+    Compose, CtrlEnter, Drafted, Filed, FolderArchive, FolderDensity, FolderRef, HOME_BUTTONS, IDLE_AFTER_S, ImportState, Imports, IndexPass,
+    KeySource, KnownCert, KnownKey, Leaving, ListFilter, Lock, MoveTarget, NotesOrder, Notice, PANICS_CAUGHT, PGP_DOC, PINNED_HEADING, PaneSection,
+    PgpSettings, Picture, Prefs, PreparedBody, Quote, RIBBON_ADDED_MOST, RIBBON_MOST, RIBBON_ROW, Reach, Reactions, ReadInPane, Reading, ReadingPane,
+    RevocationCheck, Row, SMIME_DOC, SOURCE_SHOWN, Scheme, Seal, SearchProgress, SearchScope, SearchStats, SearchWork, Security, SendBlock,
+    SendCheck, SendReceive, SenderAddresses, SenderMarks, ServerSearch, Session, SignInCheck, SignedBy, SmimeSettings, SourceView, StartIn,
+    TransferRow, TrustedCertificate, UNDO_SEND_MAX, UndoHold, UpdateCheck, VacationState, View, accent_code, accent_rgb,
     invite::{AnsweredInvites, Fit, Invite, InviteDay, InviteProblem, Route, WaitingInvite, forwarding_allowed, proposals_allowed},
     junk::{JunkList, junk_entry},
     leaving_way, newer_release,

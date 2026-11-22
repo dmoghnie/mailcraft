@@ -36,6 +36,8 @@ pub struct KeyTips {
     alt_held: bool,
     // Keep consuming a held letter after its action hides the key tips.
     held: Vec<Key>,
+    // How many commands the simplified ribbon has besides Home's: their digits are sequences.
+    added: usize,
 }
 
 /// Set by the Alt codes (`app/alt_code.rs`) while Alt is held: digits typed then are a
@@ -48,6 +50,11 @@ impl KeyTips {
     /// The letters typed so far (empty: Alt was pressed), if key tips show.
     pub fn prefix(&self) -> Option<&str> {
         self.prefix.as_deref()
+    }
+
+    /// The simplified ribbon has `n` commands besides Home's (none: it isn't shown).
+    pub fn set_added(&mut self, n: usize) {
+        self.added = n;
     }
 
     pub fn clear(&mut self) {
@@ -114,7 +121,7 @@ impl KeyTips {
                         && !command_modifier(*modifiers)
                         && letter(*key).is_some_and(|c| {
                             let next = format!("{}{c}", self.prefix.as_deref().unwrap_or_default());
-                            table::lookup(&next).is_some() || table::has_deeper(&next)
+                            table::lookup(&next, self.added).is_some() || table::has_deeper(&next, self.added)
                         });
                     if alt_letter && *pressed && self.prefix.is_none() {
                         self.prefix = Some(String::new());
@@ -176,7 +183,7 @@ impl KeyTips {
     /// A letter typed with key tips showing.
     fn typed(&mut self, letter: char, acts: &mut Vec<Act>) {
         let next = format!("{}{letter}", self.prefix.as_deref().unwrap_or_default());
-        match table::lookup(&next) {
+        match table::lookup(&next, self.added) {
             // A tab stays open with its buttons' letters showing.
             Some(Entry::Top(Top::Tab(tab))) => {
                 self.prefix = Some(next);
@@ -195,7 +202,7 @@ impl KeyTips {
                 acts.push(Act::Press(sequence));
             }
             // Part of a longer sequence (Send / Receive's J S): more letters are waited for.
-            None if table::has_deeper(&next) => self.prefix = Some(next),
+            None if table::has_deeper(&next, self.added) => self.prefix = Some(next),
             // A letter that reaches nothing is taken, and nothing changes (as in Outlook).
             None => {}
         }
@@ -275,15 +282,59 @@ pub fn on_ribbon<R>(ui: &mut egui::Ui, draw: impl FnOnce(&mut egui::Ui) -> R) ->
 /// A ribbon button labelled `label` (in English, as [`table::BUTTONS`] names it): its letters
 /// drawn under it while its tab's show, and pressed when they were typed (and it can be).
 pub fn apply(ui: &egui::Ui, label: &str, resp: &mut egui::Response, enabled: bool, t: &Tokens) {
+    mark(ui, resp, enabled, t, |tab| table::button_letters(tab, label));
+}
+
+/// The simplified ribbon's `n`th command added besides Home's (from 0): its digit, as [`apply`].
+pub fn apply_added(ui: &egui::Ui, n: usize, resp: &mut egui::Response, enabled: bool, t: &Tokens) {
+    mark(ui, resp, enabled, t, |tab| table::added_letters(tab, n));
+}
+
+/// Whether the letters of the button labelled `label`, not drawn this frame (it's in the
+/// simplified ribbon's More commands), were just typed: taken, so nothing else is pressed by them.
+pub fn pressed(ui: &egui::Ui, label: &str) -> bool {
+    letters_now(ui, true, |tab| table::button_letters(tab, label)).0
+}
+
+/// [`pressed`], for the `n`th command added to the simplified ribbon.
+pub fn pressed_added(ui: &egui::Ui, n: usize) -> bool {
+    letters_now(ui, true, |tab| table::added_letters(tab, n)).0
+}
+
+/// A button's letters (`own`: its whole sequence on the tab shown) drawn under it, and it pressed
+/// when they were typed.
+fn mark(
+    ui: &egui::Ui,
+    resp: &mut egui::Response,
+    enabled: bool,
+    t: &Tokens,
+    own: impl FnOnce(crate::RibbonTab) -> Option<(&'static str, &'static str)>,
+) {
+    let (pressed, letters) = letters_now(ui, enabled, own);
+    if pressed {
+        resp.flags.insert(egui::response::Flags::FAKE_PRIMARY_CLICKED);
+    }
+    if let Some(letters) = letters {
+        badge(ui.ctx(), resp.rect, letters, enabled, t);
+    }
+}
+
+/// Whether a button whose whole sequence is `own` is pressed now (it can be, and they were just
+/// typed: the press is taken), and the letters left to type on it, while they show.
+fn letters_now(
+    ui: &egui::Ui,
+    enabled: bool,
+    own: impl FnOnce(crate::RibbonTab) -> Option<(&'static str, &'static str)>,
+) -> (bool, Option<&'static str>) {
     // Read where the frame is kept, not copied out; nothing more is done while no key tips show
     // and no press waits (every frame but those after Alt).
     let key = egui::util::id_type_map::RawKey::new::<Frame>(frame_id());
-    let (pressed, letters) = ui.ctx().data_mut(|d| {
+    ui.ctx().data_mut(|d| {
         let Some(frame) = d.get_temp_raw_mut(key).and_then(|f| f.downcast_mut::<Frame>()) else { return (false, None) };
         if !frame.ribbon || (frame.prefix.is_none() && frame.press.is_none()) {
             return (false, None);
         }
-        let Some((head, own)) = frame.tab.and_then(|tab| table::button_letters(tab, label)) else { return (false, None) };
+        let Some((head, own)) = frame.tab.and_then(own) else { return (false, None) };
         // Pressed once: a button drawn in its place this frame isn't pressed too.
         let pressed = enabled && frame.press.as_deref().is_some_and(|p| p.strip_prefix(head) == Some(own));
         if pressed {
@@ -292,13 +343,7 @@ pub fn apply(ui: &egui::Ui, label: &str, resp: &mut egui::Response, enabled: boo
         // Its letters show once its tab's are typed, while they can still be typed.
         let shows = frame.prefix.as_deref().and_then(|p| p.strip_prefix(head)).is_some_and(|typed| own.len() > typed.len() && own.starts_with(typed));
         (pressed, shows.then_some(own))
-    });
-    if pressed {
-        resp.flags.insert(egui::response::Flags::FAKE_PRIMARY_CLICKED);
-    }
-    if let Some(letters) = letters {
-        badge(ui.ctx(), resp.rect, letters, enabled, t);
-    }
+    })
 }
 
 /// A key tip's letters, in a small dark box on the middle of `rect`'s bottom edge, mostly below
@@ -319,6 +364,7 @@ impl crate::MailApp {
     /// keyboard, a button to press as the ribbon is drawn. Whether the File page is to open.
     pub(crate) fn keytips(&mut self, ctx: &Context) -> bool {
         let enabled = self.ui.dialog.is_none() && self.ui.backstage.is_none();
+        self.ui.keytips.set_added(self.ribbon_added());
         let mut file = false;
         let mut press = None;
         for act in self.ui.keytips.process(ctx, enabled) {

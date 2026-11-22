@@ -86,8 +86,8 @@ fn each_sequence_names_one_button() {
     for (tab, _, label) in table::BUTTONS {
         let (head, own) = table::button_letters(*tab, label).unwrap_or_default();
         let own = format!("{head}{own}");
-        assert_eq!(table::lookup(&own), Some(Entry::Button(own.clone())), "{label}");
-        assert!(!table::has_deeper(&own), "{label}: {own} starts another");
+        assert_eq!(table::lookup(&own, 0), Some(Entry::Button(own.clone())), "{label}");
+        assert!(!table::has_deeper(&own, 0), "{label}: {own} starts another");
     }
 }
 
@@ -114,7 +114,7 @@ fn sequences_in_two_parts_read_as_whole_ones() {
             }
             let found = whole.iter().find(|(w, _)| *w == s).map(|(_, e)| e.clone());
             let deeper = whole.iter().any(|(w, _)| w.len() > s.len() && w.starts_with(&s));
-            assert_eq!((table::lookup(&s), table::has_deeper(&s)), (found, deeper), "{s:?}");
+            assert_eq!((table::lookup(&s, 0), table::has_deeper(&s, 0)), (found, deeper), "{s:?}");
             tried += 1;
         }
     }
@@ -224,4 +224,21 @@ fn measure_idle_apply() {
     });
     out.textures_delta.clear();
     println!("MEASURE keytips::apply, idle, {} Home buttons: {each:?} a button", labels.len());
+}
+
+/// The simplified ribbon's added commands are reached by digits after H, as many as it has, and
+/// no other sequence changes; as many digits as it may have.
+#[test]
+fn added_commands_are_reached_by_digits() {
+    assert_eq!(table::ADDED.len(), mailcraft_engine::RIBBON_ADDED_MOST);
+    assert_eq!(table::lookup("H2", 2), Some(Entry::Button("H2".into())));
+    assert_eq!(table::lookup("H3", 2), None);
+    assert_eq!(table::lookup("H1", 0), None);
+    assert_eq!(table::lookup("HRP", 2), Some(Entry::Button("HRP".into())));
+    assert!(table::has_deeper("H", 2) && !table::has_deeper("H1", 2));
+    let mut tips = KeyTips::default();
+    tips.set_added(1);
+    run(&mut tips, vec![alt(true), alt(false)]);
+    run(&mut tips, vec![key(Key::H, Modifiers::NONE)]);
+    assert_eq!(run(&mut tips, vec![key(Key::Num1, Modifiers::NONE)]).0, vec![Act::Press("H1".into())]);
 }

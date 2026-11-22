@@ -2081,3 +2081,14 @@ count	occurrences	repeticiones
 	Last year	El año pasado
 	Show or hide the formatting	Mostrar u ocultar el formato
 	Ctrl+S	Ctrl+S
+	Simplified ribbon	Cinta simplificada
+	Customize the ribbon	Personalizar la cinta de opciones
+	Customize the ribbon…	Personalizar la cinta de opciones…
+	More commands	Más comandos
+	The simplified ribbon's buttons, in order. Home's others are in its More commands.	Los botones de la cinta simplificada, en orden. Los demás de Inicio están en Más comandos.
+	Reset	Restablecer
+	The buttons it starts with	Los botones con los que empieza
+	Add a command	Agregar un comando
+	Add {command}	Agregar {command}
+	At most {n} commands besides Home's own	Como máximo {n} comandos además de los de Inicio
+	Home in one row of the buttons you use most; right-click the ribbon to choose them	Inicio en una fila con los botones que más usa; haga clic con el botón derecho en la cinta para elegirlos

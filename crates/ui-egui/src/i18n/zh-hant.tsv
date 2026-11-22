@@ -2080,3 +2080,14 @@ count	occurrences	次
 	Last year	去年
 	Show or hide the formatting	顯示或隱藏格式
 	Ctrl+S	Ctrl+S
+	Simplified ribbon	簡化功能區
+	Customize the ribbon	自訂功能區
+	Customize the ribbon…	自訂功能區…
+	More commands	更多命令
+	The simplified ribbon's buttons, in order. Home's others are in its More commands.	簡化功能區的按鈕，依序排列。「常用」中的其他按鈕在「更多命令」裡。
+	Reset	重設
+	The buttons it starts with	初始按鈕
+	Add a command	新增命令
+	Add {command}	新增「{command}」
+	At most {n} commands besides Home's own	除「常用」本身的命令外，最多 {n} 個命令
+	Home in one row of the buttons you use most; right-click the ribbon to choose them	「常用」只顯示一列最常用的按鈕；以滑鼠右鍵按一下功能區即可選擇這些按鈕

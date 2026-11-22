@@ -2094,3 +2094,14 @@ count	occurrences	повторений
 	Last year	В прошлом году
 	Show or hide the formatting	Показать или скрыть форматирование
 	Ctrl+S	Ctrl+S
+	Simplified ribbon	Упрощённая лента
+	Customize the ribbon	Настроить ленту
+	Customize the ribbon…	Настроить ленту…
+	More commands	Другие команды
+	The simplified ribbon's buttons, in order. Home's others are in its More commands.	Кнопки упрощённой ленты по порядку. Остальные кнопки «Главной» — в «Других командах».
+	Reset	Сбросить
+	The buttons it starts with	Исходные кнопки
+	Add a command	Добавить команду
+	Add {command}	Добавить: {command}
+	At most {n} commands besides Home's own	Не больше {n} команд, кроме команд «Главной»
+	Home in one row of the buttons you use most; right-click the ribbon to choose them	«Главная» в одну строку из самых нужных кнопок; чтобы выбрать их, щёлкните ленту правой кнопкой мыши

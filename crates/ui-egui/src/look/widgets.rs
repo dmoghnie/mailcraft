@@ -84,6 +84,17 @@ fn ribbon_button(ui: &Ui, label_width: f32) -> bool {
     })
 }
 
+/// The ribbon's buttons drawn next keep their labels whatever the room: the simplified ribbon
+/// puts what doesn't fit in its More commands instead.
+pub fn keep_ribbon_labels(ui: &Ui) {
+    ui.ctx().data_mut(|d| {
+        let f = d.get_temp_mut_or_default::<RibbonFit>(ribbon_fit_id());
+        if f.active {
+            f.icons_from = usize::MAX;
+        }
+    });
+}
+
 /// Whether the ribbon being drawn is the classic one (read in place: a copy would take every
 /// label width noted so far with it, for every button).
 fn classic(ui: &Ui) -> bool {

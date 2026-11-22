@@ -62,8 +62,8 @@ pub use mailboxes::{ARRANGE_HEADINGS, Arrange, ListFilter, PINNED_HEADING, Row};
 pub use opening::SenderMarks;
 pub use organize::{junk, quick_steps, search_folders, server_rules, sweep, vips};
 pub use prefs::{
-    ACCENTS, CtrlEnter, DICTIONARY_MAX, FolderDensity, NotesOrder, Prefs, ReadInPane, ReadingPane, SenderAddresses, StartIn, accent_code, accent_rgb,
-    dictionary_word,
+    ACCENTS, CtrlEnter, DICTIONARY_MAX, FolderDensity, HOME_BUTTONS, NotesOrder, Prefs, RIBBON_ADDED_MOST, RIBBON_MOST, RIBBON_ROW, ReadInPane,
+    ReadingPane, SenderAddresses, StartIn, accent_code, accent_rgb, dictionary_word,
 };
 pub mod pim;
 pub use pim::invite;

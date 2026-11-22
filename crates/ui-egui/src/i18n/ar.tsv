@@ -2076,3 +2076,14 @@ count	occurrences	مرات
 	Last year	العام الماضي
 	Show or hide the formatting	إظهار التنسيق أو إخفاؤه
 	Ctrl+S	Ctrl+S
+	Simplified ribbon	الشريط المبسّط
+	Customize the ribbon	تخصيص الشريط
+	Customize the ribbon…	تخصيص الشريط…
+	More commands	أوامر أخرى
+	The simplified ribbon's buttons, in order. Home's others are in its More commands.	أزرار الشريط المبسّط بترتيبها. أزرار «الرئيسية» الأخرى في «أوامر أخرى».
+	Reset	إعادة التعيين
+	The buttons it starts with	الأزرار التي يبدأ بها
+	Add a command	إضافة أمر
+	Add {command}	إضافة {command}
+	At most {n} commands besides Home's own	{n} أوامر على الأكثر غير أوامر «الرئيسية»
+	Home in one row of the buttons you use most; right-click the ribbon to choose them	«الرئيسية» في صف واحد من الأزرار الأكثر استخدامًا؛ انقر بزر الماوس الأيمن على الشريط لاختيارها

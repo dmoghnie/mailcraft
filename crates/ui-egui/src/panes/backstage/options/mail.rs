@@ -28,10 +28,29 @@ pub(super) fn reading(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Actio
                 s.prefs.classic_ribbon,
                 "view.classicRibbon",
             ),
+            (
+                tl!("Simplified ribbon"),
+                Some(tl!("Home in one row of the buttons you use most; right-click the ribbon to choose them")),
+                s.prefs.simple_ribbon,
+                "view.simpleRibbon",
+            ),
         ];
         for (label, about, on, cmd) in switches {
             switch_row(ui, t, false, Switch { label, about, on, cmd }, acts);
         }
+        // The simplified ribbon's buttons, as from the ribbon's right-click menu.
+        setting(
+            ui,
+            t,
+            false,
+            tl!("Customize the ribbon"),
+            Some(tl!("The simplified ribbon's buttons, in order. Home's others are in its More commands.")),
+            |ui| {
+                if ui.button(tl!("Customize the ribbon…")).clicked() {
+                    acts.push(Action::Dialog(Dialog::customize_ribbon(s)));
+                }
+            },
+        );
         // When the reading pane marks mail read, as Outlook's Reading Pane options: when shown
         // (after a wait), once another message is chosen, or not at all (only a message opened
         // in its own window is then).

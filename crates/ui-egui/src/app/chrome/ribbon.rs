@@ -2,8 +2,10 @@
 
 use crate::*;
 
+mod home;
 mod mail_tabs;
 mod modules;
+mod simple;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum RibbonTab {
@@ -90,18 +92,29 @@ impl MailApp {
         }
     }
 
-    /// The ribbon's buttons: the tab chosen's, Mail's (`ribbon/mail_tabs.rs`) or the module's
-    /// shown (`ribbon/modules.rs`). Send / Receive is the same in every module; Home and View
-    /// are each module's own, as Outlook's (issue #142: in Calendar, People, Tasks and Notes the
-    /// tabs changed nothing, Home's buttons always shown).
+    /// The ribbon's buttons ([`MailApp::ribbon_buttons`]), and its right-click menu.
     pub(crate) fn ribbon(&mut self, ui: &mut Ui, acts: &mut Vec<Action>) {
-        let t = self.ui.tokens;
         // The buttons sit on a card with an edge, as Outlook's (issue #8): its place is kept here
         // and drawn under them once they're laid out (`card_under_ribbon`).
         let slot = ui.painter().add(egui::Shape::Noop);
         let top = ui.cursor().top();
         ui.ctx().data_mut(|d| d.insert_temp(egui::Id::unique(RIBBON_CARD), Some((slot, top))));
         ui.add_space(3.0);
+        self.ribbon_buttons(ui, acts);
+        ribbon_menu(ui, &self.session, top, acts);
+    }
+
+    /// How many commands besides Home's the simplified ribbon shows (their key tips are digits).
+    pub(crate) fn ribbon_added(&self) -> usize {
+        simple::added(&self.session)
+    }
+
+    /// The ribbon's buttons: the tab chosen's, Mail's (`ribbon/home.rs`, `ribbon/simple.rs`,
+    /// `ribbon/mail_tabs.rs`) or the module's shown (`ribbon/modules.rs`). Send / Receive is the
+    /// same in every module; Home and View are each module's own, as Outlook's (issue #142: in
+    /// Calendar, People, Tasks and Notes the tabs changed nothing, Home's buttons always shown).
+    fn ribbon_buttons(&mut self, ui: &mut Ui, acts: &mut Vec<Action>) {
+        let t = self.ui.tokens;
         if self.session.module != Module::Mail && self.ui.tab != RibbonTab::SendReceive {
             ui.horizontal(|ui| {
                 ui.spacing_mut().item_spacing.x = 2.0;
@@ -116,6 +129,11 @@ impl MailApp {
             return;
         }
         let s = &self.session;
+        // The simplified ribbon fits the window: what doesn't goes in its More commands.
+        if self.ui.tab == RibbonTab::Home && s.prefs.simple_ribbon {
+            simple::home(ui, s, t, acts);
+            return;
+        }
         let ust = &mut self.ui;
         // A narrow window scrolls the ribbon sideways rather than cutting buttons off; each tab
         // keeps its own place (one shared place opened View scrolled as far as Home was, which
@@ -127,7 +145,7 @@ impl MailApp {
                 ui.spacing_mut().item_spacing.x = 2.0;
                 widgets::start_group(ui);
                 match ust.tab {
-                    RibbonTab::Home => mail_tabs::ribbon_home(ui, s, t, acts),
+                    RibbonTab::Home => home::ribbon_home(ui, s, t, acts),
                     RibbonTab::SendReceive => mail_tabs::ribbon_send_receive(ui, s, t, ust.has_files, &mut ust.send_receive.open, acts),
                     RibbonTab::Search => mail_tabs::ribbon_search(ui, s, ust, t, acts),
                     RibbonTab::View => mail_tabs::ribbon_view(ui, s, t, ust.dark, acts),
@@ -135,6 +153,41 @@ impl MailApp {
             });
         });
     }
+}
+
+/// Right-click on the ribbon: the simplified or classic ribbon, Customize the ribbon, and hiding
+/// it (as Outlook's ribbon menu). `top`: where the ribbon starts.
+fn ribbon_menu(ui: &mut Ui, s: &Session, top: f32, acts: &mut Vec<Action>) {
+    let rect = egui::Rect::from_x_y_ranges(ui.max_rect().x_range(), top..=ui.min_rect().bottom().max(top));
+    // On a button too, as on the space between: read from the pointer, as a widget over the
+    // ribbon would take the buttons' clicks.
+    let asked = ui.rect_contains_pointer(rect) && ui.input(|i| i.pointer.button_clicked(egui::PointerButton::Secondary));
+    let id = egui::Id::unique("ribbon-menu");
+    egui::Popup::new(id, ui.ctx().clone(), rect, ui.layer_id())
+        .kind(egui::PopupKind::Menu)
+        .layout(egui::Layout::top_down_justified(egui::Align::Min))
+        .open_memory(asked.then_some(egui::SetOpenCommand::Bool(true)))
+        .at_pointer_fixed()
+        .show(|ui| {
+            let p = &s.prefs;
+            for (on, label, id) in
+                [(p.simple_ribbon, "Simplified ribbon", "view.simpleRibbon"), (p.classic_ribbon, "Classic ribbon", "view.classicRibbon")]
+            {
+                if ui.add(egui::Button::selectable(on, tl!(label))).clicked() {
+                    acts.push(Action::Run(id, json!({})));
+                    ui.close();
+                }
+            }
+            ui.separator();
+            if ui.button(tl!("Customize the ribbon…")).clicked() {
+                acts.push(Action::Dialog(Dialog::customize_ribbon(s)));
+                ui.close();
+            }
+            if ui.button(tl!("Hide the ribbon")).clicked() {
+                acts.push(Action::Run("view.hideRibbon", json!({})));
+                ui.close();
+            }
+        });
 }
 
 /// A tab's colours on the top bar, the one shown and the others: white on the coloured bar

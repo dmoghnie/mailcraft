@@ -162,6 +162,12 @@ pub struct Prefs {
     /// The ribbon's buttons hidden, its tabs kept on the top bar: one clicked shows its buttons
     /// until a click elsewhere.
     pub ribbon_hidden: bool,
+    /// The simplified ribbon: Home is one row of the buttons chosen for it, as many as fit, the
+    /// rest in its More commands; off, every button shows in its group.
+    pub simple_ribbon: bool,
+    /// The simplified ribbon's buttons, by command, in order (Customize the ribbon); none: those
+    /// it starts with ([`RIBBON_ROW`]). [`Session::ribbon_row`] reads them.
+    pub ribbon_buttons: Vec<String>,
     /// The formatting row shows under the bar of the message being written (its Aa), as last
     /// left; hidden, the bar is one row.
     pub format_bar: bool,
@@ -423,6 +429,63 @@ impl SenderAddresses {
     }
 }
 
+/// The ribbon's Home buttons, by the command each runs, in their order there.
+pub const HOME_BUTTONS: [&str; 15] = [
+    "mail.new",
+    "mail.delete",
+    "mail.archive",
+    "mail.junk",
+    "mail.move",
+    "quickStep.run",
+    "mail.reply",
+    "mail.replyAll",
+    "mail.forward",
+    "mail.toggleRead",
+    "mail.flag",
+    "mail.categorize",
+    "mail.pin",
+    "mail.snooze",
+    "list.filter",
+];
+
+/// The simplified ribbon's buttons as it starts: the most used of Home's.
+pub const RIBBON_ROW: [&str; 8] =
+    ["mail.new", "mail.delete", "mail.archive", "mail.move", "mail.reply", "mail.replyAll", "mail.forward", "mail.flag"];
+
+/// The most commands besides Home's own the simplified ribbon takes: each is reached by a digit
+/// after Alt, H, as Outlook numbers what's added to its toolbar.
+pub const RIBBON_ADDED_MOST: usize = 9;
+
+/// The most buttons the simplified ribbon takes: Home's, and those added.
+pub const RIBBON_MOST: usize = HOME_BUTTONS.len() + RIBBON_ADDED_MOST;
+
+impl Session {
+    /// The simplified ribbon's buttons, by command, in order: each once, only commands (a
+    /// settings file from another version may name others), and at most [`RIBBON_ADDED_MOST`]
+    /// besides Home's. Only the first [`RIBBON_MOST`] named are read: the file may be damaged.
+    pub fn ribbon_row(&self) -> Vec<&'static str> {
+        let reg = self.registry();
+        let named: Vec<&str> =
+            if self.prefs.ribbon_buttons.is_empty() { RIBBON_ROW.to_vec() } else { self.prefs.ribbon_buttons.iter().map(String::as_str).collect() };
+        let mut row: Vec<&'static str> = Vec::new();
+        let mut added = 0usize;
+        for name in named.into_iter().take(RIBBON_MOST) {
+            let Some(id) = reg.get(name).map(|c| c.id) else { continue };
+            if row.contains(&id) {
+                continue;
+            }
+            if !HOME_BUTTONS.contains(&id) {
+                if added >= RIBBON_ADDED_MOST {
+                    continue;
+                }
+                added = added.saturating_add(1);
+            }
+            row.push(id);
+        }
+        row
+    }
+}
+
 impl Default for Prefs {
     fn default() -> Self {
         Prefs {
@@ -452,6 +515,8 @@ impl Default for Prefs {
             single_line: false,
             classic_ribbon: false,
             ribbon_hidden: false,
+            simple_ribbon: false,
+            ribbon_buttons: Vec::new(),
             format_bar: false,
             open_send_receive: false,
             accent: String::new(),

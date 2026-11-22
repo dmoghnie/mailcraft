@@ -250,6 +250,7 @@ mod mcp;
 mod opening;
 mod organize;
 mod photos;
+mod ribbon;
 mod safety;
 mod smime;
 mod writing;

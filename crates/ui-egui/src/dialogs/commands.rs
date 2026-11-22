@@ -42,7 +42,8 @@ const HIDDEN: &[&str] = &[
 
 /// Commands that need something given, which the window asks for first, in the dialog their
 /// button opens ([`dialog_for`]).
-const OPENS: &[&str] = &["mail.move", "mail.copy", "mail.sweep", "category.list", "rules.list", "event.create", "contact.create", "task.create"];
+const OPENS: &[&str] =
+    &["mail.move", "mail.copy", "mail.sweep", "category.list", "rules.list", "event.create", "contact.create", "task.create", "view.arrangeRibbon"];
 
 /// Commands that take one of a few values, a row for each: (id, parameter, value, name).
 const CHOICES: &[(&str, &str, &str, &str)] = &[
@@ -64,6 +65,7 @@ fn dialog_for(id: &str, s: &Session) -> Option<Dialog> {
         "event.create" => Dialog::new_event(s, None),
         "contact.create" => Dialog::new_contact(),
         "task.create" => Dialog::new_task(s, None),
+        "view.arrangeRibbon" => Dialog::customize_ribbon(s),
         // Asked first, as from the reading pane (a message goes out, or a page opens); from Junk
         // Email, or with no way to leave, it runs and says why it can't.
         "mail.unsubscribe" => {
@@ -98,7 +100,7 @@ impl Offer {
 
 /// Whether a command needs nothing given: no parameter its description names is required
 /// (`"to": string`; an optional one is `"key"?: string`).
-fn runs_as_is(spec: &CommandSpec) -> bool {
+pub(crate) fn runs_as_is(spec: &CommandSpec) -> bool {
     !spec.params.contains("\":")
 }
 
@@ -154,6 +156,29 @@ pub(crate) fn offers(s: &Session) -> Vec<Offer> {
         }
     }
     out
+}
+
+/// What can go on the simplified ribbon (Customize the ribbon): Home's own buttons, and every
+/// command that runs as it is, named in the interface's language.
+pub(crate) fn ribbon_offers(s: &Session) -> Vec<Offer> {
+    let reg = s.registry();
+    let fits = |spec: &&CommandSpec| {
+        (mailcraft_engine::HOME_BUTTONS.contains(&spec.id) || (runs_as_is(spec) && !HIDDEN.contains(&spec.id) && !OPENS.contains(&spec.id)))
+            && i18n::in_every_catalog(spec.label)
+    };
+    reg.all()
+        .iter()
+        .filter(fits)
+        .map(|spec| Offer {
+            id: spec.id,
+            params: json!({}),
+            name: tl!(spec.label).to_string(),
+            english: spec.label.to_lowercase(),
+            place: shown_place(spec.location),
+            shortcut: shown_shortcut(spec.shortcut),
+            off: None,
+        })
+        .collect()
 }
 
 /// How well `offer` matches `typed` (lower case): 0 its name starts with it, 1 a word of its

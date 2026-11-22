@@ -2081,3 +2081,14 @@ count	occurrences	előfordulás
 	Last year	Tavaly
 	Show or hide the formatting	Formázás megjelenítése vagy elrejtése
 	Ctrl+S	Ctrl+S
+	Simplified ribbon	Egyszerűsített menüszalag
+	Customize the ribbon	A menüszalag testreszabása
+	Customize the ribbon…	A menüszalag testreszabása…
+	More commands	További parancsok
+	The simplified ribbon's buttons, in order. Home's others are in its More commands.	Az egyszerűsített menüszalag gombjai, sorrendben. A Kezdőlap többi gombja a További parancsok alatt van.
+	Reset	Visszaállítás
+	The buttons it starts with	A kezdeti gombok
+	Add a command	Parancs hozzáadása
+	Add {command}	{command} hozzáadása
+	At most {n} commands besides Home's own	Legfeljebb {n} parancs a Kezdőlapéin kívül
+	Home in one row of the buttons you use most; right-click the ribbon to choose them	A Kezdőlap egy sorban, a leggyakrabban használt gombokkal; a kiválasztásukhoz kattintson a jobb gombbal a menüszalagra

@@ -2081,3 +2081,14 @@ count	occurrences	Terminen
 	Last year	Letztes Jahr
 	Show or hide the formatting	Formatierung ein- oder ausblenden
 	Ctrl+S	Strg+S
+	Simplified ribbon	Vereinfachtes Menüband
+	Customize the ribbon	Menüband anpassen
+	Customize the ribbon…	Menüband anpassen…
+	More commands	Weitere Befehle
+	The simplified ribbon's buttons, in order. Home's others are in its More commands.	Die Schaltflächen des vereinfachten Menübands, der Reihe nach. Die übrigen von Start stehen unter „Weitere Befehle“.
+	Reset	Zurücksetzen
+	The buttons it starts with	Die Schaltflächen, mit denen es beginnt
+	Add a command	Befehl hinzufügen
+	Add {command}	{command} hinzufügen
+	At most {n} commands besides Home's own	Höchstens {n} Befehle außer denen von Start
+	Home in one row of the buttons you use most; right-click the ribbon to choose them	Start in einer Zeile mit den meistgenutzten Schaltflächen; zum Auswählen mit der rechten Maustaste auf das Menüband klicken
