@@ -1,4 +1,5 @@
-//! The message editor's ribbon: formatting, colours, links, pictures, signature, date and time, word count.
+//! The message editor's bar: files, links, pictures, the signature, and More options (names, the
+//! date and time, word count); the formatting, colours and lists in a row of their own.
 
 use super::*;
 
@@ -87,71 +88,113 @@ pub(super) fn color_button(
     picked
 }
 
-/// The Message ribbon: font size, bold / italic / underline / strikethrough, colours, lists,
-/// alignment, indent, clear formatting; then names, files, links, pictures, the signature, the
-/// date and time, and the word count. `signatures` are the sending account's, by name (its
-/// Signature menu).
-pub(crate) fn ribbon(ui: &mut Ui, t: &Tokens, ed: &mut Editor, c: &mut Compose, signatures: &[String], clock: &Clock, acts: &mut Vec<Action>) {
-    let (sel, cur, para) = ribbon_state(ed, c);
+/// What the bar of the message being written is given besides the editor.
+pub(crate) struct Bar<'a> {
+    /// The sending account's signatures, by name (the Signature menu).
+    pub(crate) signatures: &'a [String],
+    pub(crate) clock: &'a Clock,
+    /// The formatting row shows under the bar (Aa lit).
+    pub(crate) formatting: bool,
+    /// The message's own options, at the end of More options' menu.
+    pub(crate) more: &'a dyn Fn(&mut Ui, &mut Compose),
+}
+
+/// The bar's buttons: Attach File, Link, Pictures and Signature; Aa, which shows the formatting
+/// row under the bar or hides it ([`format_row`]); and More options, with Address Book, Check
+/// Names, Date & time and Word count, then the message's own options.
+pub(crate) fn ribbon(ui: &mut Ui, t: &Tokens, ed: &mut Editor, c: &mut Compose, bar: &Bar<'_>, acts: &mut Vec<Action>) {
+    let sel = ribbon_state(ed, c).0;
     let mut ops: Vec<Op> = Vec::new();
-    wrapped_row(ui, |ui| {
-        ui.spacing_mut().item_spacing.x = 2.0;
-        format_buttons(ui, t, c, &cur, para, &mut ops);
-        sep(ui, t);
-        if crate::widgets::tool_button(ui, Icon::AddressBook, "Address Book", t, !c.sending).on_hover_text(tl!("Ctrl+Shift+B")).clicked() {
-            acts.push(Action::Dialog(Dialog::select_names(c, crate::dialogs::Recipients::To)));
-        }
-        // The names typed in To, Cc and Bcc looked up (issue #211); Ctrl+K in those boxes.
-        if crate::widgets::tool_button(ui, Icon::Person, "Check Names", t, !c.sending).on_hover_text(tl!("Ctrl+K in To, Cc or Bcc")).clicked() {
-            acts.push(Action::Run("compose.checkNames", serde_json::json!({})));
-        }
-        if crate::widgets::tool_button(ui, Icon::Attach, "Attach File", t, !c.sending).clicked() {
-            acts.push(Action::AttachFiles);
-        }
-        if crate::widgets::tool_button(ui, Icon::Link, "Link", t, !c.sending && !c.plain).on_hover_text(tl!("Ctrl+K")).clicked() {
-            ed.link = Some(LinkForm::open(c, sel.clone()));
-        }
-        if crate::widgets::tool_button(ui, Icon::Image, "Pictures", t, !c.sending && !c.plain).clicked() {
-            acts.push(Action::InsertPicture);
-        }
-        // The account's signatures, one picked replacing the one in the message, or making and
-        // changing them, from the message (Outlook's Signature menu on the Message ribbon).
-        let r = crate::widgets::tool_button(ui, Icon::Drafts, "Signature", t, !c.sending);
-        egui::Popup::menu(&r).show(|ui| {
-            for name in signatures {
-                let on = c.signature_name.eq_ignore_ascii_case(name) && c.signature_at().is_some();
-                if ui.add(egui::Button::selectable(on, name.as_str())).clicked() {
-                    acts.push(Action::InsertSignature(Some(name.clone())));
-                    ui.close();
-                }
-            }
-            if signatures.is_empty() {
-                ui.add_enabled(false, egui::Button::new(tl!("No signatures yet")));
-            }
-            ui.separator();
-            if ui.button(tl!("Signatures…")).clicked() {
-                acts.push(Action::EditSignature { account: c.account.clone(), insert: true });
+    ui.spacing_mut().item_spacing.x = 2.0;
+    if crate::widgets::tool_button(ui, Icon::Attach, "Attach File", t, !c.sending).clicked() {
+        acts.push(Action::AttachFiles);
+    }
+    if crate::widgets::tool_button(ui, Icon::Link, "Link", t, !c.sending && !c.plain).on_hover_text(tl!("Ctrl+K")).clicked() {
+        ed.link = Some(LinkForm::open(c, sel.clone()));
+    }
+    if crate::widgets::tool_button(ui, Icon::Image, "Pictures", t, !c.sending && !c.plain).clicked() {
+        acts.push(Action::InsertPicture);
+    }
+    signature_menu(ui, t, c, bar.signatures, acts);
+    sep(ui, t);
+    let aa = TextFormat::simple(theme::regular(14.0), t.text);
+    if fmt_button(ui, t, Face::Letter("Aa", aa), bar.formatting, "Show or hide the formatting").clicked() {
+        acts.push(Action::Run("compose.formatBar", serde_json::json!({})));
+    }
+    let more = crate::widgets::more_icon(ui, "More options", t);
+    egui::Popup::menu(&more).close_behavior(egui::PopupCloseBehavior::CloseOnClickOutside).show(|ui| {
+        more_menu(ui, c, &sel, bar, &mut ops, acts);
+    });
+    link_dialog(ui, t, ed, c);
+    apply_ops(ui.ctx(), ed, c, ops);
+}
+
+/// The account's signatures, one picked replacing the one in the message, or making and changing
+/// them, from the message (Outlook's Signature menu on the Message ribbon).
+fn signature_menu(ui: &mut Ui, t: &Tokens, c: &Compose, signatures: &[String], acts: &mut Vec<Action>) {
+    let r = crate::widgets::tool_button(ui, Icon::Drafts, "Signature", t, !c.sending);
+    egui::Popup::menu(&r).show(|ui| {
+        for name in signatures {
+            let on = c.signature_name.eq_ignore_ascii_case(name) && c.signature_at().is_some();
+            if ui.add(egui::Button::selectable(on, name.as_str())).clicked() {
+                acts.push(Action::InsertSignature(Some(name.clone())));
                 ui.close();
             }
-        });
+        }
+        if signatures.is_empty() {
+            ui.add_enabled(false, egui::Button::new(tl!("No signatures yet")));
+        }
+        ui.separator();
+        if ui.button(tl!("Signatures…")).clicked() {
+            acts.push(Action::EditSignature { account: c.account.clone(), insert: true });
+            ui.close();
+        }
+    });
+}
+
+/// More options' menu: Address Book, Check Names, Date & time and Word count, then the message's
+/// own options.
+fn more_menu(ui: &mut Ui, c: &mut Compose, sel: &Range<usize>, bar: &Bar<'_>, ops: &mut Vec<Op>, acts: &mut Vec<Action>) {
+    ui.add_enabled_ui(!c.sending, |ui| {
+        if ui.button(tl!("Address Book")).on_hover_text(tl!("Ctrl+Shift+B")).clicked() {
+            acts.push(Action::Dialog(Dialog::select_names(c, crate::dialogs::Recipients::To)));
+            ui.close();
+        }
+        // The names typed in To, Cc and Bcc looked up (issue #211); Ctrl+K in those boxes.
+        if ui.button(tl!("Check Names")).on_hover_text(tl!("Ctrl+K in To, Cc or Bcc")).clicked() {
+            acts.push(Action::Run("compose.checkNames", serde_json::json!({})));
+            ui.close();
+        }
         // Today's date or the time at the cursor, in one of a few ways (Outlook's Date & Time).
-        let r = crate::widgets::tool_button(ui, Icon::Calendar, "Date & time", t, !c.sending);
-        egui::Popup::menu(&r).show(|ui| {
-            for text in date_choices(clock) {
+        ui.menu_button(tl!("Date & time"), |ui| {
+            for text in date_choices(bar.clock) {
                 if ui.button(text.as_str()).clicked() {
                     ops.push(Op::Insert(text));
                     ui.close();
                 }
             }
         });
-        // How much is written: the selection's count, or the whole message's.
-        if crate::widgets::tool_button(ui, Icon::ListNumber, "Word count", t, true).clicked() {
-            let range = if sel.is_empty() { 0..c.body.chars().count() } else { sel.clone() };
-            let text: String = chars_in(&c.body, range).filter(|ch| *ch != rich::PICTURE).collect();
-            acts.push(Action::Dialog(Dialog::WordCount(count_words(&text), !sel.is_empty())));
-        }
     });
-    link_dialog(ui, t, ed, c);
+    // How much is written: the selection's count, or the whole message's.
+    if ui.button(tl!("Word count")).clicked() {
+        let range = if sel.is_empty() { 0..c.body.chars().count() } else { sel.clone() };
+        let text: String = chars_in(&c.body, range).filter(|ch| *ch != rich::PICTURE).collect();
+        acts.push(Action::Dialog(Dialog::WordCount(count_words(&text), !sel.is_empty())));
+        ui.close();
+    }
+    ui.separator();
+    (bar.more)(ui, c);
+}
+
+/// The formatting row, under the bar while its Aa is lit: the font, its size, bold, italic,
+/// underline and strikethrough, colours, lists, alignment, indent and clear formatting.
+pub(crate) fn format_row(ui: &mut Ui, t: &Tokens, ed: &mut Editor, c: &mut Compose) {
+    let (_, cur, para) = ribbon_state(ed, c);
+    let mut ops: Vec<Op> = Vec::new();
+    wrapped_row(ui, |ui| {
+        ui.spacing_mut().item_spacing.x = 2.0;
+        format_buttons(ui, t, c, &cur, para, &mut ops);
+    });
     apply_ops(ui.ctx(), ed, c, ops);
 }
 

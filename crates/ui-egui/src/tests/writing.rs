@@ -3,6 +3,7 @@
 
 use super::*;
 
+mod bar;
 mod check_names;
 mod files;
 mod fonts;

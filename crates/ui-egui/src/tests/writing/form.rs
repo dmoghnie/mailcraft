@@ -107,16 +107,16 @@ fn the_message_form_draws_in_each_state() {
     let get = |name: &str| all.iter().find(|(n, ..)| *n == name).map(|(_, texts)| texts.clone()).unwrap_or_default();
     let has = |name: &str, what: &str| get(name).iter().any(|t| t == what);
     for name in ["new", "reply", "attachments", "dark", "window", "blocked"] {
-        for what in ["Send", "From", "To", "Cc", "Subject", "Save draft", "Discard", "Plain text", "Read receipt", "Replies to"] {
+        for what in ["Send", "From", "To", "Cc", "Subject", "Aa"] {
             assert!(has(name, what), "{name}: {what}: {:?}", get(name));
         }
     }
     assert!(has("suggesting", "Zoe Park") && has("suggesting", "zoe@studio.example"), "{:?}", get("suggesting"));
-    assert!(has("reply", "Bcc") && has("reply", "Hide Bcc") && has("reply", "desk@example.org"), "{:?}", get("reply"));
+    assert!(has("reply", "Bcc") && has("reply", "desk@example.org") && has("reply", "!"), "{:?}", get("reply"));
     assert!(has("reply", "Not sent: the server said no") && has("reply", "Not an email address: ann@"), "{:?}", get("reply"));
     assert!(get("attachments").iter().any(|t| t.starts_with("notes.txt (")), "{:?}", get("attachments"));
     assert!(get("window").iter().any(|t| t.starts_with("Sends ")), "{:?}", get("window"));
-    for what in ["Send", "From", "To", "Save draft", "Discard", "notes.txt (3 B)"] {
+    for what in ["Send", "From", "To", "Aa", "notes.txt (3 B)"] {
         assert!(has("narrow", what), "narrow: {what}: {:?}", get("narrow"));
     }
     assert!(has("alert", "Add at least one name in To, Cc or Bcc before sending.") && has("alert", "OK"));

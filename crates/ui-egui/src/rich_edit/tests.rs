@@ -395,15 +395,17 @@ fn a_selection_is_drawn_where_it_was() {
     }
 }
 
-/// One frame of the message window's editor: its ribbon, then the text in a scroll area as the
-/// window has it. What was drawn.
+/// One frame of the message window's editor: its bar and formatting row, then the text in a scroll
+/// area as the window has it. What was drawn.
 fn editor_frame(ctx: &egui::Context, ed: &mut Editor, c: &mut Compose) -> Vec<egui::epaint::ClippedShape> {
     let t = Tokens::light();
     let clock = Clock::default();
     let raw = egui::RawInput { screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, vec2(1000.0, 800.0))), ..Default::default() };
     let mut acts = Vec::new();
     let mut out = ctx.run_ui(raw, |ui| {
-        ribbon(ui, &t, ed, c, &[], &clock, &mut acts);
+        let more = |_: &mut Ui, _: &mut Compose| {};
+        ribbon(ui, &t, ed, c, &Bar { signatures: &[], clock: &clock, formatting: true, more: &more }, &mut acts);
+        format_row(ui, &t, ed, c);
         egui::ScrollArea::vertical().auto_shrink(false).id_salt("compose-body").show(ui, |ui| body(ui, &t, ed, c, None, &mut acts));
     });
     out.textures_delta.clear();

@@ -48,6 +48,8 @@ fn the_ribbon_checks_names_and_cancel_leaves_them() {
     let ctx = egui::Context::default();
     ctx.enable_accesskit();
     typing_in_to(&ctx, &mut a, "studio");
+    click_named(&ctx, &mut a, "More options");
+    frame(&ctx, &mut a, vec![]);
     click_named(&ctx, &mut a, "Check Names");
     frame(&ctx, &mut a, vec![]);
     assert!(matches!(&a.ui.dialog, Some(Dialog::CheckNames(_))), "{:?}", a.ui.dialog);

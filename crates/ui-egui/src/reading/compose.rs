@@ -81,6 +81,8 @@ struct Form {
     reach: Option<mailcraft_engine::Reach>,
     /// The names of its account's signatures.
     signatures: Vec<String>,
+    /// The formatting row shows under the bar.
+    formatting: bool,
 }
 
 /// What the form needs from the session (computed before the form borrows the message).
@@ -105,7 +107,8 @@ fn form(s: &mut Session, st: &mut UiState, in_window: bool) -> Form {
         .and_then(|c| s.account(&c.account))
         .map(|a| a.config.signatures.iter().map(|g| g.name.clone()).collect())
         .unwrap_or_default();
-    Form { in_window, accounts, suggestions, clock, can_delay, has_cert, has_pgp, blocked, blocked_text, reach, signatures }
+    let formatting = s.prefs.format_bar;
+    Form { in_window, accounts, suggestions, clock, can_delay, has_cert, has_pgp, blocked, blocked_text, reach, signatures, formatting }
 }
 
 /// The message being written, in a window of its own.
@@ -154,18 +157,28 @@ pub(super) fn compose(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut
         // From the right in a right-to-left interface, its rows too (the message's own text goes
         // the way it's written).
         ui.with_layout(crate::bidi::column(), |ui| {
-            // The Message ribbon.
+            // The bar: one row (its buttons, More options, what's on; Save draft, Discard and Pop
+            // out at its end), and the formatting under it while Aa is lit.
             egui::Frame::new().fill(t.chrome).corner_radius(6).inner_margin(Margin::symmetric(8, 4)).show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                let on_quote = quote_cell.and_then(|n| {
-                    super::quote::with_cell(c, &mut quote_eds, n, |c, ed| rich_edit::ribbon(ui, &t, ed, c, &f.signatures, &f.clock, acts))
+                let more = |ui: &mut Ui, c: &mut mailcraft_engine::Compose| options::more(ui, &t, c, &f);
+                let bar = rich_edit::Bar { signatures: &f.signatures, clock: &f.clock, formatting: f.formatting, more: &more };
+                options::bar(ui, &t, &f, c.sending, acts, |ui, acts| {
+                    let on_quote =
+                        quote_cell.and_then(|n| super::quote::with_cell(c, &mut quote_eds, n, |c, ed| rich_edit::ribbon(ui, &t, ed, c, &bar, acts)));
+                    if on_quote.is_none() {
+                        rich_edit::ribbon(ui, &t, &mut ed, c, &bar, acts);
+                    }
+                    options::shown(ui, &t, c, &f);
                 });
-                if on_quote.is_none() {
-                    rich_edit::ribbon(ui, &t, &mut ed, c, &f.signatures, &f.clock, acts);
+                if f.formatting {
+                    let on_quote =
+                        quote_cell.and_then(|n| super::quote::with_cell(c, &mut quote_eds, n, |c, ed| rich_edit::format_row(ui, &t, ed, c)));
+                    if on_quote.is_none() {
+                        rich_edit::format_row(ui, &t, &mut ed, c);
+                    }
                 }
             });
-            ui.add_space(4.0);
-            options::options_row(ui, &t, c, &f, acts);
             if let Some(b) = f.blocked {
                 ui.add_space(4.0);
                 send_block_bar(ui, &t, b, acts);

@@ -99,6 +99,7 @@ fn the_list_arrows_take_the_screen_reader_from_message_to_message() {
 fn a_toolbar_drop_down_keeps_the_keyboard_while_its_arrows_choose() {
     let (mut a, _) = app("access-toolbar-keys");
     a.session.prefs.new_mail_window = false;
+    a.session.prefs.format_bar = true;
     let ctx = egui::Context::default();
     ctx.enable_accesskit();
     settled(&ctx, &mut a, vec![]);

@@ -40,9 +40,9 @@ pub(crate) use ops::{Op, apply};
 pub(crate) use pictures::FIT_WIDTH;
 pub(crate) use pictures::{fitted_width, own_line, own_size, web_loaded};
 pub use toolbar::Counts;
+pub(crate) use toolbar::{Bar, format_row, ribbon, signature_bar};
 #[cfg(test)]
 pub(crate) use toolbar::{count_words, date_choices};
-pub(crate) use toolbar::{ribbon, signature_bar};
 use tracked::Tracked;
 use undo::{History, Snap};
 

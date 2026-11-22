@@ -58,6 +58,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - Adding an IMAP, POP or JMAP account: Connect signs in to its incoming and outgoing servers first and adds the account only once they take the sign-in. When one refuses it or can't be reached, the dialog says which server and why, and the account can still be added with Add anyway. A mistyped password or server was found only after the account was added.
 - Adding an account whose domain publishes no settings: MailCraft asks the domain's own servers under the usual names (`imap.`, `mail.`, the domain itself) whether they answer over an encrypted connection with a valid certificate, and fills in those that do. It filled in `mail.` and the domain unchecked, which often wasn't the server.
 - Calendar shows Today and its views once, in the header beside the days they change, and New event and Side by side once, on the ribbon (in the side pane while the ribbon is hidden). The View tab keeps the views for a window too narrow to show them in the header.
+- **One slim bar** over the message being written, in place of four rows: Attach File, Link, Pictures, Signature, **Aa** (the formatting row, shown or hidden as last left) and **More options** (Address Book, Check Names, Date & time, Word count, Bcc, Replies to, Plain text, importance, Read receipt, Delay delivery); Save draft, Discard and Pop out as icons at its end. Importance, Sign, Encrypt and a delay stay in the bar while they're on. Every shortcut is unchanged.
 
 ### Fixed
 

@@ -162,6 +162,9 @@ pub struct Prefs {
     /// The ribbon's buttons hidden, its tabs kept on the top bar: one clicked shows its buttons
     /// until a click elsewhere.
     pub ribbon_hidden: bool,
+    /// The formatting row shows under the bar of the message being written (its Aa), as last
+    /// left; hidden, the bar is one row.
+    pub format_bar: bool,
     /// Send / Receive asked for (F9) opens its progress window. Off unless asked for, as
     /// Outlook's: the status bar says how it goes, and opens the window when clicked.
     pub open_send_receive: bool,
@@ -449,6 +452,7 @@ impl Default for Prefs {
             single_line: false,
             classic_ribbon: false,
             ribbon_hidden: false,
+            format_bar: false,
             open_send_receive: false,
             accent: String::new(),
             plain_top_bar: false,

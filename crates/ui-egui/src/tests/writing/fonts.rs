@@ -31,6 +31,7 @@ const SIZE: egui::Vec2 = egui::vec2(1280.0, 800.0);
 fn writing(name: &str, source: Option<Arc<dyn FontSource>>) -> (MailApp, egui::Context, egui::Id) {
     let (mut a, _) = app(name);
     a.session.prefs.new_mail_window = false;
+    a.session.prefs.format_bar = true;
     let ctx = egui::Context::default();
     ctx.enable_accesskit();
     if let Some(source) = source {
@@ -125,6 +126,7 @@ fn focus(id: egui::accesskit::NodeId) -> Event {
 fn the_font_for_new_messages_is_set_in_options_and_written_in() {
     let (mut a, _) = app("fonts-new-messages");
     a.session.prefs.new_mail_window = false;
+    a.session.prefs.format_bar = true;
     let ctx = egui::Context::default();
     ctx.enable_accesskit();
     crate::mail_fonts::install(&ctx, Arc::new(OneFont));

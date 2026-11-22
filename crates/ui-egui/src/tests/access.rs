@@ -110,6 +110,8 @@ fn every_drop_down_says_what_it_is_for() {
         }
     };
     let wide = egui::vec2(1280.0, 800.0);
+    // With its formatting row, where the font and its size are chosen.
+    a.session.prefs.format_bar = true;
     a.run("mail.new", json!({}));
     check(&mut a, "new message", wide);
     a.run("compose.discard", json!({}));

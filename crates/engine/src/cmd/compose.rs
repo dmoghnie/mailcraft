@@ -64,6 +64,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         CommandSpec::new("compose.saveDraft", "Save draft", "Message", |s, _| s.save_draft()).key("Mod+S").when(has_compose),
         CommandSpec::new("compose.discard", "Discard", "Message", discard).when(has_compose),
         CommandSpec::new("compose.popOut", "Pop out", "Message", |s, _| pop_out(s, true)).when(has_compose),
+        toggle!("compose.formatBar", "Show or hide the formatting", "Message › Aa", format_bar),
         CommandSpec::new("compose.popIn", "Pop in", "Message", |s, _| pop_out(s, false)).when(has_compose),
         CommandSpec::new("compose.close", "Close", "Message", close_compose).params(r#"{"save"?: bool (keep it in Drafts; default true)}"#).when(has_compose),
         CommandSpec::new("contacts.suggest", "Suggest recipients", "Message › To", |s, v| {
