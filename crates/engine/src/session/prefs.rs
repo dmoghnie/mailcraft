@@ -12,6 +12,40 @@ pub enum ReadingPane {
     Off,
 }
 
+/// What a sideways swipe over a message-list row does on that message (File › Options › Mail).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum SwipeAction {
+    #[default]
+    Archive,
+    Delete,
+    /// Mark it read, or unread when it's read.
+    Read,
+    /// Flag it, or take the flag off.
+    Flag,
+    /// Nothing: the row doesn't slide.
+    Off,
+}
+
+impl SwipeAction {
+    pub const ALL: [SwipeAction; 5] = [SwipeAction::Archive, SwipeAction::Delete, SwipeAction::Read, SwipeAction::Flag, SwipeAction::Off];
+
+    /// Its name in commands: `view.swipe`'s values, and `list.rowAction`'s action.
+    pub fn code(self) -> &'static str {
+        match self {
+            SwipeAction::Archive => "archive",
+            SwipeAction::Delete => "delete",
+            SwipeAction::Read => "read",
+            SwipeAction::Flag => "flag",
+            SwipeAction::Off => "off",
+        }
+    }
+
+    pub fn from_code(code: &str) -> Option<SwipeAction> {
+        SwipeAction::ALL.into_iter().find(|a| a.code() == code)
+    }
+}
+
 /// How notes are listed (Outlook's Arrange by for notes).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -170,6 +204,10 @@ pub struct Prefs {
     pub conversation_pane: bool,
     /// Those cards with the newest at the top; off, at the bottom.
     pub conversation_newest_first: bool,
+    /// A swipe over a list row toward the start of a line (to the left, in a language written
+    /// left to right), and toward its end.
+    pub swipe_start: SwipeAction,
+    pub swipe_end: SwipeAction,
     /// The simplified ribbon's buttons, by command, in order (Customize the ribbon); none: those
     /// it starts with ([`RIBBON_ROW`]). [`Session::ribbon_row`] reads them.
     pub ribbon_buttons: Vec<String>,
@@ -523,6 +561,8 @@ impl Default for Prefs {
             simple_ribbon: false,
             conversation_pane: false,
             conversation_newest_first: false,
+            swipe_start: SwipeAction::Archive,
+            swipe_end: SwipeAction::Read,
             ribbon_buttons: Vec::new(),
             format_bar: false,
             open_send_receive: false,

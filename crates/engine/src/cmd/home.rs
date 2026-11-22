@@ -11,8 +11,8 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             .when(has_account),
         // Home › Delete
         CommandSpec::new("mail.delete", "Delete", "Home › Delete", delete).key("Delete").params(r#"{"permanent"?: bool}"#).when(has_selection),
-        CommandSpec::new("list.rowAction", "Delete, flag or mark read", "Message list › row", row_action)
-            .params(r#"{"key": string, "action": "delete"|"flag"|"read"} (that message alone, what's selected and open kept)"#),
+        CommandSpec::new("list.rowAction", "Delete, archive, flag or mark read", "Message list › row", row_action)
+            .params(r#"{"key": string, "action": "delete"|"archive"|"flag"|"read"} (that message alone, what's selected and open kept)"#),
         CommandSpec::new("mail.archive", "Archive", "Home › Delete", |s, _| s.move_selection(MoveTarget::Role(FolderRole::Archive)))
             .key("Backspace")
             .when(has_selection),
@@ -315,19 +315,20 @@ pub(super) fn delete(s: &mut Session, v: &Value) -> CmdResult {
 fn row_action(s: &mut Session, v: &Value) -> CmdResult {
     let key = key_param(s, v)?;
     let action = p::req_str(v, "action")?;
-    if !matches!(action, "delete" | "flag" | "read") {
-        return Err(CmdError::Params(format!("`{action}` isn't delete, flag or read")));
+    if !matches!(action, "delete" | "archive" | "flag" | "read") {
+        return Err(CmdError::Params(format!("`{action}` isn't delete, archive, flag or read")));
     }
     let selection = std::mem::replace(&mut s.selection, vec![key.clone()]);
     let (focus, anchor, reading) = (s.focus.take(), s.anchor.take(), s.reading.take());
     let done = match action {
         "delete" => delete(s, &json!({})),
+        "archive" => s.move_selection(MoveTarget::Role(FolderRole::Archive)),
         "flag" => flag(s, &json!({})),
         _ => s.flag_selection(Flag::Seen, None),
     };
-    // Put back as it was, but the message deleted (the one it went to stays shown when that
-    // was the one open).
-    let gone = action == "delete" && done.is_ok();
+    // Put back as it was, but the message deleted or archived (the one it went to stays shown
+    // when that was the one open).
+    let gone = matches!(action, "delete" | "archive") && done.is_ok();
     let kept = |k: &Option<mailcraft_model::MessageKey>| if gone && k.as_ref() == Some(&key) { None } else { k.clone() };
     s.selection = selection.into_iter().filter(|k| !gone || *k != key).collect();
     s.focus = kept(&focus);

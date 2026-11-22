@@ -358,3 +358,32 @@ fn down_steps_during_an_import() {
     drop(s);
     drop(store);
 }
+
+/// A row's own Archive (a swipe over it): that message alone goes to the Archive, what's
+/// selected kept, and Undo brings it back. What each swipe does is set each way; one that isn't
+/// an action changes nothing.
+#[test]
+fn a_rows_own_archive_moves_that_message_alone() {
+    let mut s = sample_session("row-archive");
+    s.run("folder.open", &json!({"account": "sample", "folder": "INBOX"})).unwrap();
+    let (chosen, other) = (s.list[0].key.clone(), s.list[1].clone());
+    s.run("list.select", &json!({"key": chosen.to_id()})).unwrap();
+    let before = s.list.len();
+    s.run("list.rowAction", &json!({"key": other.key.to_id(), "action": "archive"})).unwrap();
+    assert_eq!(s.list.len(), before - 1);
+    assert!(s.list.iter().all(|m| m.key != other.key), "gone from the Inbox");
+    assert_eq!(s.selection, std::slice::from_ref(&chosen), "what's selected kept");
+    let archive = s.store.as_ref().unwrap().load_folder("sample", "Archive").unwrap();
+    assert!(archive.messages.iter().any(|m| m.subject == other.subject), "in the Archive");
+    s.run("edit.undo", &json!({})).unwrap();
+    assert!(s.list.iter().any(|m| m.subject == other.subject), "back with Undo");
+
+    assert_eq!((s.prefs.swipe_start, s.prefs.swipe_end), (crate::SwipeAction::Archive, crate::SwipeAction::Read));
+    s.run("view.swipe", &json!({"end": "flag"})).unwrap();
+    assert_eq!((s.prefs.swipe_start, s.prefs.swipe_end), (crate::SwipeAction::Archive, crate::SwipeAction::Flag));
+    s.run("view.swipe", &json!({"start": "off", "end": "delete"})).unwrap();
+    for bad in [json!({"start": "sideways"}), json!({"end": 3}), json!({"start": "read", "end": "Archive"})] {
+        assert!(matches!(s.run("view.swipe", &bad), Err(CmdError::Params(_))), "{bad}");
+    }
+    assert_eq!((s.prefs.swipe_start, s.prefs.swipe_end), (crate::SwipeAction::Off, crate::SwipeAction::Delete));
+}

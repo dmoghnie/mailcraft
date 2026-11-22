@@ -45,6 +45,7 @@ pub(super) fn reading(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Actio
         for (label, about, on, cmd) in switches {
             switch_row(ui, t, false, Switch { label, about, on, cmd }, acts);
         }
+        swipes(s, t, ui, acts);
         // The simplified ribbon's buttons, as from the ribbon's right-click menu.
         setting(
             ui,
@@ -251,6 +252,45 @@ pub(super) fn checking(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Acti
             });
         }
     });
+}
+
+/// What a sideways swipe over a list row on a trackpad does, each way: left and right as the
+/// screen shows them, toward the start of a line and its end as kept (mirrored in a language
+/// written right to left).
+fn swipes(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
+    use mailcraft_engine::SwipeAction;
+    let name = |a: SwipeAction| match a {
+        SwipeAction::Archive => tl!("Archive"),
+        SwipeAction::Delete => tl!("Delete"),
+        SwipeAction::Read => tl!("Mark as read or unread"),
+        SwipeAction::Flag => tl!("Flag or unflag"),
+        SwipeAction::Off => tl!("Nothing"),
+    };
+    let rtl = crate::i18n::current().rtl();
+    let ways = [(tl!("Swipe left"), if rtl { "end" } else { "start" }), (tl!("Swipe right"), if rtl { "start" } else { "end" })];
+    for (label, way) in ways {
+        let now = if way == "start" { s.prefs.swipe_start } else { s.prefs.swipe_end };
+        setting(ui, t, false, label, Some(tl!("Two fingers sideways over a message on a trackpad")), |ui| {
+            let r = egui::ComboBox::from_id_salt(("swipe", way))
+                .width(220.0)
+                .selected_text(name(now))
+                .show_ui(ui, |ui| {
+                    for a in SwipeAction::ALL {
+                        if ui.selectable_label(a == now, name(a)).clicked() {
+                            acts.push(Action::Run("view.swipe", json!({ way: a.code() })));
+                        }
+                    }
+                })
+                .response
+                // The setting's name is beside it in the row, which doesn't hand it on.
+                .accessible_name(label);
+            let mut at = now;
+            crate::drop_down::keys(ui, &r, &mut at, &SwipeAction::ALL);
+            if at != now {
+                acts.push(Action::Run("view.swipe", json!({ way: at.code() })));
+            }
+        });
+    }
 }
 
 /// What opens at the start (issue #172), as Outlook's "Start Outlook in this folder": the first

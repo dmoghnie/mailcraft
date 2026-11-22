@@ -16,6 +16,7 @@ use crate::{Action, Dialog, UiState};
 
 mod no_answer;
 mod row;
+mod swipe;
 
 use row::{RowOf, message_row};
 
@@ -466,6 +467,8 @@ fn list_body(s: &Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action>)
         let keyboard = st.row_keyboard.filter(|id| ui.memory(|m| m.focused()) == Some(*id));
         st.list_stop = None;
         let mut keyboard_drawn = false;
+        // A sideways swipe on a trackpad, over a row.
+        let mut swipe = swipe::Swipe::begin(ui);
         let first = tops.partition_point(|&top| top + mh < viewport.min.y);
         for (i, row) in rows.iter().enumerate().skip(first) {
             let top = tops.get(i).copied().unwrap_or(0.0);
@@ -502,7 +505,7 @@ fn list_body(s: &Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action>)
                         several_folders,
                         tab_stop: tab_stop == Some(&m.key),
                     };
-                    let resp = message_row(s, &t, ui, of, acts);
+                    let resp = swipe.row(s, &t, ui, of, acts);
                     if tab_stop == Some(&m.key) {
                         st.list_stop = Some(resp.id);
                     }
@@ -511,6 +514,7 @@ fn list_body(s: &Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action>)
                 }
             }
         }
+        swipe.end(s, ui, acts);
         // The row with the keyboard gone (its message deleted, moved, archived): the message the
         // list's focus went on to takes it, read as the next is in Outlook, not the window.
         if keyboard.is_some() && !keyboard_drawn {

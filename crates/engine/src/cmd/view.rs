@@ -240,6 +240,9 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         toggle!("view.conversationPane", "Show the whole conversation in the reading pane", "File › Options › Mail", conversation_pane),
         toggle!("view.conversationNewestFirst", "Newest message at the top of a conversation", "File › Options › Mail", conversation_newest_first),
         toggle!("view.markReadOnOpen", "Mark as read when opened", "File › Options › Mail", mark_read_on_open),
+        CommandSpec::new("view.swipe", "Swipe actions", "File › Options › Mail", swipe).params(
+            r#"{"start"?: "archive"|"delete"|"read"|"flag"|"off", "end"?: the same} (what a sideways swipe over a list row does: toward the start of a line, to the left in English, or toward its end)"#,
+        ),
         CommandSpec::new("calendar.show", "Show or hide a calendar", "Calendar › Calendars", |s, v| {
             let account = p::req_str(v, "account")?.to_string();
             let calendar = p::req_str(v, "calendar")?.to_string();
@@ -445,6 +448,23 @@ pub(super) fn reading_pane(s: &mut Session, v: &Value) -> CmdResult {
         other => return Err(CmdError::Params(format!("unknown reading pane position `{other}`"))),
     };
     Ok(json!({"value": p::req_str(v, "value")?}))
+}
+
+/// What a sideways swipe over a list row does, toward the start of a line and toward its end:
+/// those given, the others kept.
+fn swipe(s: &mut Session, v: &Value) -> CmdResult {
+    let given = |k: &str| match v.get(k) {
+        None | Some(Value::Null) => Ok(None),
+        Some(x) => x
+            .as_str()
+            .and_then(crate::SwipeAction::from_code)
+            .map(Some)
+            .ok_or_else(|| CmdError::Params(format!("`{k}` is archive, delete, read, flag or off"))),
+    };
+    let (start, end) = (given("start")?, given("end")?);
+    s.prefs.swipe_start = start.unwrap_or(s.prefs.swipe_start);
+    s.prefs.swipe_end = end.unwrap_or(s.prefs.swipe_end);
+    Ok(json!({"start": s.prefs.swipe_start.code(), "end": s.prefs.swipe_end.code()}))
 }
 
 /// The simplified ribbon's buttons, in order (Customize the ribbon), and that ribbon shown.

@@ -8,6 +8,7 @@ mod no_answer;
 mod sent_rules;
 mod server_rules;
 mod sweep;
+mod swipe;
 mod vips;
 
 #[test]
