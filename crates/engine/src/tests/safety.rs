@@ -116,6 +116,42 @@ fn sending_holds_for_a_lookalike_address_or_many_strangers() {
     assert!(send(&mut s, json!({})).get("check").is_none());
 }
 
+/// A message whose text says a file comes with it, and none does, is held to be looked at
+/// (Outlook's attachment reminder). The word in the original under a reply, or in the signature,
+/// doesn't count; a file attached, or a picture put in the text, is what it meant.
+#[test]
+fn sending_holds_for_a_file_mentioned_but_not_attached() {
+    let mut s = sample_session("send-no-attachment");
+    let send = |s: &mut Session| s.run("compose.send", &json!({})).unwrap();
+    let write = |s: &mut Session, body: &str| {
+        s.run("mail.new", &json!({})).unwrap();
+        s.run("compose.update", &json!({"to": "zoe@studio.example", "subject": "Frames", "body": body})).unwrap();
+    };
+    write(&mut s, "Here are the frames, attached.");
+    assert_eq!(send(&mut s)["check"], json!([{"kind": "noAttachment"}]));
+    assert!(s.compose.as_ref().is_some_and(|c| !c.sending), "nothing went");
+    s.run("compose.attach", &json!({"name": "frames.pdf", "data": [37, 80, 68, 70]})).unwrap();
+    assert!(send(&mut s).get("check").is_none(), "a file is attached now");
+
+    // In another language the interface is in, as in English.
+    write(&mut s, "Anbei die Bilder.");
+    assert_eq!(send(&mut s)["check"], json!([{"kind": "noAttachment"}]));
+    s.run("compose.discard", &json!({})).unwrap();
+
+    // Only the signature says it.
+    write(&mut s, "See you Thursday.\n\n-- \nRiley · attachments welcome");
+    assert!(send(&mut s).get("check").is_none());
+
+    // A reply to Zoe's message, whose own text says she attached the colour key: the original
+    // under the reply doesn't count.
+    s.run("list.open", &json!({"key": "sample:1:1:INBOX"})).unwrap();
+    s.run("mail.reply", &json!({})).unwrap();
+    let quoted = s.compose.as_ref().map(|c| c.body.to_lowercase().contains("attached")).unwrap_or_default();
+    let html = s.compose.as_ref().is_some_and(|c| c.quote.is_some());
+    assert!(quoted || html, "the reply quotes the original");
+    assert!(send(&mut s).get("check").is_none());
+}
+
 #[test]
 fn tracking_pictures_stay_unloaded_when_pictures_are_shown() {
     let mut s = sample_session("trackers");

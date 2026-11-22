@@ -2016,3 +2016,5 @@ count	occurrences	повторений
 	None: every invitation in the Inbox is in your calendar or answered.	Нет: каждое приглашение во «Входящих» есть в календаре или на него ответили.
 	Put in calendar	Добавить в календарь
 	Still reading {n} messages…	Ещё читается сообщений: {n}…
+	The message says a file is attached, but none is.	В сообщении говорится, что файл вложен, но вложений нет.
+	Attach a file	Вложить файл

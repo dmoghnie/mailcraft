@@ -1999,3 +1999,5 @@ count	occurrences	次
 	None: every invitation in the Inbox is in your calendar or answered.	没有：收件箱中的每个邀请都已在日历中或已答复。
 	Put in calendar	放入日历
 	Still reading {n} messages…	仍在读取 {n} 封邮件…
+	The message says a file is attached, but none is.	邮件中提到附有文件，但没有附加任何文件。
+	Attach a file	附加文件

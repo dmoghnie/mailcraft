@@ -6,6 +6,7 @@ use super::*;
 
 mod check_names;
 mod drafts;
+mod forgotten;
 mod keeping;
 mod outbox;
 mod quote;
@@ -37,6 +38,9 @@ pub enum SendCheck {
     /// other (each organisation outside the sender's own counted once, each address at a big mail
     /// service on its own).
     Exposed { count: usize },
+    /// The text the user wrote says a file comes with it, and none does (Outlook's attachment
+    /// reminder).
+    NoAttachment,
 }
 
 /// What a reply or forward goes with ([`Session::reply_head`]).
@@ -628,6 +632,11 @@ impl Session {
         }
         if people.len() >= EXPOSED_FROM {
             found.push(SendCheck::Exposed { count: people.len() });
+        }
+        // A picture put in the text is what "attached" may mean.
+        let own = forgotten::own_text(&c.body, &c.styles);
+        if d.attachments.is_empty() && !own.contains(mime::rich::PICTURE) && forgotten::mentions_attachment(own) {
+            found.push(SendCheck::NoAttachment);
         }
         found
     }

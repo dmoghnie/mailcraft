@@ -2002,3 +2002,5 @@ count	occurrences	次
 	None: every invitation in the Inbox is in your calendar or answered.	沒有：收件匣中的每個邀請都已在行事曆中或已回覆。
 	Put in calendar	放入行事曆
 	Still reading {n} messages…	仍在讀取 {n} 封郵件…
+	The message says a file is attached, but none is.	郵件中提到附有檔案，但沒有附加任何檔案。
+	Attach a file	附加檔案

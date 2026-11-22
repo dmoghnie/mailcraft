@@ -242,3 +242,18 @@ fn ctrl_enter_asks_before_sending() {
     assert!(matches!(a.ui.dialog, Some(Dialog::CtrlEnter { .. })), "asked in its window");
     assert_eq!(a.session.compose, written, "not sent");
 }
+
+/// The message says a file comes with it and none does: the check says so, and offers to attach
+/// one beside Send anyway.
+#[test]
+fn a_file_mentioned_but_not_attached_is_said_with_a_way_to_attach_one() {
+    let (mut a, _) = app("send-check-no-file");
+    let ctx = egui::Context::default();
+    frame(&ctx, &mut a, vec![]);
+    a.ui.dialog = Some(Dialog::SendCheck(vec![mailcraft_engine::SendCheck::NoAttachment]));
+    frame(&ctx, &mut a, vec![]);
+    let texts = drawn_strings(&ctx, &mut a, egui::vec2(1280.0, 800.0));
+    for said in ["The message says a file is attached, but none is.", "Attach a file", "Send anyway"] {
+        assert!(has(&texts, said), "{said}: {texts:?}");
+    }
+}

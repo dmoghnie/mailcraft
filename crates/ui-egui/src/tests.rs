@@ -409,6 +409,7 @@ pub(crate) fn tour() {
             Dialog::SendCheck(vec![
                 mailcraft_engine::SendCheck::Lookalike { address: "orders@printsh0p.example".into(), like: "printshop.example".into() },
                 mailcraft_engine::SendCheck::Exposed { count: 12 },
+                mailcraft_engine::SendCheck::NoAttachment,
             ]),
             Dialog::CheckNames(Box::new(crate::dialogs::CheckNamesForm {
                 asks: vec![crate::dialogs::NameChoice {

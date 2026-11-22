@@ -75,7 +75,7 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
             use mailcraft_engine::SendCheck;
             ui.set_width(440.0);
             title(ui, t, "Check before sending");
-            let mut exposed = false;
+            let (mut exposed, mut no_file) = (false, false);
             // What was found can't be shown (see `MailApp::run`): that there is something.
             let unread = found.is_empty().then(|| {
                 tl!("Something about the recipients was found to look at, but it can't be shown. Look them over before sending.").to_string()
@@ -87,6 +87,10 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
                 SendCheck::Exposed { count } => {
                     exposed = true;
                     tf!("{n} people who may not know each other will all see each other's addresses.", n = count)
+                }
+                SendCheck::NoAttachment => {
+                    no_file = true;
+                    tl!("The message says a file is attached, but none is.").to_string()
                 }
             });
             for line in unread.into_iter().chain(lines) {
@@ -105,6 +109,13 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
                     .clicked()
                 {
                     acts.push(Action::Run("compose.hideRecipients", json!({})));
+                    return false;
+                }
+            }
+            if no_file {
+                ui.add_space(4.0);
+                if ui.button(tl!("Attach a file")).clicked() {
+                    acts.push(Action::AttachFiles);
                     return false;
                 }
             }

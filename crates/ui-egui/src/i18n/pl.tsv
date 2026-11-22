@@ -2016,3 +2016,5 @@ count	occurrences	wystąpieniach
 	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	Aplikacja AI połączona poleceniem mailcraft mcp może czytać i przeszukiwać Twoją pocztę. Włącz to tylko dla agenta, któremu ufasz
 	Let AI agents send, delete and change settings	Pozwól agentom AI wysyłać, usuwać i zmieniać ustawienia
 	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	Bez tego agent może tylko czytać i przeszukiwać Twoją pocztę. Po włączeniu może uruchomić dowolne polecenie: wysyłać, odpowiadać, usuwać, przenosić i zmieniać ustawienia. Włącz to tylko dla agenta, któremu ufasz
+	The message says a file is attached, but none is.	Wiadomość mówi, że dołączono plik, ale żaden nie jest dołączony.
+	Attach a file	Dołącz plik

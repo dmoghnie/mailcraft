@@ -2003,3 +2003,5 @@ count	occurrences	occurrences
 	None: every invitation in the Inbox is in your calendar or answered.	Aucune : chaque invitation de la boîte de réception est dans votre calendrier ou a reçu une réponse.
 	Put in calendar	Ajouter au calendrier
 	Still reading {n} messages…	Encore {n} messages à lire…
+	The message says a file is attached, but none is.	Le message indique qu'un fichier est joint, mais aucun ne l'est.
+	Attach a file	Joindre un fichier

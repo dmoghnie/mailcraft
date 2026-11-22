@@ -2003,3 +2003,5 @@ count	occurrences	kez
 	None: every invitation in the Inbox is in your calendar or answered.	Yok: Gelen Kutusu'ndaki her davet takviminizde ya da yanıtlanmış.
 	Put in calendar	Takvime ekle
 	Still reading {n} messages…	Hâlâ {n} ileti okunuyor…
+	The message says a file is attached, but none is.	İletide bir dosya eklendiği yazıyor, ancak ekli dosya yok.
+	Attach a file	Dosya ekle
