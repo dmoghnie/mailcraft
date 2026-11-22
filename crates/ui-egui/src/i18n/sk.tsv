@@ -133,7 +133,6 @@
 	Mail from {sender}	Pošta od odosielateľa {sender}
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · aplikácia ArtCraft · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	Mailing list: odhlásenie na adrese {address}
 	Mar	mar
 	Mark all as read	Označiť všetko ako prečítané
 	Mark as read	Označiť ako prečítané
@@ -2053,3 +2052,9 @@ count	occurrences	opakovaní
 	More	Ďalšie
 	Names	Mená
 	AutoArchive settings	Nastavenia automatickej archivácie
+	From a mailing list.	Z mailing listu.
+	Unsubscribe	Odhlásiť sa
+	Unsubscribing from junk mail tells its sender that your address is read	Odhlásenie z nevyžiadanej pošty prezradí odosielateľovi, že vašu adresu niekto číta
+	Unsubscribe from this list?	Odhlásiť sa z tohto mailing listu?
+	A message asking to leave it goes to {address}, from your account.	Správa so žiadosťou o odhlásenie odíde z vášho konta na {address}.
+	Its page for leaving it opens in your browser: {site}.	Stránka na odhlásenie z listu sa otvorí v prehliadači: {site}.

@@ -133,7 +133,6 @@
 	Mail from {sender}	Nouveau message — expéditeur : {sender}
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · une application ArtCraft · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	Liste de diffusion : désabonnement à {address}
 	Mar	mars
 	Mark all as read	Tout marquer comme lu
 	Mark as read	Marquer comme lu
@@ -2039,3 +2038,9 @@ count	occurrences	occurrences
 	More	Plus
 	Names	Noms
 	AutoArchive settings	Paramètres d'archivage automatique
+	From a mailing list.	D'une liste de diffusion.
+	Unsubscribe	Se désabonner
+	Unsubscribing from junk mail tells its sender that your address is read	Se désabonner d'un courrier indésirable indique à son expéditeur que votre adresse est lue
+	Unsubscribe from this list?	Se désabonner de cette liste ?
+	A message asking to leave it goes to {address}, from your account.	Un message demandant à la quitter part vers {address}, depuis votre compte.
+	Its page for leaving it opens in your browser: {site}.	La page de la liste pour se désabonner s'ouvre dans votre navigateur : {site}.

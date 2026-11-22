@@ -133,7 +133,6 @@
 	Mail from {sender}	来自 {sender} 的邮件
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · ArtCraft 应用 · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	邮件列表: 在 {address} 退订
 	Mar	3月
 	Mark all as read	全部标记为已读
 	Mark as read	标记为已读
@@ -2035,3 +2034,9 @@ count	occurrences	次
 	More	更多
 	Names	姓名
 	AutoArchive settings	自动存档设置
+	From a mailing list.	来自邮件列表。
+	Unsubscribe	退订
+	Unsubscribing from junk mail tells its sender that your address is read	退订垃圾邮件会让发件人知道你的地址有人在读
+	Unsubscribe from this list?	退订此邮件列表?
+	A message asking to leave it goes to {address}, from your account.	一封请求退出的邮件将从你的帐户发送到 {address}。
+	Its page for leaving it opens in your browser: {site}.	该列表的退订页面将在浏览器中打开: {site}。

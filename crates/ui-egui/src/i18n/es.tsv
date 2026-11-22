@@ -133,7 +133,6 @@
 	Mail from {sender}	Correo de {sender}
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · una aplicación de ArtCraft · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	Lista de correo: cancela la suscripción en {address}
 	Mar	mar
 	Mark all as read	Marcar todo como leído
 	Mark as read	Marcar como leído
@@ -2039,3 +2038,9 @@ count	occurrences	repeticiones
 	More	Más
 	Names	Nombres
 	AutoArchive settings	Configuración de Autoarchivar
+	From a mailing list.	De una lista de correo.
+	Unsubscribe	Cancelar suscripción
+	Unsubscribing from junk mail tells its sender that your address is read	Cancelar la suscripción al correo no deseado le dice al remitente que tu dirección se lee
+	Unsubscribe from this list?	¿Cancelar la suscripción a esta lista?
+	A message asking to leave it goes to {address}, from your account.	Se envía un mensaje pidiendo la baja a {address}, desde tu cuenta.
+	Its page for leaving it opens in your browser: {site}.	La página de la lista para darse de baja se abre en tu navegador: {site}.

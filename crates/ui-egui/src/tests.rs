@@ -413,6 +413,14 @@ pub(crate) fn tour() {
                 mailcraft_engine::SendCheck::Exposed { count: 12 },
                 mailcraft_engine::SendCheck::NoAttachment,
             ]),
+            Dialog::Unsubscribe {
+                key: a.session.list[0].key.clone(),
+                way: mailcraft_engine::Leaving::Mail { to: "leave@gallery.example".into(), subject: "unsubscribe".into(), body: String::new() },
+            },
+            Dialog::Unsubscribe {
+                key: a.session.list[0].key.clone(),
+                way: mailcraft_engine::Leaving::Page { url: "https://news.example/leave?u=1".into() },
+            },
             Dialog::CheckNames(Box::new(crate::dialogs::CheckNamesForm {
                 asks: vec![crate::dialogs::NameChoice {
                     field: "to".into(),

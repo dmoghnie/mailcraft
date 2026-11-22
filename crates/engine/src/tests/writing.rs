@@ -16,6 +16,7 @@ mod signature_code;
 mod signatures;
 mod spelling;
 mod undo_send;
+mod unsubscribe;
 
 #[test]
 fn compose_reply_and_send_locally() {

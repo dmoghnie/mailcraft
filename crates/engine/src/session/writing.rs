@@ -16,6 +16,7 @@ mod send_again;
 mod sending;
 mod signatures;
 mod undo_send;
+mod unsubscribe;
 pub use drafts::Drafted;
 pub(crate) use drafts::DraftedMemo;
 pub use quote::Quote;
@@ -23,6 +24,7 @@ pub use reactions::Reactions;
 pub use sending::SendBlock;
 pub use signatures::signature_parts;
 pub use undo_send::{UNDO_SEND_MAX, UndoHold};
+pub use unsubscribe::{Leaving, leaving_way};
 
 /// From this many people (counted as [`SendCheck::Exposed`] says), sending to all of them in To
 /// and Cc asks first.

@@ -679,6 +679,7 @@ fn ctrl_a_in_the_search_box_after_a_long_message_does_not_copy_it_whole() {
 }
 
 mod text_selection;
+mod unsubscribe;
 
 /// Issue #109: in the dark theme, messages can be shown on a light background, with the colours
 /// they were written in (dark text on a light page), from Options or the switch above the

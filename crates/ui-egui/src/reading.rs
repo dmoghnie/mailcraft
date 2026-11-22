@@ -300,6 +300,26 @@ fn attachments_strip(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, f
     ui.add_space(10.0);
 }
 
+/// Mail from a mailing list: Unsubscribe, asked first ([`Dialog::Unsubscribe`]). In Junk Email,
+/// Block sender instead: unsubscribing from junk mail tells its sender the address is read.
+fn list_bar(s: &Session, t: &Tokens, ui: &mut Ui, key: &MessageKey, p: &mailcraft_engine::mime::Parsed, acts: &mut Vec<Action>) {
+    ui.horizontal_wrapped(|ui| {
+        ui.label(RichText::new(tl!("From a mailing list.")).color(t.faint).small());
+        if s.in_junk(key) {
+            let r =
+                ui.small_button(tl!("Block sender")).on_hover_text(tl!("Unsubscribing from junk mail tells its sender that your address is read"));
+            if r.clicked() {
+                acts.push(Action::Run("junk.blockSender", json!({})));
+            }
+        } else if let Some(way) = mailcraft_engine::leaving_way(&p.unsubscribe_links)
+            && ui.small_button(tl!("Unsubscribe")).clicked()
+        {
+            acts.push(Action::Dialog(crate::Dialog::Unsubscribe { key: key.clone(), way }));
+        }
+    });
+    ui.add_space(6.0);
+}
+
 /// The message's text, under the bars about it (words hidden, its formatting, its mailing list):
 /// formatted, or plain, selected as one whatever it's drawn as. A line is drawn above it when
 /// something is (`above`, or a bar here): under a header kept in place with nothing between,
@@ -314,9 +334,8 @@ fn message_text(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, format
     if p.had_html {
         html_bar(s, &t, ui, &r.key, p, formatted, acts);
     }
-    if let Some(u) = &p.unsubscribe {
-        ui.label(RichText::new(tf!("Mailing list: unsubscribe at {address}", address = widgets::shorten(u, 80))).color(t.faint).small());
-        ui.add_space(6.0);
+    if !p.unsubscribe_links.is_empty() {
+        list_bar(s, &t, ui, &r.key, p, acts);
     }
     // In the dark theme: the message on a light page or the dark one, switched here too (issue #109).
     if t.dark {

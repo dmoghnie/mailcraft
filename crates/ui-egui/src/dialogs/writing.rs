@@ -5,6 +5,13 @@ use serde_json::Value;
 use super::*;
 use crate::icons::Icon;
 
+/// The site a page is on: `https://news.example/leave?u=1` is `news.example`.
+fn site_of(url: &str) -> &str {
+    let rest = url.split_once("://").map_or(url, |(_, r)| r);
+    let host = rest.split(['/', '?', '#']).next().unwrap_or(rest);
+    host.rsplit_once('@').map_or(host, |(_, h)| h)
+}
+
 pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &mut Vec<Action>) -> bool {
     match d {
         Dialog::SelectNames(f) => select_names(ui, f, t, acts),
@@ -29,6 +36,25 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
                 }
             });
             keep
+        }
+        Dialog::Unsubscribe { key, way } => {
+            ui.set_width(400.0);
+            title(ui, t, "Unsubscribe from this list?");
+            let said = match way {
+                mailcraft_engine::Leaving::Mail { to, .. } => {
+                    tf!("A message asking to leave it goes to {address}, from your account.", address = widgets::shorten(to, 80))
+                }
+                mailcraft_engine::Leaving::Page { url } => {
+                    tf!("Its page for leaving it opens in your browser: {site}.", site = widgets::shorten(site_of(url), 60))
+                }
+            };
+            ui.label(RichText::new(said).color(t.dim));
+            let (ok, cancel) = buttons(ui, t, "Unsubscribe", true);
+            if ok {
+                acts.push(Action::Run("mail.unsubscribe", json!({"key": key.to_id()})));
+                return false;
+            }
+            !cancel
         }
         Dialog::EmptySubject => {
             ui.set_width(360.0);

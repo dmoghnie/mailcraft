@@ -133,7 +133,6 @@
 	Mail from {sender}	بريد من {sender}
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · تطبيق من ArtCraft · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	قائمة بريدية: ألغِ الاشتراك عبر {address}
 	Mar	مارس
 	Mark all as read	تعليم الكل كمقروء
 	Mark as read	تعليم كمقروء
@@ -2034,3 +2033,9 @@ count	occurrences	مرات
 	More	المزيد
 	Names	الأسماء
 	AutoArchive settings	إعدادات الأرشفة التلقائية
+	From a mailing list.	من قائمة بريدية.
+	Unsubscribe	إلغاء الاشتراك
+	Unsubscribing from junk mail tells its sender that your address is read	إلغاء الاشتراك من البريد العشوائي يُخبر مُرسله بأن عنوانك يُقرأ
+	Unsubscribe from this list?	إلغاء الاشتراك في هذه القائمة؟
+	A message asking to leave it goes to {address}, from your account.	تُرسَل رسالة تطلب الخروج منها إلى {address}، من حسابك.
+	Its page for leaving it opens in your browser: {site}.	تُفتح صفحة الخروج من القائمة في متصفحك: {site}.

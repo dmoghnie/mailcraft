@@ -133,7 +133,6 @@
 	Mail from {sender}	דואר מ-{sender}
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · אפליקציה של ArtCraft · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	רשימת תפוצה: לביטול המינוי {address}
 	Mar	מרץ
 	Mark all as read	סמן הכול כנקרא
 	Mark as read	סמן כנקרא
@@ -2034,3 +2033,9 @@ count	occurrences	פעמים
 	More	עוד
 	Names	שמות
 	AutoArchive settings	הגדרות העברה אוטומטית לארכיון
+	From a mailing list.	מרשימת תפוצה.
+	Unsubscribe	ביטול מינוי
+	Unsubscribing from junk mail tells its sender that your address is read	ביטול מינוי מדואר זבל מגלה לשולח שהכתובת שלך נקראת
+	Unsubscribe from this list?	לבטל את המינוי לרשימה הזו?
+	A message asking to leave it goes to {address}, from your account.	הודעה שמבקשת לעזוב אותה תישלח אל {address}, מהחשבון שלך.
+	Its page for leaving it opens in your browser: {site}.	דף העזיבה של הרשימה ייפתח בדפדפן שלך: {site}.

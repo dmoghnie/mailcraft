@@ -133,7 +133,6 @@
 	Mail from {sender}	Email de {sender}
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · um aplicativo ArtCraft · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	Lista de emails: cancele a inscrição em {address}
 	Mar	mar
 	Mark all as read	Marcar tudo como lido
 	Mark as read	Marcar como lido
@@ -2039,3 +2038,9 @@ count	occurrences	ocorrências
 	More	Mais
 	Names	Nomes
 	AutoArchive settings	Configurações do AutoArquivar
+	From a mailing list.	De uma lista de emails.
+	Unsubscribe	Cancelar inscrição
+	Unsubscribing from junk mail tells its sender that your address is read	Cancelar a inscrição de lixo eletrônico avisa ao remetente que seu endereço é lido
+	Unsubscribe from this list?	Cancelar a inscrição nesta lista?
+	A message asking to leave it goes to {address}, from your account.	Uma mensagem pedindo para sair vai para {address}, da sua conta.
+	Its page for leaving it opens in your browser: {site}.	A página da lista para sair abre no navegador: {site}.

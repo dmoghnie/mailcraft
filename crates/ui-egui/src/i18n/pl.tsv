@@ -133,7 +133,6 @@
 	Mail from {sender}	Wiadomości od {sender}
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · aplikacja ArtCraft · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	Lista dyskusyjna: wypisz się pod adresem {address}
 	Mar	mar
 	Mark all as read	Oznacz wszystkie jako przeczytane
 	Mark as read	Oznacz jako przeczytane
@@ -2052,3 +2051,9 @@ count	occurrences	wystąpieniach
 	More	Więcej
 	Names	Nazwy
 	AutoArchive settings	Ustawienia autoarchiwizacji
+	From a mailing list.	Z listy dyskusyjnej.
+	Unsubscribe	Wypisz się
+	Unsubscribing from junk mail tells its sender that your address is read	Wypisanie się z wiadomości-śmieci zdradza nadawcy, że ten adres jest czytany
+	Unsubscribe from this list?	Wypisać się z tej listy?
+	A message asking to leave it goes to {address}, from your account.	Wiadomość z prośbą o wypisanie trafi z konta na adres {address}.
+	Its page for leaving it opens in your browser: {site}.	Strona listy do wypisania się otworzy się w przeglądarce: {site}.

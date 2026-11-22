@@ -127,6 +127,12 @@ pub enum Dialog {
     /// What `compose.send` held the message for (a lookalike recipient, many people seeing each
     /// other's addresses).
     SendCheck(Vec<mailcraft_engine::SendCheck>),
+    /// Leave the mailing list message `key` came from, `way` said first (a message sent from the
+    /// account, or the list's page opened in the browser).
+    Unsubscribe {
+        key: mailcraft_engine::model::MessageKey,
+        way: mailcraft_engine::Leaving,
+    },
     RemoveAccount {
         account: String,
         email: String,
@@ -337,6 +343,7 @@ impl Dialog {
                     | Dialog::CtrlEnter { .. }
                     | Dialog::SaveChanges
                     | Dialog::SendCheck(_)
+                    | Dialog::Unsubscribe { .. }
             )
     }
 
@@ -753,6 +760,7 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         | Dialog::EmptySubject
         | Dialog::CtrlEnter { .. }
         | Dialog::SendCheck(_)
+        | Dialog::Unsubscribe { .. }
         | Dialog::WordCount(..) => writing::draw(ui, d, s, t, acts),
         Dialog::ConfirmDeleteContact { .. }
         | Dialog::PicturePreview { .. }

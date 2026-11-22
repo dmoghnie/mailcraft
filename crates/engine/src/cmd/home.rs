@@ -82,6 +82,10 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         CommandSpec::new("mail.replyAll", "Reply all", "Home › Respond", |s, _| s.reply_compose(ReplyMode::ReplyAll)).key("Mod+Shift+R").when(has_reading),
         CommandSpec::new("mail.forward", "Forward", "Home › Respond", |s, _| s.reply_compose(ReplyMode::Forward)).key("Mod+F").when(has_reading),
         CommandSpec::new("mail.forwardAsAttachment", "Forward as attachment", "Reading pane › More", |s, _| s.forward_as_attachment()).when(has_reading),
+        // Leaving the mailing list a message came from (RFC 2369): never from Junk Email.
+        CommandSpec::new("mail.unsubscribe", "Unsubscribe", "Reading pane", |s, v| s.unsubscribe(parse_key(v)))
+            .params(r#"{"key"?: string (a message from a mailing list; default: the one shown)} (sends the message the list asks for from the account, or opens the list's page in the browser)"#)
+            .when(has_reading),
         // A message the user sent, as a new one to change or send again as it is.
         CommandSpec::new("mail.sendAgain", "Send again", "Reading pane › More", |s, v| s.send_again(parse_key(v)))
             .params(r#"{"key"?: string (a message you sent; default: the one shown)}"#)

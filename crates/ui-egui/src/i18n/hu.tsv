@@ -133,7 +133,6 @@
 	Mail from {sender}	Üzenet ettől a feladótól: {sender}
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · az ArtCraft alkalmazása · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	Levelezőlista: leiratkozás ezen a címen: {address}
 	Mar	márc.
 	Mark all as read	Összes megjelölése olvasottként
 	Mark as read	Megjelölés olvasottként
@@ -2039,3 +2038,9 @@ count	occurrences	előfordulás
 	More	Továbbiak
 	Names	Nevek
 	AutoArchive settings	Automatikus archiválás beállításai
+	From a mailing list.	Levelezőlistáról.
+	Unsubscribe	Leiratkozás
+	Unsubscribing from junk mail tells its sender that your address is read	A levélszemétről való leiratkozás elárulja a feladónak, hogy a címedet olvassák
+	Unsubscribe from this list?	Leiratkozol erről a listáról?
+	A message asking to leave it goes to {address}, from your account.	A kilépést kérő üzenet a fiókodból megy ide: {address}.
+	Its page for leaving it opens in your browser: {site}.	A lista leiratkozási oldala a böngésződben nyílik meg: {site}.

@@ -53,7 +53,7 @@ pub use security::{
 };
 pub use send_receive::{SendReceive, TransferRow};
 pub use updates::{UpdateCheck, newer_release};
-pub use writing::{Compose, Drafted, Quote, Reactions, SendBlock, SendCheck, UNDO_SEND_MAX, UndoHold, signature_parts};
+pub use writing::{Compose, Drafted, Leaving, Quote, Reactions, SendBlock, SendCheck, UNDO_SEND_MAX, UndoHold, leaving_way, signature_parts};
 // The message list's arrangement and rows, named here as before.
 #[cfg(test)]
 pub(crate) use mailboxes::arrange_list;

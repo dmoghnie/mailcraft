@@ -133,7 +133,6 @@
 	Mail from {sender}	{sender} からのメール
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · ArtCraft アプリ · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	メーリング リスト: {address} で登録解除
 	Mar	3月
 	Mark all as read	すべて既読にする
 	Mark as read	既読にする
@@ -2035,3 +2034,9 @@ count	occurrences	回
 	More	その他
 	Names	名前
 	AutoArchive settings	自動アーカイブの設定
+	From a mailing list.	メーリング リストからのメールです。
+	Unsubscribe	登録解除
+	Unsubscribing from junk mail tells its sender that your address is read	迷惑メールの登録を解除すると、このアドレスが読まれていることが送信者に伝わります
+	Unsubscribe from this list?	このリストの登録を解除しますか?
+	A message asking to leave it goes to {address}, from your account.	退会を求めるメッセージが、このアカウントから {address} に送られます。
+	Its page for leaving it opens in your browser: {site}.	リストの退会ページがブラウザーで開きます: {site}。

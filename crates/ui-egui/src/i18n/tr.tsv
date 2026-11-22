@@ -133,7 +133,6 @@
 	Mail from {sender}	Gönderen {sender} olan posta
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · bir ArtCraft uygulaması · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	Posta listesi: aboneliği bırakmak için {address}
 	Mar	Mar
 	Mark all as read	Tümünü okundu olarak işaretle
 	Mark as read	Okundu olarak işaretle
@@ -2039,3 +2038,9 @@ count	occurrences	kez
 	More	Diğer
 	Names	Adlar
 	AutoArchive settings	Otomatik Arşivleme ayarları
+	From a mailing list.	Bir posta listesinden.
+	Unsubscribe	Abonelikten çık
+	Unsubscribing from junk mail tells its sender that your address is read	İstenmeyen postadan çıkmak, gönderene adresinizin okunduğunu bildirir
+	Unsubscribe from this list?	Bu listeden çıkılsın mı?
+	A message asking to leave it goes to {address}, from your account.	Listeden çıkmayı isteyen bir ileti hesabınızdan {address} adresine gider.
+	Its page for leaving it opens in your browser: {site}.	Listenin çıkış sayfası tarayıcınızda açılır: {site}.

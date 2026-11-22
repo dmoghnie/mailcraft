@@ -133,7 +133,6 @@
 	Mail from {sender}	來自 {sender} 的郵件
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · ArtCraft 應用程式 · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	郵寄清單: 在 {address} 取消訂閱
 	Mar	3月
 	Mark all as read	全部標示為已讀
 	Mark as read	標示為已讀
@@ -2038,3 +2037,9 @@ count	occurrences	次
 	More	更多
 	Names	姓名
 	AutoArchive settings	自動封存設定
+	From a mailing list.	來自郵寄清單。
+	Unsubscribe	取消訂閱
+	Unsubscribing from junk mail tells its sender that your address is read	取消訂閱垃圾郵件會讓寄件者知道你的地址有人在讀
+	Unsubscribe from this list?	要取消訂閱此郵寄清單嗎?
+	A message asking to leave it goes to {address}, from your account.	一封要求退出的郵件會從你的帳戶寄到 {address}。
+	Its page for leaving it opens in your browser: {site}.	該清單的退訂頁面會在瀏覽器中開啟: {site}。

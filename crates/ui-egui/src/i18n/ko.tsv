@@ -133,7 +133,6 @@
 	Mail from {sender}	{sender}의 메일
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · ArtCraft 앱 · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	메일링 리스트: {address}에서 구독 취소
 	Mar	3월
 	Mark all as read	모두 읽음으로 표시
 	Mark as read	읽음으로 표시
@@ -2038,3 +2037,9 @@ count	occurrences	회
 	More	더 보기
 	Names	이름
 	AutoArchive settings	자동 보관 설정
+	From a mailing list.	메일링 리스트에서 온 메일입니다.
+	Unsubscribe	구독 취소
+	Unsubscribing from junk mail tells its sender that your address is read	정크 메일의 구독을 취소하면 이 주소를 읽는다는 사실이 보낸 사람에게 알려집니다
+	Unsubscribe from this list?	이 리스트의 구독을 취소할까요?
+	A message asking to leave it goes to {address}, from your account.	탈퇴를 요청하는 메시지가 이 계정에서 {address}(으)로 전송됩니다.
+	Its page for leaving it opens in your browser: {site}.	리스트의 탈퇴 페이지가 브라우저에서 열립니다: {site}.

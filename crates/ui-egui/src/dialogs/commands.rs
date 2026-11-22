@@ -61,6 +61,13 @@ fn dialog_for(id: &str, s: &Session) -> Option<Dialog> {
         "event.create" => Dialog::new_event(s, None),
         "contact.create" => Dialog::new_contact(),
         "task.create" => Dialog::new_task(s, None),
+        // Asked first, as from the reading pane (a message goes out, or a page opens); from Junk
+        // Email, or with no way to leave, it runs and says why it can't.
+        "mail.unsubscribe" => {
+            let key = s.reading.as_ref()?.key.clone();
+            let way = s.leaving(&key).filter(|_| !s.in_junk(&key))?;
+            Dialog::Unsubscribe { key, way }
+        }
         _ => return None,
     })
 }

@@ -133,7 +133,6 @@
 	Mail from {sender}	Mail van {sender}
 	MailCraft	MailCraft
 	MailCraft {version} · an ArtCraft app · MIT OR Apache-2.0	MailCraft {version} · een ArtCraft-app · MIT OR Apache-2.0
-	Mailing list: unsubscribe at {address}	Mailinglijst: afmelden via {address}
 	Mar	mrt
 	Mark all as read	Alles als gelezen markeren
 	Mark as read	Als gelezen markeren
@@ -2034,3 +2033,9 @@ count	occurrences	keer
 	More	Meer
 	Names	Namen
 	AutoArchive settings	Instellingen voor AutoArchiveren
+	From a mailing list.	Van een mailinglijst.
+	Unsubscribe	Afmelden
+	Unsubscribing from junk mail tells its sender that your address is read	Afmelden voor ongewenste e-mail laat de afzender weten dat je adres wordt gelezen
+	Unsubscribe from this list?	Afmelden voor deze lijst?
+	A message asking to leave it goes to {address}, from your account.	Een bericht met het verzoek om af te melden gaat vanaf je account naar {address}.
+	Its page for leaving it opens in your browser: {site}.	De afmeldpagina van de lijst opent in je browser: {site}.

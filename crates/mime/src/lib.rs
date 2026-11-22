@@ -75,6 +75,8 @@ pub fn decode_in(charset: &str, bytes: &[u8]) -> Option<String> {
 
 /// Longest preview kept in a summary, in characters.
 pub const PREVIEW_CHARS: usize = 200;
+/// The most `List-Unsubscribe` links kept (a list names an address and a page, often).
+const UNSUBSCRIBE_LINKS: usize = 8;
 /// The most of an HTML body read for its preview, in characters.
 const PREVIEW_HTML: usize = 64 * 1024;
 /// HTML larger than this is cut before conversion (the rest is rarely more than markup).
@@ -306,6 +308,10 @@ pub struct Parsed {
     pub trackers: Trackers,
     /// `List-Unsubscribe` target, when the sender offers one.
     pub unsubscribe: Option<String>,
+    /// Every `List-Unsubscribe` link, in the header's order (a few at most): an address and a
+    /// page, often, to choose from.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub unsubscribe_links: Vec<String>,
     /// Sent in bulk (a list, a newsletter, an automatic message), as [`Summary::bulk`] says,
     /// from this message's own header: whatever account it came through.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
@@ -429,7 +435,11 @@ pub fn parse(raw: &[u8]) -> Option<Parsed> {
     };
     let (text, had_html) = shown_text(&m, real_html, &tnef_body, html.as_deref(), standing_in.as_deref(), ready.as_ref());
     let attachments = attached.into_iter().map(|a| a.info).collect();
-    let unsubscribe = m.list_unsubscribe().and_then(|a| a.first()).and_then(|x| x.address()).map(|t| t.trim_matches(['<', '>']).to_string());
+    let unsubscribe_links: Vec<String> = m
+        .list_unsubscribe()
+        .map(|a| a.mailboxes().filter_map(|x| x.address()).map(|t| t.trim_matches(['<', '>']).to_string()).take(UNSUBSCRIBE_LINKS).collect())
+        .unwrap_or_default();
+    let unsubscribe = unsubscribe_links.first().cloned();
     Some(Parsed {
         subject: fields::subject(&m),
         from: addrs(fields::from(&m)).into_iter().next().unwrap_or_default(),
@@ -451,6 +461,7 @@ pub fn parse(raw: &[u8]) -> Option<Parsed> {
         hidden_text: hidden.map(|(t, _)| t).unwrap_or_default(),
         trackers: tracking,
         unsubscribe,
+        unsubscribe_links,
         bulk: is_bulk(&m),
         sender_check: fields::checked_sender(&m),
         reaction: reaction_of(&m),
