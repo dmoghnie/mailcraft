@@ -2098,3 +2098,18 @@ count	occurrences	Terminen
 	Show quoted text	Zitierten Text zeigen
 	Hide quoted text	Zitierten Text ausblenden
 	Fold this message	Diese Nachricht zuklappen
+	Templates	Vorlagen
+	No templates yet	Noch keine Vorlagen
+	Save as template	Als Vorlage speichern
+	From a template	Aus einer Vorlage
+	Template name	Name der Vorlage
+	Keep who it's to	Empfänger behalten
+	Keep its files	Angehängte Dateien behalten
+	Rename template	Vorlage umbenennen
+	Delete {name}	{name} löschen
+	Rename {name}	{name} umbenennen
+	Insert a template	Vorlage einfügen
+	Delete template	Vorlage löschen
+	Save as template…	Als Vorlage speichern…
+	Rename…	Umbenennen…
+	Messages kept to start others from. Save one from a message's More options.	Gespeicherte Nachrichten, mit denen andere beginnen. Speichern Sie eine über „Weitere Optionen“ einer Nachricht.

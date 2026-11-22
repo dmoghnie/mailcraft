@@ -109,6 +109,7 @@ mod printing;
 mod security;
 mod signatures;
 mod tasks;
+mod templates;
 mod view;
 
 /// Every command, in the order the CLI lists them: the Home tab's first, accounts' last.
@@ -127,6 +128,7 @@ pub fn registry() -> Registry {
     all.extend(accounts::commands());
     all.extend(data_files::commands());
     all.extend(signatures::commands());
+    all.extend(templates::commands());
     Registry::new(all)
 }
 

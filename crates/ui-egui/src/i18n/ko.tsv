@@ -2097,3 +2097,18 @@ count	occurrences	회
 	Show quoted text	인용된 텍스트 표시
 	Hide quoted text	인용된 텍스트 숨기기
 	Fold this message	이 메시지 접기
+	Templates	템플릿
+	No templates yet	아직 템플릿이 없습니다
+	Save as template	템플릿으로 저장
+	From a template	템플릿에서
+	Template name	템플릿 이름
+	Keep who it's to	받는 사람 유지
+	Keep its files	첨부 파일 유지
+	Rename template	템플릿 이름 바꾸기
+	Delete {name}	{name} 삭제
+	Rename {name}	{name} 이름 바꾸기
+	Insert a template	템플릿 삽입
+	Delete template	템플릿 삭제
+	Save as template…	템플릿으로 저장…
+	Rename…	이름 바꾸기…
+	Messages kept to start others from. Save one from a message's More options.	다른 메시지를 시작할 때 쓰는 저장된 메시지입니다. 메시지의 '추가 옵션'에서 저장합니다.

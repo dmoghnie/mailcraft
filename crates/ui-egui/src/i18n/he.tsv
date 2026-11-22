@@ -2093,3 +2093,18 @@ count	occurrences	פעמים
 	Show quoted text	הצג טקסט מצוטט
 	Hide quoted text	הסתר טקסט מצוטט
 	Fold this message	קפל את ההודעה הזו
+	Templates	תבניות
+	No templates yet	אין עדיין תבניות
+	Save as template	שמור כתבנית
+	From a template	מתבנית
+	Template name	שם התבנית
+	Keep who it's to	שמור את הנמענים
+	Keep its files	שמור את הקבצים המצורפים
+	Rename template	שנה את שם התבנית
+	Delete {name}	מחק את {name}
+	Rename {name}	שנה את השם של {name}
+	Insert a template	הוסף תבנית
+	Delete template	מחק תבנית
+	Save as template…	שמור כתבנית…
+	Rename…	שנה שם…
+	Messages kept to start others from. Save one from a message's More options.	הודעות שנשמרו כדי להתחיל מהן הודעות אחרות. שמור אחת מתוך „אפשרויות נוספות” של הודעה.

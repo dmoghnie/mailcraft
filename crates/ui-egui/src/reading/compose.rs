@@ -83,6 +83,8 @@ struct Form {
     signatures: Vec<String>,
     /// The formatting row shows under the bar.
     formatting: bool,
+    /// The names of the templates kept.
+    templates: Vec<String>,
 }
 
 /// What the form needs from the session (computed before the form borrows the message).
@@ -108,7 +110,8 @@ fn form(s: &mut Session, st: &mut UiState, in_window: bool) -> Form {
         .map(|a| a.config.signatures.iter().map(|g| g.name.clone()).collect())
         .unwrap_or_default();
     let formatting = s.prefs.format_bar;
-    Form { in_window, accounts, suggestions, clock, can_delay, has_cert, has_pgp, blocked, blocked_text, reach, signatures, formatting }
+    let templates = s.templates().iter().map(|t| t.name.clone()).collect();
+    Form { in_window, accounts, suggestions, clock, can_delay, has_cert, has_pgp, blocked, blocked_text, reach, signatures, formatting, templates }
 }
 
 /// The message being written, in a window of its own.
@@ -161,7 +164,7 @@ pub(super) fn compose(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut
             // out at its end), and the formatting under it while Aa is lit.
             egui::Frame::new().fill(t.chrome).corner_radius(6).inner_margin(Margin::symmetric(8, 4)).show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                let more = |ui: &mut Ui, c: &mut mailcraft_engine::Compose| options::more(ui, &t, c, &f);
+                let more = |ui: &mut Ui, c: &mut mailcraft_engine::Compose, acts: &mut Vec<Action>| options::more(ui, &t, c, &f, acts);
                 let bar = rich_edit::Bar { signatures: &f.signatures, clock: &f.clock, formatting: f.formatting, more: &more };
                 options::bar(ui, &t, &f, c.sending, acts, |ui, acts| {
                     let on_quote =

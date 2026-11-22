@@ -67,7 +67,7 @@ pub fn style_signature(c: &mut Compose, sig: &(String, mime::rich::Styles), pict
 }
 
 /// The line drawn over the original of a reply or forward: the character its line starts at.
-fn quote_line(c: &Compose) -> Option<usize> {
+pub(super) fn quote_line(c: &Compose) -> Option<usize> {
     // A paragraph past the text's last line (styles not yet fitted to it) isn't there.
     let rule = c.styles.paras.iter().position(|p| p.rule).filter(|r| *r <= c.body.matches('\n').count())?;
     Some(if rule == 0 { 0 } else { c.body.chars().enumerate().filter(|(_, ch)| *ch == '\n').nth(rule - 1).map_or(0, |(i, _)| i + 1) })

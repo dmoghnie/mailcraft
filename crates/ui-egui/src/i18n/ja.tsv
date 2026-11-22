@@ -2094,3 +2094,18 @@ count	occurrences	回
 	Show quoted text	引用されたテキストを表示
 	Hide quoted text	引用されたテキストを隠す
 	Fold this message	このメッセージを折りたたむ
+	Templates	テンプレート
+	No templates yet	テンプレートはまだありません
+	Save as template	テンプレートとして保存
+	From a template	テンプレートから
+	Template name	テンプレート名
+	Keep who it's to	宛先も保存
+	Keep its files	添付ファイルも保存
+	Rename template	テンプレートの名前を変更
+	Delete {name}	{name} を削除
+	Rename {name}	{name} の名前を変更
+	Insert a template	テンプレートを挿入
+	Delete template	テンプレートを削除
+	Save as template…	テンプレートとして保存…
+	Rename…	名前の変更…
+	Messages kept to start others from. Save one from a message's More options.	ほかのメッセージの元にする保存済みメッセージです。メッセージの「その他のオプション」から保存します。

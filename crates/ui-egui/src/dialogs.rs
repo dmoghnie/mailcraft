@@ -258,6 +258,8 @@ pub enum Dialog {
     AutoArchive(Box<AutoArchiveForm>),
     /// AutoArchive is due, and asks first.
     AutoArchiveDue,
+    /// Save as template, or a template renamed.
+    TemplateName(TemplateForm),
     /// New folder (in `parent`), or rename `rename`.
     FolderName {
         account: String,
@@ -556,6 +558,7 @@ impl Dialog {
             | Dialog::DeleteFolder { error, .. }
             | Dialog::NewCategory { error, .. } => *error = Some(e),
             Dialog::EditRule(f) => f.error = Some(e),
+            Dialog::TemplateName(f) => f.error = Some(e),
             Dialog::SearchFolder(f) => f.error = Some(e),
             Dialog::QuickStep(f) => f.error = Some(e),
             Dialog::EditAccount(f) => f.error = Some(e),
@@ -777,6 +780,7 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         | Dialog::CtrlEnter { .. }
         | Dialog::SendCheck(_)
         | Dialog::Unsubscribe { .. }
+        | Dialog::TemplateName(..)
         | Dialog::WordCount(..) => writing::draw(ui, d, s, t, acts),
         Dialog::ConfirmDeleteContact { .. }
         | Dialog::PicturePreview { .. }

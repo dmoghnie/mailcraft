@@ -10,6 +10,7 @@ mod general;
 mod inbox;
 mod mail;
 mod safety;
+mod templates;
 
 pub(super) fn options(s: &Session, st: &UiState, ui: &mut Ui, acts: &mut Vec<Action>) {
     let t = st.tokens;
@@ -20,6 +21,7 @@ pub(super) fn options(s: &Session, st: &UiState, ui: &mut Ui, acts: &mut Vec<Act
     mail::reading(s, &t, ui, acts);
     mail::kept(s, &t, ui, acts);
     mail::checking(s, &t, ui, acts);
+    templates::templates(s, &t, ui, acts);
     inbox::inbox(s, &t, ui, acts);
     calendar::calendar(s, &t, ui, acts);
     super::meetings::meetings(s, st, ui, acts);

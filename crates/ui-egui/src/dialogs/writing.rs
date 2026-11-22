@@ -16,6 +16,7 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
     match d {
         Dialog::SelectNames(f) => select_names(ui, f, t, acts),
         Dialog::CheckNames(f) => check_names(ui, f, t, acts),
+        Dialog::TemplateName(f) => template_name(ui, f, t, acts),
         Dialog::SaveChanges => {
             ui.set_width(380.0);
             title(ui, t, "Want to save your changes?");
@@ -207,6 +208,56 @@ pub struct CheckNamesForm {
 
 /// Check Names: the people a name typed could be, one picked (a double-click picks and goes on);
 /// then the next name. Cancel leaves the rest as typed.
+/// Save as template: its name, and whether who it's to and its files are kept too; or a template
+/// renamed (`was`, from File › Options › Mail).
+#[derive(Clone, Debug, Default)]
+pub struct TemplateForm {
+    pub was: Option<String>,
+    pub name: String,
+    pub recipients: bool,
+    pub files: bool,
+    pub error: Option<String>,
+}
+
+impl Dialog {
+    pub(crate) fn save_template() -> Self {
+        Dialog::TemplateName(TemplateForm::default())
+    }
+
+    pub(crate) fn rename_template(name: &str) -> Self {
+        Dialog::TemplateName(TemplateForm { was: Some(name.to_string()), name: name.to_string(), ..Default::default() })
+    }
+}
+
+fn template_name(ui: &mut Ui, f: &mut TemplateForm, t: &Tokens, acts: &mut Vec<Action>) -> bool {
+    ui.set_width(360.0);
+    title(ui, t, if f.was.is_some() { "Rename template" } else { "Save as template" });
+    let r = ui.add(egui::TextEdit::singleline(&mut f.name).hint_text(tl!("Template name")).desired_width(f32::INFINITY));
+    if ui.memory(|m| m.focused().is_none()) {
+        r.request_focus();
+    }
+    // One field: Enter means OK wherever the focus is.
+    let enter = ui.input(|i| i.key_pressed(egui::Key::Enter));
+    if f.was.is_none() {
+        ui.add_space(4.0);
+        ui.checkbox(&mut f.recipients, tl!("Keep who it's to"));
+        ui.checkbox(&mut f.files, tl!("Keep its files"));
+    }
+    if let Some(e) = &f.error {
+        ui.label(RichText::new(e.as_str()).color(t.danger).small());
+    }
+    let ready = !f.name.trim().is_empty();
+    let (ok, cancel) = buttons(ui, t, if f.was.is_some() { "Rename" } else { "Save" }, ready);
+    if (ok || enter) && ready {
+        f.error = None;
+        match &f.was {
+            Some(was) => acts.push(Action::Submit("template.rename", json!({"name": was, "to": f.name.trim()}))),
+            None => acts.push(Action::Submit("template.save", json!({"name": f.name.trim(), "recipients": f.recipients, "files": f.files}))),
+        }
+    }
+    !cancel
+}
+
 fn check_names(ui: &mut Ui, f: &mut CheckNamesForm, t: &Tokens, acts: &mut Vec<Action>) -> bool {
     let Some(ask) = f.asks.first() else { return false };
     ui.set_width(440.0);

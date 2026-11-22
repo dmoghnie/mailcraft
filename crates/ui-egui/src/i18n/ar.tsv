@@ -2093,3 +2093,18 @@ count	occurrences	مرات
 	Show quoted text	إظهار النص المقتبس
 	Hide quoted text	إخفاء النص المقتبس
 	Fold this message	طيّ هذه الرسالة
+	Templates	قوالب
+	No templates yet	لا توجد قوالب بعد
+	Save as template	حفظ كقالب
+	From a template	من قالب
+	Template name	اسم القالب
+	Keep who it's to	الاحتفاظ بالمستلمين
+	Keep its files	الاحتفاظ بالملفات المرفقة
+	Rename template	إعادة تسمية القالب
+	Delete {name}	حذف {name}
+	Rename {name}	إعادة تسمية {name}
+	Insert a template	إدراج قالب
+	Delete template	حذف القالب
+	Save as template…	حفظ كقالب…
+	Rename…	إعادة تسمية…
+	Messages kept to start others from. Save one from a message's More options.	رسائل محفوظة تبدأ منها رسائل أخرى. احفظ واحدة من «خيارات أخرى» في رسالة.

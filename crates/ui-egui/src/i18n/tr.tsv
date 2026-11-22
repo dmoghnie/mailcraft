@@ -2098,3 +2098,18 @@ count	occurrences	kez
 	Show quoted text	Alıntılanan metni göster
 	Hide quoted text	Alıntılanan metni gizle
 	Fold this message	Bu iletiyi daralt
+	Templates	Şablonlar
+	No templates yet	Henüz şablon yok
+	Save as template	Şablon olarak kaydet
+	From a template	Şablondan
+	Template name	Şablon adı
+	Keep who it's to	Alıcıları koru
+	Keep its files	Ekli dosyaları koru
+	Rename template	Şablonu yeniden adlandır
+	Delete {name}	{name} öğesini sil
+	Rename {name}	{name} öğesini yeniden adlandır
+	Insert a template	Şablon ekle
+	Delete template	Şablonu sil
+	Save as template…	Şablon olarak kaydet…
+	Rename…	Yeniden adlandır…
+	Messages kept to start others from. Save one from a message's More options.	Başka iletilere başlamak için saklanan iletiler. Bir iletinin “Diğer seçenekler” menüsünden kaydedin.

@@ -403,7 +403,7 @@ fn editor_frame(ctx: &egui::Context, ed: &mut Editor, c: &mut Compose) -> Vec<eg
     let raw = egui::RawInput { screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, vec2(1000.0, 800.0))), ..Default::default() };
     let mut acts = Vec::new();
     let mut out = ctx.run_ui(raw, |ui| {
-        let more = |_: &mut Ui, _: &mut Compose| {};
+        let more = |_: &mut Ui, _: &mut Compose, _: &mut Vec<crate::Action>| {};
         ribbon(ui, &t, ed, c, &Bar { signatures: &[], clock: &clock, formatting: true, more: &more }, &mut acts);
         format_row(ui, &t, ed, c);
         egui::ScrollArea::vertical().auto_shrink(false).id_salt("compose-body").show(ui, |ui| body(ui, &t, ed, c, None, &mut acts));

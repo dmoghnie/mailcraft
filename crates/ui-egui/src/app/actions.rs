@@ -106,6 +106,8 @@ pub enum Action {
     /// A signature of the account (by name; `None`: the one in it, else its own for this kind
     /// of message) into the message being written: in place of the one there, else at the cursor.
     InsertSignature(Option<String>),
+    /// A template (by name) into the message being written, at the cursor.
+    InsertTemplate(String),
     /// Paste a picture from the clipboard, if there is one.
     PastePicture,
     /// A picture into the signature being edited: from a file, or (`paste`) the clipboard's.
@@ -338,6 +340,7 @@ impl MailApp {
                 self.ui.dialog = Some(Dialog::Signature(Box::new(dialogs::SignatureForm::new(&self.session, &account, insert))));
             }
             Action::InsertSignature(name) => self.insert_signature(name),
+            Action::InsertTemplate(name) => self.insert_template(&name),
             Action::InsertPicture => self.insert_picture(),
             Action::PastePicture => self.paste_picture(),
             Action::SignaturePicture { paste } => self.signature_picture(paste),

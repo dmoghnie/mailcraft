@@ -2111,3 +2111,18 @@ count	occurrences	wystąpieniach
 	Show quoted text	Pokaż cytowany tekst
 	Hide quoted text	Ukryj cytowany tekst
 	Fold this message	Zwiń tę wiadomość
+	Templates	Szablony
+	No templates yet	Brak szablonów
+	Save as template	Zapisz jako szablon
+	From a template	Z szablonu
+	Template name	Nazwa szablonu
+	Keep who it's to	Zachowaj odbiorców
+	Keep its files	Zachowaj załączone pliki
+	Rename template	Zmień nazwę szablonu
+	Delete {name}	Usuń {name}
+	Rename {name}	Zmień nazwę {name}
+	Insert a template	Wstaw szablon
+	Delete template	Usuń szablon
+	Save as template…	Zapisz jako szablon…
+	Rename…	Zmień nazwę…
+	Messages kept to start others from. Save one from a message's More options.	Zapisane wiadomości, od których zaczyna się inne. Zapisz je w „Więcej opcji” wiadomości.

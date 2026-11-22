@@ -273,6 +273,19 @@ fn new_items(ui: &mut Ui, s: &Session, acts: &mut Vec<Action>) {
         acts.push(Action::Dialog(Dialog::new_contact()));
         ui.close();
     }
+    // A new message from a template kept (from a message's More options).
+    ui.separator();
+    ui.menu_button(tl!("From a template"), |ui| {
+        for t in s.templates() {
+            if ui.button(t.name.as_str()).clicked() {
+                acts.push(Action::Run("template.insert", json!({"name": t.name, "new": true})));
+                ui.close();
+            }
+        }
+        if s.templates().is_empty() {
+            ui.add_enabled(false, egui::Button::new(tl!("No templates yet")));
+        }
+    });
 }
 
 fn delete_options(ui: &mut Ui, s: &Session, acts: &mut Vec<Action>) {

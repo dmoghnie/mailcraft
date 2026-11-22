@@ -22,6 +22,22 @@ impl MailApp {
         }
     }
 
+    /// A template into the message being written: at the cursor of its text (not one in a block
+    /// of the quoted original: then at its start), the cursor after it.
+    pub(super) fn insert_template(&mut self, name: &str) {
+        let c = self.session.compose.as_ref();
+        let at = c.filter(|_| self.quote_cell().is_none()).and_then(|c| self.ui.editor.as_ref().filter(|e| e.id == c.id)).map(|e| e.sel.start);
+        match self.session.run("template.insert", &json!({"name": name, "at": at})) {
+            Ok(v) => {
+                let end = v.get("end").and_then(serde_json::Value::as_u64).and_then(|e| usize::try_from(e).ok()).unwrap_or(0);
+                if let Some(ed) = self.ui.editor.as_mut() {
+                    ed.refocus = Some(end..end);
+                }
+            }
+            Err(e) => self.session.notice(e.to_string(), true),
+        }
+    }
+
     /// Pictures from files, at the cursor (the browser's picker answers later).
     pub(super) fn insert_picture(&mut self) {
         if self.services.pick_later(&crate::Picked::Picture) {

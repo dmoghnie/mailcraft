@@ -2098,3 +2098,18 @@ count	occurrences	occurrences
 	Show quoted text	Afficher le texte cité
 	Hide quoted text	Masquer le texte cité
 	Fold this message	Replier ce message
+	Templates	Modèles
+	No templates yet	Aucun modèle pour l'instant
+	Save as template	Enregistrer comme modèle
+	From a template	À partir d'un modèle
+	Template name	Nom du modèle
+	Keep who it's to	Conserver les destinataires
+	Keep its files	Conserver les fichiers joints
+	Rename template	Renommer le modèle
+	Delete {name}	Supprimer {name}
+	Rename {name}	Renommer {name}
+	Insert a template	Insérer un modèle
+	Delete template	Supprimer le modèle
+	Save as template…	Enregistrer comme modèle…
+	Rename…	Renommer…
+	Messages kept to start others from. Save one from a message's More options.	Des messages gardés pour en commencer d'autres. Enregistrez-en un depuis « Plus d'options » d'un message.

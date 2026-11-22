@@ -13,6 +13,7 @@ mod quote;
 mod sending;
 mod signatures;
 mod suggest;
+mod templates;
 mod undo_send;
 
 #[test]

@@ -44,8 +44,8 @@ pub(super) fn bar(ui: &mut Ui, t: &Tokens, f: &Form, sending: bool, acts: &mut V
 }
 
 /// The message's own options, at the end of the bar's More options: Bcc and Replies to, the
-/// format, importance, a read receipt, and Delay delivery.
-pub(super) fn more(ui: &mut Ui, t: &Tokens, c: &mut mailcraft_engine::Compose, f: &Form) {
+/// format, importance, a read receipt, Delay delivery, and Templates.
+pub(super) fn more(ui: &mut Ui, t: &Tokens, c: &mut mailcraft_engine::Compose, f: &Form, acts: &mut Vec<Action>) {
     ui.add_enabled_ui(!c.sending, |ui| {
         if ui.button(tl!(if c.show_bcc { "Hide Bcc" } else { "Bcc" })).clicked() {
             c.show_bcc = !c.show_bcc;
@@ -81,7 +81,27 @@ pub(super) fn more(ui: &mut Ui, t: &Tokens, c: &mut mailcraft_engine::Compose, f
                 .response
                 .on_hover_text(tl!("Keep it in the Outbox and send it later (MailCraft has to be running then)"));
         }
+        ui.separator();
+        ui.menu_button(tl!("Templates"), |ui| templates_menu(ui, f, acts));
     });
+}
+
+/// Templates: one into the message at the cursor, or the message kept as one.
+fn templates_menu(ui: &mut Ui, f: &Form, acts: &mut Vec<Action>) {
+    for name in &f.templates {
+        if ui.button(name.as_str()).clicked() {
+            acts.push(Action::InsertTemplate(name.clone()));
+            ui.close();
+        }
+    }
+    if f.templates.is_empty() {
+        ui.add_enabled(false, egui::Button::new(tl!("No templates yet")));
+    }
+    ui.separator();
+    if ui.button(tl!("Save as template…")).clicked() {
+        acts.push(Action::Dialog(crate::dialogs::Dialog::save_template()));
+        ui.close();
+    }
 }
 
 /// What's on, kept in the bar's row after More options: importance (a click takes it off), Sign

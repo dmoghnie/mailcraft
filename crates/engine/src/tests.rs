@@ -253,4 +253,5 @@ mod photos;
 mod ribbon;
 mod safety;
 mod smime;
+mod templates;
 mod writing;

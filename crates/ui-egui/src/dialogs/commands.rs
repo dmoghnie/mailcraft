@@ -38,6 +38,7 @@ const HIDDEN: &[&str] = &[
     "searchFolder.list",
     "security.certificates",
     "task.list",
+    "template.list",
 ];
 
 /// Commands that need something given, which the window asks for first, in the dialog their

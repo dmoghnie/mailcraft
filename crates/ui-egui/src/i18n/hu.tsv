@@ -2098,3 +2098,18 @@ count	occurrences	előfordulás
 	Show quoted text	Idézett szöveg megjelenítése
 	Hide quoted text	Idézett szöveg elrejtése
 	Fold this message	Az üzenet összecsukása
+	Templates	Sablonok
+	No templates yet	Még nincsenek sablonok
+	Save as template	Mentés sablonként
+	From a template	Sablonból
+	Template name	Sablon neve
+	Keep who it's to	Címzettek megtartása
+	Keep its files	Csatolt fájlok megtartása
+	Rename template	Sablon átnevezése
+	Delete {name}	{name} törlése
+	Rename {name}	{name} átnevezése
+	Insert a template	Sablon beszúrása
+	Delete template	Sablon törlése
+	Save as template…	Mentés sablonként…
+	Rename…	Átnevezés…
+	Messages kept to start others from. Save one from a message's More options.	Elmentett üzenetek, amelyekből újak indulnak. Egy üzenet „További beállítások” menüjéből menthet egyet.

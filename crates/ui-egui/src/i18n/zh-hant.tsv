@@ -2097,3 +2097,18 @@ count	occurrences	次
 	Show quoted text	顯示引用的文字
 	Hide quoted text	隱藏引用的文字
 	Fold this message	摺疊這封郵件
+	Templates	範本
+	No templates yet	尚無範本
+	Save as template	另存為範本
+	From a template	從範本
+	Template name	範本名稱
+	Keep who it's to	保留收件者
+	Keep its files	保留附件
+	Rename template	重新命名範本
+	Delete {name}	刪除 {name}
+	Rename {name}	重新命名 {name}
+	Insert a template	插入範本
+	Delete template	刪除範本
+	Save as template…	另存為範本…
+	Rename…	重新命名…
+	Messages kept to start others from. Save one from a message's More options.	保存下來用於開始其他郵件的郵件。在郵件的「更多選項」中儲存。

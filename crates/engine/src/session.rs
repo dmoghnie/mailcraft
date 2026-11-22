@@ -53,7 +53,10 @@ pub use security::{
 };
 pub use send_receive::{SendReceive, TransferRow};
 pub use updates::{UpdateCheck, newer_release};
-pub use writing::{Compose, Drafted, Leaving, Quote, Reactions, SendBlock, SendCheck, UNDO_SEND_MAX, UndoHold, leaving_way, signature_parts};
+pub use writing::{
+    Compose, Drafted, Leaving, Quote, Reactions, SendBlock, SendCheck, TEMPLATE_BYTES_MOST, TEMPLATE_NAME_MOST, TEMPLATES_MOST, Template,
+    TemplateFile, UNDO_SEND_MAX, UndoHold, leaving_way, signature_parts,
+};
 // The message list's arrangement and rows, named here as before.
 #[cfg(test)]
 pub(crate) use mailboxes::arrange_list;
@@ -300,6 +303,8 @@ pub struct Session {
     pub saving: Vec<Compose>,
     /// The messages a draft answers or forwards, as last found ([`Session::drafted`]).
     pub(crate) drafted: writing::DraftedMemo,
+    /// Message templates, read from their file when it opens.
+    pub(crate) templates: writing::KeptTemplates,
     pub prefs: Prefs,
     pub clock: Clock,
     pub notices: Vec<Notice>,
@@ -526,6 +531,7 @@ impl Session {
             sent_away: Vec::new(),
             saving: Vec::new(),
             drafted: writing::DraftedMemo::default(),
+            templates: writing::KeptTemplates::default(),
             prefs: Prefs::default(),
             clock,
             notices: Vec::new(),
@@ -622,6 +628,7 @@ impl Session {
             update: UpdateCheck::NotAsked,
         };
         if let Some(store) = s.store.clone() {
+            s.templates = writing::KeptTemplates::load(&store);
             match store.load_doc(RULES_DOC) {
                 Ok(r) => s.rules = r,
                 Err(e) => {

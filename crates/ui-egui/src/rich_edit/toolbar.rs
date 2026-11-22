@@ -96,7 +96,7 @@ pub(crate) struct Bar<'a> {
     /// The formatting row shows under the bar (Aa lit).
     pub(crate) formatting: bool,
     /// The message's own options, at the end of More options' menu.
-    pub(crate) more: &'a dyn Fn(&mut Ui, &mut Compose),
+    pub(crate) more: &'a dyn Fn(&mut Ui, &mut Compose, &mut Vec<Action>),
 }
 
 /// The bar's buttons: Attach File, Link, Pictures and Signature; Aa, which shows the formatting
@@ -183,7 +183,7 @@ fn more_menu(ui: &mut Ui, c: &mut Compose, sel: &Range<usize>, bar: &Bar<'_>, op
         ui.close();
     }
     ui.separator();
-    (bar.more)(ui, c);
+    (bar.more)(ui, c, acts);
 }
 
 /// The formatting row, under the bar while its Aa is lit: the font, its size, bold, italic,

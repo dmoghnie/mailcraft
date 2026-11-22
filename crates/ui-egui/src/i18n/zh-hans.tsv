@@ -2094,3 +2094,18 @@ count	occurrences	次
 	Show quoted text	显示引用的文字
 	Hide quoted text	隐藏引用的文字
 	Fold this message	折叠这封邮件
+	Templates	模板
+	No templates yet	还没有模板
+	Save as template	另存为模板
+	From a template	从模板
+	Template name	模板名称
+	Keep who it's to	保留收件人
+	Keep its files	保留附件
+	Rename template	重命名模板
+	Delete {name}	删除 {name}
+	Rename {name}	重命名 {name}
+	Insert a template	插入模板
+	Delete template	删除模板
+	Save as template…	另存为模板…
+	Rename…	重命名…
+	Messages kept to start others from. Save one from a message's More options.	保存下来用于开始其他邮件的邮件。在邮件的“更多选项”中保存。

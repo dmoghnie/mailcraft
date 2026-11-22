@@ -15,6 +15,7 @@ mod reopen;
 mod send_again;
 mod sending;
 mod signatures;
+mod templates;
 mod undo_send;
 mod unsubscribe;
 pub use drafts::Drafted;
@@ -23,6 +24,8 @@ pub use quote::Quote;
 pub use reactions::Reactions;
 pub use sending::SendBlock;
 pub use signatures::signature_parts;
+pub(crate) use templates::Kept as KeptTemplates;
+pub use templates::{TEMPLATE_BYTES_MOST, TEMPLATE_NAME_MOST, TEMPLATES_MOST, Template, TemplateFile};
 pub use undo_send::{UNDO_SEND_MAX, UndoHold};
 pub use unsubscribe::{Leaving, leaving_way};
 

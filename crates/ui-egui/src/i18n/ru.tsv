@@ -2111,3 +2111,18 @@ count	occurrences	повторений
 	Show quoted text	Показать цитату
 	Hide quoted text	Скрыть цитату
 	Fold this message	Свернуть это письмо
+	Templates	Шаблоны
+	No templates yet	Шаблонов пока нет
+	Save as template	Сохранить как шаблон
+	From a template	Из шаблона
+	Template name	Название шаблона
+	Keep who it's to	Сохранить получателей
+	Keep its files	Сохранить вложенные файлы
+	Rename template	Переименовать шаблон
+	Delete {name}	Удалить «{name}»
+	Rename {name}	Переименовать «{name}»
+	Insert a template	Вставить шаблон
+	Delete template	Удалить шаблон
+	Save as template…	Сохранить как шаблон…
+	Rename…	Переименовать…
+	Messages kept to start others from. Save one from a message's More options.	Сохранённые письма, с которых начинаются другие. Сохраните письмо через «Другие действия».
