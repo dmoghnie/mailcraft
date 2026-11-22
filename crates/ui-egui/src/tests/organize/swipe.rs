@@ -177,8 +177,13 @@ fn options_set_what_each_way_does() {
     let (mut a, ctx) = started("swipe-options");
     a.ui.backstage = Some(crate::backstage::Backstage::new(crate::backstage::Page::Options));
     frame(&ctx, &mut a, vec![]);
+    // In the order they're drawn, top to bottom: AccessKit's list comes from a hash map, its
+    // order not the page's (it changed as File › Options grew).
     let boxes = |ctx: &egui::Context, a: &mut MailApp| {
-        named(ctx, a, tall).into_iter().filter(|n| n.role == Role::ComboBox && n.name().is_some_and(|l| l.starts_with("Swipe "))).collect::<Vec<_>>()
+        let mut b: Vec<Named> =
+            named(ctx, a, tall).into_iter().filter(|n| n.role == Role::ComboBox && n.name().is_some_and(|l| l.starts_with("Swipe "))).collect();
+        b.sort_by(|x, y| x.rect.map(|r| (r.min.y, r.min.x)).partial_cmp(&y.rect.map(|r| (r.min.y, r.min.x))).unwrap_or(std::cmp::Ordering::Equal));
+        b
     };
     let shown = boxes(&ctx, &mut a);
     assert_eq!(shown.iter().filter_map(Named::name).collect::<Vec<_>>(), ["Swipe left", "Swipe right"]);
