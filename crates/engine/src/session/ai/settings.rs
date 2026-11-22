@@ -142,7 +142,7 @@ impl AiPrefs {
 }
 
 /// Whether a web address's host is this computer or its own network ([`AiProfile::local`]).
-pub(crate) fn local_url(url: &str) -> bool {
+pub fn local_url(url: &str) -> bool {
     let rest = url.trim();
     let rest =
         ["https://", "http://"].iter().find_map(|s| rest.get(..s.len()).filter(|h| h.eq_ignore_ascii_case(s)).and_then(|_| rest.get(s.len()..)));

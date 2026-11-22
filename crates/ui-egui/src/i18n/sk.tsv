@@ -2157,3 +2157,49 @@ count	occurrences	opakovaní
 	To {name}	Komu: {name}
 	Go to the message	Prejsť na správu
 	Search files	Hľadať v súboroch
+	AI	AI
+	A language model you add can answer questions about your mail. Nothing goes to one until you add it and let an account's mail go to it	Jazykový model, ktorý pridáte, môže odpovedať na otázky o vašej pošte. Nič sa doň neodošle, kým ho nepridáte a nepovolíte, aby doň išla pošta niektorého konta
+	Use models on this computer or its network alone	Používať len modely na tomto počítači alebo v jeho sieti
+	No mail goes to a cloud provider, whatever an account allows	Žiadna pošta nejde k poskytovateľovi cloudu, nech konto povoľuje čokoľvek
+	On this computer, such as Ollama, or at a cloud provider, with its key	Na tomto počítači, napríklad Ollama, alebo u poskytovateľa cloudu, s jeho kľúčom
+	Add a model	Pridať model
+	{model} at {server}	{model} na {server}
+	On this computer or its network	Na tomto počítači alebo v jeho sieti
+	At a cloud provider: mail you let go to it leaves this computer	U poskytovateľa cloudu: pošta, ktorú doň povolíte, opúšťa tento počítač
+	Its key couldn't be kept: {error}	Kľúč sa nepodarilo uložiť: {error}
+	Its key is kept in this computer's keychain	Kľúč sa uchováva v kľúčenke tohto počítača
+	Testing…	Testuje sa…
+	It answered: {text}	Odpovedal: {text}
+	The test failed: {error}	Test zlyhal: {error}
+	Test	Otestovať
+	Model for questions	Model na otázky
+	Answers, summaries and drafts	Odpovede, zhrnutia a koncepty
+	Model for quick decisions	Model na rýchle rozhodnutia
+	Short choices about mail: a small, fast model is enough	Krátke rozhodnutia o pošte: stačí malý a rýchly model
+	The first model	Prvý model
+	Whose mail may go to a model	Pošta ktorých kont môže ísť do modelu
+	Off: no question asked holds its mail. Local models: only those on this computer or its network are asked	Vypnuté: žiadna otázka neobsahuje jeho poštu. Lokálne modely: pýtajú sa len modely na tomto počítači alebo v jeho sieti
+	Local models	Lokálne modely
+	Any model	Ľubovoľný model
+	What was sent	Čo sa odoslalo
+	The newest questions MailCraft's AI asked: when, what for, which model, whose mail and how much. What they said isn't kept	Najnovšie otázky AI v MailCrafte: kedy, na čo, ktorému modelu, čia pošta a koľko. Ich obsah sa neuchováva
+	Nothing sent yet.	Zatiaľ sa nič neodoslalo.
+	A test	Test
+	A question	Otázka
+	Mail of {account}	Pošta konta {account}
+	{sent} sent, {received} back	Odoslané {sent}, prijaté {received}
+	Answered	Zodpovedané
+	Change a model	Zmeniť model
+	Fill in for	Vyplniť pre
+	Format	Formát
+	OpenAI's, which most servers speak	Formát OpenAI, ktorým hovorí väčšina serverov
+	Anthropic's	Formát Anthropic
+	Up to its version, such as /v1. Plain http only to this computer	Až po verziu, napríklad /v1. Nešifrované http len do tohto počítača
+	Model	Model
+	API key	Kľúč API
+	Kept in the keychain: type to change it	Uložený v kľúčenke: na zmenu ho prepíšte
+	None needed for a model on this computer	Pre model na tomto počítači netreba
+	Forget the key kept	Zabudnúť uložený kľúč
+	Longest answer, in tokens	Najdlhšia odpoveď, v tokenoch
+	When it fails, ask	Keď zlyhá, opýtať sa
+	No other model	Žiadny iný model

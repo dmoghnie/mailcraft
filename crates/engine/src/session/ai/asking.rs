@@ -284,8 +284,8 @@ impl Session {
     }
 }
 
-/// The host (and port) of a server's address, for the record.
-fn server_of(url: &str) -> String {
+/// The host (and port) of a server's address, as the record and File › Options › AI name it.
+pub fn server_of(url: &str) -> String {
     let rest = url.trim().split_once("://").map_or(url.trim(), |(_, r)| r);
     rest.split(['/', '?', '#']).next().unwrap_or_default().rsplit('@').next().unwrap_or_default().to_ascii_lowercase()
 }

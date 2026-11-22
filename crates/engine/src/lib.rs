@@ -35,7 +35,7 @@ pub use session::{
     Scheme, Seal, SearchProgress, SearchScope, SearchStats, SearchWork, Security, SendBlock, SendCheck, SendReceive, SenderAddresses, SenderMarks,
     ServerSearch, Session, SignInCheck, SignedBy, SmimeSettings, SourceView, StartIn, SwipeAction, TEMPLATE_BYTES_MOST, TEMPLATE_NAME_MOST,
     TEMPLATES_MOST, Template, TemplateFile, TransferRow, TrustedCertificate, UNDO_SEND_MAX, UndoHold, UpdateCheck, VacationState, View, accent_code,
-    accent_rgb,
+    accent_rgb, ai_server, ai_url_is_local,
     attached::{AttachedFile, FILES_MESSAGES_MOST, FILES_MOST, FileKind, FilesFilter},
     invite::{AnsweredInvites, Fit, Invite, InviteDay, InviteProblem, Route, WaitingInvite, forwarding_allowed, proposals_allowed},
     junk::{JunkList, junk_entry},

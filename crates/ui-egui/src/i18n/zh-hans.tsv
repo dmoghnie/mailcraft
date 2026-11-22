@@ -2139,3 +2139,49 @@ count	occurrences	次
 	To {name}	收件人：{name}
 	Go to the message	转到邮件
 	Search files	搜索文件
+	AI	AI
+	A language model you add can answer questions about your mail. Nothing goes to one until you add it and let an account's mail go to it	你添加的语言模型可以回答有关你邮件的问题。在你添加模型并允许某个帐户的邮件发送给它之前，不会向它发送任何内容
+	Use models on this computer or its network alone	只使用这台电脑或其网络中的模型
+	No mail goes to a cloud provider, whatever an account allows	无论帐户允许什么，邮件都不会发送给云服务商
+	On this computer, such as Ollama, or at a cloud provider, with its key	在这台电脑上（如 Ollama），或在云服务商处（使用其密钥）
+	Add a model	添加模型
+	{model} at {server}	{server} 上的 {model}
+	On this computer or its network	在这台电脑或其网络中
+	At a cloud provider: mail you let go to it leaves this computer	在云服务商处：你允许发送给它的邮件会离开这台电脑
+	Its key couldn't be kept: {error}	无法保存其密钥：{error}
+	Its key is kept in this computer's keychain	其密钥保存在这台电脑的钥匙串中
+	Testing…	正在测试…
+	It answered: {text}	它的回答：{text}
+	The test failed: {error}	测试失败：{error}
+	Test	测试
+	Model for questions	用于提问的模型
+	Answers, summaries and drafts	回答、摘要和草稿
+	Model for quick decisions	用于快速判断的模型
+	Short choices about mail: a small, fast model is enough	关于邮件的简短选择：小而快的模型就够了
+	The first model	第一个模型
+	Whose mail may go to a model	哪些帐户的邮件可以发送给模型
+	Off: no question asked holds its mail. Local models: only those on this computer or its network are asked	关闭：任何问题都不包含其邮件。本地模型：只询问这台电脑或其网络中的模型
+	Local models	本地模型
+	Any model	任何模型
+	What was sent	已发送的内容
+	The newest questions MailCraft's AI asked: when, what for, which model, whose mail and how much. What they said isn't kept	MailCraft AI 最近的提问：时间、用途、哪个模型、谁的邮件以及多少。提问的内容不会保存
+	Nothing sent yet.	尚未发送任何内容。
+	A test	一次测试
+	A question	一个问题
+	Mail of {account}	{account} 的邮件
+	{sent} sent, {received} back	已发送 {sent}，收回 {received}
+	Answered	已回答
+	Change a model	更改模型
+	Fill in for	填写为
+	Format	格式
+	OpenAI's, which most servers speak	OpenAI 的格式（大多数服务器支持）
+	Anthropic's	Anthropic 的格式
+	Up to its version, such as /v1. Plain http only to this computer	到版本为止，如 /v1。未加密的 http 只能连到这台电脑
+	Model	模型
+	API key	API 密钥
+	Kept in the keychain: type to change it	已保存在钥匙串中：输入以更改
+	None needed for a model on this computer	这台电脑上的模型不需要
+	Forget the key kept	忘记已保存的密钥
+	Longest answer, in tokens	最长回答（token 数）
+	When it fails, ask	失败时改问
+	No other model	不改问其他模型

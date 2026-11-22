@@ -2139,3 +2139,49 @@ count	occurrences	回
 	To {name}	宛先: {name}
 	Go to the message	メッセージへ移動
 	Search files	ファイルを検索
+	AI	AI
+	A language model you add can answer questions about your mail. Nothing goes to one until you add it and let an account's mail go to it	追加した言語モデルが、メールについての質問に答えます。モデルを追加し、アカウントのメールを送ることを許可するまで、何も送信されません
+	Use models on this computer or its network alone	このコンピューターまたはそのネットワーク上のモデルだけを使う
+	No mail goes to a cloud provider, whatever an account allows	アカウントの設定にかかわらず、メールはクラウド プロバイダーに送られません
+	On this computer, such as Ollama, or at a cloud provider, with its key	このコンピューター上 (Ollama など)、またはクラウド プロバイダー (キーを使用)
+	Add a model	モデルを追加
+	{model} at {server}	{server} の {model}
+	On this computer or its network	このコンピューターまたはそのネットワーク上
+	At a cloud provider: mail you let go to it leaves this computer	クラウド プロバイダー: 送ることを許可したメールはこのコンピューターの外に出ます
+	Its key couldn't be kept: {error}	キーを保存できませんでした: {error}
+	Its key is kept in this computer's keychain	キーはこのコンピューターのキーチェーンに保存されています
+	Testing…	テスト中…
+	It answered: {text}	応答: {text}
+	The test failed: {error}	テストに失敗しました: {error}
+	Test	テスト
+	Model for questions	質問用のモデル
+	Answers, summaries and drafts	回答、要約、下書き
+	Model for quick decisions	すばやい判断用のモデル
+	Short choices about mail: a small, fast model is enough	メールについての短い判断: 小さく速いモデルで十分です
+	The first model	最初のモデル
+	Whose mail may go to a model	メールをモデルに送れるアカウント
+	Off: no question asked holds its mail. Local models: only those on this computer or its network are asked	オフ: そのメールを含む質問はしません。ローカル モデル: このコンピューターまたはそのネットワーク上のモデルにだけ質問します
+	Local models	ローカル モデル
+	Any model	すべてのモデル
+	What was sent	送信した内容
+	The newest questions MailCraft's AI asked: when, what for, which model, whose mail and how much. What they said isn't kept	MailCraft の AI が最近した質問: いつ、何のために、どのモデルへ、誰のメールを、どれだけ。質問と回答の内容は保存されません
+	Nothing sent yet.	まだ何も送信していません。
+	A test	テスト
+	A question	質問
+	Mail of {account}	{account} のメール
+	{sent} sent, {received} back	送信 {sent}、受信 {received}
+	Answered	回答済み
+	Change a model	モデルを変更
+	Fill in for	自動入力:
+	Format	形式
+	OpenAI's, which most servers speak	OpenAI の形式 (ほとんどのサーバーが対応)
+	Anthropic's	Anthropic の形式
+	Up to its version, such as /v1. Plain http only to this computer	バージョンまで (/v1 など)。暗号化なしの http はこのコンピューターへのみ
+	Model	モデル
+	API key	API キー
+	Kept in the keychain: type to change it	キーチェーンに保存済み: 変更するには入力
+	None needed for a model on this computer	このコンピューター上のモデルには不要です
+	Forget the key kept	保存したキーを削除
+	Longest answer, in tokens	最長の回答 (トークン数)
+	When it fails, ask	失敗したときに使う
+	No other model	ほかのモデルを使わない

@@ -2138,3 +2138,49 @@ count	occurrences	keer
 	To {name}	Aan {name}
 	Go to the message	Naar het bericht
 	Search files	Bestanden zoeken
+	AI	AI
+	A language model you add can answer questions about your mail. Nothing goes to one until you add it and let an account's mail go to it	Een taalmodel dat je toevoegt kan vragen over je mail beantwoorden. Er gaat niets naartoe tot je het toevoegt en de mail van een account ernaartoe laat gaan
+	Use models on this computer or its network alone	Alleen modellen op deze computer of het netwerk ervan gebruiken
+	No mail goes to a cloud provider, whatever an account allows	Er gaat geen mail naar een cloudprovider, wat een account ook toestaat
+	On this computer, such as Ollama, or at a cloud provider, with its key	Op deze computer, zoals Ollama, of bij een cloudprovider, met de sleutel ervan
+	Add a model	Een model toevoegen
+	{model} at {server}	{model} op {server}
+	On this computer or its network	Op deze computer of het netwerk ervan
+	At a cloud provider: mail you let go to it leaves this computer	Bij een cloudprovider: mail die je ernaartoe laat gaan, verlaat deze computer
+	Its key couldn't be kept: {error}	De sleutel kon niet worden bewaard: {error}
+	Its key is kept in this computer's keychain	De sleutel wordt bewaard in de sleutelhanger van deze computer
+	Testing…	Bezig met testen…
+	It answered: {text}	Het antwoordde: {text}
+	The test failed: {error}	De test is mislukt: {error}
+	Test	Testen
+	Model for questions	Model voor vragen
+	Answers, summaries and drafts	Antwoorden, samenvattingen en concepten
+	Model for quick decisions	Model voor snelle beslissingen
+	Short choices about mail: a small, fast model is enough	Korte keuzes over mail: een klein, snel model volstaat
+	The first model	Het eerste model
+	Whose mail may go to a model	Van welke accounts mail naar een model mag
+	Off: no question asked holds its mail. Local models: only those on this computer or its network are asked	Uit: geen enkele vraag bevat de mail ervan. Lokale modellen: alleen modellen op deze computer of het netwerk ervan worden gevraagd
+	Local models	Lokale modellen
+	Any model	Elk model
+	What was sent	Wat er is verzonden
+	The newest questions MailCraft's AI asked: when, what for, which model, whose mail and how much. What they said isn't kept	De nieuwste vragen van de AI van MailCraft: wanneer, waarvoor, aan welk model, wiens mail en hoeveel. Wat erin stond, wordt niet bewaard
+	Nothing sent yet.	Nog niets verzonden.
+	A test	Een test
+	A question	Een vraag
+	Mail of {account}	Mail van {account}
+	{sent} sent, {received} back	{sent} verzonden, {received} terug
+	Answered	Beantwoord
+	Change a model	Een model wijzigen
+	Fill in for	Invullen voor
+	Format	Indeling
+	OpenAI's, which most servers speak	Die van OpenAI, die de meeste servers spreken
+	Anthropic's	Die van Anthropic
+	Up to its version, such as /v1. Plain http only to this computer	Tot en met de versie, zoals /v1. Onversleuteld http alleen naar deze computer
+	Model	Model
+	API key	API-sleutel
+	Kept in the keychain: type to change it	Bewaard in de sleutelhanger: typ om te wijzigen
+	None needed for a model on this computer	Niet nodig voor een model op deze computer
+	Forget the key kept	Bewaarde sleutel vergeten
+	Longest answer, in tokens	Langste antwoord, in tokens
+	When it fails, ask	Als het mislukt, vragen aan
+	No other model	Geen ander model

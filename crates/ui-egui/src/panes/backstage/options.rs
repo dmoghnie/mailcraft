@@ -5,6 +5,7 @@ use super::*;
 /// MailCraft's own colour, the accent when none is chosen ([`theme::APP_COLOR`]).
 const APP_RGB: [u8; 3] = [theme::APP_COLOR.r(), theme::APP_COLOR.g(), theme::APP_COLOR.b()];
 
+mod ai;
 mod calendar;
 mod general;
 mod inbox;
@@ -28,6 +29,9 @@ pub(super) fn options(s: &Session, st: &UiState, ui: &mut Ui, acts: &mut Vec<Act
     safety::senders(s, &t, ui, acts);
     safety::safety(s, &t, ui, acts);
     safety::privacy(s, &t, ui, acts);
+    ai::models(s, &t, ui, acts);
+    ai::accounts(s, &t, ui, acts);
+    ai::record(s, &t, ui);
 }
 
 /// One setting of a card, one per row, by its name and the line about it (in the rows Info and

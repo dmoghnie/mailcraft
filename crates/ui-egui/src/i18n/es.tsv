@@ -2143,3 +2143,49 @@ count	occurrences	repeticiones
 	To {name}	Para {name}
 	Go to the message	Ir al mensaje
 	Search files	Buscar archivos
+	AI	IA
+	A language model you add can answer questions about your mail. Nothing goes to one until you add it and let an account's mail go to it	Un modelo de lenguaje que añadas puede responder preguntas sobre tu correo. No se le envía nada hasta que lo añadas y permitas que el correo de una cuenta vaya a él
+	Use models on this computer or its network alone	Usar solo modelos de este equipo o de su red
+	No mail goes to a cloud provider, whatever an account allows	Ningún correo va a un proveedor en la nube, permita lo que permita una cuenta
+	On this computer, such as Ollama, or at a cloud provider, with its key	En este equipo, como Ollama, o en un proveedor en la nube, con su clave
+	Add a model	Añadir un modelo
+	{model} at {server}	{model} en {server}
+	On this computer or its network	En este equipo o en su red
+	At a cloud provider: mail you let go to it leaves this computer	En un proveedor en la nube: el correo que permitas que vaya a él sale de este equipo
+	Its key couldn't be kept: {error}	No se pudo guardar su clave: {error}
+	Its key is kept in this computer's keychain	Su clave se guarda en el llavero de este equipo
+	Testing…	Probando…
+	It answered: {text}	Respondió: {text}
+	The test failed: {error}	La prueba falló: {error}
+	Test	Probar
+	Model for questions	Modelo para preguntas
+	Answers, summaries and drafts	Respuestas, resúmenes y borradores
+	Model for quick decisions	Modelo para decisiones rápidas
+	Short choices about mail: a small, fast model is enough	Decisiones breves sobre el correo: basta un modelo pequeño y rápido
+	The first model	El primer modelo
+	Whose mail may go to a model	Qué cuentas pueden enviar su correo a un modelo
+	Off: no question asked holds its mail. Local models: only those on this computer or its network are asked	Desactivado: ninguna pregunta incluye su correo. Modelos locales: solo se pregunta a los de este equipo o de su red
+	Local models	Modelos locales
+	Any model	Cualquier modelo
+	What was sent	Lo que se envió
+	The newest questions MailCraft's AI asked: when, what for, which model, whose mail and how much. What they said isn't kept	Las preguntas más recientes de la IA de MailCraft: cuándo, para qué, a qué modelo, de quién era el correo y cuánto. Lo que decían no se guarda
+	Nothing sent yet.	Aún no se ha enviado nada.
+	A test	Una prueba
+	A question	Una pregunta
+	Mail of {account}	Correo de {account}
+	{sent} sent, {received} back	{sent} enviados, {received} recibidos
+	Answered	Respondida
+	Change a model	Cambiar un modelo
+	Fill in for	Rellenar para
+	Format	Formato
+	OpenAI's, which most servers speak	El de OpenAI, que habla la mayoría de los servidores
+	Anthropic's	El de Anthropic
+	Up to its version, such as /v1. Plain http only to this computer	Hasta su versión, como /v1. http sin cifrar solo a este equipo
+	Model	Modelo
+	API key	Clave de API
+	Kept in the keychain: type to change it	Guardada en el llavero: escribe para cambiarla
+	None needed for a model on this computer	No hace falta para un modelo en este equipo
+	Forget the key kept	Olvidar la clave guardada
+	Longest answer, in tokens	Respuesta más larga, en tokens
+	When it fails, ask	Si falla, preguntar a
+	No other model	Ningún otro modelo

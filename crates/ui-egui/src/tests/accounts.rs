@@ -2,6 +2,7 @@
 
 use super::*;
 
+mod ai_models;
 mod archiving;
 pub(super) mod compacting;
 mod forms;

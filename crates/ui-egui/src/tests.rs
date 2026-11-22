@@ -487,6 +487,16 @@ pub(crate) fn tour() {
                 error: Some("that's the account's own address".into()),
                 ..Default::default()
             }),
+            Dialog::AiModel(Box::default()),
+            Dialog::AiModel(Box::new(crate::dialogs::AiModelForm {
+                id: Some("p1".into()),
+                name: "Ollama".into(),
+                url: "http://localhost:11434/v1".into(),
+                model: "llama3.2".into(),
+                has_key: true,
+                error: Some("no such model profile".into()),
+                ..Default::default()
+            })),
             Dialog::Dav(crate::dialogs::DavForm {
                 account: "sample".into(),
                 caldav: "https://dav.example.com/calendars/riley/default".into(),
@@ -663,6 +673,12 @@ pub(crate) fn backstage_tour(a: &mut MailApp, ctx: &egui::Context) {
     a.run("meetings.addHost", json!({"host": "jitsi.example.org"}));
     a.run("options.answeredInvites", json!({"after": "move", "replies": true}));
     a.run("view.externalTag", json!({"on": true, "domains": "studio.example"}));
+    // File › Options › AI with two models, the sample's mail let go to local ones, one tested
+    // (its question waits: the tour's backend sends nothing).
+    a.run("ai.saveProfile", json!({"name": "Ollama", "api": "openAi", "url": "http://localhost:11434/v1", "model": "llama3.2"}));
+    a.run("ai.saveProfile", json!({"name": "Cloud", "api": "anthropic", "url": "https://models.example/v1", "model": "large", "key": "sk-tour"}));
+    a.run("ai.allow", json!({"account": "sample", "reach": "local"}));
+    a.run("ai.test", json!({"profile": "p1"}));
     a.act(crate::Action::Backstage(crate::backstage::Page::Options));
     frame(ctx, a, vec![]);
     a.session.prefs = prefs;

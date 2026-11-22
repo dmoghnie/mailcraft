@@ -41,7 +41,7 @@ pub(crate) use accounts::data_file_path;
 pub use accounts::{AgeUnit, ArchiveRule, AutoArchive, Compacting, Compaction, FolderArchive, IDLE_AFTER_S};
 pub use accounts::{Changes, ImportState, Imports, SignInCheck, TrustedCertificate};
 pub(crate) use ai::ai_commands;
-pub use ai::{AI_LOG_KEPT, AiLogEntry, AiPrefs, AiProfile, AiReach, AiState, AiTask, AiTest};
+pub use ai::{AI_LOG_KEPT, AiLogEntry, AiPrefs, AiProfile, AiReach, AiState, AiTask, AiTest, ai_server, ai_url_is_local};
 use changing::Batch;
 pub(crate) use changing::NoticeAct;
 use changing::keys_by_account;

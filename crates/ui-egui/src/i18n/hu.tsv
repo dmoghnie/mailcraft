@@ -2143,3 +2143,49 @@ count	occurrences	előfordulás
 	To {name}	Címzett: {name}
 	Go to the message	Ugrás az üzenethez
 	Search files	Keresés a fájlokban
+	AI	MI
+	A language model you add can answer questions about your mail. Nothing goes to one until you add it and let an account's mail go to it	Egy hozzáadott nyelvi modell kérdésekre válaszolhat a leveleidről. Semmi nem jut el hozzá, amíg hozzá nem adod, és meg nem engeded, hogy egy fiók levelei hozzá kerüljenek
+	Use models on this computer or its network alone	Csak az ezen a számítógépen vagy a hálózatán futó modellek használata
+	No mail goes to a cloud provider, whatever an account allows	Egy levél sem jut felhőszolgáltatóhoz, bármit enged is egy fiók
+	On this computer, such as Ollama, or at a cloud provider, with its key	Ezen a számítógépen, például Ollama, vagy egy felhőszolgáltatónál, a kulcsával
+	Add a model	Modell hozzáadása
+	{model} at {server}	{model} itt: {server}
+	On this computer or its network	Ezen a számítógépen vagy a hálózatán
+	At a cloud provider: mail you let go to it leaves this computer	Felhőszolgáltatónál: a levelek, amelyeket hozzá engedsz, elhagyják ezt a számítógépet
+	Its key couldn't be kept: {error}	A kulcsát nem sikerült megőrizni: {error}
+	Its key is kept in this computer's keychain	A kulcsa a számítógép jelszótárolójában van
+	Testing…	Tesztelés…
+	It answered: {text}	Válasza: {text}
+	The test failed: {error}	A teszt sikertelen: {error}
+	Test	Kipróbálás
+	Model for questions	Modell kérdésekhez
+	Answers, summaries and drafts	Válaszok, összefoglalók és piszkozatok
+	Model for quick decisions	Modell gyors döntésekhez
+	Short choices about mail: a small, fast model is enough	Rövid döntések levelekről: elég egy kicsi, gyors modell
+	The first model	Az első modell
+	Whose mail may go to a model	Mely fiókok levelei mehetnek modellhez
+	Off: no question asked holds its mail. Local models: only those on this computer or its network are asked	Ki: egyetlen kérdés sem tartalmazza a leveleit. Helyi modellek: csak az ezen a számítógépen vagy a hálózatán futó modellek kapnak kérdést
+	Local models	Helyi modellek
+	Any model	Bármely modell
+	What was sent	Mi lett elküldve
+	The newest questions MailCraft's AI asked: when, what for, which model, whose mail and how much. What they said isn't kept	A MailCraft MI-jének legutóbbi kérdései: mikor, mire, melyik modellnek, kinek a leveleiből és mennyi. A tartalmukat nem őrzi meg
+	Nothing sent yet.	Még semmi sem lett elküldve.
+	A test	Teszt
+	A question	Kérdés
+	Mail of {account}	{account} levelei
+	{sent} sent, {received} back	{sent} elküldve, {received} vissza
+	Answered	Megválaszolva
+	Change a model	Modell módosítása
+	Fill in for	Kitöltés ehhez:
+	Format	Formátum
+	OpenAI's, which most servers speak	Az OpenAI-é, ezt beszéli a legtöbb kiszolgáló
+	Anthropic's	Az Anthropicé
+	Up to its version, such as /v1. Plain http only to this computer	A verzióig, például /v1. Titkosítatlan http csak ehhez a számítógéphez
+	Model	Modell
+	API key	API-kulcs
+	Kept in the keychain: type to change it	A jelszótárolóban van: a módosításhoz írj be újat
+	None needed for a model on this computer	Ezen a számítógépen futó modellhez nem kell
+	Forget the key kept	A megőrzött kulcs elfelejtése
+	Longest answer, in tokens	Leghosszabb válasz, tokenben
+	When it fails, ask	Ha nem sikerül, ezt kérdezze
+	No other model	Nincs másik modell

@@ -2142,3 +2142,49 @@ count	occurrences	회
 	To {name}	받는 사람: {name}
 	Go to the message	메시지로 이동
 	Search files	파일 검색
+	AI	AI
+	A language model you add can answer questions about your mail. Nothing goes to one until you add it and let an account's mail go to it	추가한 언어 모델이 메일에 관한 질문에 답할 수 있습니다. 모델을 추가하고 계정의 메일을 보내도록 허용하기 전에는 아무것도 보내지 않습니다
+	Use models on this computer or its network alone	이 컴퓨터나 그 네트워크에 있는 모델만 사용
+	No mail goes to a cloud provider, whatever an account allows	계정에서 무엇을 허용하든 메일이 클라우드 제공업체로 가지 않습니다
+	On this computer, such as Ollama, or at a cloud provider, with its key	이 컴퓨터(예: Ollama) 또는 키를 사용하는 클라우드 제공업체
+	Add a model	모델 추가
+	{model} at {server}	{server}의 {model}
+	On this computer or its network	이 컴퓨터 또는 그 네트워크
+	At a cloud provider: mail you let go to it leaves this computer	클라우드 제공업체: 보내도록 허용한 메일은 이 컴퓨터를 떠납니다
+	Its key couldn't be kept: {error}	키를 보관하지 못했습니다: {error}
+	Its key is kept in this computer's keychain	키는 이 컴퓨터의 키체인에 보관됩니다
+	Testing…	테스트 중…
+	It answered: {text}	응답: {text}
+	The test failed: {error}	테스트 실패: {error}
+	Test	테스트
+	Model for questions	질문용 모델
+	Answers, summaries and drafts	답변, 요약, 초안
+	Model for quick decisions	빠른 결정용 모델
+	Short choices about mail: a small, fast model is enough	메일에 관한 짧은 선택: 작고 빠른 모델이면 충분합니다
+	The first model	첫 번째 모델
+	Whose mail may go to a model	메일을 모델에 보낼 수 있는 계정
+	Off: no question asked holds its mail. Local models: only those on this computer or its network are asked	끄기: 어떤 질문에도 그 메일이 담기지 않습니다. 로컬 모델: 이 컴퓨터나 그 네트워크의 모델에만 질문합니다
+	Local models	로컬 모델
+	Any model	모든 모델
+	What was sent	보낸 내용
+	The newest questions MailCraft's AI asked: when, what for, which model, whose mail and how much. What they said isn't kept	MailCraft AI의 최근 질문: 언제, 무엇을 위해, 어떤 모델에, 누구의 메일을, 얼마나. 내용은 보관하지 않습니다
+	Nothing sent yet.	아직 보낸 것이 없습니다.
+	A test	테스트
+	A question	질문
+	Mail of {account}	{account}의 메일
+	{sent} sent, {received} back	{sent} 보냄, {received} 받음
+	Answered	응답함
+	Change a model	모델 변경
+	Fill in for	자동 입력:
+	Format	형식
+	OpenAI's, which most servers speak	OpenAI 형식(대부분의 서버가 사용)
+	Anthropic's	Anthropic 형식
+	Up to its version, such as /v1. Plain http only to this computer	버전까지(예: /v1). 암호화되지 않은 http는 이 컴퓨터로만
+	Model	모델
+	API key	API 키
+	Kept in the keychain: type to change it	키체인에 보관됨: 바꾸려면 입력
+	None needed for a model on this computer	이 컴퓨터의 모델에는 필요 없음
+	Forget the key kept	보관된 키 지우기
+	Longest answer, in tokens	가장 긴 답변(토큰)
+	When it fails, ask	실패하면 물어볼 모델
+	No other model	다른 모델 없음

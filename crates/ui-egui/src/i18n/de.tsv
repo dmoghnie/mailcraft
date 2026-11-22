@@ -2143,3 +2143,49 @@ count	occurrences	Terminen
 	To {name}	An {name}
 	Go to the message	Zur Nachricht
 	Search files	Dateien durchsuchen
+	AI	KI
+	A language model you add can answer questions about your mail. Nothing goes to one until you add it and let an account's mail go to it	Ein Sprachmodell, das Sie hinzufügen, kann Fragen zu Ihren E-Mails beantworten. Nichts geht an ein Modell, bevor Sie es hinzufügen und die E-Mails eines Kontos dafür freigeben
+	Use models on this computer or its network alone	Nur Modelle auf diesem Computer oder in seinem Netzwerk verwenden
+	No mail goes to a cloud provider, whatever an account allows	Keine E-Mail geht an einen Cloud-Anbieter, was auch immer ein Konto erlaubt
+	On this computer, such as Ollama, or at a cloud provider, with its key	Auf diesem Computer, etwa Ollama, oder bei einem Cloud-Anbieter, mit seinem Schlüssel
+	Add a model	Modell hinzufügen
+	{model} at {server}	{model} auf {server}
+	On this computer or its network	Auf diesem Computer oder in seinem Netzwerk
+	At a cloud provider: mail you let go to it leaves this computer	Bei einem Cloud-Anbieter: E-Mails, die Sie dafür freigeben, verlassen diesen Computer
+	Its key couldn't be kept: {error}	Sein Schlüssel konnte nicht gespeichert werden: {error}
+	Its key is kept in this computer's keychain	Sein Schlüssel ist im Schlüsselbund dieses Computers gespeichert
+	Testing…	Wird getestet…
+	It answered: {text}	Antwort: {text}
+	The test failed: {error}	Der Test ist fehlgeschlagen: {error}
+	Test	Testen
+	Model for questions	Modell für Fragen
+	Answers, summaries and drafts	Antworten, Zusammenfassungen und Entwürfe
+	Model for quick decisions	Modell für schnelle Entscheidungen
+	Short choices about mail: a small, fast model is enough	Kurze Entscheidungen über E-Mails: Ein kleines, schnelles Modell genügt
+	The first model	Das erste Modell
+	Whose mail may go to a model	Wessen E-Mails an ein Modell gehen dürfen
+	Off: no question asked holds its mail. Local models: only those on this computer or its network are asked	Aus: Keine Frage enthält seine E-Mails. Lokale Modelle: Nur Modelle auf diesem Computer oder in seinem Netzwerk werden gefragt
+	Local models	Lokale Modelle
+	Any model	Jedes Modell
+	What was sent	Was gesendet wurde
+	The newest questions MailCraft's AI asked: when, what for, which model, whose mail and how much. What they said isn't kept	Die neuesten Fragen der KI von MailCraft: wann, wofür, an welches Modell, wessen E-Mails und wie viel. Was sie enthielten, wird nicht gespeichert
+	Nothing sent yet.	Noch nichts gesendet.
+	A test	Ein Test
+	A question	Eine Frage
+	Mail of {account}	E-Mails von {account}
+	{sent} sent, {received} back	{sent} gesendet, {received} zurück
+	Answered	Beantwortet
+	Change a model	Modell ändern
+	Fill in for	Ausfüllen für
+	Format	Format
+	OpenAI's, which most servers speak	Das von OpenAI, das die meisten Server sprechen
+	Anthropic's	Das von Anthropic
+	Up to its version, such as /v1. Plain http only to this computer	Bis zur Version, etwa /v1. Unverschlüsseltes http nur zu diesem Computer
+	Model	Modell
+	API key	API-Schlüssel
+	Kept in the keychain: type to change it	Im Schlüsselbund gespeichert: zum Ändern eingeben
+	None needed for a model on this computer	Für ein Modell auf diesem Computer nicht nötig
+	Forget the key kept	Gespeicherten Schlüssel vergessen
+	Longest answer, in tokens	Längste Antwort, in Token
+	When it fails, ask	Wenn es fehlschlägt, fragen
+	No other model	Kein anderes Modell

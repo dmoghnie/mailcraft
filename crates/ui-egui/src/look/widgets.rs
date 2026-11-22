@@ -549,6 +549,16 @@ pub fn switch(ui: &mut Ui, t: &Tokens, on: &mut bool, label: &str) -> Response {
 /// One choice among a few, as joined buttons (Theme: System, Light, Dark), labels translated.
 /// The picked one is raised; returns the index clicked, if any.
 pub fn segmented(ui: &mut Ui, t: &Tokens, id: &str, options: &[&str], selected: usize) -> Option<usize> {
+    segmented_named(ui, t, id, options, None, selected)
+}
+
+/// [`segmented`] in one row of several alike (one per account): each choice named to a screen
+/// reader with the row's name first (`riley@example.com: Off`), where the labels alone repeat.
+pub fn segmented_in(ui: &mut Ui, t: &Tokens, id: &str, options: &[&str], row: &str, selected: usize) -> Option<usize> {
+    segmented_named(ui, t, id, options, Some(row), selected)
+}
+
+fn segmented_named(ui: &mut Ui, t: &Tokens, id: &str, options: &[&str], row: Option<&str>, selected: usize) -> Option<usize> {
     let font = theme::regular(13.0);
     let labels: Vec<String> = options.iter().map(|o| o.to_string()).collect();
     let widths: Vec<f32> = labels.iter().map(|l| ui.painter().layout_no_wrap(l.clone(), font.clone(), t.text).size().x + 24.0).collect();
@@ -561,7 +571,8 @@ pub fn segmented(ui: &mut Ui, t: &Tokens, id: &str, options: &[&str], selected: 
         let r = egui::Rect::from_min_size(egui::pos2(x, rect.top() + 2.0), vec2(*w, 24.0));
         let resp = ui.interact(r, ui.scope_id().with(("segment", id, i)), Sense::click());
         let on = i == selected;
-        resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::RadioButton, ui.is_enabled(), on, label));
+        let name = row.map_or_else(|| label.clone(), |row| format!("{row}: {label}"));
+        resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::RadioButton, ui.is_enabled(), on, &name));
         if on {
             ui.painter().rect(r, 4.0, t.surface, Stroke::new(1.0, t.border), egui::StrokeKind::Inside);
         } else if resp.hovered() {

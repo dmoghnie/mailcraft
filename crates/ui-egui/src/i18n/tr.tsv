@@ -2143,3 +2143,49 @@ count	occurrences	kez
 	To {name}	Kime: {name}
 	Go to the message	İletiye git
 	Search files	Dosyalarda ara
+	AI	Yapay zekâ
+	A language model you add can answer questions about your mail. Nothing goes to one until you add it and let an account's mail go to it	Eklediğiniz bir dil modeli postalarınızla ilgili soruları yanıtlayabilir. Onu ekleyip bir hesabın postasının ona gitmesine izin verene kadar ona hiçbir şey gönderilmez
+	Use models on this computer or its network alone	Yalnızca bu bilgisayardaki veya ağındaki modelleri kullan
+	No mail goes to a cloud provider, whatever an account allows	Bir hesap neye izin verirse versin, hiçbir posta bulut sağlayıcısına gitmez
+	On this computer, such as Ollama, or at a cloud provider, with its key	Bu bilgisayarda (Ollama gibi) veya anahtarıyla bir bulut sağlayıcısında
+	Add a model	Model ekle
+	{model} at {server}	{server} üzerinde {model}
+	On this computer or its network	Bu bilgisayarda veya ağında
+	At a cloud provider: mail you let go to it leaves this computer	Bir bulut sağlayıcısında: ona gitmesine izin verdiğiniz posta bu bilgisayardan çıkar
+	Its key couldn't be kept: {error}	Anahtarı saklanamadı: {error}
+	Its key is kept in this computer's keychain	Anahtarı bu bilgisayarın anahtarlığında tutulur
+	Testing…	Test ediliyor…
+	It answered: {text}	Yanıtı: {text}
+	The test failed: {error}	Test başarısız oldu: {error}
+	Test	Test et
+	Model for questions	Sorular için model
+	Answers, summaries and drafts	Yanıtlar, özetler ve taslaklar
+	Model for quick decisions	Hızlı kararlar için model
+	Short choices about mail: a small, fast model is enough	Posta hakkında kısa seçimler: küçük, hızlı bir model yeter
+	The first model	İlk model
+	Whose mail may go to a model	Hangi hesapların postası bir modele gidebilir
+	Off: no question asked holds its mail. Local models: only those on this computer or its network are asked	Kapalı: hiçbir soru onun postasını içermez. Yerel modeller: yalnızca bu bilgisayardaki veya ağındaki modellere sorulur
+	Local models	Yerel modeller
+	Any model	Herhangi bir model
+	What was sent	Gönderilenler
+	The newest questions MailCraft's AI asked: when, what for, which model, whose mail and how much. What they said isn't kept	MailCraft yapay zekâsının en son soruları: ne zaman, ne için, hangi modele, kimin postası ve ne kadar. İçerikleri saklanmaz
+	Nothing sent yet.	Henüz bir şey gönderilmedi.
+	A test	Bir test
+	A question	Bir soru
+	Mail of {account}	{account} postası
+	{sent} sent, {received} back	{sent} gönderildi, {received} geldi
+	Answered	Yanıtlandı
+	Change a model	Modeli değiştir
+	Fill in for	Şunun için doldur:
+	Format	Biçim
+	OpenAI's, which most servers speak	OpenAI'ninki, çoğu sunucunun konuştuğu
+	Anthropic's	Anthropic'inki
+	Up to its version, such as /v1. Plain http only to this computer	Sürümüne kadar, örneğin /v1. Şifresiz http yalnızca bu bilgisayara
+	Model	Model
+	API key	API anahtarı
+	Kept in the keychain: type to change it	Anahtarlıkta tutuluyor: değiştirmek için yazın
+	None needed for a model on this computer	Bu bilgisayardaki bir model için gerekmez
+	Forget the key kept	Kayıtlı anahtarı unut
+	Longest answer, in tokens	En uzun yanıt, token olarak
+	When it fails, ask	Başarısız olursa şuna sor
+	No other model	Başka model yok

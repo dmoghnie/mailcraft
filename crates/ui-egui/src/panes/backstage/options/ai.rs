@@ -1,0 +1,186 @@
+//! Options' AI cards: the models MailCraft's own AI may ask, how far each account's mail may go
+//! to them, and the record of what went where. Nothing is sent until a model is added and an
+//! account's mail let go to it.
+
+use super::*;
+use crate::dialogs::AiModelForm;
+use mailcraft_engine::model::dates;
+use mailcraft_engine::{AiProfile, AiReach, AiTask, AiTest};
+
+/// The newest questions the record shows.
+const RECORD_SHOWN: usize = 20;
+/// The most of a test's answer shown, in characters.
+const ANSWER_SHOWN: usize = 120;
+
+/// The models, and the switch that keeps every question on this computer or its network.
+pub(super) fn models(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
+    let ai = &s.prefs.ai;
+    let about =
+        tl!("A language model you add can answer questions about your mail. Nothing goes to one until you add it and let an account's mail go to it");
+    card(ui, t, tl!("AI"), Some(about), |ui| {
+        let local_only = Switch {
+            label: tl!("Use models on this computer or its network alone"),
+            about: Some(tl!("No mail goes to a cloud provider, whatever an account allows")),
+            on: ai.local_only,
+            cmd: "ai.localOnly",
+        };
+        switch_row(ui, t, true, local_only, acts);
+        for p in &ai.profiles {
+            profile(s, t, ui, p, acts);
+        }
+        let more = tl!("On this computer, such as Ollama, or at a cloud provider, with its key");
+        setting(ui, t, false, tl!("Add a model"), Some(more), |ui| {
+            if ui.button(tl!("Add…")).clicked() {
+                acts.push(Action::Dialog(Dialog::AiModel(Box::default())));
+            }
+        });
+        if ai.profiles.len() > 1 {
+            uses(s, t, ui, acts);
+        }
+    });
+}
+
+/// A model: its name; what it is and where; its key and its last test; and what can be done.
+fn profile(s: &Session, t: &Tokens, ui: &mut Ui, p: &AiProfile, acts: &mut Vec<Action>) {
+    let mut lines = vec![tf!("{model} at {server}", model = p.endpoint.model, server = mailcraft_engine::ai_server(&p.endpoint.url))];
+    lines.push(if p.local() {
+        tl!("On this computer or its network").to_string()
+    } else {
+        tl!("At a cloud provider: mail you let go to it leaves this computer").to_string()
+    });
+    if let Some(e) = s.ai.key_errors.get(&p.id) {
+        lines.push(tf!("Its key couldn't be kept: {error}", error = e));
+    } else if p.has_key {
+        lines.push(tl!("Its key is kept in this computer's keychain").to_string());
+    }
+    let testing = matches!(s.ai.tests.get(&p.id), Some(AiTest::Asking));
+    match s.ai.tests.get(&p.id) {
+        Some(AiTest::Asking) => lines.push(tl!("Testing…").to_string()),
+        Some(AiTest::Answered { text }) => {
+            let text: String = text.chars().filter(|c| !c.is_control()).take(ANSWER_SHOWN).collect();
+            lines.push(tf!("It answered: {text}", text = text));
+        }
+        Some(AiTest::Failed { error }) => lines.push(tf!("The test failed: {error}", error = error)),
+        None => {}
+    }
+    let about = lines.join("\n");
+    setting(ui, t, false, &p.name, Some(&about), |ui| {
+        if button(ui, p, tl!("Remove"), true).clicked() {
+            acts.push(Action::Run("ai.removeProfile", json!({"id": p.id})));
+        }
+        if button(ui, p, tl!("Change…"), true).clicked() {
+            acts.push(Action::Dialog(Dialog::AiModel(Box::new(AiModelForm::of(p)))));
+        }
+        if button(ui, p, tl!("Test"), !testing).clicked() {
+            acts.push(Action::Run("ai.test", json!({"profile": p.id})));
+        }
+    });
+}
+
+/// One of a model's buttons, named to a screen reader with the model first (`Ollama: Test`):
+/// each model's row has the same ones.
+fn button(ui: &mut Ui, p: &AiProfile, label: &str, enabled: bool) -> egui::Response {
+    let resp = ui.add_enabled(enabled, egui::Button::new(label));
+    widgets::named(ui, &resp, &format!("{}: {label}", p.name), enabled, None);
+    resp
+}
+
+/// Which model does each kind of work: the first one, unless another is chosen.
+fn uses(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
+    let ai = &s.prefs.ai;
+    for (task, label, about) in [
+        (AiTask::Chat, tl!("Model for questions"), tl!("Answers, summaries and drafts")),
+        (AiTask::Decision, tl!("Model for quick decisions"), tl!("Short choices about mail: a small, fast model is enough")),
+    ] {
+        let chosen = ai.uses.get(&task).and_then(|id| ai.profile(id));
+        let first = tl!("The first model");
+        let shown = chosen.map_or(first, |p| p.name.as_str());
+        setting(ui, t, false, label, Some(about), |ui| {
+            egui::ComboBox::from_id_salt(("ai-use", task.code())).width(220.0).selected_text(shown).show_ui(ui, |ui| {
+                if ui.selectable_label(chosen.is_none(), first).clicked() {
+                    acts.push(Action::Run("ai.use", json!({"task": task.code(), "profile": ""})));
+                }
+                for p in &ai.profiles {
+                    let on = chosen.is_some_and(|c| c.id == p.id);
+                    if ui.selectable_label(on, p.name.as_str()).clicked() && !on {
+                        acts.push(Action::Run("ai.use", json!({"task": task.code(), "profile": p.id})));
+                    }
+                }
+            });
+        });
+    }
+}
+
+/// How far each account's mail may go: to no model, to those on this computer or its network,
+/// or to any.
+pub(super) fn accounts(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
+    if s.prefs.ai.profiles.is_empty() || s.accounts.is_empty() {
+        return;
+    }
+    let about = tl!("Off: no question asked holds its mail. Local models: only those on this computer or its network are asked");
+    card(ui, t, tl!("Whose mail may go to a model"), Some(about), |ui| {
+        let options = [tl!("Off"), tl!("Local models"), tl!("Any model")];
+        for (i, a) in s.accounts.iter().enumerate() {
+            let id = &a.config.id;
+            let who = if a.config.email.is_empty() { a.config.name.as_str() } else { a.config.email.as_str() };
+            let now = match s.prefs.ai.accounts.get(id) {
+                None => 0,
+                Some(AiReach::Local) => 1,
+                Some(AiReach::Any) => 2,
+            };
+            setting(ui, t, i == 0, who, None, |ui| {
+                if let Some(pick) = widgets::segmented_in(ui, t, &format!("ai-reach-{id}"), &options, who, now)
+                    && pick != now
+                    && let Some(reach) = ["off", "local", "any"].get(pick)
+                {
+                    acts.push(Action::Run("ai.allow", json!({"account": id, "reach": reach})));
+                }
+            });
+        }
+    });
+}
+
+/// What went where: the newest questions, by when, what for, to which model, whose mail and how
+/// much. What they said is never kept.
+pub(super) fn record(s: &Session, t: &Tokens, ui: &mut Ui) {
+    if s.prefs.ai.profiles.is_empty() && s.ai.log.is_empty() {
+        return;
+    }
+    let about = tl!("The newest questions MailCraft's AI asked: when, what for, which model, whose mail and how much. What they said isn't kept");
+    card(ui, t, tl!("What was sent"), Some(about), |ui| {
+        if s.ai.log.is_empty() {
+            ui.add_space(4.0);
+            ui.label(RichText::new(tl!("Nothing sent yet.")).color(t.faint).small());
+            ui.add_space(8.0);
+        }
+        for (i, (_, e)) in s.ai.log.iter().rev().take(RECORD_SHOWN).enumerate() {
+            let when = crate::i18n::date(&dates::list_time(e.at, &s.clock));
+            let purpose = match e.purpose.as_str() {
+                "test" => tl!("A test").to_string(),
+                "question" => tl!("A question").to_string(),
+                other => other.to_string(),
+            };
+            let mut lines = vec![format!("{} · {}", e.profile, tf!("{model} at {server}", model = e.model, server = e.server))];
+            if let Some(account) = &e.account {
+                let who = s
+                    .account(account)
+                    .map_or(account.as_str(), |a| if a.config.email.is_empty() { a.config.name.as_str() } else { a.config.email.as_str() });
+                lines.push(tf!("Mail of {account}", account = who));
+            }
+            lines.push(tf!(
+                "{sent} sent, {received} back",
+                sent = widgets::human_size(usize::try_from(e.sent).unwrap_or(usize::MAX)),
+                received = widgets::human_size(usize::try_from(e.received).unwrap_or(usize::MAX))
+            ));
+            let outcome = match e.outcome.as_str() {
+                "waiting" => tl!("Waiting"),
+                "answered" => tl!("Answered"),
+                _ => tl!("Failed"),
+            };
+            let about = lines.join("\n");
+            setting(ui, t, i == 0, &format!("{when} · {purpose}"), Some(&about), |ui| {
+                ui.label(RichText::new(outcome).color(if e.outcome == "failed" { t.danger } else { t.dim }));
+            });
+        }
+    });
+}

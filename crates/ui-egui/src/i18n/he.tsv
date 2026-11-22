@@ -2138,3 +2138,49 @@ count	occurrences	פעמים
 	To {name}	אל {name}
 	Go to the message	מעבר להודעה
 	Search files	חפש קבצים
+	AI	בינה מלאכותית
+	A language model you add can answer questions about your mail. Nothing goes to one until you add it and let an account's mail go to it	מודל שפה שנוסף יכול לענות על שאלות על הדואר שלך. שום דבר לא נשלח אליו עד שמוסיפים אותו ומאפשרים לדואר של חשבון להגיע אליו
+	Use models on this computer or its network alone	להשתמש רק במודלים במחשב הזה או ברשת שלו
+	No mail goes to a cloud provider, whatever an account allows	שום דואר לא נשלח לספק ענן, לא משנה מה החשבון מתיר
+	On this computer, such as Ollama, or at a cloud provider, with its key	במחשב הזה, כמו Ollama, או אצל ספק ענן, עם המפתח שלו
+	Add a model	הוספת מודל
+	{model} at {server}	{model} בשרת {server}
+	On this computer or its network	במחשב הזה או ברשת שלו
+	At a cloud provider: mail you let go to it leaves this computer	אצל ספק ענן: דואר שמתירים לו להגיע אליו יוצא מהמחשב הזה
+	Its key couldn't be kept: {error}	לא ניתן היה לשמור את המפתח שלו: {error}
+	Its key is kept in this computer's keychain	המפתח שלו שמור במחזיק המפתחות של המחשב הזה
+	Testing…	בודק…
+	It answered: {text}	התשובה: {text}
+	The test failed: {error}	הבדיקה נכשלה: {error}
+	Test	לבדוק
+	Model for questions	מודל לשאלות
+	Answers, summaries and drafts	תשובות, סיכומים וטיוטות
+	Model for quick decisions	מודל להחלטות מהירות
+	Short choices about mail: a small, fast model is enough	בחירות קצרות לגבי דואר: מודל קטן ומהיר מספיק
+	The first model	המודל הראשון
+	Whose mail may go to a model	הדואר של אילו חשבונות יכול להגיע למודל
+	Off: no question asked holds its mail. Local models: only those on this computer or its network are asked	כבוי: אף שאלה לא מכילה את הדואר שלו. מודלים מקומיים: נשאלים רק מודלים במחשב הזה או ברשת שלו
+	Local models	מודלים מקומיים
+	Any model	כל מודל
+	What was sent	מה נשלח
+	The newest questions MailCraft's AI asked: when, what for, which model, whose mail and how much. What they said isn't kept	השאלות האחרונות של הבינה המלאכותית של MailCraft: מתי, לשם מה, לאיזה מודל, הדואר של מי וכמה. התוכן שלהן לא נשמר
+	Nothing sent yet.	עדיין לא נשלח דבר.
+	A test	בדיקה
+	A question	שאלה
+	Mail of {account}	הדואר של {account}
+	{sent} sent, {received} back	נשלחו {sent}, חזרו {received}
+	Answered	נענה
+	Change a model	שינוי מודל
+	Fill in for	מילוי עבור
+	Format	תבנית
+	OpenAI's, which most servers speak	של OpenAI, שרוב השרתים מדברים
+	Anthropic's	של Anthropic
+	Up to its version, such as /v1. Plain http only to this computer	עד הגרסה, כמו /v1. http לא מוצפן רק אל המחשב הזה
+	Model	מודל
+	API key	מפתח API
+	Kept in the keychain: type to change it	שמור במחזיק המפתחות: יש להקליד כדי לשנות
+	None needed for a model on this computer	לא נדרש למודל במחשב הזה
+	Forget the key kept	לשכוח את המפתח השמור
+	Longest answer, in tokens	התשובה הארוכה ביותר, בטוקנים
+	When it fails, ask	אם נכשל, לשאול את
+	No other model	בלי מודל אחר
