@@ -350,6 +350,30 @@ fn a_data_file_let_go_is_not_held_by_a_seal() {
     drop(s);
 }
 
+/// The store let go of closes its data files once a seal under way has ended: the seal holds
+/// its file open, and a data file brought in from it straight after was refused as in use.
+#[test]
+fn closing_waits_for_a_seal_under_way() {
+    let t = temp("close-sealing");
+    let s = packed_store(&t);
+    s.write_prepared(vec![(inbox(1), Store::prepare(true, b"Subject: x\r\n\r\nx".to_vec()))], false).unwrap();
+    let seals = packs(&s).seals.clone();
+    seals.pretend_sealing(Some("a1"));
+    let closed = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let closer = {
+        let closed = closed.clone();
+        std::thread::spawn(move || {
+            drop(s);
+            closed.store(true, std::sync::atomic::Ordering::SeqCst);
+        })
+    };
+    std::thread::sleep(Duration::from_millis(300));
+    assert!(!closed.load(std::sync::atomic::Ordering::SeqCst), "closed while a seal held a data file open");
+    seals.pretend_sealing(None);
+    closer.join().unwrap();
+    assert!(closed.load(std::sync::atomic::Ordering::SeqCst));
+}
+
 /// Batch `n` of [`killed_after_batches`]: 2 MiB that doesn't compress.
 fn undurable_batch(n: u32) -> Vec<(MessageKey, Vec<u8>)> {
     (0..8).map(|i| (inbox(n * 100 + i), noise(256 << 10, u64::from(n * 100 + i) + 3))).collect()

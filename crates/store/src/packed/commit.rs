@@ -354,10 +354,16 @@ impl Seals {
         *self.times.lock().unwrap_or_else(PoisonError::into_inner)
     }
 
-    /// No more sealing (the data files are closing, which seals them).
+    /// No more sealing (the data files are closing, which seals them), once a seal under way has
+    /// ended: it holds its data file open, which was still open (and refused as in use) once
+    /// the store was let go of.
     pub(super) fn stop(&self) {
-        self.lock().stop = true;
+        let mut w = self.lock();
+        w.stop = true;
         self.wake.notify_all();
+        while w.sealing.is_some() {
+            w = self.sealed.wait(w).unwrap_or_else(PoisonError::into_inner);
+        }
     }
 }
 
