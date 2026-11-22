@@ -47,6 +47,9 @@ fn starts_takes_actions_and_draws() {
     until(|v| v["kind"] == "render" && v["view"]["screen"] == "folders");
     zone(0, "UTC").unwrap();
 
+    // The cache as the desktop's: the data files' folder made in the app's folder.
+    assert!(dir.join("Data Files").is_dir());
+
     let _ = std::fs::remove_dir_all(&dir);
 }
 

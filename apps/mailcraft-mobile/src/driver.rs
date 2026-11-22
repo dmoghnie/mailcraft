@@ -85,6 +85,25 @@ impl Driver {
     }
 }
 
+/// Where each account's data file (`<address>.mailcraft`, redb) is kept: inside the app's own
+/// folder, which only the app can read (a phone has no Documents folder to share them in).
+const DATA_FILES: &str = "Data Files";
+
+/// The cache as the desktop opens it: one data file per account in [`DATA_FILES`], and the
+/// account list and app state in `dir`. Mail kept in folders from before (this app's first
+/// builds) is brought into the data files as they open. When they can't open, the folders are
+/// opened as they are, as the desktop does, so the mail is still there.
+fn open_store(dir: &std::path::Path) -> Result<Store, String> {
+    let packed = Store::packed(dir, dir.join(DATA_FILES)).and_then(|s| s.open_data_files().map(|()| s));
+    match packed {
+        Ok(s) => Ok(s),
+        Err(e) => {
+            log::error!("the data files didn't open: {e}");
+            Store::open_alone(dir).map_err(|e| format!("the mail folder didn't open: {e}"))
+        }
+    }
+}
+
 struct App {
     core: Core<Mail>,
     pool: Pool,
@@ -101,7 +120,7 @@ impl App {
         waker: Sender<Input>,
         outbox: Arc<Outbox>,
     ) -> Result<App, String> {
-        let store = Store::open_alone(dir).map_err(|e| format!("the mail folder didn't open: {e}"))?;
+        let store = open_store(&dir)?;
         let creds = Arc::new(ShellCredentials::new(secrets, outbox.clone()));
         let pool = Pool::new(store.clone(), creds);
         let waker = Mutex::new(waker);
