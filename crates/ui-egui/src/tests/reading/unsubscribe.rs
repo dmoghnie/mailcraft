@@ -13,11 +13,18 @@ fn shows(ctx: &egui::Context, a: &mut MailApp, label: &str) -> bool {
     names(ctx, a).iter().any(|n| n.name() == Some(label))
 }
 
-fn click_last(ctx: &egui::Context, a: &mut MailApp, label: &str) {
+/// Click the button called `label`, other than one at `not` (the bar's, under a dialog). Where
+/// it was.
+fn click_button(ctx: &egui::Context, a: &mut MailApp, label: &str, not: Option<egui::Pos2>) -> egui::Pos2 {
     let all = names(ctx, a);
-    let at = all.iter().filter(|n| n.name() == Some(label)).filter_map(Named::centre).next_back();
+    let at = all
+        .iter()
+        .filter(|n| n.name() == Some(label) && n.role == egui::accesskit::Role::Button)
+        .filter_map(Named::centre)
+        .find(|p| not.is_none_or(|q| p.distance(q) > 2.0));
     let at = at.unwrap_or_else(|| panic!("no {label} to click: {:?}", all.iter().filter_map(Named::name).collect::<Vec<_>>()));
     click(ctx, a, at);
+    at
 }
 
 fn opened(ctx: &egui::Context, a: &mut MailApp, folder: &str, subject: &str) {
@@ -40,14 +47,14 @@ fn unsubscribing_asks_first_then_sends_the_lists_message() {
     let before = a.session.list.len();
     opened(&ctx, &mut a, "INBOX", "Open call: winter group show");
     assert!(shows(&ctx, &mut a, "From a mailing list."));
-    click_last(&ctx, &mut a, "Unsubscribe");
+    let bar = click_button(&ctx, &mut a, "Unsubscribe", None);
     frame(&ctx, &mut a, vec![]);
     assert!(matches!(a.ui.dialog, Some(Dialog::Unsubscribe { .. })), "not asked first");
     let texts: Vec<String> = drawn_text(&ctx, &mut a, SCREEN).into_iter().map(|d| d.text).collect();
     assert!(texts.iter().any(|t| t.contains("leave@gallery.example")), "where it goes isn't said: {texts:?}");
     assert!(a.session.notices.is_empty(), "something happened before it was answered");
     // Answered: the list's message goes, from the account.
-    click_last(&ctx, &mut a, "Unsubscribe");
+    click_button(&ctx, &mut a, "Unsubscribe", Some(bar));
     frame(&ctx, &mut a, vec![]);
     assert!(a.ui.dialog.is_none());
     a.run("folder.open", json!({"account": "sample", "folder": "Sent"}));
