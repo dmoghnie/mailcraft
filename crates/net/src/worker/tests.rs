@@ -232,7 +232,8 @@ impl Credentials for Asked {
 
 /// The keychain is asked on the account's own thread, never the caller's: on macOS it may ask
 /// the user first (after an update), and the caller is the window, which would stop drawing
-/// till that's answered. Read at a start, kept when a password is given.
+/// till that's answered. Read at a start; read again when a password is given, and that one kept
+/// at once as none was there to replace.
 #[test]
 fn the_keychain_is_asked_on_the_accounts_thread() {
     let dir = std::env::temp_dir().join(format!("mailcraft-pool-keychain-{}", std::process::id()));
@@ -243,8 +244,8 @@ fn the_keychain_is_asked_on_the_accounts_thread() {
     p.submit(Job::Start { account: a.clone(), password: None });
     until(&p, "the password asked for", |e| matches!(e, Event::Status { status: SyncStatus::NeedsPassword { .. }, .. }));
     p.submit(Job::Start { account: a, password: Some(Secret("pw".into())) });
-    eventually("the password looked for and kept", || asked.0.lock().unwrap().len() >= 2);
-    assert_eq!(*asked.0.lock().unwrap(), ["get on mail-a1", "set on mail-a1"]);
+    eventually("the password looked for and kept", || asked.0.lock().unwrap().len() >= 3);
+    assert_eq!(*asked.0.lock().unwrap(), ["get on mail-a1", "get on mail-a1", "set on mail-a1"]);
     assert_eq!(asked.1.get(&AccountConfig { id: "a1".into(), ..Default::default() }).as_deref(), Some("pw"));
     p.submit(Job::Remove { account: "a1".into() });
     let _ = std::fs::remove_dir_all(dir);

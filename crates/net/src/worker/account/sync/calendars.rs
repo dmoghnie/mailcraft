@@ -167,6 +167,7 @@ impl Worker {
         match done {
             Ok(()) => {
                 self.backoff = FIRST_BACKOFF;
+                self.password_taken();
                 self.status(SyncStatus::Online { at: now() });
                 let every = self.check_every().unwrap_or(MINUTE.saturating_mul(CALENDAR_MINUTES));
                 now_at.checked_add(every)

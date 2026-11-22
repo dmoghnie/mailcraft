@@ -528,8 +528,11 @@ struct Worker {
     /// sync.
     dav_said: Option<String>,
     /// Done on this thread before it first connects ([`Worker::settle_password`]): the password
-    /// just given, to keep in the keychain, or `None` to read the one kept there.
+    /// just given, to use and keep in the keychain, or `None` to read the one kept there.
     keychain: Option<Option<String>>,
+    /// The password given, kept in the keychain once the server takes it
+    /// ([`Worker::password_taken`]): one refused leaves the one kept as it was.
+    unkept: Option<String>,
     /// The second connection, started once the password is known.
     quick_start: Option<Box<dyn FnOnce() + Send>>,
     /// Set when the keychain had no password ([`Handle::no_password`]).
@@ -562,8 +565,8 @@ impl Worker {
     }
 
     /// An account's main connection, its only one when it has calendars alone. `password`: one
-    /// just given, kept in the keychain on its own thread before it first connects; `None` to read
-    /// the one kept there.
+    /// just given, kept in the keychain on its own thread ([`Worker::settle_password`]); `None` to
+    /// read the one kept there.
     fn main_connection(acc: AccountConfig, shared: Shared, password: Option<String>) -> Worker {
         let mut w = Worker::with(acc, Auth::shared(String::new()), shared);
         w.keychain = Some(password);
@@ -657,6 +660,7 @@ impl Worker {
             dav_digest: None,
             dav_said: None,
             keychain: None,
+            unkept: None,
             quick_start: None,
             no_password: Arc::default(),
             outbox_done: std::collections::HashSet::new(),

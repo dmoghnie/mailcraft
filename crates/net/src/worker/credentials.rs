@@ -89,17 +89,29 @@ impl super::Sink {
 
 impl super::Worker {
     /// Before the account's thread first connects, on that thread: the password just given kept
-    /// in the keychain, or the one kept there read. The keychain may ask the user first (macOS
-    /// does after an update, for a build signed ad hoc), so it isn't done on the window's
-    /// thread, which would stop drawing till it's answered. `false` when the keychain has no
-    /// password: the account asks for one, and the pool forgets this thread.
+    /// in the keychain (once the server takes it, when it would replace another), or the one kept
+    /// there read. The keychain may ask the user first (macOS does after an update, for a build
+    /// signed ad hoc), so it isn't done on the window's thread, which would stop drawing till
+    /// it's answered. `false` when the keychain has no password: the account asks for one, and
+    /// the pool forgets this thread.
     pub(super) fn settle_password(&mut self) -> bool {
         let Some(given) = self.keychain.take() else { return true };
         let Some(creds) = self.creds.clone() else { return true };
         let password = match given {
             Some(p) => {
-                if let Err(e) = creds.set(&self.acc, &p) {
-                    self.sink.not_kept(&self.acc.id, "the password", &e);
+                match creds.get(&self.acc) {
+                    // The one kept already: nothing to change.
+                    Some(kept) if kept == p => {}
+                    // Another kept: this one replaces it once the server takes it
+                    // ([`Worker::password_taken`]). Kept at once, one mistyped into Sign in again
+                    // replaced the one kept, which may have been right (a server refuses a good
+                    // one at times, after connections time out). Not an OAuth account's refresh
+                    // token: [`Worker::secret`] keeps the newer one a provider hands out as it
+                    // signs in, which this would then replace.
+                    Some(_) if self.acc.oauth.is_none() => self.unkept = Some(p.clone()),
+                    // None kept to replace (a new account): kept now, or the account would ask
+                    // again after MailCraft is closed before a server took it.
+                    _ => self.keep_password(&creds, &p),
                 }
                 p
             }
@@ -117,5 +129,19 @@ impl super::Worker {
             start();
         }
         true
+    }
+
+    /// Signed in: the password given, if it waited for the server to take it, kept now.
+    pub(super) fn password_taken(&mut self) {
+        let Some(p) = self.unkept.take() else { return };
+        if let Some(creds) = self.creds.clone() {
+            self.keep_password(&creds, &p);
+        }
+    }
+
+    fn keep_password(&self, creds: &std::sync::Arc<dyn Credentials>, password: &str) {
+        if let Err(e) = creds.set(&self.acc, password) {
+            self.sink.not_kept(&self.acc.id, "the password", &e);
+        }
     }
 }

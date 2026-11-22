@@ -300,14 +300,16 @@ impl Worker {
         Ok(())
     }
 
-    /// Signed in. The second connection waits its shortest again from here; the main one only
-    /// once it has synced the whole account ([`Self::sync_all`]): a failure after signing in
-    /// that comes back every time (one folder the server ends the connection on) signed in
-    /// again every five seconds for good, the folders after that one never read.
+    /// Signed in: a password given is kept now ([`Self::password_taken`]). The second connection
+    /// waits its shortest again from here; the main one only once it has synced the whole
+    /// account ([`Self::sync_all`]): a failure after signing in that comes back every time (one
+    /// folder the server ends the connection on) signed in again every five seconds for good, the
+    /// folders after that one never read.
     fn signed_in(&mut self) {
         if self.main.is_some() {
             self.backoff = FIRST_BACKOFF;
         }
+        self.password_taken();
     }
 
     /// An IMAP connection signed in with an OAuth token. Microsoft can take the token and then
