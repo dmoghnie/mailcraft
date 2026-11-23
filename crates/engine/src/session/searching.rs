@@ -9,6 +9,7 @@ use mailcraft_store::search::Reader;
 
 use super::*;
 
+mod aside;
 mod finish;
 mod folded;
 mod folder_text;
@@ -23,6 +24,7 @@ mod run;
 pub mod suggest;
 mod work;
 
+pub(crate) use aside::FoundAside;
 pub use run::{SearchProgress, SearchStats};
 pub use work::SearchWork;
 

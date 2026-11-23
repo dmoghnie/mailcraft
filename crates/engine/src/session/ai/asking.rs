@@ -56,7 +56,8 @@ pub enum AiTest {
 
 /// A question waiting for its answer.
 struct Waiting {
-    account: Option<String>,
+    /// The accounts whose mail it holds: each must allow the profile asked.
+    accounts: Vec<String>,
     purpose: String,
     chat: AiChat,
     /// Its answer streamed, kept as it grows ([`AiState::part`]).
@@ -88,6 +89,8 @@ pub struct AiState {
     pub key_errors: BTreeMap<String, String>,
     /// What came so far of each streamed answer waiting: its text and its thinking.
     parts: HashMap<u64, (String, String)>,
+    /// The assistant's chats.
+    pub assistant: super::Assistant,
 }
 
 impl AiState {
@@ -146,19 +149,17 @@ impl Session {
     /// what came of it so far is [`AiState::part`] while it waits.
     pub(crate) fn ai_ask(&mut self, task: AiTask, account: Option<&str>, purpose: &str, chat: AiChat, stream: bool) -> Result<u64, CmdError> {
         let profile = self.prefs.ai.route(task, account).map_err(CmdError::Disabled)?.clone();
+        Ok(self.ai_ask_profile(&profile, account.into_iter().map(str::to_string).collect(), purpose, chat, stream))
+    }
+
+    /// Ask `profile`, allowed mail of each of `accounts` (the caller checked), as
+    /// [`Session::ai_ask`] does.
+    pub(crate) fn ai_ask_profile(&mut self, profile: &AiProfile, accounts: Vec<String>, purpose: &str, chat: AiChat, stream: bool) -> u64 {
         self.ai.next += 1;
         let id = self.ai.next;
-        let waiting = Waiting {
-            account: account.map(str::to_string),
-            purpose: purpose.to_string(),
-            chat,
-            stream,
-            profile: profile.id.clone(),
-            tried: Vec::new(),
-            logged: 0,
-        };
-        self.ai_send(id, waiting, &profile);
-        Ok(id)
+        let waiting = Waiting { accounts, purpose: purpose.to_string(), chat, stream, profile: profile.id.clone(), tried: Vec::new(), logged: 0 };
+        self.ai_send(id, waiting, profile);
+        id
     }
 
     /// Ask `profile` question `id`, and record it.
@@ -171,7 +172,7 @@ impl Session {
             profile: profile.name.clone(),
             server: server_of(&profile.endpoint.url),
             model: profile.endpoint.model.clone(),
-            account: w.account.clone(),
+            account: (!w.accounts.is_empty()).then(|| w.accounts.join(", ")),
             sent: u64::try_from(size).unwrap_or(u64::MAX),
             received: 0,
             outcome: "waiting".into(),
@@ -244,6 +245,9 @@ impl Session {
                     self.ai.answers.remove(&oldest);
                 }
                 self.ai.answers.insert(id, result);
+                if self.ai.assistant.owns(id) {
+                    self.assistant_heard(id);
+                }
             }
             AiDone::KeySaved { name, error } => match error {
                 Some(e) => {
@@ -266,7 +270,7 @@ impl Session {
         let mut seen: Vec<&str> = vec![w.profile.as_str()];
         let mut at = ai.profile(&w.profile).and_then(|p| p.fallback.as_deref()).and_then(|id| ai.profile(id));
         while let Some(p) = at.filter(|p| !seen.contains(&p.id.as_str())) {
-            if !w.tried.contains(&p.id) && ai.allows(p, w.account.as_deref()) {
+            if !w.tried.contains(&p.id) && ai.allows_all(p, &w.accounts) {
                 return Some(p.clone());
             }
             seen.push(&p.id);
@@ -293,7 +297,7 @@ impl Session {
         self.ai.next += 1;
         let question = self.ai.next;
         let waiting = Waiting {
-            account: None,
+            accounts: Vec::new(),
             purpose: TEST_PURPOSE.into(),
             chat: AiChat::ask("", TEST_QUESTION, TEST_TOKENS),
             stream: false,

@@ -109,7 +109,19 @@ and `cargo xtask sizes` enforces them.
 - **Keys stay out of errors.** What a server says is quoted with the key blanked out, before it's
   cut short; an error of the network layer that quotes a server's words (a status line it
   couldn't read) and holds the key, or the start of it, says less instead.
-- **Not yet:** embeddings (for search), pictures, a monthly budget, the browser and the phones.
+- **The assistant** (`session/ai/assistant/`) chats with a model that has tools. Those that read
+  run at once; finding goes through `search_aside` (`session/searching/aside.rs`: the window's
+  matching over the summaries, each account's index and the sources downloaded, without its list,
+  selection or search). A change is a proposal: made only once the person approves it, checked
+  again then, on the messages it names (never the selection), and undone with Undo; a message it
+  writes opens to be sent. A model asked about a chat must be allowed every account whose mail
+  is in it (`AiPrefs::allows_all`), its fallbacks too. A chat that outgrows its profile's
+  context (a token for every three bytes) loses what tools gave early on, then its oldest
+  turns. At most 24 steps for one thing the person says.
+- **Chats stay on this computer**: `assistant.json` lists them, each in `assistant-<id>.json`
+  (read when first wanted, its file removed when it's deleted); never in the record or the log.
+- **Not yet:** embeddings (for search), pictures, a monthly budget, the browser and the phones;
+  the assistant's pane in the window, and its tools for the calendar, contacts and rules.
   A question waits up to five minutes for its answer to start.
 
 ## The session

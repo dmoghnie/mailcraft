@@ -300,6 +300,16 @@ impl Store {
         self.write_json(&self.root.join(safe_doc(name)), value)
     }
 
+    /// A document at the top of the data folder ([`Store::save_doc`]) removed; one not there is
+    /// no matter.
+    pub fn remove_doc(&self, name: &str) -> Result<()> {
+        let path = self.root.join(safe_doc(name));
+        match self.files.remove_file(&path) {
+            Err(e) if e.kind() != io::ErrorKind::NotFound => Err(io_err(&path)(e)),
+            _ => Ok(()),
+        }
+    }
+
     /// A small document kept with an account's cache (removed with it).
     pub fn load_account_doc<T: DeserializeOwned + Default>(&self, account: &str, name: &str) -> Result<T> {
         self.read_json(&self.account_dir(account).join(safe_doc(name)))

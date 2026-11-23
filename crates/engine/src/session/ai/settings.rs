@@ -56,6 +56,10 @@ pub struct AiProfile {
     pub has_key: bool,
     /// The longest answer it's asked for, in tokens.
     pub max_tokens: u32,
+    /// What it takes in at once, in tokens (0: [`CONTEXT_AT_FIRST`](super::CONTEXT_AT_FIRST)):
+    /// the assistant's chats are fitted into it.
+    #[serde(skip_serializing_if = "is_zero")]
+    pub context: u32,
     /// The profile asked instead when this one can't be reached or refuses (one on this
     /// computer, say).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -114,6 +118,26 @@ impl AiPrefs {
         }
     }
 
+    /// Whether `profile` may be asked about mail of every one of `accounts` (none: a question
+    /// that holds no mail).
+    pub fn allows_all(&self, profile: &AiProfile, accounts: &[String]) -> bool {
+        if accounts.is_empty() { self.allows(profile, None) } else { accounts.iter().all(|a| self.allows(profile, Some(a))) }
+    }
+
+    /// `from`, or the first along its fallbacks allowed mail of every one of `accounts`.
+    pub fn allowed_for_all<'a>(&'a self, from: &'a AiProfile, accounts: &[String]) -> Option<&'a AiProfile> {
+        let mut seen: Vec<&str> = Vec::new();
+        let mut at = Some(from);
+        while let Some(p) = at.filter(|p| !seen.contains(&p.id.as_str())) {
+            if self.allows_all(p, accounts) {
+                return Some(p);
+            }
+            seen.push(&p.id);
+            at = p.fallback.as_deref().and_then(|id| self.profile(id));
+        }
+        None
+    }
+
     /// The profile `task` goes to for mail of `account`: the one named for it, or the first,
     /// or else along their fallbacks the first that's allowed. Why none, when none is.
     pub fn route(&self, task: AiTask, account: Option<&str>) -> Result<&AiProfile, String> {
@@ -167,4 +191,8 @@ pub fn local_url(url: &str) -> bool {
         },
         Err(_) => false,
     }
+}
+
+fn is_zero(n: &u32) -> bool {
+    *n == 0
 }

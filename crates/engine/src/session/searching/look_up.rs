@@ -231,9 +231,9 @@ impl Session {
     /// Look up the run's words in `account`'s index, a few pages; those looked up lately in the
     /// index as it is now, at once.
     pub(super) fn terms_unit(&mut self, run: &mut SearchRun, account: &str) {
-        let (Some(store), Some(reader)) = (self.store.clone(), self.search_state.readers.get_mut(account).and_then(|s| s.reader.as_mut())) else {
+        if self.store.is_none() || !self.search_state.readers.get(account).is_some_and(|s| s.reader.is_some()) {
             return;
-        };
+        }
         // Made once a run and account (its words and phrases copied then, not at every unit).
         if !run.terms.contains_key(account) {
             #[cfg(test)]
@@ -243,6 +243,19 @@ impl Session {
             run.terms.insert(account.to_string(), Terms::new(run.words.clone(), phrases));
         }
         let Some(terms) = run.terms.get_mut(account) else { return };
+        if !self.terms_step(terms, account) {
+            run.terms.remove(account);
+        }
+    }
+
+    /// Look up `terms` in `account`'s open index, a few pages; those looked up lately in the
+    /// index as it is now, at once. `false` when the index couldn't be read: it's let go, to be
+    /// read afresh by the next search, and this one goes on without it (what it can't tell may
+    /// be missing).
+    pub(super) fn terms_step(&mut self, terms: &mut Terms, account: &str) -> bool {
+        let (Some(store), Some(reader)) = (self.store.clone(), self.search_state.readers.get_mut(account).and_then(|s| s.reader.as_mut())) else {
+            return false;
+        };
         let of = (reader.epoch(), reader.generation());
         while terms.scanning.is_none()
             && let Some((field, word)) = terms.todo.first().cloned()
@@ -254,12 +267,12 @@ impl Session {
             let read = phrase_unit(&mut self.search_state.looked_up, terms, reader, &store, account, of);
             self.search_state.stats.reader_pages = self.search_state.stats.reader_pages.saturating_add(read.unwrap_or(0));
             if read.is_none() {
-                run.terms.remove(account);
                 if let Some(slot) = self.search_state.readers.get_mut(account) {
                     slot.reader = None;
                 }
+                return false;
             }
-            return;
+            return true;
         };
         let before = reader.pages_read();
         let mut bits = terms.scanning.take().unwrap_or_else(|| Bits::new(reader.len()));
@@ -273,15 +286,14 @@ impl Session {
                 terms.found(field, word, bits);
             }
             Err(e) => {
-                // Read afresh by the next search; this one goes on without it (what it can't
-                // tell may be missing).
                 log::warn!("{account}: the search index couldn't be read: {e}");
-                run.terms.remove(account);
                 if let Some(slot) = self.search_state.readers.get_mut(account) {
                     slot.reader = None;
                 }
+                return false;
             }
         }
+        true
     }
 }
 

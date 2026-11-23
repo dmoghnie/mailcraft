@@ -183,19 +183,7 @@ impl SearchRun {
                 _ => false,
             }
         }
-        let mut words: Vec<(Field, String)> = Vec::new();
-        for (tf, w, _) in query.text_words() {
-            if w.is_empty() {
-                continue;
-            }
-            let address = w.contains(['@', '.']);
-            for f in [Some(Field::from(tf)), address.then_some(Field::Address)].into_iter().flatten() {
-                if !words.iter().any(|(g, x)| *g == f && *x == w) {
-                    words.push((f, w.clone()));
-                }
-            }
-        }
-        let phrases = query.text_phrases().into_iter().map(|(tf, words)| (Field::from(tf), words)).collect();
+        let (words, phrases) = query_terms(&query);
         SearchRun {
             q: q.to_string(),
             scope,
@@ -709,4 +697,23 @@ impl Session {
             }
         }
     }
+}
+
+/// The words a query looks up in the index (an address's in the addresses as well), each once,
+/// and its phrases.
+pub(super) fn query_terms(query: &Query) -> (Vec<(Field, String)>, Vec<(Field, Vec<String>)>) {
+    let mut words: Vec<(Field, String)> = Vec::new();
+    for (tf, w, _) in query.text_words() {
+        if w.is_empty() {
+            continue;
+        }
+        let address = w.contains(['@', '.']);
+        for f in [Some(Field::from(tf)), address.then_some(Field::Address)].into_iter().flatten() {
+            if !words.iter().any(|(g, x)| *g == f && *x == w) {
+                words.push((f, w.clone()));
+            }
+        }
+    }
+    let phrases = query.text_phrases().into_iter().map(|(tf, words)| (Field::from(tf), words)).collect();
+    (words, phrases)
 }

@@ -13,6 +13,10 @@ const PROFILES_MOST: usize = 32;
 const TOKENS_MOST: u32 = 128_000;
 /// A profile's answers at first, in tokens.
 const TOKENS_AT_FIRST: u32 = 4096;
+/// The most a model takes in, as a profile may say, in tokens (more than any takes today).
+const CONTEXT_MOST: u32 = 16_000_000;
+/// The least: below it, no chat with tools fits.
+const CONTEXT_LEAST: u32 = 2048;
 /// The longest name, model and address, in characters.
 const TEXT_MOST: usize = 200;
 /// The longest key, in bytes.
@@ -24,7 +28,7 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
     vec![
         CommandSpec::new("ai.settings", "Show MailCraft's AI settings", WHERE, |s, _| Ok(settings(s))),
         CommandSpec::new("ai.saveProfile", "Add or change a model MailCraft's AI may ask", WHERE, save_profile).params(
-            r#"{"id"?: string (none: a new profile), "name": string, "api": "openAi"|"anthropic", "url": string (the API address, up to its version: https://api.openai.com/v1, http://localhost:11434/v1), "model": string, "maxTokens"?: number, "fallback"?: string (a profile asked instead when this one fails; "": none), "key"?: string (kept in the keychain; "": forgotten)}"#,
+            r#"{"id"?: string (none: a new profile), "name": string, "api": "openAi"|"anthropic", "url": string (the API address, up to its version: https://api.openai.com/v1, http://localhost:11434/v1), "model": string, "maxTokens"?: number, "context"?: number (what the model takes in at once, in tokens; 0: 32768, Ollama's own), "fallback"?: string (a profile asked instead when this one fails; "": none), "key"?: string (kept in the keychain; "": forgotten)}"#,
         ),
         CommandSpec::new("ai.removeProfile", "Remove a model and forget its key", WHERE, |s, v| {
             let id = p::req_str(v, "id")?.to_string();
@@ -127,6 +131,14 @@ fn save_profile(s: &mut Session, v: &Value) -> CmdResult {
             .ok_or_else(|| CmdError::Params(format!("`maxTokens` is from 1 to {TOKENS_MOST}")))?,
         None => TOKENS_AT_FIRST,
     };
+    let context = match p::u64(v, "context") {
+        Some(0) => 0,
+        Some(n) => u32::try_from(n)
+            .ok()
+            .filter(|n| (CONTEXT_LEAST..=CONTEXT_MOST).contains(n))
+            .ok_or_else(|| CmdError::Params(format!("`context` is 0, or from {CONTEXT_LEAST} to {CONTEXT_MOST}")))?,
+        None => u32::MAX,
+    };
     let key = p::str(v, "key").map(str::trim);
     if key.is_some_and(|k| k.len() > KEY_MOST || k.chars().any(char::is_control)) {
         return Err(CmdError::Params(format!("`key` is longer than {KEY_MOST} bytes, or holds control characters")));
@@ -152,7 +164,8 @@ fn save_profile(s: &mut Session, v: &Value) -> CmdResult {
         Some(k) => !k.is_empty(),
         None => old.as_ref().is_some_and(|o| o.has_key) && !moved,
     };
-    let profile = AiProfile { id: id.clone(), name, endpoint, has_key, max_tokens, fallback };
+    let context = if context == u32::MAX { old.as_ref().map_or(0, |o| o.context) } else { context };
+    let profile = AiProfile { id: id.clone(), name, endpoint, has_key, max_tokens, context, fallback };
     match key {
         Some(k) => s.jobs.push(Job::Ai { work: AiWork::SaveKey { name: id.clone(), key: (!k.is_empty()).then(|| Secret(k.to_string())) } }),
         None if moved => s.jobs.push(Job::Ai { work: AiWork::SaveKey { name: id.clone(), key: None } }),

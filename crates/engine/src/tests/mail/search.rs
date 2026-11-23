@@ -732,3 +732,38 @@ fn a_search_that_fails_leaves_other_accounts_indexes_open() {
     let p = s.search_progress().unwrap();
     assert_eq!((p.found, p.missing), (0, 100), "the index isn't read");
 }
+
+/// A search aside (MailCraft's AI's) finds what the search box does: a word its index has, a
+/// phrase the text kept settles, and the same count for a word of the subjects. The window it
+/// leaves as it was: its list, selection, the message open and its search.
+#[test]
+fn a_search_aside_finds_as_the_search_box_does_and_leaves_the_window_alone() {
+    let mut s = sample_session("search-aside");
+    let a = sample::SAMPLE_ACCOUNT.to_string();
+    let key = next_key(&s, &a, "INBOX");
+    let body = b"From: a@x.example\r\nSubject: Travel\r\n\r\nThe zeppelin lands at noon.\r\n";
+    let size = u32::try_from(body.len()).unwrap();
+    file_in(
+        &mut s,
+        mailcraft_model::Summary { key: key.clone(), subject: "Travel".into(), message_id: "<z@x.example>".into(), size, ..Default::default() },
+        Some(body),
+    );
+    let generation = index_now(&s, &a);
+    indexed(&mut s, &a, generation);
+    let open = s.list.iter().find(|m| m.key != key).unwrap().key.clone();
+    s.open_message(&open);
+    let window = (s.list.iter().map(|m| m.key.clone()).collect::<Vec<_>>(), s.selection.clone(), s.reading.as_ref().map(|r| r.key.clone()));
+    let folders = s.scope_folders(SearchScope::All);
+    let keys = |f: crate::session::FoundAside| f.found.iter().map(|m| m.key.clone()).collect::<Vec<_>>();
+    assert_eq!(keys(s.search_aside("zeppelin", &folders, 10)), vec![key.clone()], "a word of its text, from the index");
+    assert_eq!(keys(s.search_aside("\"zeppelin lands\"", &folders, 10)), vec![key.clone()]);
+    assert!(keys(s.search_aside("\"lands zeppelin\"", &folders, 10)).is_empty(), "a phrase is its words in order");
+    let aside = s.search_aside("storyboard", &folders, 2);
+    assert_eq!(aside.found.len(), 2, "at most as many as asked for");
+    assert!(aside.found.windows(2).all(|w| w[0].date >= w[1].date), "the newest first");
+    let now = (s.list.iter().map(|m| m.key.clone()).collect::<Vec<_>>(), s.selection.clone(), s.reading.as_ref().map(|r| r.key.clone()));
+    assert_eq!(now, window, "the window as it was");
+    assert!(s.search.is_none());
+    let boxed = s.run("search.run", &json!({"query": "storyboard", "scope": "all"})).unwrap()["results"].as_u64().unwrap();
+    assert_eq!(usize::try_from(boxed).unwrap(), aside.total, "as many as the search box finds");
+}

@@ -40,8 +40,11 @@ pub(crate) use accounts::RuleChange;
 pub(crate) use accounts::data_file_path;
 pub use accounts::{AgeUnit, ArchiveRule, AutoArchive, Compacting, Compaction, FolderArchive, IDLE_AFTER_S};
 pub use accounts::{Changes, ImportState, Imports, SignInCheck, TrustedCertificate};
-pub(crate) use ai::ai_commands;
-pub use ai::{AI_LOG_KEPT, AiLogEntry, AiPrefs, AiProfile, AiReach, AiState, AiTask, AiTest, ai_server, ai_url_is_local};
+pub use ai::{
+    AI_LOG_KEPT, AiLogEntry, AiPrefs, AiProfile, AiReach, AiState, AiTask, AiTest, Assistant, CONTEXT_AT_FIRST, Chat, ChatHead, ChatTurn,
+    ContextItem, RunState, STEPS_MOST, ToolRun, ai_server, ai_url_is_local,
+};
+pub(crate) use ai::{ai_commands, assistant_commands};
 use changing::Batch;
 pub(crate) use changing::NoticeAct;
 use changing::keys_by_account;
@@ -50,6 +53,7 @@ pub(crate) use changing::{MOVED_IN_MAX, MovedIn};
 #[cfg(test)]
 pub(crate) use opening::source_lines;
 pub use opening::{BodyWork, PreparedBody, SOURCE_SHOWN, SourceView, Toward};
+pub(crate) use searching::FoundAside;
 pub use searching::{IndexPass, SearchProgress, SearchScope, SearchStats, SearchWork, ServerSearch, no_answer, suggest};
 pub use security::{
     CardSearch, KeySource, KnownCert, KnownKey, Lock, PGP_DOC, PgpSettings, Reach, RevocationCheck, SMIME_DOC, Scheme, Seal, Security, SignedBy,
@@ -737,6 +741,7 @@ impl Session {
     /// saved first, so a question is on it before it goes.
     pub fn take_jobs(&mut self) -> Vec<Job> {
         self.save_ai_log();
+        self.save_chats();
         std::mem::take(&mut self.jobs)
     }
 
