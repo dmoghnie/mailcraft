@@ -9,6 +9,7 @@ use std::fmt;
 
 use mailcraft_model::{AiChat, AiRole, AiTurn, MessageKey};
 
+use super::links::message_name;
 use super::*;
 use crate::{CmdError, Session};
 
@@ -91,12 +92,12 @@ impl Session {
                     Some(t) => cut(&t, MESSAGE_CHARS),
                     None => "(Its text isn't downloaded yet: read_message gets it.)".into(),
                 };
-                Ok(format!("<message id=\"{id}\">\n{}\n\n{text}\n</message>", self.message_head(&m)))
+                Ok(format!("<message id=\"{}\">\n{}\n\n{text}\n</message>", message_name(id), self.message_head(&m)))
             }
             ContextItem::Quote { id, text } => {
                 let key = MessageKey::from_id(id).ok_or_else(|| CmdError::Params("not a message".into()))?;
                 let m = self.shared_of(&key).ok_or_else(|| CmdError::Params("that message isn't there any more".into()))?;
-                Ok(format!("<selected part of=\"{id}\">\n{}\n\n{}\n</selected>", self.message_head(&m), cut(text, QUOTE_CHARS)))
+                Ok(format!("<selected part of=\"{}\">\n{}\n\n{}\n</selected>", message_name(id), self.message_head(&m), cut(text, QUOTE_CHARS)))
             }
             ContextItem::Folder { account, folder } => {
                 let f = self.folder(account, folder).ok_or_else(|| CmdError::Params(format!("no folder `{folder}`")))?;

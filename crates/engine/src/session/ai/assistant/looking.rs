@@ -6,6 +6,7 @@ use mailcraft_model::{Flag, FolderRole, Job, MessageKey, Summary};
 use serde_json::Value;
 
 use super::context::{MESSAGE_CHARS, cut};
+use super::links::message_name;
 use super::tools::Outcome;
 use super::*;
 use crate::session::AccountState;
@@ -59,7 +60,7 @@ impl Session {
         self.folder(account, folder).map_or_else(|| folder.to_string(), |f| f.display_name())
     }
 
-    /// A message found, in a line: its id first, as the tools name it.
+    /// A message found, in a line: its name first, as the tools take it.
     fn message_row(&self, m: &Summary) -> String {
         let to: Vec<String> = m.to.iter().take(3).map(ToString::to_string).collect();
         let more = if m.to.len() > 3 { format!(" and {} more", m.to.len() - 3) } else { String::new() };
@@ -78,7 +79,7 @@ impl Session {
         let preview: String = m.preview.split_whitespace().collect::<Vec<_>>().join(" ").chars().take(PREVIEW_CHARS).collect();
         format!(
             "[{}] {} | From: {} | To: {}{more} | Subject: {} | {}{marks} | {preview}",
-            m.key.to_id(),
+            message_name(&m.key.to_id()),
             mailcraft_model::dates::full_time(m.date, &self.clock),
             m.from,
             to.join(", "),
@@ -194,8 +195,8 @@ impl Session {
     /// `read_message`: a message whole, as it reads; one not downloaded yet is asked for, and
     /// the call waits for it.
     pub(super) fn tool_read_message(&mut self, chat: &mut Chat, profile: &AiProfile, input: &Value) -> Outcome {
-        let Some(key) = input.get("id").and_then(Value::as_str).and_then(MessageKey::from_id) else {
-            return Outcome::failed("Read a message", "`id` must be a message's id, as find_messages gives it".into());
+        let Some(key) = input.get("id").and_then(Value::as_str).and_then(|n| chat.message_named(n)) else {
+            return Outcome::failed("Read a message", "`id` must be a message's id, as the tools give it".into());
         };
         let id = key.to_id();
         if let Some(why) = self.unreadable(&key.account, profile) {
@@ -213,7 +214,8 @@ impl Session {
             Some(text) => {
                 chat.holds(&key.account);
                 let body = if text.is_empty() { "(No text: it may be encrypted, or only pictures.)".to_string() } else { cut(&text, chars) };
-                Outcome::ran(&what, vec![id.clone()], format!("<message id=\"{id}\">\n{}\n\n{body}\n</message>", self.message_head(&m)))
+                let name = message_name(&id);
+                Outcome::ran(&what, vec![id], format!("<message id=\"{name}\">\n{}\n\n{body}\n</message>", self.message_head(&m)))
             }
             None if self.account(&key.account).is_some_and(AccountState::is_local) => Outcome::failed(&what, "its text isn't kept here".into()),
             None => {

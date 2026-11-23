@@ -41,8 +41,9 @@ pub(crate) use accounts::data_file_path;
 pub use accounts::{AgeUnit, ArchiveRule, AutoArchive, Compacting, Compaction, FolderArchive, IDLE_AFTER_S};
 pub use accounts::{Changes, ImportState, Imports, SignInCheck, TrustedCertificate};
 pub use ai::{
-    AI_LOG_KEPT, ASSISTANT_WIDTH, AiLogEntry, AiPrefs, AiProfile, AiReach, AiState, AiTask, AiTest, Assistant, AssistantPane, CONTEXT_AT_FIRST,
-    CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, Chat, ChatHead, ChatTurn, ContextItem, RunState, STEPS_MOST, ToolRun, ai_server, ai_url_is_local,
+    AI_LOG_KEPT, ASSISTANT_LINK, ASSISTANT_WIDTH, AiLogEntry, AiPrefs, AiProfile, AiReach, AiState, AiTask, AiTest, Assistant, AssistantPane,
+    CONTEXT_AT_FIRST, CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, Chat, ChatHead, ChatTurn, ContextItem, RunState, STEPS_MOST, ToolRun, ai_server,
+    ai_url_is_local, assistant_message_link,
 };
 pub(crate) use ai::{ai_commands, assistant_commands};
 use changing::Batch;

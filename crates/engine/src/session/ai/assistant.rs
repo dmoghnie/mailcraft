@@ -22,6 +22,7 @@ mod commands;
 mod context;
 mod exchange;
 mod kept;
+mod links;
 mod looking;
 mod tools;
 mod window;
@@ -29,6 +30,7 @@ mod window;
 pub use commands::QUOTE_MOST as CONTEXT_QUOTE_MOST;
 pub(crate) use commands::commands as assistant_commands;
 pub use context::{CONTEXT_AT_FIRST, ContextItem, ITEMS_MOST as CONTEXT_ITEMS_MOST};
+pub use links::{LINK as ASSISTANT_LINK, message_link as assistant_message_link};
 pub use window::{ASSISTANT_WIDTH, AssistantPane};
 
 /// The most of steps (answers with tool calls) the assistant takes for one thing the person

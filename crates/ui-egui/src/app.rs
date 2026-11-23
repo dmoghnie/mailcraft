@@ -183,8 +183,9 @@ impl MailApp {
                 self.ui.dialog = Some(Dialog::SendCheck(found));
             }
             // A message opened by a command (a script's, a conversation's row in the reading
-            // pane) is brought into view in the list: it could be opened out of sight.
-            Ok(_) if id == "list.open" => self.ui.scroll_to_focus = true,
+            // pane, a link in an answer of MailCraft's AI) is brought into view in the list: it
+            // could be opened out of sight.
+            Ok(_) if id == "list.open" || id == "assistant.open" => self.ui.scroll_to_focus = true,
             // Something said to MailCraft's AI (from its box, a script or an agent): that chat
             // is the one its pane shows.
             Ok(v) if id == "assistant.send" => self.ui.assistant.chat = v.get("chat").and_then(Value::as_str).map(str::to_string),

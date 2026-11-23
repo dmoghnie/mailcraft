@@ -22,7 +22,7 @@ pub(super) enum Outcome {
 
 /// The tools, as the model is told them.
 pub(super) fn tools() -> Vec<AiTool> {
-    let ids = json!({"type": "array", "items": {"type": "string"}, "description": "The messages' ids, as find_messages gives them", "maxItems": changes::IDS_MOST});
+    let ids = json!({"type": "array", "items": {"type": "string"}, "description": "The messages' ids, as the tools give them", "maxItems": changes::IDS_MOST});
     let tool = |name: &str, description: &str, schema: Value| AiTool { name: name.into(), description: description.into(), schema };
     vec![
         tool(
@@ -101,7 +101,7 @@ impl Session {
             "find_messages" => self.tool_find_messages(profile, &input),
             "read_message" => self.tool_read_message(chat, profile, &input),
             "selected_messages" => self.tool_selected(profile),
-            name if !reads(name) && tools().iter().any(|t| t.name == name) => match self.change_of(name, &input) {
+            name if !reads(name) && tools().iter().any(|t| t.name == name) => match self.change_of(chat, name, &input) {
                 Ok(change) => Outcome::Proposed { what: change.what(self), messages: change.ids() },
                 Err(why) => Outcome::failed(name, why),
             },

@@ -108,6 +108,7 @@ pub use files::{is_mail_file, is_message_file};
 mod home;
 mod meetings;
 mod navigation;
+pub(crate) use navigation::go_to_message;
 mod pgp;
 mod pim;
 mod printing;

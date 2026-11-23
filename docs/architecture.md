@@ -125,6 +125,11 @@ and `cargo xtask sizes` enforces them.
   (`egui_commonmark`) with each picture made a link, so nothing is fetched; its links open as a
   message's do. Text selected in a message is read as its runs are laid out, so its Ask AI
   button takes it a frame after it's pressed (`reading/text_selection/asking.rs`).
+- **Links to messages** (`session/ai/assistant/links.rs`): the tools name each message by `m`
+  and ten hex digits of its id's FNV-1a hash, since an id holds its folder's name (spaces and
+  all) and a Markdown link can't; the model links what it names as `[subject](mailcraft:m…)`,
+  and `assistant.open` goes to it. A name is looked up only among the messages the chat has
+  seen, and names are kept in saved chats, so how one is made never changes.
 - **Not yet:** embeddings (for search), pictures, a monthly budget, the browser and the phones;
   the assistant's tools for the calendar, contacts and rules.
   A question waits up to five minutes for its answer to start.

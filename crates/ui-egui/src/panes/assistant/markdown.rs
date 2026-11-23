@@ -1,21 +1,35 @@
 //! A model's answer, formatted from its Markdown. What it says comes partly from mail others
 //! wrote, so: a picture is shown as a link to it (nothing is fetched, from the web or from this
 //! computer), a link opens as one in a message does (a web page in the browser, `mailto:` a new
-//! message, anything else not at all), and a very long answer is shown cut short.
+//! message, anything else not at all), and a very long answer is shown cut short. A link to a
+//! message (`mailcraft:`) goes to it, if the chat has seen it (`assistant.open`).
 
 use egui::Ui;
 use egui_commonmark::{CommonMarkCache, CommonMarkViewer};
 use pulldown_cmark::{Event, Options, Parser, Tag};
+
+use mailcraft_engine::ASSISTANT_LINK;
+use serde_json::json;
 
 use crate::Action;
 
 /// The most of an answer shown, in bytes.
 const SHOWN_MOST: usize = 200 << 10;
 
-pub(super) fn show(ui: &mut Ui, cache: &mut CommonMarkCache, id: egui::Id, text: &str, acts: &mut Vec<Action>) {
+/// `text` of chat `chat`, formatted.
+pub(super) fn show(ui: &mut Ui, cache: &mut CommonMarkCache, id: egui::Id, chat: &str, text: &str, acts: &mut Vec<Action>) {
     let text = pictures_as_links(cut(text));
     let before = ui.ctx().output(|o| o.commands.len());
-    CommonMarkViewer::new().show_with_id(id, ui, cache, &text);
+    ui.scope(|ui| {
+        // Links in the links' colour: the window's text colour, set over all text
+        // (`theme::apply`), would paint them as text. Plain text keeps it, as egui's own.
+        ui.visuals_mut().override_text_color = None;
+        // A line of text as high as its words: a link's are put at the top of the line
+        // (egui_commonmark), the words around it in its middle, so a line taller than they are
+        // (a button's, as a list item starts) had the link stand above them.
+        ui.spacing_mut().interact_size.y = ui.text_style_height(&egui::TextStyle::Body);
+        CommonMarkViewer::new().show_with_id(id, ui, cache, &text);
+    });
     // The links clicked: MailCraft opens them, not egui.
     let urls = ui.ctx().output_mut(|o| {
         let mut urls = Vec::new();
@@ -32,7 +46,9 @@ pub(super) fn show(ui: &mut Ui, cache: &mut CommonMarkCache, id: egui::Id, text:
         });
         urls
     });
-    acts.extend(urls.into_iter().map(Action::OpenUrl));
+    acts.extend(urls.into_iter().map(|url| {
+        if url.starts_with(ASSISTANT_LINK) { Action::Run("assistant.open", json!({"chat": chat, "link": url})) } else { Action::OpenUrl(url) }
+    }));
 }
 
 /// `text`, at most [`SHOWN_MOST`] bytes of it (on a character's edge).

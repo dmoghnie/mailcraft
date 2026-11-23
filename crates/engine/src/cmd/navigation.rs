@@ -377,6 +377,21 @@ pub(super) fn quick_actions(v: &Value) -> Result<Option<Vec<mailcraft_model::org
     }
 }
 
+/// Mail, the message's folder, and the message in it: where it is, from wherever the window is
+/// (Files' Go to the message, a link in an answer of MailCraft's AI).
+pub(crate) fn go_to_message(s: &mut Session, key: &mailcraft_model::MessageKey) -> CmdResult {
+    if s.folder(&key.account, &key.folder).is_none() {
+        return Err(CmdError::Failed(format!("the folder `{}` is gone", key.folder)));
+    }
+    set_module(s, crate::Module::Mail)?;
+    s.open_view(View::Folder { account: key.account.clone(), folder: key.folder.clone() });
+    if s.summary(key).is_none() {
+        return Err(CmdError::Failed("the message isn't in its folder any more".into()));
+    }
+    s.open_message(key);
+    Ok(json!({"key": key.to_id()}))
+}
+
 pub(super) fn open_message(s: &mut Session, v: &Value) -> CmdResult {
     let k = key_param(s, v)?;
     s.open_message(&k);

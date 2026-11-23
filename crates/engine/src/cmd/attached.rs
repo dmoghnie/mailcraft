@@ -93,14 +93,5 @@ fn save(s: &mut Session, v: &Value) -> CmdResult {
 /// Mail, the message's folder, and the message in it.
 fn go_to(s: &mut Session, v: &Value) -> CmdResult {
     let f = file_param(s, v)?;
-    if s.folder(&f.key.account, &f.key.folder).is_none() {
-        return Err(CmdError::Failed(format!("the folder `{}` is gone", f.key.folder)));
-    }
-    set_module(s, crate::Module::Mail)?;
-    s.open_view(View::Folder { account: f.key.account.clone(), folder: f.key.folder.clone() });
-    if s.summary(&f.key).is_none() {
-        return Err(CmdError::Failed("the message isn't in its folder any more".into()));
-    }
-    s.open_message(&f.key);
-    Ok(json!({"key": f.key.to_id()}))
+    go_to_message(s, &f.key)
 }

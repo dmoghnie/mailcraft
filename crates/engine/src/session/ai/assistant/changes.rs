@@ -78,12 +78,12 @@ impl Change {
 
 impl Session {
     /// The change tool `name` asks for with `input`, checked; why not, for the model.
-    pub(super) fn change_of(&mut self, name: &str, input: &Value) -> Result<Change, String> {
+    pub(super) fn change_of(&mut self, chat: &Chat, name: &str, input: &Value) -> Result<Change, String> {
         let s = |k: &str| input.get(k).and_then(Value::as_str).map(str::trim).filter(|v| !v.is_empty());
         let b = |k: &str| input.get(k).and_then(Value::as_bool);
         match name {
             "move_messages" => {
-                let keys = self.keys_of(input)?;
+                let keys = self.keys_of(chat, input)?;
                 let folder = s("folder").ok_or("`folder` is required")?;
                 let to = match FolderRole::from_code(folder)
                     .filter(|r| matches!(r, FolderRole::Inbox | FolderRole::Archive | FolderRole::Junk | FolderRole::Trash))
@@ -103,14 +103,14 @@ impl Session {
                 Ok(Change::Move { keys, to })
             }
             "delete_messages" => {
-                let keys = self.keys_of(input)?;
+                let keys = self.keys_of(chat, input)?;
                 if let Some(k) = keys.iter().find(|k| self.in_role(k, FolderRole::Trash)) {
                     return Err(format!("{} is in Deleted Items already: MailCraft's AI doesn't delete mail for good", k.to_id()));
                 }
                 Ok(Change::Delete { keys })
             }
             "mark_messages" => {
-                let keys = self.keys_of(input)?;
+                let keys = self.keys_of(chat, input)?;
                 let (read, flagged) = (b("read"), b("flagged"));
                 if read.is_none() && flagged.is_none() {
                     return Err("say `read` or `flagged`".into());
@@ -118,17 +118,17 @@ impl Session {
                 Ok(Change::Mark { keys, read, flagged })
             }
             "categorize_messages" => {
-                let keys = self.keys_of(input)?;
+                let keys = self.keys_of(chat, input)?;
                 let name = s("category").ok_or("`category` is required")?;
                 let c = self.category(name).ok_or_else(|| format!("there's no category {name}: the person has {}", self.category_names()))?;
                 Ok(Change::Categorize { keys, name: c.name.clone(), keyword: c.keyword.clone(), on: b("on").unwrap_or(true) })
             }
-            "write_message" => self.write_of(input),
+            "write_message" => self.write_of(chat, input),
             other => Err(format!("there's no tool `{}`", other.chars().take(64).collect::<String>())),
         }
     }
 
-    fn write_of(&mut self, input: &Value) -> Result<Change, String> {
+    fn write_of(&mut self, chat: &Chat, input: &Value) -> Result<Change, String> {
         let s = |k: &str| input.get(k).and_then(Value::as_str).map(str::trim).unwrap_or_default().to_string();
         let body = input.get("body").and_then(Value::as_str).unwrap_or_default().to_string();
         if body.trim().is_empty() {
@@ -145,7 +145,7 @@ impl Session {
         }
         let reply_to = match input.get("reply_to").and_then(Value::as_str).filter(|v| !v.is_empty()) {
             Some(id) => {
-                let k = MessageKey::from_id(id).ok_or("`reply_to` must be a message's id")?;
+                let k = chat.message_named(id).ok_or("`reply_to` must be a message's id, as the tools give it")?;
                 self.shared_of(&k).ok_or_else(|| format!("there's no message {id} (any more)"))?;
                 Some(k)
             }
@@ -161,7 +161,7 @@ impl Session {
     }
 
     /// The messages a change names (`ids`), each there.
-    fn keys_of(&mut self, input: &Value) -> Result<Vec<MessageKey>, String> {
+    fn keys_of(&mut self, chat: &Chat, input: &Value) -> Result<Vec<MessageKey>, String> {
         let ids = input.get("ids").and_then(Value::as_array).ok_or("`ids` (the messages' ids) is required")?;
         if ids.is_empty() || ids.len() > IDS_MOST {
             return Err(format!("name between 1 and {IDS_MOST} messages"));
@@ -169,7 +169,8 @@ impl Session {
         let mut keys: Vec<MessageKey> = Vec::new();
         for id in ids {
             let id = id.as_str().ok_or("each id is a string")?;
-            let k = MessageKey::from_id(id).ok_or_else(|| format!("`{}` isn't a message's id", id.chars().take(80).collect::<String>()))?;
+            let k =
+                chat.message_named(id).ok_or_else(|| format!("`{}` isn't a message's id the tools gave", id.chars().take(80).collect::<String>()))?;
             if self.shared_of(&k).is_none() {
                 return Err(format!("there's no message {id} (any more)"));
             }

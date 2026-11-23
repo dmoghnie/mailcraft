@@ -36,6 +36,26 @@ fn answers(a: &mut MailApp, chat: &str, text: &str, tools: &[(&str, serde_json::
     a.session.apply(MailEvent::Ai { done: AiDone::Answered { id, answer: Some(answer), error: None } });
 }
 
+/// The colour `text` is painted in, where the frame has it, and its first line's baseline.
+fn painted_at(ctx: &egui::Context, a: &mut MailApp, text: &str) -> Option<(egui::Color32, f32)> {
+    let size = windows::layout::SIZE.with(std::cell::Cell::get);
+    let out = sized_frame(ctx, a, size, vec![]);
+    out.shapes.iter().find_map(|s| match &s.shape {
+        egui::Shape::Text(t) if t.galley.job.text.trim() == text => {
+            // A section's own colour, else (a placeholder) the colour the shape is drawn in.
+            let own = t.galley.job.sections.first().map(|x| x.format.color).filter(|c| *c != egui::Color32::PLACEHOLDER);
+            let row = t.galley.rows.first()?;
+            let baseline = t.pos.y + row.pos.y + row.glyphs.first()?.pos.y;
+            Some((t.override_text_color.or(own).unwrap_or(t.fallback_color), baseline))
+        }
+        _ => None,
+    })
+}
+
+fn painted(ctx: &egui::Context, a: &mut MailApp, text: &str) -> Option<egui::Color32> {
+    painted_at(ctx, a, text).map(|(c, _)| c)
+}
+
 #[test]
 fn the_assistant_asks_about_whats_selected_and_a_change_is_approved_on_its_card() {
     let (mut a, ctx) = ready("assistant-pane");
@@ -111,4 +131,30 @@ fn a_chat_begun_by_a_command_is_the_one_shown() {
     assert!(has(&t, "What came in today?") && has(&t, "Stop"), "{t:?}");
     answers(&mut a, &chat, "Two messages.", &[]);
     assert!(has(&texts(&ctx, &mut a), "Two messages."));
+}
+
+/// A message an answer links to opens with a click: its folder, and the message in it.
+#[test]
+fn a_message_an_answer_links_to_opens_with_a_click() {
+    let (mut a, ctx) = ready("assistant-link");
+    a.run("assistant.pane", json!({"on": true}));
+    let m = a.session.list.first().cloned().unwrap();
+    let id = m.key.to_id();
+    a.run("assistant.send", json!({"text": "What's this about?", "context": [{"kind": "message", "id": id}]}));
+    let chat = a.ui.assistant.chat.clone().unwrap();
+    let link = mailcraft_engine::assistant_message_link(&id);
+    answers(&mut a, &chat, &format!("It's this one:\n\n- [the message you pointed at]({link}) from Zoe"), &[]);
+    // Drawn as a link, in the links' colour; the words around it as text.
+    let t = a.ui.tokens;
+    assert_eq!(painted(&ctx, &mut a, "the message you pointed at"), Some(t.accent));
+    assert_eq!(painted(&ctx, &mut a, "from Zoe"), Some(t.text));
+    // On the line of the words around it, not above them.
+    let (link, text) = (painted_at(&ctx, &mut a, "the message you pointed at").unwrap().1, painted_at(&ctx, &mut a, "from Zoe").unwrap().1);
+    assert!((link - text).abs() < 0.5, "the link's baseline {link}, the text's {text}");
+    a.run("folder.open", json!({"account": "sample", "folder": "Archive"}));
+    frame(&ctx, &mut a, vec![]);
+    assert!(a.session.reading.as_ref().is_none_or(|r| r.key != m.key));
+    click_named(&ctx, &mut a, "the message you pointed at");
+    assert!(matches!(&a.session.view, mailcraft_engine::View::Folder { folder, .. } if *folder == m.key.folder), "{:?}", a.session.view);
+    assert_eq!(a.session.reading.as_ref().map(|r| r.key.clone()), Some(m.key.clone()));
 }

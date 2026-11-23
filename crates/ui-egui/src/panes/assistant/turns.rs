@@ -101,7 +101,7 @@ fn answered(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, i: usize,
         );
     }
     if !turn.turn.text.trim().is_empty() {
-        markdown::show(ui, &mut a.markdown, ui.make_persistent_id(("assistant-answer", &chat.id, i)), &turn.turn.text, acts);
+        markdown::show(ui, &mut a.markdown, ui.make_persistent_id(("assistant-answer", &chat.id, i)), &chat.id, &turn.turn.text, acts);
     }
     if turn.cut {
         ui.label(RichText::new(tl!("The answer was cut short at the longest answer set for this model.")).small().color(t.faint));
@@ -195,7 +195,7 @@ fn coming(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, part: Optio
     ui.add_space(6.0);
     let (text, thinking) = part.unwrap_or_default();
     if !text.trim().is_empty() {
-        markdown::show(ui, &mut a.markdown, ui.make_persistent_id(("assistant-coming", &chat.id)), text, acts);
+        markdown::show(ui, &mut a.markdown, ui.make_persistent_id(("assistant-coming", &chat.id)), &chat.id, text, acts);
     }
     ui.horizontal(|ui| {
         ui.spinner();

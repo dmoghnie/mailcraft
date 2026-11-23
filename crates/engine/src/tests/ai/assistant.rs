@@ -55,6 +55,11 @@ fn id_of(s: &Session, subject: &str) -> String {
     key_of(s, subject)["key"].as_str().unwrap().to_string()
 }
 
+/// The name the tools give the message with id `id`: its link, less `mailcraft:`.
+fn name_of(id: &str) -> String {
+    crate::assistant_message_link(id).replace(crate::ASSISTANT_LINK, "")
+}
+
 /// The person asks; the model finds, then reads, at once, and answers. Nothing the window shows
 /// changes: its list, its selection and the message open stay as they were.
 #[test]
@@ -72,9 +77,11 @@ fn the_assistant_reads_at_once_and_leaves_the_window_alone() {
     calls(&mut s, q, "Let me look.", &[("find_messages", json!({"query": "from:zoe storyboard"}))]);
     let (q, asked) = question(&mut s);
     let found = &asked.turns.last().unwrap().results[0];
-    assert!(found.content.contains(&story) && found.content.contains(STORYBOARD), "{}", found.content);
+    // Named as a link can hold it, and read by that name.
+    let name = name_of(&story);
+    assert!(found.content.contains(&format!("[{name}]")) && found.content.contains(STORYBOARD), "{}", found.content);
     assert!(!found.error);
-    calls(&mut s, q, "", &[("read_message", json!({"id": story}))]);
+    calls(&mut s, q, "", &[("read_message", json!({"id": name}))]);
     let (q, asked) = question(&mut s);
     let read = &asked.turns.last().unwrap().results[0].content;
     assert!(read.contains("revised frames for scenes 4 to 7") && read.contains("colour-key.png"), "{read}");
@@ -361,4 +368,55 @@ fn the_assistants_pane_is_shown_and_its_chats_read() {
     assert_eq!(s.assistant_heads().iter().map(|h| h.title.as_str()).collect::<Vec<_>>(), ["Hello there"]);
     assert_eq!(s.assistant_shown(&c).map(|c| c.turns.len()), Some(1));
     assert!(s.assistant_shown("c999").is_none());
+}
+
+/// Names are kept in saved chats (in what the tools gave, and in the answers' links): one is
+/// made as it always was.
+#[test]
+fn a_messages_name_is_made_as_it_always_was() {
+    assert_eq!(crate::assistant_message_link("sample:1:1:INBOX"), "mailcraft:m36c1254ac9");
+}
+
+proptest::proptest! {
+    /// Whatever its id holds (a folder's name with spaces and brackets), a message's link is
+    /// one a Markdown link can hold.
+    #[test]
+    fn a_link_is_always_one_markdown_holds(id in "\\PC{0,80}") {
+        let link = crate::assistant_message_link(&id);
+        let name = link.strip_prefix("mailcraft:m").unwrap_or_default();
+        proptest::prop_assert!(name.len() == 10 && name.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b)), "{}", link);
+    }
+}
+
+/// The model names each message by a name a link holds and links what it names; a link opens
+/// the message it names (Mail, its folder, the message), from wherever the window is. Only a
+/// message the chat has seen: a link is written from mail others wrote.
+#[test]
+fn an_answers_links_open_the_messages_the_chat_has_seen() {
+    let mut s = ready("assistant-links");
+    let story = id_of(&s, STORYBOARD);
+    let other = s.list.iter().find(|m| m.subject != STORYBOARD).map(|m| m.key.to_id()).unwrap();
+    let c = send(&mut s, None, "Find Zoe's mail");
+    let (q, asked) = question(&mut s);
+    assert!(asked.system.contains("[Storyboard review](mailcraft:m0123456789)"), "told to link what it names");
+    calls(&mut s, q, "", &[("find_messages", json!({"query": "from:zoe"}))]);
+    let (q, _) = question(&mut s);
+    let link = crate::assistant_message_link(&story);
+    // A change takes the name too.
+    calls(&mut s, q, &format!("Zoe wrote [{STORYBOARD}]({link})."), &[("mark_messages", json!({"ids": [name_of(&story)], "flagged": false}))]);
+    let v = chat(&mut s, &c);
+    assert_eq!(v["chat"]["runs"][1]["messages"], json!([story]), "{v}");
+    // From the calendar, another folder open.
+    s.run("folder.open", &json!({"account": "sample", "folder": "Archive"})).unwrap();
+    s.run("view.calendar", &json!({})).unwrap();
+    let opened = s.run("assistant.open", &json!({"chat": c, "link": link})).unwrap();
+    assert_eq!(opened["key"], json!(story));
+    assert_eq!(s.module, crate::Module::Mail);
+    assert!(matches!(&s.view, crate::View::Folder { folder, .. } if folder == "INBOX"), "{:?}", s.view);
+    assert_eq!(s.reading.as_ref().map(|r| r.key.to_id()), Some(story.clone()));
+    // Not one it hasn't seen, by its name or its id; nor junk.
+    for link in [crate::assistant_message_link(&other), format!("mailcraft:{other}"), other.clone(), "mailcraft:m0123456789".into(), String::new()] {
+        assert!(s.run("assistant.open", &json!({"chat": c, "link": link})).is_err(), "{link}");
+    }
+    assert_eq!(s.reading.as_ref().map(|r| r.key.to_id()), Some(story), "left open");
 }

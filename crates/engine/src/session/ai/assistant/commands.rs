@@ -34,6 +34,7 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
         })
         .params(r#"{"on"?: bool (shown or hidden; not given: the other way, or shown when a width is given), "width"?: number}"#),
         CommandSpec::new("assistant.chat", "Show a chat with MailCraft's AI", WHERE, show).params(r#"{"chat": string}"#),
+        CommandSpec::new("assistant.open", "Open what an answer of MailCraft's AI links to", WHERE, open).params(r#"{"chat": string, "link": string (as the answer has it: mailcraft:m0123456789)}"#),
         CommandSpec::new("assistant.send", "Say something to MailCraft's AI", WHERE, send).params(
             r#"{"chat"?: string (none: a new chat), "text": string, "context"?: [{"kind": "message", "id": string} | {"kind": "quote", "id": string, "text": string (the part selected)} | {"kind": "folder", "account": string, "folder": string}], "profile"?: string (the model the chat asks from now on; "": the one chat work goes to)}"#,
         ),
@@ -86,6 +87,16 @@ fn show(s: &mut Session, v: &Value) -> CmdResult {
     let part = asking.and_then(|q| s.ai.part(q)).map(|(text, thinking)| json!({"text": text, "thinking": thinking}));
     let profile = s.assistant_profile(&chat).ok().map(|p| json!({"id": p.id, "name": p.name, "model": p.endpoint.model, "local": p.local()}));
     Ok(json!({"chat": chat, "asking": asking.is_some(), "part": part, "waitsOnYou": chat.waits_on_person(), "profile": profile}))
+}
+
+/// A message an answer links to, gone to: Mail, its folder, and it open. Only one the chat has
+/// seen: a link is written by the model, from mail others wrote.
+fn open(s: &mut Session, v: &Value) -> CmdResult {
+    let id = p::req_str(v, "chat")?.to_string();
+    let link = p::req_str(v, "link")?;
+    let key = s.assistant_chat(&id)?.linked_message(link);
+    let key = key.ok_or_else(|| CmdError::Failed("MailCraft's AI linked to a message it hasn't found in this chat".into()))?;
+    crate::cmd::go_to_message(s, &key)
 }
 
 fn send(s: &mut Session, v: &Value) -> CmdResult {
