@@ -2188,3 +2188,41 @@ count	occurrences	ripetizioni
 	Longest answer, in tokens	Risposta più lunga, in token
 	When it fails, ask	Se non riesce, chiedi a
 	No other model	Nessun altro modello
+	A message no longer here	Un messaggio non più presente
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	Aggiungi un modello per chiedergli della tua posta: uno su questo computer o quello di un fornitore cloud.
+	Add the selected messages	Aggiungi i messaggi selezionati
+	Answering…	Sta rispondendo…
+	Approve	Approva
+	Approve all {n}	Approva tutte ({n})
+	Ask AI	Chiedi all’IA
+	Ask AI about the selected text	Chiedi all’IA del testo selezionato
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	Fai domande sulla tua posta: può trovarla, leggerla, riassumerla, rispondere e riordinarla. Nulla cambia finché non lo approvi.
+	Ask about your mail…	Chiedi della tua posta…
+	Chats	Chat
+	Close the AI assistant	Chiudi l’assistente IA
+	Cloud: {server}	Cloud: {server}
+	Couldn't be done	Non è stato possibile
+	Decline all	Rifiuta tutte
+	Delete all chats	Elimina tutte le chat
+	Click again to delete all {n} chats	Fai di nuovo clic per eliminare tutte le chat ({n})
+	Delete this chat	Elimina questa chat
+	Find the mail I haven't answered	Trova la posta a cui non ho risposto
+	Reasoning	Ragionamento
+	Looked at the folders	Ha guardato le cartelle
+	Looked at what's selected	Ha guardato la selezione
+	Mark	Contrassegna
+	New chat	Nuova chat
+	No chats yet	Nessuna chat per ora
+	No model	Nessun modello
+	Read a message	Ha letto un messaggio
+	Searched the mail	Ha cercato nella posta
+	Set up AI	Configura l’IA
+	Shift+Enter for a new line	Maiusc+Invio per andare a capo
+	Sum up the selected messages	Riassumi i messaggi selezionati
+	The answer was cut short at the longest answer set for this model.	La risposta è stata troncata alla lunghezza massima impostata per questo modello.
+	Default model	Modello predefinito
+	Thinking…	Sta pensando…
+	Needs your approval	Richiede la tua approvazione
+	What needs my attention today?	Cosa richiede la mia attenzione oggi?
+	Write a message	Scrivi un messaggio
+	Write a reply to this message	Scrivi una risposta a questo messaggio

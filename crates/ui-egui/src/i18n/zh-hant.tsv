@@ -2188,3 +2188,41 @@ count	occurrences	次
 	Longest answer, in tokens	最長回答（token 數）
 	When it fails, ask	失敗時改問
 	No other model	不改問其他模型
+	A message no longer here	已不存在的郵件
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	新增一個模型來詢問你的郵件：可以是這台電腦上的模型，也可以是雲端服務商的模型。
+	Add the selected messages	新增所選郵件
+	Answering…	正在回答…
+	Approve	核准
+	Approve all {n}	全部核准 ({n})
+	Ask AI	詢問 AI
+	Ask AI about the selected text	就所選文字詢問 AI
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	詢問你的郵件：它可以尋找、閱讀、摘要、回覆和整理郵件。在你核准之前不會有任何變更。
+	Ask about your mail…	詢問你的郵件…
+	Chats	對話
+	Close the AI assistant	關閉 AI 助理
+	Cloud: {server}	雲端：{server}
+	Couldn't be done	無法完成
+	Decline all	全部拒絕
+	Delete all chats	刪除所有對話
+	Click again to delete all {n} chats	再按一下即可刪除全部 {n} 個對話
+	Delete this chat	刪除此對話
+	Find the mail I haven't answered	找出我還沒回覆的郵件
+	Reasoning	推理過程
+	Looked at the folders	查看了資料夾
+	Looked at what's selected	查看了所選內容
+	Mark	標記
+	New chat	新對話
+	No chats yet	還沒有對話
+	No model	沒有模型
+	Read a message	閱讀了一封郵件
+	Searched the mail	搜尋了郵件
+	Set up AI	設定 AI
+	Shift+Enter for a new line	Shift+Enter 換行
+	Sum up the selected messages	摘要所選郵件
+	The answer was cut short at the longest answer set for this model.	回答在為此模型設定的最長長度處被截斷。
+	Default model	預設模型
+	Thinking…	正在思考…
+	Needs your approval	需要你的核准
+	What needs my attention today?	今天有什麼需要我處理的？
+	Write a message	撰寫郵件
+	Write a reply to this message	替這封郵件寫一封回覆

@@ -2185,3 +2185,41 @@ count	occurrences	次
 	Longest answer, in tokens	最长回答（token 数）
 	When it fails, ask	失败时改问
 	No other model	不改问其他模型
+	A message no longer here	已不存在的邮件
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	添加一个模型来询问你的邮件：可以是这台电脑上的模型，也可以是云服务商的模型。
+	Add the selected messages	添加所选邮件
+	Answering…	正在回答…
+	Approve	批准
+	Approve all {n}	全部批准 ({n})
+	Ask AI	询问 AI
+	Ask AI about the selected text	就所选文本询问 AI
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	询问你的邮件：它可以查找、阅读、总结、回复和整理邮件。在你批准之前不会有任何更改。
+	Ask about your mail…	询问你的邮件…
+	Chats	对话
+	Close the AI assistant	关闭 AI 助手
+	Cloud: {server}	云端：{server}
+	Couldn't be done	无法完成
+	Decline all	全部拒绝
+	Delete all chats	删除所有对话
+	Click again to delete all {n} chats	再次点击以删除全部 {n} 个对话
+	Delete this chat	删除此对话
+	Find the mail I haven't answered	找出我还没回复的邮件
+	Reasoning	推理过程
+	Looked at the folders	查看了文件夹
+	Looked at what's selected	查看了所选内容
+	Mark	标记
+	New chat	新对话
+	No chats yet	还没有对话
+	No model	没有模型
+	Read a message	阅读了一封邮件
+	Searched the mail	搜索了邮件
+	Set up AI	设置 AI
+	Shift+Enter for a new line	Shift+Enter 换行
+	Sum up the selected messages	总结所选邮件
+	The answer was cut short at the longest answer set for this model.	回答在为此模型设定的最长长度处被截断。
+	Default model	默认模型
+	Thinking…	正在思考…
+	Needs your approval	需要你的批准
+	What needs my attention today?	今天有什么需要我处理的？
+	Write a message	写一封邮件
+	Write a reply to this message	给这封邮件写一封回复

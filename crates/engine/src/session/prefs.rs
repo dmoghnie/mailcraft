@@ -395,6 +395,9 @@ pub struct Prefs {
     pub pane_order: Vec<String>,
     /// The To-Do Bar beside the mail (View › To-Do Bar): its parts and its width.
     pub todo_bar: pim::TodoBar,
+    /// The assistant's pane beside the mail (Home › Ask AI): shown or not, and its width.
+    #[serde(default)]
+    pub assistant_pane: super::AssistantPane,
     /// When flagged messages are due (Follow Up › Today, Tomorrow…): Message-ID → local day.
     /// IMAP has nowhere for it, so it's kept here, as Outlook keeps it for IMAP accounts.
     #[serde(default, deserialize_with = "checked_days")]
@@ -524,7 +527,7 @@ impl SenderAddresses {
 }
 
 /// The ribbon's Home buttons, by the command each runs, in their order there.
-pub const HOME_BUTTONS: [&str; 15] = [
+pub const HOME_BUTTONS: [&str; 16] = [
     "mail.new",
     "mail.delete",
     "mail.archive",
@@ -540,6 +543,7 @@ pub const HOME_BUTTONS: [&str; 15] = [
     "mail.pin",
     "mail.snooze",
     "list.filter",
+    "assistant.pane",
 ];
 
 /// The simplified ribbon's buttons as it starts: the most used of Home's.
@@ -693,6 +697,7 @@ impl Default for Prefs {
             collapsed: BTreeSet::new(),
             pane_order: Vec::new(),
             todo_bar: pim::TodoBar::default(),
+            assistant_pane: super::AssistantPane::default(),
         }
     }
 }

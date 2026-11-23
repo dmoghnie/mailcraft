@@ -42,6 +42,7 @@ pub const BUTTONS: &[(RibbonTab, &str, &str)] = &[
     (RibbonTab::Home, "G", "Categorize"),
     (RibbonTab::Home, "U", "Flag"),
     (RibbonTab::Home, "L", "Filter"),
+    (RibbonTab::Home, "AI", "Ask AI"),
     (RibbonTab::Home, "Y", "More commands"),
     (RibbonTab::SendReceive, "S", "Send / Receive all folders"),
     (RibbonTab::SendReceive, "A", "Send all"),

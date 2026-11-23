@@ -223,6 +223,15 @@ Test builds update themselves ([how test builds update](updates.md)). These part
   in both shells, and background checking needs the phones' own job schedulers. The iOS app
   needs a Mac with Xcode to build and test.
 
+### 19. MailCraft's AI assistant: what isn't done yet
+
+- **Impact:** The assistant works with mail alone: it can't look at or change the calendar,
+  people, tasks or rules. On its cards, what a change does and why a step failed are in English
+  whatever the interface language. It isn't in the browser or on the phones.
+- **Workaround:** Ask it to write a message, and make the other changes by hand.
+- **Cause:** Each kind of item needs tools of its own, each change a proposal checked again when
+  approved. A card's words are written by the engine, as the CLI and agents read them.
+
 ## Not planned
 
 These are outside MailCraft's control, or accepted as they are.

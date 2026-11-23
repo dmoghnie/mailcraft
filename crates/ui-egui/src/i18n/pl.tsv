@@ -2202,3 +2202,41 @@ count	occurrences	wystąpieniach
 	Longest answer, in tokens	Najdłuższa odpowiedź, w tokenach
 	When it fails, ask	Gdy zawiedzie, zapytaj
 	No other model	Żaden inny model
+	A message no longer here	Wiadomość, której już nie ma
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	Dodaj model, aby pytać o swoją pocztę: na tym komputerze albo u dostawcy chmury.
+	Add the selected messages	Dodaj zaznaczone wiadomości
+	Answering…	Odpowiada…
+	Approve	Zatwierdź
+	Approve all {n}	Zatwierdź wszystkie ({n})
+	Ask AI	Zapytaj AI
+	Ask AI about the selected text	Zapytaj AI o zaznaczony tekst
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	Pytaj o swoją pocztę: może ją znaleźć, przeczytać, podsumować, odpowiedzieć i uporządkować. Nic się nie zmieni, dopóki tego nie zatwierdzisz.
+	Ask about your mail…	Zapytaj o swoją pocztę…
+	Chats	Czaty
+	Close the AI assistant	Zamknij asystenta AI
+	Cloud: {server}	Chmura: {server}
+	Couldn't be done	Nie udało się
+	Decline all	Odrzuć wszystkie
+	Delete all chats	Usuń wszystkie czaty
+	Click again to delete all {n} chats	Kliknij ponownie, aby usunąć wszystkie czaty ({n})
+	Delete this chat	Usuń ten czat
+	Find the mail I haven't answered	Znajdź wiadomości, na które nie odpowiedziałem
+	Reasoning	Rozumowanie
+	Looked at the folders	Sprawdził foldery
+	Looked at what's selected	Sprawdził zaznaczenie
+	Mark	Oznacz
+	New chat	Nowy czat
+	No chats yet	Brak czatów
+	No model	Brak modelu
+	Read a message	Przeczytał wiadomość
+	Searched the mail	Przeszukał pocztę
+	Set up AI	Skonfiguruj AI
+	Shift+Enter for a new line	Shift+Enter: nowy wiersz
+	Sum up the selected messages	Podsumuj zaznaczone wiadomości
+	The answer was cut short at the longest answer set for this model.	Odpowiedź została ucięta na najdłuższej odpowiedzi ustawionej dla tego modelu.
+	Default model	Model domyślny
+	Thinking…	Myśli…
+	Needs your approval	Wymaga twojego zatwierdzenia
+	What needs my attention today?	Co wymaga dziś mojej uwagi?
+	Write a message	Napisz wiadomość
+	Write a reply to this message	Napisz odpowiedź na tę wiadomość

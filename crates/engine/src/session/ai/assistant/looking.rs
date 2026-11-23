@@ -55,7 +55,7 @@ impl Session {
         head
     }
 
-    fn folder_name(&self, account: &str, folder: &str) -> String {
+    pub(super) fn folder_name(&self, account: &str, folder: &str) -> String {
         self.folder(account, folder).map_or_else(|| folder.to_string(), |f| f.display_name())
     }
 

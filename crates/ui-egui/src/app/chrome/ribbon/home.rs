@@ -9,13 +9,14 @@ use super::{junk_menu, quick_steps_menu};
 use crate::*;
 
 /// Home's groups on the full ribbon: their names, and their buttons in order.
-pub(super) const GROUPS: [(&str, &[&str]); 6] = [
+pub(super) const GROUPS: [(&str, &[&str]); 7] = [
     ("New", &["mail.new"]),
     ("Delete", &["mail.delete", "mail.archive", "mail.junk"]),
     ("Move", &["mail.move", "quickStep.run"]),
     ("Respond", &["mail.reply", "mail.replyAll", "mail.forward"]),
     ("Tags", &["mail.toggleRead", "mail.flag", "mail.categorize", "mail.pin", "mail.snooze"]),
     ("Find", &["list.filter"]),
+    ("AI", &["assistant.pane"]),
 ];
 
 /// Where a command added to the ribbon lives, by the start of its id, and the icon its button
@@ -82,6 +83,7 @@ pub(super) fn name(s: &Session, id: &'static str) -> &'static str {
         "mail.pin" => "Pin",
         "mail.snooze" => "Snooze",
         "list.filter" => "Filter",
+        "assistant.pane" => "Ask AI",
         _ => s.registry().get(id).map_or(id, |c| c.label),
     }
 }
@@ -148,6 +150,7 @@ fn icon(s: &Session, id: &str) -> Icon {
         "mail.pin" => Icon::Pin,
         "mail.snooze" => Icon::Clock,
         "list.filter" => Icon::Funnel,
+        "assistant.pane" => Icon::Sparkle,
         _ => AREA_ICONS.iter().find(|(area, _)| id.starts_with(area)).map_or(Icon::Steps, |(_, icon)| *icon),
     }
 }

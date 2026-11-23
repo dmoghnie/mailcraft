@@ -34,6 +34,11 @@ craft-proof = { workspace = true }
 hayro = { version = "0.9", default-features = false }
 # A search's time each frame: std's clock panics in the browser (the version egui's winit uses).
 web-time = "1.1"
+# The assistant's answers, written in Markdown, shown formatted: no pictures loaded (none from
+# the web, none from files), no syntax highlighting (MIT OR Apache-2.0).
+egui_commonmark = { version = "0.26", default-features = false, features = ["pulldown_cmark"] }
+# The parser it uses, to find the pictures in an answer and show each as a link (MIT).
+pulldown-cmark = { version = "0.13", default-features = false }
 
 [dev-dependencies]
 # The search tests' big made-up mailbox (`sample::big`).

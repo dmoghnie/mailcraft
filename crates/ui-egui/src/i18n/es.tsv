@@ -2189,3 +2189,41 @@ count	occurrences	repeticiones
 	Longest answer, in tokens	Respuesta más larga, en tokens
 	When it fails, ask	Si falla, preguntar a
 	No other model	Ningún otro modelo
+	A message no longer here	Un mensaje que ya no está
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	Añada un modelo para preguntarle sobre su correo: uno en este equipo o el de un proveedor en la nube.
+	Add the selected messages	Añadir los mensajes seleccionados
+	Answering…	Respondiendo…
+	Approve	Aprobar
+	Approve all {n}	Aprobar las {n}
+	Ask AI	Preguntar a la IA
+	Ask AI about the selected text	Preguntar a la IA sobre el texto seleccionado
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	Pregunte sobre su correo: puede buscarlo, leerlo, resumirlo, responderlo y ordenarlo. Nada cambia hasta que usted lo apruebe.
+	Ask about your mail…	Pregunte sobre su correo…
+	Chats	Chats
+	Close the AI assistant	Cerrar el asistente de IA
+	Cloud: {server}	Nube: {server}
+	Couldn't be done	No se pudo hacer
+	Decline all	Rechazar todas
+	Delete all chats	Eliminar todos los chats
+	Click again to delete all {n} chats	Haga clic otra vez para eliminar los {n} chats
+	Delete this chat	Eliminar este chat
+	Find the mail I haven't answered	Busca el correo que no he respondido
+	Reasoning	Razonamiento
+	Looked at the folders	Revisó las carpetas
+	Looked at what's selected	Revisó lo seleccionado
+	Mark	Marcar
+	New chat	Nuevo chat
+	No chats yet	Aún no hay chats
+	No model	Ningún modelo
+	Read a message	Leyó un mensaje
+	Searched the mail	Buscó en el correo
+	Set up AI	Configurar la IA
+	Shift+Enter for a new line	Mayús+Intro para una nueva línea
+	Sum up the selected messages	Resume los mensajes seleccionados
+	The answer was cut short at the longest answer set for this model.	La respuesta se cortó en la respuesta más larga fijada para este modelo.
+	Default model	Modelo predeterminado
+	Thinking…	Pensando…
+	Needs your approval	Necesita su aprobación
+	What needs my attention today?	¿Qué necesita mi atención hoy?
+	Write a message	Escribir un mensaje
+	Write a reply to this message	Escribe una respuesta a este mensaje

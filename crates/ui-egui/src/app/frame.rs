@@ -564,6 +564,7 @@ impl MailApp {
             if module == Module::Mail {
                 // Beside the mail, at the window's end, while what's read keeps its room.
                 let least = if pane == ReadingPane::Right { LIST_LEAST + READING_LEAST } else { LIST_LEAST };
+                assistant::panel(&mut self.session, &mut self.ui, ui, least, acts);
                 todo_bar::panel(&mut self.session, &mut self.ui, ui, least, acts);
             }
             let list_frame = egui::Frame::new().fill(t.surface).stroke(egui::Stroke::new(1.0, t.border));

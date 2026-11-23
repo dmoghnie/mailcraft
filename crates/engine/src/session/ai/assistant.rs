@@ -24,9 +24,12 @@ mod exchange;
 mod kept;
 mod looking;
 mod tools;
+mod window;
 
+pub use commands::QUOTE_MOST as CONTEXT_QUOTE_MOST;
 pub(crate) use commands::commands as assistant_commands;
-pub use context::{CONTEXT_AT_FIRST, ContextItem};
+pub use context::{CONTEXT_AT_FIRST, ContextItem, ITEMS_MOST as CONTEXT_ITEMS_MOST};
+pub use window::{ASSISTANT_WIDTH, AssistantPane};
 
 /// The most of steps (answers with tool calls) the assistant takes for one thing the person
 /// says: past it, it stops and says so.
@@ -198,6 +201,11 @@ impl Assistant {
     /// The chats kept, newest first.
     pub fn heads(&self) -> impl Iterator<Item = &ChatHead> {
         self.heads.iter().rev()
+    }
+
+    /// Chat `id`, if it's been read ([`Session::assistant_shown`] reads it).
+    pub fn chat(&self, id: &str) -> Option<&Chat> {
+        self.chats.get(id)
     }
 
     /// The question chat `id` waits on, if it does.

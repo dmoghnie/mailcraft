@@ -2189,3 +2189,41 @@ count	occurrences	kez
 	Longest answer, in tokens	En uzun yanıt, token olarak
 	When it fails, ask	Başarısız olursa şuna sor
 	No other model	Başka model yok
+	A message no longer here	Artık burada olmayan bir ileti
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	Postanız hakkında soru sormak için bir model ekleyin: bu bilgisayardaki bir model ya da bir bulut sağlayıcısınınki.
+	Add the selected messages	Seçili iletileri ekle
+	Answering…	Yanıtlıyor…
+	Approve	Onayla
+	Approve all {n}	Tümünü onayla ({n})
+	Ask AI	Yapay zekâya sor
+	Ask AI about the selected text	Seçili metin hakkında yapay zekâya sor
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	Postanız hakkında soru sorun: postalarınızı bulabilir, okuyabilir, özetleyebilir, yanıtlayabilir ve düzenleyebilir. Siz onaylayana kadar hiçbir şey değişmez.
+	Ask about your mail…	Postanız hakkında sorun…
+	Chats	Sohbetler
+	Close the AI assistant	Yapay zekâ asistanını kapat
+	Cloud: {server}	Bulut: {server}
+	Couldn't be done	Yapılamadı
+	Decline all	Tümünü reddet
+	Delete all chats	Tüm sohbetleri sil
+	Click again to delete all {n} chats	{n} sohbetin tümünü silmek için yeniden tıklayın
+	Delete this chat	Bu sohbeti sil
+	Find the mail I haven't answered	Yanıtlamadığım postaları bul
+	Reasoning	Akıl yürütme
+	Looked at the folders	Klasörlere baktı
+	Looked at what's selected	Seçili olanlara baktı
+	Mark	İşaretle
+	New chat	Yeni sohbet
+	No chats yet	Henüz sohbet yok
+	No model	Model yok
+	Read a message	Bir ileti okudu
+	Searched the mail	Postalarda arama yaptı
+	Set up AI	Yapay zekâyı ayarla
+	Shift+Enter for a new line	Yeni satır için Shift+Enter
+	Sum up the selected messages	Seçili iletileri özetle
+	The answer was cut short at the longest answer set for this model.	Yanıt, bu model için belirlenen en uzun yanıtta kesildi.
+	Default model	Varsayılan model
+	Thinking…	Düşünüyor…
+	Needs your approval	Onayınızı bekliyor
+	What needs my attention today?	Bugün neyle ilgilenmem gerekiyor?
+	Write a message	İleti yaz
+	Write a reply to this message	Bu iletiye bir yanıt yaz

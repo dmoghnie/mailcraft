@@ -453,6 +453,12 @@ impl MessageRow<'_> {
                 }
             };
             item(ui, acts, tl!("Open in new window"), Action::Run("message.popOut", json!({"key": key.to_id()})));
+            // What's selected (or the row alone, outside it), to MailCraft's AI, once one is set up.
+            if !s.prefs.ai.profiles.is_empty() {
+                let keys = if s.selection.contains(key) { s.selection.as_slice() } else { std::slice::from_ref(key) };
+                let items = keys.iter().map(|k| mailcraft_engine::ContextItem::Message { id: k.to_id() }).collect();
+                item(ui, acts, tl!("Ask AI"), Action::AskAi(items));
+            }
             ui.separator();
             // One of several selected: answering and printing are for one message (they failed, or
             // asked where to save a PDF and then said nothing is open).

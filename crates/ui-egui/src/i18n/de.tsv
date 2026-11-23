@@ -2189,3 +2189,41 @@ count	occurrences	Terminen
 	Longest answer, in tokens	Längste Antwort, in Token
 	When it fails, ask	Wenn es fehlschlägt, fragen
 	No other model	Kein anderes Modell
+	A message no longer here	Eine Nachricht, die nicht mehr da ist
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	Fügen Sie ein Modell hinzu, um es zu Ihren E-Mails zu fragen: eines auf diesem Computer oder das eines Cloud-Anbieters.
+	Add the selected messages	Ausgewählte Nachrichten hinzufügen
+	Answering…	Antwortet…
+	Approve	Genehmigen
+	Approve all {n}	Alle {n} genehmigen
+	Ask AI	KI fragen
+	Ask AI about the selected text	KI zum ausgewählten Text fragen
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	Fragen Sie zu Ihren E-Mails: Es kann sie finden, lesen, zusammenfassen, beantworten und aufräumen. Nichts ändert sich, bevor Sie es genehmigen.
+	Ask about your mail…	Fragen zu Ihren E-Mails…
+	Chats	Chats
+	Close the AI assistant	KI-Assistenten schließen
+	Cloud: {server}	Cloud: {server}
+	Couldn't be done	Nicht möglich
+	Decline all	Alle ablehnen
+	Delete all chats	Alle Chats löschen
+	Click again to delete all {n} chats	Erneut klicken, um alle {n} Chats zu löschen
+	Delete this chat	Diesen Chat löschen
+	Find the mail I haven't answered	Finde die E-Mails, die ich nicht beantwortet habe
+	Reasoning	Überlegungen
+	Looked at the folders	Ordner angesehen
+	Looked at what's selected	Auswahl angesehen
+	Mark	Markieren
+	New chat	Neuer Chat
+	No chats yet	Noch keine Chats
+	No model	Kein Modell
+	Read a message	Eine Nachricht gelesen
+	Searched the mail	E-Mails durchsucht
+	Set up AI	KI einrichten
+	Shift+Enter for a new line	Umschalt+Eingabe für eine neue Zeile
+	Sum up the selected messages	Fasse die ausgewählten Nachrichten zusammen
+	The answer was cut short at the longest answer set for this model.	Die Antwort wurde bei der für dieses Modell festgelegten längsten Antwort abgeschnitten.
+	Default model	Standardmodell
+	Thinking…	Denkt nach…
+	Needs your approval	Wartet auf Ihre Genehmigung
+	What needs my attention today?	Was braucht heute meine Aufmerksamkeit?
+	Write a message	Nachricht schreiben
+	Write a reply to this message	Schreibe eine Antwort auf diese Nachricht

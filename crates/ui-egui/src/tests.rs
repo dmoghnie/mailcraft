@@ -838,6 +838,7 @@ impl crate::Services for Ticking {
 
 mod access;
 mod accounts;
+mod assistant;
 mod calendar;
 mod commands;
 mod organize;

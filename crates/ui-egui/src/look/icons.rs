@@ -90,6 +90,8 @@ pub enum Icon {
     Source,
     /// Two rows of squares (the classic ribbon's big buttons).
     Ribbon,
+    /// MailCraft's AI: a four-pointed star, and a small one beside it.
+    Sparkle,
 }
 
 struct Pen<'a> {
@@ -431,6 +433,10 @@ pub fn paint(p: &Painter, rect: Rect, icon: Icon, color: Color32) {
             for (x, y) in [(1.5, 2.5), (6.0, 2.5), (10.5, 2.5), (1.5, 9.0), (6.0, 9.0), (10.5, 9.0)] {
                 pen.rect(x, y, x + 4.0, y + 4.5);
             }
+        }
+        Icon::Sparkle => {
+            pen.closed(&[(6.5, 4.0), (7.8, 8.2), (12.0, 9.5), (7.8, 10.8), (6.5, 15.0), (5.2, 10.8), (1.0, 9.5), (5.2, 8.2)]);
+            pen.closed(&[(12.5, 1.0), (13.1, 2.9), (15.0, 3.5), (13.1, 4.1), (12.5, 6.0), (11.9, 4.1), (10.0, 3.5), (11.9, 2.9)]);
         }
         Icon::Steps => {
             pen.line(&[(3.0, 4.0), (7.0, 8.0), (3.0, 12.0)]);

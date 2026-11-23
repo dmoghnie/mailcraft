@@ -13,7 +13,7 @@ use super::*;
 use crate::{CmdError, Session};
 
 /// The most items pointed at in a turn.
-pub(super) const ITEMS_MOST: usize = 20;
+pub const ITEMS_MOST: usize = 20;
 /// The most of a message's text written in for it, in characters.
 pub(super) const MESSAGE_CHARS: usize = 12_000;
 /// The most of a selected part written in, in characters.

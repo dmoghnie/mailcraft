@@ -2189,3 +2189,41 @@ count	occurrences	occurrences
 	Longest answer, in tokens	Réponse la plus longue, en jetons
 	When it fails, ask	En cas d'échec, interroger
 	No other model	Aucun autre modèle
+	A message no longer here	Un message qui n’est plus là
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	Ajoutez un modèle pour l’interroger sur vos messages : un modèle sur cet ordinateur, ou celui d’un fournisseur cloud.
+	Add the selected messages	Ajouter les messages sélectionnés
+	Answering…	Réponse en cours…
+	Approve	Approuver
+	Approve all {n}	Tout approuver ({n})
+	Ask AI	Demander à l’IA
+	Ask AI about the selected text	Interroger l’IA sur le texte sélectionné
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	Posez vos questions sur vos messages : elle peut les trouver, les lire, les résumer, y répondre et les ranger. Rien ne change tant que vous ne l’avez pas approuvé.
+	Ask about your mail…	Une question sur vos messages…
+	Chats	Discussions
+	Close the AI assistant	Fermer l’assistant IA
+	Cloud: {server}	Cloud : {server}
+	Couldn't be done	Impossible
+	Decline all	Tout refuser
+	Delete all chats	Supprimer toutes les discussions
+	Click again to delete all {n} chats	Cliquez à nouveau pour supprimer les {n} discussions
+	Delete this chat	Supprimer cette discussion
+	Find the mail I haven't answered	Trouve les messages auxquels je n’ai pas répondu
+	Reasoning	Raisonnement
+	Looked at the folders	A consulté les dossiers
+	Looked at what's selected	A consulté la sélection
+	Mark	Marquer
+	New chat	Nouvelle discussion
+	No chats yet	Aucune discussion pour l’instant
+	No model	Aucun modèle
+	Read a message	A lu un message
+	Searched the mail	A cherché dans les messages
+	Set up AI	Configurer l’IA
+	Shift+Enter for a new line	Maj+Entrée pour une nouvelle ligne
+	Sum up the selected messages	Résume les messages sélectionnés
+	The answer was cut short at the longest answer set for this model.	La réponse a été coupée à la longueur maximale fixée pour ce modèle.
+	Default model	Modèle par défaut
+	Thinking…	Réflexion en cours…
+	Needs your approval	Attend votre approbation
+	What needs my attention today?	Qu’est-ce qui demande mon attention aujourd’hui ?
+	Write a message	Écrire un message
+	Write a reply to this message	Écris une réponse à ce message

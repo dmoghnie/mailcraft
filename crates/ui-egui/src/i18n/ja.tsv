@@ -2185,3 +2185,41 @@ count	occurrences	回
 	Longest answer, in tokens	最長の回答 (トークン数)
 	When it fails, ask	失敗したときに使う
 	No other model	ほかのモデルを使わない
+	A message no longer here	見つからなくなったメッセージ
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	メールについて質問するモデルを追加してください。このコンピューター上のモデルか、クラウドプロバイダーのモデルです。
+	Add the selected messages	選択したメッセージを追加
+	Answering…	回答中…
+	Approve	承認
+	Approve all {n}	すべて承認 ({n})
+	Ask AI	AI に質問
+	Ask AI about the selected text	選択したテキストについて AI に質問
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	メールについて質問できます。検索、閲覧、要約、返信、整理ができます。承認するまで何も変更されません。
+	Ask about your mail…	メールについて質問…
+	Chats	チャット
+	Close the AI assistant	AI アシスタントを閉じる
+	Cloud: {server}	クラウド: {server}
+	Couldn't be done	実行できませんでした
+	Decline all	すべて拒否
+	Delete all chats	すべてのチャットを削除
+	Click again to delete all {n} chats	もう一度クリックすると {n} 件のチャットをすべて削除します
+	Delete this chat	このチャットを削除
+	Find the mail I haven't answered	返信していないメールを探して
+	Reasoning	推論
+	Looked at the folders	フォルダーを確認しました
+	Looked at what's selected	選択内容を確認しました
+	Mark	マーク
+	New chat	新しいチャット
+	No chats yet	チャットはまだありません
+	No model	モデルなし
+	Read a message	メッセージを読みました
+	Searched the mail	メールを検索しました
+	Set up AI	AI を設定
+	Shift+Enter for a new line	Shift+Enter で改行
+	Sum up the selected messages	選択したメッセージを要約して
+	The answer was cut short at the longest answer set for this model.	このモデルに設定された最長の回答で、回答が途中で切れました。
+	Default model	既定のモデル
+	Thinking…	考え中…
+	Needs your approval	承認が必要です
+	What needs my attention today?	今日対応が必要なものは？
+	Write a message	メッセージを作成
+	Write a reply to this message	このメッセージへの返信を書いて

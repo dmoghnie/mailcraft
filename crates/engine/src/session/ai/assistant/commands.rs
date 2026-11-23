@@ -9,7 +9,7 @@ use crate::{CmdError, CmdResult, CommandSpec, Session, p};
 
 const WHERE: &str = "AI assistant";
 /// The longest selected part pointed at, in bytes.
-const QUOTE_MOST: usize = 64 << 10;
+pub const QUOTE_MOST: usize = 64 << 10;
 
 pub(crate) fn commands() -> Vec<CommandSpec> {
     vec![
@@ -23,6 +23,16 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
                 .collect();
             Ok(json!({"chats": chats}))
         }),
+        CommandSpec::new("assistant.pane", "Ask AI", "Home", |s, v| {
+            let pane = &mut s.prefs.assistant_pane;
+            pane.shown = p::bool(v, "on").unwrap_or(!pane.shown || v.get("width").is_some());
+            if let Some(w) = p::u64(v, "width") {
+                let (least, most) = (*ASSISTANT_WIDTH.start(), *ASSISTANT_WIDTH.end());
+                pane.width = u16::try_from(w).unwrap_or(most).clamp(least, most);
+            }
+            Ok(json!({"shown": pane.shown, "width": pane.width}))
+        })
+        .params(r#"{"on"?: bool (shown or hidden; not given: the other way, or shown when a width is given), "width"?: number}"#),
         CommandSpec::new("assistant.chat", "Show a chat with MailCraft's AI", WHERE, show).params(r#"{"chat": string}"#),
         CommandSpec::new("assistant.send", "Say something to MailCraft's AI", WHERE, send).params(
             r#"{"chat"?: string (none: a new chat), "text": string, "context"?: [{"kind": "message", "id": string} | {"kind": "quote", "id": string, "text": string (the part selected)} | {"kind": "folder", "account": string, "folder": string}], "profile"?: string (the model the chat asks from now on; "": the one chat work goes to)}"#,

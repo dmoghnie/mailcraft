@@ -2184,3 +2184,41 @@ count	occurrences	keer
 	Longest answer, in tokens	Langste antwoord, in tokens
 	When it fails, ask	Als het mislukt, vragen aan
 	No other model	Geen ander model
+	A message no longer here	Een bericht dat er niet meer is
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	Voeg een model toe om vragen over je mail te stellen: een op deze computer, of dat van een cloudaanbieder.
+	Add the selected messages	De geselecteerde berichten toevoegen
+	Answering…	Bezig met antwoorden…
+	Approve	Goedkeuren
+	Approve all {n}	Alle {n} goedkeuren
+	Ask AI	Vraag het AI
+	Ask AI about the selected text	Vraag het AI over de geselecteerde tekst
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	Stel vragen over je mail: het kan je mail vinden, lezen, samenvatten, beantwoorden en opruimen. Er verandert niets tot je het goedkeurt.
+	Ask about your mail…	Stel een vraag over je mail…
+	Chats	Chats
+	Close the AI assistant	De AI-assistent sluiten
+	Cloud: {server}	Cloud: {server}
+	Couldn't be done	Kon niet worden gedaan
+	Decline all	Alles afwijzen
+	Delete all chats	Alle chats verwijderen
+	Click again to delete all {n} chats	Klik nogmaals om alle {n} chats te verwijderen
+	Delete this chat	Deze chat verwijderen
+	Find the mail I haven't answered	Zoek de mail die ik niet heb beantwoord
+	Reasoning	Redenering
+	Looked at the folders	Mappen bekeken
+	Looked at what's selected	Selectie bekeken
+	Mark	Markeren
+	New chat	Nieuwe chat
+	No chats yet	Nog geen chats
+	No model	Geen model
+	Read a message	Een bericht gelezen
+	Searched the mail	In de mail gezocht
+	Set up AI	AI instellen
+	Shift+Enter for a new line	Shift+Enter voor een nieuwe regel
+	Sum up the selected messages	Vat de geselecteerde berichten samen
+	The answer was cut short at the longest answer set for this model.	Het antwoord is afgebroken bij het langste antwoord dat voor dit model is ingesteld.
+	Default model	Standaardmodel
+	Thinking…	Bezig met nadenken…
+	Needs your approval	Wacht op je goedkeuring
+	What needs my attention today?	Wat heeft vandaag mijn aandacht nodig?
+	Write a message	Een bericht schrijven
+	Write a reply to this message	Schrijf een antwoord op dit bericht

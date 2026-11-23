@@ -2184,3 +2184,41 @@ count	occurrences	פעמים
 	Longest answer, in tokens	התשובה הארוכה ביותר, בטוקנים
 	When it fails, ask	אם נכשל, לשאול את
 	No other model	בלי מודל אחר
+	A message no longer here	הודעה שכבר אינה כאן
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	הוסיפו מודל כדי לשאול אותו על הדואר שלכם: מודל במחשב הזה, או של ספק ענן.
+	Add the selected messages	הוספת ההודעות שנבחרו
+	Answering…	עונה…
+	Approve	אישור
+	Approve all {n}	אישור הכול ({n})
+	Ask AI	שאלו את הבינה המלאכותית
+	Ask AI about the selected text	שאלו את הבינה המלאכותית על הטקסט שנבחר
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	שאלו על הדואר שלכם: הוא יכול למצוא, לקרוא, לסכם, לענות ולסדר אותו. שום דבר לא משתנה עד שתאשרו.
+	Ask about your mail…	שאלו על הדואר שלכם…
+	Chats	שיחות
+	Close the AI assistant	סגירת עוזר הבינה המלאכותית
+	Cloud: {server}	ענן: {server}
+	Couldn't be done	לא ניתן היה לבצע
+	Decline all	דחיית הכול
+	Delete all chats	מחיקת כל השיחות
+	Click again to delete all {n} chats	לחצו שוב כדי למחוק את כל השיחות ({n})
+	Delete this chat	מחיקת השיחה הזו
+	Find the mail I haven't answered	מצא את הדואר שלא עניתי עליו
+	Reasoning	שיקולים
+	Looked at the folders	עבר על התיקיות
+	Looked at what's selected	עבר על מה שנבחר
+	Mark	סימון
+	New chat	שיחה חדשה
+	No chats yet	אין עדיין שיחות
+	No model	אין מודל
+	Read a message	קרא הודעה
+	Searched the mail	חיפש בדואר
+	Set up AI	הגדרת בינה מלאכותית
+	Shift+Enter for a new line	Shift+Enter לשורה חדשה
+	Sum up the selected messages	סכם את ההודעות שנבחרו
+	The answer was cut short at the longest answer set for this model.	התשובה נקטעה באורך התשובה המרבי שנקבע למודל הזה.
+	Default model	מודל ברירת המחדל
+	Thinking…	חושב…
+	Needs your approval	ממתין לאישורכם
+	What needs my attention today?	מה דורש את תשומת ליבי היום?
+	Write a message	כתיבת הודעה
+	Write a reply to this message	כתוב תשובה להודעה הזו

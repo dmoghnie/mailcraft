@@ -120,8 +120,13 @@ and `cargo xtask sizes` enforces them.
   turns. At most 24 steps for one thing the person says.
 - **Chats stay on this computer**: `assistant.json` lists them, each in `assistant-<id>.json`
   (read when first wanted, its file removed when it's deleted); never in the record or the log.
+- **The pane** (`ui-egui/src/panes/assistant/`) shows the chat from the session, never a copy:
+  what the person says and decides goes through `assistant.*` commands. An answer is Markdown
+  (`egui_commonmark`) with each picture made a link, so nothing is fetched; its links open as a
+  message's do. Text selected in a message is read as its runs are laid out, so its Ask AI
+  button takes it a frame after it's pressed (`reading/text_selection/asking.rs`).
 - **Not yet:** embeddings (for search), pictures, a monthly budget, the browser and the phones;
-  the assistant's pane in the window, and its tools for the calendar, contacts and rules.
+  the assistant's tools for the calendar, contacts and rules.
   A question waits up to five minutes for its answer to start.
 
 ## The session

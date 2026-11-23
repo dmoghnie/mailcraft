@@ -1,7 +1,8 @@
 //! The window's panes and pages: the folder pane, the message list, calendar, people, tasks, notes,
-//! the To-Do Bar, the Reminders window, the organizing menus, and the File page; and what People,
+//! the To-Do Bar, MailCraft's AI assistant, the Reminders window, the organizing menus, and the File page; and what People,
 //! Tasks and Notes list, kept between frames.
 
+pub(crate) mod assistant;
 pub mod backstage;
 pub(crate) mod calendar;
 pub(crate) mod files;

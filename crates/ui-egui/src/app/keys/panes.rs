@@ -12,11 +12,13 @@ pub(crate) enum Pane {
     /// The reading pane, or Calendar's, People's, Tasks' or Notes' own.
     Reading,
     TodoBar,
+    /// MailCraft's AI assistant, beside the mail.
+    Assistant,
     /// The top bar and the ribbon under it.
     Bars,
 }
 
-const ORDER: [Pane; 5] = [Pane::Folders, Pane::List, Pane::Reading, Pane::TodoBar, Pane::Bars];
+const ORDER: [Pane; 6] = [Pane::Folders, Pane::List, Pane::Reading, Pane::TodoBar, Pane::Assistant, Pane::Bars];
 
 impl MailApp {
     /// F6 (`back`: Shift+F6): the keyboard to the next pane drawn last frame that has a control

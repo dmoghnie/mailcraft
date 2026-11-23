@@ -2203,3 +2203,41 @@ count	occurrences	opakovaní
 	Longest answer, in tokens	Najdlhšia odpoveď, v tokenoch
 	When it fails, ask	Keď zlyhá, opýtať sa
 	No other model	Žiadny iný model
+	A message no longer here	Správa, ktorá tu už nie je
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	Pridajte model, ktorého sa budete pýtať na svoju poštu: na tomto počítači alebo od poskytovateľa cloudu.
+	Add the selected messages	Pridať vybrané správy
+	Answering…	Odpovedá…
+	Approve	Schváliť
+	Approve all {n}	Schváliť všetky ({n})
+	Ask AI	Opýtať sa AI
+	Ask AI about the selected text	Opýtať sa AI na vybraný text
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	Pýtajte sa na svoju poštu: dokáže ju nájsť, prečítať, zhrnúť, odpovedať na ňu a upratať. Nič sa nezmení, kým to neschválite.
+	Ask about your mail…	Opýtajte sa na svoju poštu…
+	Chats	Konverzácie
+	Close the AI assistant	Zavrieť asistenta AI
+	Cloud: {server}	Cloud: {server}
+	Couldn't be done	Nepodarilo sa
+	Decline all	Odmietnuť všetky
+	Delete all chats	Odstrániť všetky konverzácie
+	Click again to delete all {n} chats	Kliknite znova a odstránia sa všetky konverzácie ({n})
+	Delete this chat	Odstrániť túto konverzáciu
+	Find the mail I haven't answered	Nájdi poštu, na ktorú som neodpovedal
+	Reasoning	Úvahy
+	Looked at the folders	Pozrel si priečinky
+	Looked at what's selected	Pozrel si výber
+	Mark	Označiť
+	New chat	Nová konverzácia
+	No chats yet	Zatiaľ žiadne konverzácie
+	No model	Žiadny model
+	Read a message	Prečítal správu
+	Searched the mail	Prehľadal poštu
+	Set up AI	Nastaviť AI
+	Shift+Enter for a new line	Shift+Enter pre nový riadok
+	Sum up the selected messages	Zhrň vybrané správy
+	The answer was cut short at the longest answer set for this model.	Odpoveď sa skrátila na najdlhšiu odpoveď nastavenú pre tento model.
+	Default model	Predvolený model
+	Thinking…	Premýšľa…
+	Needs your approval	Čaká na vaše schválenie
+	What needs my attention today?	Čo si dnes vyžaduje moju pozornosť?
+	Write a message	Napísať správu
+	Write a reply to this message	Napíš odpoveď na túto správu

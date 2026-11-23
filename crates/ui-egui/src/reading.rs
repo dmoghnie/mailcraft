@@ -398,11 +398,13 @@ fn message_body(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, format
     let t = st.tokens;
     let (r, p) = (o.r, o.p);
     // The text is selected as one, whatever it's drawn as (`text_selection`).
-    text_selection::begin(st, ui, ui.scope_id().with(("message-text", r.key.to_id())), o.in_window);
+    let doc = ui.scope_id().with(("message-text", r.key.to_id()));
+    text_selection::begin(st, ui, doc, o.in_window);
     // A search on: what it found marked (issue #173), the text drawn as formatted lines.
     if let Some(m) = marked(s, st, &r.key, p, formatted) {
         rich_body(s, st, ui, &r.key, &m, None, acts);
         text_selection::finish(st, ui, long_text::many_lines(&m).then_some(p.text.as_str()));
+        ask_ai(s, st, ui, doc, &r.key, acts);
         return;
     }
     // What a reply quotes of an earlier message shown, folded (the conversation's cards).
@@ -424,6 +426,36 @@ fn message_body(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, format
     // Laid out by what's in view, a long text's copy of all of it is its text.
     let long = if formatted { long_text::many_lines(p) } else { text.len() > long_text::LONG };
     text_selection::finish(st, ui, long.then_some(if formatted { p.text.as_str() } else { text }));
+    ask_ai(s, st, ui, doc, &r.key, acts);
+}
+
+/// Ask AI beside the end of what's selected in the message's text (text `doc`), once a model is
+/// set up: pressed, what's selected goes to the assistant's box (read the next frame).
+fn ask_ai(s: &Session, st: &mut UiState, ui: &Ui, doc: egui::Id, key: &MessageKey, acts: &mut Vec<Action>) {
+    if s.prefs.ai.profiles.is_empty() {
+        return;
+    }
+    if let Some(text) = st.text_selection.ask.take(doc) {
+        // More than a quote holds (most of a long message): the message, whole.
+        let item = if text.len() > mailcraft_engine::CONTEXT_QUOTE_MOST {
+            mailcraft_engine::ContextItem::Message { id: key.to_id() }
+        } else {
+            mailcraft_engine::ContextItem::Quote { id: key.to_id(), text }
+        };
+        acts.push(Action::AskAi(vec![item]));
+    }
+    let Some(end) = st.text_selection.ask.at(doc) else { return };
+    let t = st.tokens;
+    let pressed = egui::Area::new(doc.with("ask-ai"))
+        .order(egui::Order::Foreground)
+        .fixed_pos(egui::pos2(end.left(), end.bottom() + 4.0))
+        .constrain_to(ui.clip_rect())
+        .show(ui.ctx(), |ui| widgets::pill_button_named(ui, Icon::Sparkle, "Ask AI", "Ask AI about the selected text", &t).clicked())
+        .inner;
+    if pressed {
+        st.text_selection.ask.want(doc);
+        ui.ctx().request_repaint();
+    }
 }
 
 /// The External tag: a sender from outside the organisation (issue #29). One line however

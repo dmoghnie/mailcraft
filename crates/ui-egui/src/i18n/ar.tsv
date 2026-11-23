@@ -2184,3 +2184,41 @@ count	occurrences	مرات
 	Longest answer, in tokens	أطول إجابة، بالرموز المميّزة
 	When it fails, ask	عند الفشل، اسأل
 	No other model	لا نموذج آخر
+	A message no longer here	رسالة لم تعد موجودة
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	أضف نموذجًا لتسأله عن بريدك: نموذجًا على هذا الكمبيوتر، أو نموذج مزوّد سحابي.
+	Add the selected messages	إضافة الرسائل المحددة
+	Answering…	جارٍ الرد…
+	Approve	موافقة
+	Approve all {n}	الموافقة على الكل ({n})
+	Ask AI	اسأل الذكاء الاصطناعي
+	Ask AI about the selected text	اسأل الذكاء الاصطناعي عن النص المحدد
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	اسأل عن بريدك: يمكنه البحث فيه وقراءته وتلخيصه والرد عليه وترتيبه. لا يتغير شيء حتى توافق عليه.
+	Ask about your mail…	اسأل عن بريدك…
+	Chats	المحادثات
+	Close the AI assistant	إغلاق مساعد الذكاء الاصطناعي
+	Cloud: {server}	سحابي: {server}
+	Couldn't be done	تعذّر التنفيذ
+	Decline all	رفض الكل
+	Delete all chats	حذف كل المحادثات
+	Click again to delete all {n} chats	انقر مرة أخرى لحذف كل المحادثات ({n})
+	Delete this chat	حذف هذه المحادثة
+	Find the mail I haven't answered	ابحث عن البريد الذي لم أرد عليه
+	Reasoning	طريقة التفكير
+	Looked at the folders	اطّلع على المجلدات
+	Looked at what's selected	اطّلع على ما هو محدد
+	Mark	تعليم
+	New chat	محادثة جديدة
+	No chats yet	لا توجد محادثات بعد
+	No model	لا يوجد نموذج
+	Read a message	قرأ رسالة
+	Searched the mail	بحث في البريد
+	Set up AI	إعداد الذكاء الاصطناعي
+	Shift+Enter for a new line	Shift+Enter لسطر جديد
+	Sum up the selected messages	لخّص الرسائل المحددة
+	The answer was cut short at the longest answer set for this model.	قُطع الرد عند أطول رد محدد لهذا النموذج.
+	Default model	النموذج الافتراضي
+	Thinking…	جارٍ التفكير…
+	Needs your approval	يحتاج إلى موافقتك
+	What needs my attention today?	ما الذي يحتاج إلى انتباهي اليوم؟
+	Write a message	كتابة رسالة
+	Write a reply to this message	اكتب ردًا على هذه الرسالة

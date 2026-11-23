@@ -343,3 +343,22 @@ fn the_assistants_tools_refuse_junk() {
     let _ = ContextItem::Message { id: String::new() };
     let _ = RunState::Ran;
 }
+
+/// Home › Ask AI shows the assistant's pane or hides it; dragged, its width is kept, within
+/// bounds. The window reads the chats as they stand, and the model a new chat would ask.
+#[test]
+fn the_assistants_pane_is_shown_and_its_chats_read() {
+    let mut s = ready("assistant-pane");
+    assert!(!s.prefs.assistant_pane.shown);
+    assert_eq!(s.run("assistant.pane", &json!({})).unwrap()["shown"], true);
+    assert_eq!(s.run("assistant.pane", &json!({})).unwrap()["shown"], false);
+    let v = s.run("assistant.pane", &json!({"width": 5000})).unwrap();
+    assert_eq!((v["shown"].clone(), v["width"].clone()), (json!(true), json!(*crate::ASSISTANT_WIDTH.end())));
+    assert_eq!(s.run("assistant.pane", &json!({"width": 10, "on": false})).unwrap()["width"], *crate::ASSISTANT_WIDTH.start());
+    assert!(!s.prefs.assistant_pane.shown);
+    assert_eq!(s.assistant_model(&crate::Chat::default()).unwrap().id, "p1", "a new chat asks the model chat work goes to");
+    let c = send(&mut s, None, "Hello there");
+    assert_eq!(s.assistant_heads().iter().map(|h| h.title.as_str()).collect::<Vec<_>>(), ["Hello there"]);
+    assert_eq!(s.assistant_shown(&c).map(|c| c.turns.len()), Some(1));
+    assert!(s.assistant_shown("c999").is_none());
+}

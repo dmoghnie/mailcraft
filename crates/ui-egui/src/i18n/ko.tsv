@@ -2188,3 +2188,41 @@ count	occurrences	회
 	Longest answer, in tokens	가장 긴 답변(토큰)
 	When it fails, ask	실패하면 물어볼 모델
 	No other model	다른 모델 없음
+	A message no longer here	더 이상 없는 메시지
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	메일에 대해 물어볼 모델을 추가하세요. 이 컴퓨터의 모델이나 클라우드 제공업체의 모델입니다.
+	Add the selected messages	선택한 메시지 추가
+	Answering…	답변하는 중…
+	Approve	승인
+	Approve all {n}	모두 승인({n})
+	Ask AI	AI에게 묻기
+	Ask AI about the selected text	선택한 텍스트에 대해 AI에게 묻기
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	메일에 대해 물어보세요. 찾기, 읽기, 요약, 답장, 정리를 할 수 있습니다. 승인하기 전에는 아무것도 바뀌지 않습니다.
+	Ask about your mail…	메일에 대해 물어보세요…
+	Chats	채팅
+	Close the AI assistant	AI 도우미 닫기
+	Cloud: {server}	클라우드: {server}
+	Couldn't be done	실행할 수 없음
+	Decline all	모두 거절
+	Delete all chats	모든 채팅 삭제
+	Click again to delete all {n} chats	다시 클릭하면 채팅 {n}개를 모두 삭제합니다
+	Delete this chat	이 채팅 삭제
+	Find the mail I haven't answered	답장하지 않은 메일 찾아 줘
+	Reasoning	추론
+	Looked at the folders	폴더를 확인함
+	Looked at what's selected	선택한 항목을 확인함
+	Mark	표시
+	New chat	새 채팅
+	No chats yet	아직 채팅이 없습니다
+	No model	모델 없음
+	Read a message	메시지를 읽음
+	Searched the mail	메일을 검색함
+	Set up AI	AI 설정
+	Shift+Enter for a new line	Shift+Enter로 줄 바꿈
+	Sum up the selected messages	선택한 메시지를 요약해 줘
+	The answer was cut short at the longest answer set for this model.	이 모델에 설정된 최대 답변 길이에서 답변이 잘렸습니다.
+	Default model	기본 모델
+	Thinking…	생각하는 중…
+	Needs your approval	승인이 필요함
+	What needs my attention today?	오늘 확인해야 할 것은 무엇인가요?
+	Write a message	메시지 작성
+	Write a reply to this message	이 메시지에 대한 답장을 써 줘

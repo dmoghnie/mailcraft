@@ -178,6 +178,9 @@ pub enum Action {
     ShowFormatted(MessageKey, bool),
     /// Forget a move asked for.
     CancelDataMove,
+    /// Ask MailCraft's AI about these (messages, or text selected in one): its pane opens, and
+    /// they go with what's said next.
+    AskAi(Vec<mailcraft_engine::ContextItem>),
 }
 
 impl MailApp {
@@ -303,6 +306,12 @@ impl MailApp {
             Action::ShowFormatted(key, on) => self.ui.shown_as.set(&key, on, self.session.prefs.show_html),
             Action::SetLanguage(l) => self.ui.language = l,
             Action::OpenUrl(url) => self.open_link(&url),
+            Action::AskAi(items) => {
+                if !self.session.prefs.assistant_pane.shown {
+                    self.run("assistant.pane", json!({"on": true}));
+                }
+                self.ui.assistant.point_at(items);
+            }
             Action::SignInAgain(id) => self.sign_in_again(&id),
             // Data files and the data folder (`actions/data_files.rs`).
             Action::PickAccountDataFile => self.pick_account_data_file(),
@@ -381,6 +390,13 @@ impl MailApp {
             },
             // Check Names: who's several people asked about, who's no one said (issue #211).
             "compose.checkNames" => self.check_names(false),
+            // Said in a chat with MailCraft's AI from its box: the box empty again (the chat is
+            // shown, as `ran` shows it); no model it may ask, said.
+            "assistant.send" => match self.ran(id, &p) {
+                Ok(_) => self.ui.assistant.sent(),
+                Err(mailcraft_engine::CmdError::Disabled(m)) => self.session.notice(m, true),
+                Err(_) => {}
+            },
             // A message's source in its window, brought to the front (asked for again while open).
             "message.source" => match self.session.run(id, &p) {
                 Ok(v) => self.ui.raise_source = v.get("key").and_then(Value::as_str).and_then(MessageKey::from_id),

@@ -2202,3 +2202,41 @@ count	occurrences	повторений
 	Longest answer, in tokens	Самый длинный ответ, в токенах
 	When it fails, ask	Если не ответит, спросить
 	No other model	Никакую другую модель
+	A message no longer here	Сообщение, которого больше нет
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	Добавьте модель, чтобы задавать вопросы о почте: на этом компьютере или у облачного поставщика.
+	Add the selected messages	Добавить выбранные сообщения
+	Answering…	Отвечает…
+	Approve	Одобрить
+	Approve all {n}	Одобрить все ({n})
+	Ask AI	Спросить ИИ
+	Ask AI about the selected text	Спросить ИИ о выделенном тексте
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	Спрашивайте о почте: ИИ может находить, читать, кратко пересказывать письма, отвечать на них и наводить порядок. Ничего не меняется без вашего одобрения.
+	Ask about your mail…	Спросите о почте…
+	Chats	Чаты
+	Close the AI assistant	Закрыть ИИ-помощника
+	Cloud: {server}	Облако: {server}
+	Couldn't be done	Не удалось
+	Decline all	Отклонить все
+	Delete all chats	Удалить все чаты
+	Click again to delete all {n} chats	Нажмите ещё раз, чтобы удалить все чаты ({n})
+	Delete this chat	Удалить этот чат
+	Find the mail I haven't answered	Найди письма, на которые я не ответил
+	Reasoning	Рассуждения
+	Looked at the folders	Просмотрел папки
+	Looked at what's selected	Просмотрел выбранное
+	Mark	Отметить
+	New chat	Новый чат
+	No chats yet	Чатов пока нет
+	No model	Нет модели
+	Read a message	Прочитал сообщение
+	Searched the mail	Искал в почте
+	Set up AI	Настроить ИИ
+	Shift+Enter for a new line	Shift+Enter — новая строка
+	Sum up the selected messages	Кратко перескажи выбранные сообщения
+	The answer was cut short at the longest answer set for this model.	Ответ обрезан на наибольшей длине, заданной для этой модели.
+	Default model	Модель по умолчанию
+	Thinking…	Думает…
+	Needs your approval	Нужно ваше одобрение
+	What needs my attention today?	Что требует моего внимания сегодня?
+	Write a message	Написать сообщение
+	Write a reply to this message	Напиши ответ на это сообщение

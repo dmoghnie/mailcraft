@@ -26,6 +26,7 @@ use egui::{Color32, Key, Modifiers, Pos2, Rect, Response, Sense, Stroke, Ui, pos
 
 use crate::UiState;
 
+mod asking;
 mod reader;
 
 /// Within this distance of the view's top or bottom (its last pixels), or past it, a selection
@@ -136,6 +137,8 @@ pub(crate) struct TextSelection {
     cur: Option<(egui::Id, Doc)>,
     /// The main window's message text had the keyboard last frame: its keys aren't the list's.
     pub(crate) keys: bool,
+    /// Asking MailCraft's AI about what's selected.
+    pub(crate) ask: asking::Ask,
 }
 
 impl TextSelection {
@@ -644,6 +647,7 @@ pub(crate) fn finish(st: &mut UiState, ui: &mut Ui, whole: Option<&str>) {
     if ts.docs.len() >= KEPT {
         ts.docs.retain(|_, v| v.active);
     }
+    asking::note(&mut ts.ask, id, &d, whole);
     d.runs.clear();
     ts.docs.insert(id, d);
 }

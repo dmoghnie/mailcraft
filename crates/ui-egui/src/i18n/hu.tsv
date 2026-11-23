@@ -2189,3 +2189,41 @@ count	occurrences	előfordulás
 	Longest answer, in tokens	Leghosszabb válasz, tokenben
 	When it fails, ask	Ha nem sikerül, ezt kérdezze
 	No other model	Nincs másik modell
+	A message no longer here	Egy már nem létező üzenet
+	Add a model to ask about your mail: one on this computer, or a cloud provider's.	Adjon hozzá egy modellt, hogy kérdezhessen a leveleiről: egyet ezen a számítógépen, vagy egy felhőszolgáltatóét.
+	Add the selected messages	A kijelölt üzenetek hozzáadása
+	Answering…	Válaszol…
+	Approve	Jóváhagyás
+	Approve all {n}	Mind a(z) {n} jóváhagyása
+	Ask AI	Kérdezze az MI-t
+	Ask AI about the selected text	Kérdezze az MI-t a kijelölt szövegről
+	Ask about your mail: it can find, read, sum up, answer and tidy it. Nothing changes until you approve it.	Kérdezzen a leveleiről: meg tudja keresni, elolvasni, összefoglalni, megválaszolni és rendezni őket. Semmi sem változik, amíg jóvá nem hagyja.
+	Ask about your mail…	Kérdezzen a leveleiről…
+	Chats	Csevegések
+	Close the AI assistant	Az MI-asszisztens bezárása
+	Cloud: {server}	Felhő: {server}
+	Couldn't be done	Nem sikerült
+	Decline all	Mind elutasítása
+	Delete all chats	Az összes csevegés törlése
+	Click again to delete all {n} chats	Kattintson újra mind a(z) {n} csevegés törléséhez
+	Delete this chat	A csevegés törlése
+	Find the mail I haven't answered	Keresd meg a leveleket, amelyekre nem válaszoltam
+	Reasoning	Gondolatmenet
+	Looked at the folders	Megnézte a mappákat
+	Looked at what's selected	Megnézte a kijelölést
+	Mark	Megjelölés
+	New chat	Új csevegés
+	No chats yet	Még nincsenek csevegések
+	No model	Nincs modell
+	Read a message	Elolvasott egy üzenetet
+	Searched the mail	Keresett a levelekben
+	Set up AI	MI beállítása
+	Shift+Enter for a new line	Shift+Enter: új sor
+	Sum up the selected messages	Foglald össze a kijelölt üzeneteket
+	The answer was cut short at the longest answer set for this model.	A válasz a modellhez beállított leghosszabb válaszhossznál megszakadt.
+	Default model	Alapértelmezett modell
+	Thinking…	Gondolkodik…
+	Needs your approval	Jóváhagyásra vár
+	What needs my attention today?	Mi igényli ma a figyelmemet?
+	Write a message	Üzenet írása
+	Write a reply to this message	Írj választ erre az üzenetre

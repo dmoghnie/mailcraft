@@ -38,7 +38,7 @@ pub use look::thumbs::VideoFrame;
 pub use look::{bidi, craft_fonts, faces, icons, mail_fonts, motion, theme};
 use look::{drop_down, photos, progress, thumbs, widgets};
 pub use panes::backstage;
-use panes::{calendar, files, list, nav, notes, organize, people, reminders, shown, tasks, todo_bar};
+use panes::{assistant, calendar, files, list, nav, notes, organize, people, reminders, shown, tasks, todo_bar};
 
 use std::collections::HashMap;
 use std::path::PathBuf;

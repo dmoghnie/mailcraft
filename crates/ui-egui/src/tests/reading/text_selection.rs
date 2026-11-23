@@ -471,3 +471,30 @@ fn the_shading_has_no_seam_between_runs_on_a_line() {
         assert!((w[1].left() - w[0].right()).abs() < 0.01, "edge to edge: {} then {}", w[0].right(), w[1].left());
     }
 }
+
+/// Text selected in a message, with a model set up: Ask AI beside where it ends opens the
+/// assistant with what's selected pointed at. Without a model, there's no button.
+#[test]
+fn selected_text_is_asked_about_beside_where_it_ends() {
+    const ASK: &str = "Ask AI about the selected text";
+    let (mut a, _) = app("select-ask-ai");
+    let ctx = egui::Context::default();
+    ctx.enable_accesskit();
+    let area = open(&mut a, &ctx, lines(10));
+    click_at(&ctx, &mut a, area.left_top() + egui::vec2(0.5, 8.0), egui::PointerButton::Primary, Modifiers::NONE);
+    frame(&ctx, &mut a, vec![key(Key::End, Modifiers::SHIFT)]);
+    let size = crate::tests::windows::layout::SIZE.with(std::cell::Cell::get);
+    let asks = |ctx: &egui::Context, a: &mut MailApp| named(ctx, a, size).iter().any(|n| n.label.as_deref() == Some(ASK));
+    assert!(!asks(&ctx, &mut a), "no model, no button");
+    a.run("ai.saveProfile", json!({"name": "Local", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small"}));
+    frame(&ctx, &mut a, vec![]);
+    assert!(asks(&ctx, &mut a), "beside the selection");
+    click_named(&ctx, &mut a, ASK);
+    frame(&ctx, &mut a, vec![]);
+    frame(&ctx, &mut a, vec![]);
+    assert!(a.session.prefs.assistant_pane.shown, "the assistant opens");
+    let key = a.session.reading.as_ref().map(|r| r.key.to_id()).unwrap();
+    let quoted = mailcraft_engine::ContextItem::Quote { id: key, text: "Line 000 of the message.".into() };
+    assert_eq!(a.ui.assistant.context, [quoted], "what's selected is pointed at");
+    assert!(a.ui.text_selection.ask.at(egui::Id::NULL).is_none());
+}

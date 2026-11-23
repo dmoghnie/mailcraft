@@ -327,4 +327,6 @@ pub struct UiState {
     pub(crate) import_details: Option<String>,
     /// Send / Receive's progress window.
     pub(crate) send_receive: super::chrome::send_receive::SendReceiveUi,
+    /// MailCraft's AI assistant: the chat shown, what's typed and pointed at.
+    pub(crate) assistant: crate::panes::assistant::AssistantUi,
 }
