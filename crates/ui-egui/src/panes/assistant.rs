@@ -236,8 +236,10 @@ fn model(s: &Session, st: &mut UiState, ui: &mut Ui, chat: Option<&Chat>, acts: 
                 None => st.assistant.profile = Some(id).filter(|id| !id.is_empty()),
             }
         }
+        // Cut short to fit, whole on hover: a long model's name (Ollama's `owner/Name:tag`)
+        // stretched the pane past its width.
         if let Ok(p) = &asked {
-            ui.label(RichText::new(where_it_is(p)).small().color(t.faint));
+            ui.add(egui::Label::new(RichText::new(where_it_is(p)).small().color(t.faint)).truncate());
         }
     });
     if let Err(e) = asked {

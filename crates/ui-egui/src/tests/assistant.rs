@@ -208,3 +208,26 @@ fn an_event_proposed_is_added_from_its_card_and_opens_from_the_answer() {
     assert_eq!(a.session.module, mailcraft_engine::Module::Calendar);
     assert!(matches!(&a.ui.dialog, Some(Dialog::Event(f)) if f.summary == "Zoom the team"), "the event opens");
 }
+
+/// A model with a long name (Ollama's `owner/Model-Name:tag`) is named in a line that fits the
+/// pane, cut short: it stretched the pane past the width it was set to, and where the window
+/// had no room for that, the pane's left side (its title, the model, the cards' buttons) was
+/// cut off.
+#[test]
+fn a_long_model_name_keeps_the_pane_within_its_width() {
+    let (mut a, ctx) = ready("assistant-long-model");
+    let long = "orcarouter/Qwen3.8-27B-Uncensored:mlx-4bit";
+    a.run("ai.saveProfile", json!({"id": "p1", "name": "Local", "api": "openAi", "url": "http://localhost:11434/v1", "model": long}));
+    a.run("assistant.pane", json!({"on": true, "width": 320}));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    let size = windows::layout::SIZE.with(std::cell::Cell::get);
+    let all = named(&ctx, &mut a, size);
+    let pane = a.ui.panes.iter().find(|(p, _)| *p == crate::Pane::Assistant).map(|(_, r)| *r).expect("the pane shown");
+    assert!(pane.width() <= 321.0, "the pane is {} wide, not the 320 it was set to", pane.width());
+    for label in ["Model", "Close the AI assistant", "Send"] {
+        let r = all.iter().find(|n| n.label.as_deref() == Some(label)).and_then(|n| n.rect).unwrap_or_else(|| panic!("no {label}"));
+        assert!(pane.expand(1.0).contains_rect(r), "{label} at {r:?}, outside the pane {pane:?}");
+    }
+}
