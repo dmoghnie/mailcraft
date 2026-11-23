@@ -2216,6 +2216,8 @@ count	occurrences	회
 	No model	모델 없음
 	Read a message	메시지를 읽음
 	Searched the mail	메일을 검색함
+	Searched the calendar	일정을 검색함
+	Searched the contacts	연락처를 검색함
 	Set up AI	AI 설정
 	Shift+Enter for a new line	Shift+Enter로 줄 바꿈
 	Sum up the selected messages	선택한 메시지를 요약해 줘

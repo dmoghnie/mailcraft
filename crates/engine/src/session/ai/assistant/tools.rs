@@ -10,8 +10,8 @@ use crate::Session;
 
 /// How a call went, as soon as it's made.
 pub(super) enum Outcome {
-    /// Read: what it gave.
-    Ran { what: String, messages: Vec<String>, result: String },
+    /// Read: what it gave, and the messages, events and people in it.
+    Ran { what: String, messages: Vec<String>, found: Vec<Found>, result: String },
     /// It couldn't be done: why.
     Failed { what: String, result: String },
     /// It reads a message still to download.
@@ -43,6 +43,22 @@ pub(super) fn tools() -> Vec<AiTool> {
             "read_message",
             "Read a message whole: who wrote it to whom and when, its text, and its files' names.",
             json!({"type": "object", "properties": {"id": {"type": "string"}, "max_chars": {"type": "integer", "minimum": 500, "maximum": 40000}}, "required": ["id"]}),
+        ),
+        tool(
+            "find_events",
+            "Find events in the calendars shown, as the calendar's search box does: words, and location:, subject:, notes:, organizer:, attendee:, category:, is:recurring, after: and before: YYYY-MM-DD. With no query, the next events. Gives each event's id, when it is, what, where, its calendar, organizer and attendees, and the start of its notes.",
+            json!({"type": "object", "properties": {
+                "query": {"type": "string", "description": "As typed in the calendar's search box, e.g. `attendee:zoe after:2026-01-01`"},
+                "when": {"type": "string", "enum": ["all", "upcoming", "past"], "description": "Upcoming, past or both (upcoming when there's no query, else all)"},
+                "account": {"type": "string", "description": "Only this account's calendars (its id)"},
+                "limit": {"type": "integer", "minimum": 1, "maximum": 50, "description": "How many to give at most (20 when not said)"}}}),
+        ),
+        tool(
+            "find_people",
+            "Find people in the person's contacts, by name, organization or address. With no query, everyone. Gives each one's id, name, addresses, phones, title and organization.",
+            json!({"type": "object", "properties": {
+                "query": {"type": "string", "description": "A name, organization or address, or part of one"},
+                "limit": {"type": "integer", "minimum": 1, "maximum": 50, "description": "How many to give at most (20 when not said)"}}}),
         ),
         tool(
             "selected_messages",
@@ -85,7 +101,7 @@ pub(super) fn tools() -> Vec<AiTool> {
 
 /// Whether `tool` only reads.
 pub(super) fn reads(tool: &str) -> bool {
-    matches!(tool, "list_folders" | "find_messages" | "read_message" | "selected_messages")
+    matches!(tool, "list_folders" | "find_messages" | "read_message" | "find_events" | "find_people" | "selected_messages")
 }
 
 impl Session {
@@ -100,6 +116,8 @@ impl Session {
             "list_folders" => self.tool_list_folders(profile, &input),
             "find_messages" => self.tool_find_messages(profile, &input),
             "read_message" => self.tool_read_message(chat, profile, &input),
+            "find_events" => self.tool_find_events(chat, profile, &input),
+            "find_people" => self.tool_find_people(chat, profile, &input),
             "selected_messages" => self.tool_selected(profile),
             name if !reads(name) && tools().iter().any(|t| t.name == name) => match self.change_of(chat, name, &input) {
                 Ok(change) => Outcome::Proposed { what: change.what(self), messages: change.ids() },

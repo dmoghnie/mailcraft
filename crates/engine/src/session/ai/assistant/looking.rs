@@ -94,7 +94,7 @@ impl Session {
     }
 
     /// Why mail of `account` can't be read for `profile`, when it can't.
-    fn unreadable(&self, account: &str, profile: &AiProfile) -> Option<String> {
+    pub(super) fn unreadable(&self, account: &str, profile: &AiProfile) -> Option<String> {
         if self.account(account).is_none() {
             return Some(format!("there's no account {account}"));
         }
@@ -255,7 +255,12 @@ impl Session {
 
 impl Outcome {
     pub(super) fn ran(what: &str, messages: Vec<String>, result: String) -> Outcome {
-        Outcome::Ran { what: what.to_string(), messages, result }
+        Outcome::Ran { what: what.to_string(), messages, found: Vec::new(), result }
+    }
+
+    /// Read: the events or people `found`.
+    pub(super) fn listed(what: &str, found: Vec<Found>, result: String) -> Outcome {
+        Outcome::Ran { what: what.to_string(), messages: Vec::new(), found, result }
     }
 
     pub(super) fn failed(what: &str, why: String) -> Outcome {

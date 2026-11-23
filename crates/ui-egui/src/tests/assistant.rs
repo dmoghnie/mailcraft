@@ -158,3 +158,31 @@ fn a_message_an_answer_links_to_opens_with_a_click() {
     assert!(matches!(&a.session.view, mailcraft_engine::View::Folder { folder, .. } if *folder == m.key.folder), "{:?}", a.session.view);
     assert_eq!(a.session.reading.as_ref().map(|r| r.key.clone()), Some(m.key.clone()));
 }
+
+/// An event or a person an answer links to opens with a click: the event in its window, on the
+/// calendar's day; the person's card in People.
+#[test]
+fn an_event_or_a_person_an_answer_links_to_opens_with_a_click() {
+    let (mut a, ctx) = ready("assistant-link-pim");
+    a.run("assistant.pane", json!({"on": true}));
+    a.run("assistant.send", json!({"text": "When's lunch with Jun, and who's Zoe?"}));
+    let chat = a.ui.assistant.chat.clone().unwrap();
+    answers(&mut a, &chat, "", &[("find_events", json!({"query": "Jun"})), ("find_people", json!({"query": "zoe"}))]);
+    // The names the tools gave: what's between the brackets their lines start with.
+    let runs = a.session.ai.assistant.chat(&chat).unwrap().runs.clone();
+    let name = |n: usize| runs[n].result.split(['[', ']']).nth(1).unwrap().to_string();
+    let (event, person) = (name(0), name(1));
+    answers(&mut a, &chat, &format!("- [the lunch](mailcraft:{event}) today\n- [who Zoe is](mailcraft:{person})"), &[]);
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "Searched the calendar") && has(&t, "Searched the contacts"), "the tools' cards: {t:?}");
+    click_named(&ctx, &mut a, "the lunch");
+    assert_eq!(a.session.module, mailcraft_engine::Module::Calendar);
+    assert!(matches!(&a.ui.dialog, Some(Dialog::Event(f)) if f.summary == "Lunch with Jun"), "the event opens");
+    a.ui.dialog = None;
+    a.ui.people_view = crate::panes::people::PeopleView::Cards;
+    click_named(&ctx, &mut a, "who Zoe is");
+    assert_eq!(a.session.module, mailcraft_engine::Module::People);
+    assert_eq!(a.ui.person.as_deref(), Some("zoe@sample.mailcraft"));
+    assert_eq!(a.ui.people_view, crate::panes::people::PeopleView::People, "the card shown");
+    assert!(has(&texts(&ctx, &mut a), "Director"), "Zoe's card");
+}

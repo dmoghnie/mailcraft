@@ -109,6 +109,7 @@ mod home;
 mod meetings;
 mod navigation;
 pub(crate) use navigation::go_to_message;
+pub(crate) use pim::{go_to_event, go_to_person};
 mod pgp;
 mod pim;
 mod printing;

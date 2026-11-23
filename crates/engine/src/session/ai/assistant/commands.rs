@@ -34,7 +34,7 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
         })
         .params(r#"{"on"?: bool (shown or hidden; not given: the other way, or shown when a width is given), "width"?: number}"#),
         CommandSpec::new("assistant.chat", "Show a chat with MailCraft's AI", WHERE, show).params(r#"{"chat": string}"#),
-        CommandSpec::new("assistant.open", "Open what an answer of MailCraft's AI links to", WHERE, open).params(r#"{"chat": string, "link": string (as the answer has it: mailcraft:m0123456789)}"#),
+        CommandSpec::new("assistant.open", "Open what an answer of MailCraft's AI links to", WHERE, open).params(r#"{"chat": string, "link": string (as the answer has it: mailcraft:m0123456789)} (an event or a person: gives {"event": {"uid", "occurrence"}} or {"person": uid} for the window to open)"#),
         CommandSpec::new("assistant.send", "Say something to MailCraft's AI", WHERE, send).params(
             r#"{"chat"?: string (none: a new chat), "text": string, "context"?: [{"kind": "message", "id": string} | {"kind": "quote", "id": string, "text": string (the part selected)} | {"kind": "folder", "account": string, "folder": string}], "profile"?: string (the model the chat asks from now on; "": the one chat work goes to)}"#,
         ),
@@ -94,9 +94,12 @@ fn show(s: &mut Session, v: &Value) -> CmdResult {
 fn open(s: &mut Session, v: &Value) -> CmdResult {
     let id = p::req_str(v, "chat")?.to_string();
     let link = p::req_str(v, "link")?;
-    let key = s.assistant_chat(&id)?.linked_message(link);
-    let key = key.ok_or_else(|| CmdError::Failed("MailCraft's AI linked to a message it hasn't found in this chat".into()))?;
-    crate::cmd::go_to_message(s, &key)
+    let linked = s.assistant_chat(&id)?.linked(link);
+    match linked.ok_or_else(|| CmdError::Failed("MailCraft's AI linked to something it hasn't found in this chat".into()))? {
+        Linked::Message(key) => crate::cmd::go_to_message(s, &key),
+        Linked::Found(Found::Event { account, uid, occurrence, start, .. }) => crate::cmd::go_to_event(s, &account, &uid, occurrence, start),
+        Linked::Found(Found::Person { account, uid }) => crate::cmd::go_to_person(s, &account, &uid),
+    }
 }
 
 fn send(s: &mut Session, v: &Value) -> CmdResult {

@@ -651,3 +651,23 @@ fn save_note_file(s: &mut Session, v: &Value) -> CmdResult {
     super::compose::mark_from_internet(std::path::Path::new(path), &data);
     Ok(json!({"saved": path, "bytes": data.len()}))
 }
+
+/// Go to the calendar's day of an event's occurrence that starts at `start`: the window then
+/// opens the event (a command never opens a dialog).
+pub(crate) fn go_to_event(s: &mut Session, account: &str, uid: &str, occurrence: i64, start: i64) -> CmdResult {
+    if !s.pim.get(account).is_some_and(|p| p.events.iter().any(|e| e.event.uid == uid)) {
+        return Err(CmdError::Failed("the event isn't in the calendar any more".into()));
+    }
+    set_module(s, crate::Module::Calendar)?;
+    s.cal_goto(Some(&mailcraft_model::dates::day_string(s.clock.local_day(start))), 0)?;
+    Ok(json!({"event": {"uid": uid, "occurrence": occurrence}}))
+}
+
+/// Go to People, for the window to show someone's card.
+pub(crate) fn go_to_person(s: &mut Session, account: &str, uid: &str) -> CmdResult {
+    if !s.find_person(uid).is_some_and(|p| p.account == account) {
+        return Err(CmdError::Failed("the contact isn't in the address book any more".into()));
+    }
+    set_module(s, crate::Module::People)?;
+    Ok(json!({"person": uid}))
+}

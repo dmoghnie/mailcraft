@@ -164,6 +164,20 @@ impl MailApp {
         self.ran(id, &params).ok()
     }
 
+    /// Open what `assistant.open` went to, as it says.
+    fn open_linked(&mut self, v: &Value) {
+        if let Some(e) = v.get("event") {
+            let (uid, occurrence) =
+                (e.get("uid").and_then(Value::as_str).unwrap_or_default(), e.get("occurrence").and_then(Value::as_i64).unwrap_or_default());
+            self.ui.dialog = Dialog::open_event(&self.session, uid, occurrence);
+        } else if let Some(uid) = v.get("person").and_then(Value::as_str) {
+            self.ui.person = Some(uid.to_string());
+            self.ui.people_view = crate::panes::people::PeopleView::People;
+        } else {
+            self.ui.scroll_to_focus = true;
+        }
+    }
+
     /// Run a command as the window does, what came of it shown where the window shows it (a
     /// dialog, over the message being written, a toast), and the result whole: what an agent
     /// runs (`mailcraft_engine::mcp`), which reads why one failed too.
@@ -183,9 +197,12 @@ impl MailApp {
                 self.ui.dialog = Some(Dialog::SendCheck(found));
             }
             // A message opened by a command (a script's, a conversation's row in the reading
-            // pane, a link in an answer of MailCraft's AI) is brought into view in the list: it
-            // could be opened out of sight.
-            Ok(_) if id == "list.open" || id == "assistant.open" => self.ui.scroll_to_focus = true,
+            // pane) is brought into view in the list: it could be opened out of sight.
+            Ok(_) if id == "list.open" => self.ui.scroll_to_focus = true,
+            // What an answer of MailCraft's AI links to: an event opens (the calendar on its
+            // day), a person's card shows (People's card view: in the others they could be out
+            // of sight), a message is brought into view in its folder.
+            Ok(v) if id == "assistant.open" => self.open_linked(v),
             // Something said to MailCraft's AI (from its box, a script or an agent): that chat
             // is the one its pane shows.
             Ok(v) if id == "assistant.send" => self.ui.assistant.chat = v.get("chat").and_then(Value::as_str).map(str::to_string),

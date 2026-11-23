@@ -2217,6 +2217,8 @@ count	occurrences	előfordulás
 	No model	Nincs modell
 	Read a message	Elolvasott egy üzenetet
 	Searched the mail	Keresett a levelekben
+	Searched the calendar	Keresett a naptárban
+	Searched the contacts	Keresett a névjegyek között
 	Set up AI	MI beállítása
 	Shift+Enter for a new line	Shift+Enter: új sor
 	Sum up the selected messages	Foglald össze a kijelölt üzeneteket

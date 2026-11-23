@@ -420,3 +420,67 @@ fn an_answers_links_open_the_messages_the_chat_has_seen() {
     }
     assert_eq!(s.reading.as_ref().map(|r| r.key.to_id()), Some(story), "left open");
 }
+
+/// The name in a tool's line: what's between its first brackets.
+fn bracketed(line: &str) -> String {
+    let from = line.find('[').unwrap() + 1;
+    let to = line[from..].find(']').unwrap() + from;
+    line[from..to].to_string()
+}
+
+/// Events and people are found and named as messages are, and an answer's link to one goes to
+/// it: the calendar on the event's day (the window then opens the event), or People (the window
+/// shows the person's card). Only what the chat found; nothing gone.
+#[test]
+fn the_calendar_and_contacts_are_found_and_their_links_go_to_them() {
+    let mut s = ready("assistant-pim");
+    let c = send(&mut s, None, "When do I see Jun, and how do I reach Zoe?");
+    let (q, asked) = question(&mut s);
+    let names: Vec<&str> = asked.tools.iter().map(|t| t.name.as_str()).collect();
+    assert!(names.contains(&"find_events") && names.contains(&"find_people"), "{names:?}");
+    assert!(asked.system.contains("[Zoe Park](mailcraft:p0123456789)"), "told to link people too");
+    calls(&mut s, q, "", &[("find_events", json!({"query": "Jun"})), ("find_people", json!({"query": "zoe"}))]);
+    let (q, asked) = question(&mut s);
+    let results = &asked.turns.last().unwrap().results;
+    let (events, people) = (&results[0].content, &results[1].content);
+    assert!(events.contains("| Lunch with Jun | Where: Café on the corner | Calendar: Calendar"), "{events}");
+    assert!(people.contains("Zoe Park | zoe@studio.example | Phone: +1 555 0142 | Director, Studio Lantern"), "{people}");
+    let (event, person) = (bracketed(events), bracketed(people));
+    assert!(event.starts_with('e') && person.starts_with('p') && event.len() == 11, "{event} {person}");
+    answer(&mut s, q, &format!("[Lunch with Jun](mailcraft:{event}) with [Zoe Park](mailcraft:{person})."));
+    // The event: the calendar on its day, for the window to open it.
+    s.run("calendar.goto", &json!({"date": "2001-01-01"})).unwrap();
+    let opened = s.run("assistant.open", &json!({"chat": c, "link": format!("mailcraft:{event}")})).unwrap();
+    assert_eq!(opened["event"]["uid"], json!("lunch@sample.mailcraft"), "{opened}");
+    assert_eq!(s.module, crate::Module::Calendar);
+    assert_eq!(s.cal_day(), mailcraft_model::dates::today(&s.clock));
+    // The person: People, for the window to show their card.
+    let opened = s.run("assistant.open", &json!({"chat": c, "link": format!("mailcraft:{person}")})).unwrap();
+    assert_eq!(opened["person"], json!("zoe@sample.mailcraft"), "{opened}");
+    assert_eq!(s.module, crate::Module::People);
+    // Nothing the chat didn't find; an event deleted since, said to be gone.
+    for link in ["mailcraft:p0123456789", "mailcraft:e0123456789", "e0123456789"] {
+        assert!(s.run("assistant.open", &json!({"chat": c, "link": link})).is_err(), "{link}");
+    }
+    s.run("event.delete", &json!({"uid": "lunch@sample.mailcraft"})).unwrap();
+    let e = s.run("assistant.open", &json!({"chat": c, "link": format!("mailcraft:{event}")})).unwrap_err().to_string();
+    assert!(e.contains("isn't in the calendar any more"), "{e}");
+}
+
+/// An account's events and contacts go only to a model its mail may go to, as its mail does.
+#[test]
+fn events_and_people_go_only_to_a_model_their_account_allows() {
+    let mut s = sample_session("assistant-pim-allowed");
+    s.run("ai.allow", &json!({"account": "sample", "reach": "local"})).unwrap();
+    let cloud = cloud(&mut s, "Claude");
+    s.run("ai.use", &json!({"task": "chat", "profile": cloud})).unwrap();
+    s.take_jobs();
+    send(&mut s, None, "Who's Zoe, and what's next?");
+    let (q, _) = question(&mut s);
+    calls(&mut s, q, "", &[("find_events", json!({})), ("find_people", json!({"query": "zoe"})), ("find_events", json!({"account": "sample"}))]);
+    let (_, asked) = question(&mut s);
+    let results = &asked.turns.last().unwrap().results;
+    assert_eq!(results[0].content, "No events found.");
+    assert_eq!(results[1].content, "No one found.");
+    assert!(results[2].error && results[2].content.contains("may not go to Claude"), "{:?}", results[2]);
+}

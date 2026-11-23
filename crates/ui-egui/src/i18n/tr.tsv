@@ -2217,6 +2217,8 @@ count	occurrences	kez
 	No model	Model yok
 	Read a message	Bir ileti okudu
 	Searched the mail	Postalarda arama yaptı
+	Searched the calendar	Takvimde arama yaptı
+	Searched the contacts	Kişilerde arama yaptı
 	Set up AI	Yapay zekâyı ayarla
 	Shift+Enter for a new line	Yeni satır için Shift+Enter
 	Sum up the selected messages	Seçili iletileri özetle
