@@ -173,6 +173,7 @@ fn tool_title(tool: &str) -> &str {
         "mark_messages" => tl!("Mark"),
         "categorize_messages" => tl!("Categorize"),
         "write_message" => tl!("Write a message"),
+        "add_event" => tl!("New event"),
         other => other,
     }
 }
@@ -182,7 +183,7 @@ fn tool_icon(tool: &str) -> Icon {
         "list_folders" => Icon::Folder,
         "find_messages" => Icon::Search,
         "read_message" | "selected_messages" => Icon::Read,
-        "find_events" => Icon::Calendar,
+        "find_events" | "add_event" => Icon::Calendar,
         "find_people" => Icon::People,
         "move_messages" => Icon::Move,
         "delete_messages" => Icon::Delete,

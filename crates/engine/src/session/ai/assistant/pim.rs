@@ -70,14 +70,7 @@ impl Session {
 
     /// An event found, in a line: its name first, then when, what, where, and who.
     fn event_row(&self, h: &EventHit, found: &Found) -> String {
-        let when = if h.all_day {
-            let (first, last) = (self.clock.local_day(h.start), self.clock.local_day(h.end.saturating_sub(1).max(h.start)));
-            let first_day = dates::day_text(first, &self.clock);
-            if last > first { format!("{first_day} to {}, all day", dates::day_text(last, &self.clock)) } else { format!("{first_day}, all day") }
-        } else {
-            format!("{} to {}", dates::full_time(h.start, &self.clock), dates::hm(h.end, &self.clock))
-        };
-        let mut row = format!("[{}] {when} | {}", found.name(), h.summary);
+        let mut row = format!("[{}] {} | {}", found.name(), self.when_text(h.all_day, h.start, h.end), h.summary);
         if !h.location.trim().is_empty() {
             row.push_str(&format!(" | Where: {}", h.location.trim()));
         }
@@ -106,6 +99,18 @@ impl Session {
         row
     }
 
+    /// When an event is, from `start` to `end` as the calendar shows them (an all-day one from
+    /// the person's midnight): its days, or its day and times.
+    pub(super) fn when_text(&self, all_day: bool, start: i64, end: i64) -> String {
+        if all_day {
+            let (first, last) = (self.clock.local_day(start), self.clock.local_day(end.saturating_sub(1).max(start)));
+            let first_day = dates::day_text(first, &self.clock);
+            if last > first { format!("{first_day} to {}, all day", dates::day_text(last, &self.clock)) } else { format!("{first_day}, all day") }
+        } else {
+            format!("{} to {}", dates::full_time(start, &self.clock), dates::hm(end, &self.clock))
+        }
+    }
+
     /// The event a hit shows: its changed occurrence when it is one, else its series.
     fn event_at(&self, h: &EventHit) -> Option<&mailcraft_model::pim::ical::CalEvent> {
         let events = &self.pim.get(&h.account)?.events;
@@ -113,7 +118,7 @@ impl Session {
         mine().find(|e| e.recurrence_id == Some(h.occurrence)).or_else(|| mine().find(|e| e.recurrence_id.is_none()))
     }
 
-    fn calendar_name_of(&self, account: &str, calendar: &str) -> String {
+    pub(super) fn calendar_name_of(&self, account: &str, calendar: &str) -> String {
         self.pim.get(account).and_then(|p| p.calendars.iter().find(|c| c.id == calendar)).map_or_else(|| calendar.to_string(), |c| c.name.clone())
     }
 

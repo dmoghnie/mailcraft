@@ -397,7 +397,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
 }
 
 /// An event from command params, starting from `e` (what's not given stays).
-pub(super) fn event_from(s: &Session, v: &Value, mut e: mailcraft_model::ical::CalEvent) -> Result<mailcraft_model::ical::CalEvent, CmdError> {
+pub(crate) fn event_from(s: &Session, v: &Value, mut e: mailcraft_model::ical::CalEvent) -> Result<mailcraft_model::ical::CalEvent, CmdError> {
     let when = |k: &str| -> Result<Option<(i64, bool)>, CmdError> {
         match p::str(v, k) {
             Some(x) => {

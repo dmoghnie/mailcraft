@@ -96,6 +96,19 @@ pub(super) fn tools() -> Vec<AiTool> {
                 "reply_to": {"type": "string", "description": "The id of the message it answers"},
                 "account": {"type": "string", "description": "The account it's sent from (its id)"}}, "required": ["body"]}),
         ),
+        tool(
+            "add_event",
+            "Propose adding an event to the person's calendar, with a reminder. The person approves it or not; nothing is added until they do. It's in their calendar alone: no one is invited (to tell others, propose a message).",
+            json!({"type": "object", "properties": {
+                "summary": {"type": "string", "description": "Its title"},
+                "start": {"type": "string", "description": "When it starts, in the person's time: YYYY-MM-DDTHH:MM, or YYYY-MM-DD for all day"},
+                "end": {"type": "string", "description": "When it ends, as start (an hour after it starts when not said; all day: its last day)"},
+                "location": {"type": "string"},
+                "notes": {"type": "string"},
+                "reminder": {"type": "integer", "minimum": 0, "maximum": mailcraft_model::ical::REMINDER_MAX_MINUTES, "description": "How many minutes before it starts the person is reminded (15 when not said)"},
+                "account": {"type": "string", "description": "The account whose calendar it goes in (its id; the first you may read when not said)"},
+                "calendar": {"type": "string", "description": "Its calendar's name, when not the one new events go to"}}, "required": ["summary", "start"]}),
+        ),
     ]
 }
 

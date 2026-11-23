@@ -308,7 +308,7 @@ fn a_long_chat_is_fitted_into_its_models_context() {
     assert!(asked.turns[0].text.ends_with("second"));
     // What the person said, and what its calls gave, too long together: said so, never sent
     // without them (what the calls gave alone, their call and the words gone).
-    let c = send(&mut s, None, &"word ".repeat(2700));
+    let c = send(&mut s, None, &"word ".repeat(2500));
     let (q, _) = question(&mut s);
     calls(&mut s, q, "", &[("find_messages", json!({"limit": 50}))]);
     assert!(questions(&mut s).is_empty());
@@ -483,4 +483,104 @@ fn events_and_people_go_only_to_a_model_their_account_allows() {
     assert_eq!(results[0].content, "No events found.");
     assert_eq!(results[1].content, "No one found.");
     assert!(results[2].error && results[2].content.contains("may not go to Claude"), "{:?}", results[2]);
+}
+
+/// An event is proposed as the other changes are, said on its card, and added to the calendar
+/// only once the person approves it, with the window's reminder; the answer's link to it goes
+/// to it. It's the person's alone: no one is invited, nothing is sent.
+#[test]
+fn an_event_is_added_to_the_calendar_only_once_approved() {
+    let mut s = ready("assistant-event");
+    let zooms = |s: &Session| -> Vec<mailcraft_model::ical::CalEvent> {
+        s.pim.values().flat_map(|p| p.events.iter()).filter(|e| e.event.summary == "Zoom the team").map(|e| e.event.clone()).collect()
+    };
+    let tomorrow = mailcraft_model::dates::today(&s.clock) + 1;
+    let day = mailcraft_model::dates::day_string(tomorrow);
+    let c = send(&mut s, None, "Add a calendar reminder for tomorrow to zoom the team");
+    let (q, asked) = question(&mut s);
+    assert!(asked.tools.iter().any(|t| t.name == "add_event"));
+    let input = json!({"summary": "Zoom the team", "start": format!("{day}T10:00"), "end": format!("{day}T10:30"), "location": "Zoom"});
+    calls(&mut s, q, "", &[("add_event", input)]);
+    let v = chat(&mut s, &c);
+    let run = &v["chat"]["runs"][0];
+    assert_eq!(run["state"], "proposed");
+    let what = run["what"].as_str().unwrap();
+    assert!(
+        what.starts_with("Add “Zoom the team” to Calendar: ") && what.ends_with("10:00 to 10:30, at Zoom; a reminder 15 minutes before"),
+        "{what}"
+    );
+    assert!(zooms(&s).is_empty(), "nothing added before it's approved");
+    s.run("assistant.decide", &json!({"chat": c, "approve": true})).unwrap();
+    let added = zooms(&s);
+    assert_eq!(added.len(), 1);
+    assert_eq!(mailcraft_model::ical::reminder_minutes(&added[0]), Some(15));
+    assert_eq!(added[0].end - added[0].start, 1800);
+    assert!(added[0].attendees.is_empty() && added[0].organizer.is_none());
+    let jobs = s.take_jobs();
+    assert!(!jobs.iter().any(|j| matches!(j, Job::Send { .. })), "no one invited");
+    // The model is told it's done and what it's named; the answer's link goes to it.
+    let (q, asked) = jobs
+        .into_iter()
+        .find_map(|j| match j {
+            Job::Ai { work: AiWork::Ask { id, chat, .. } } => Some((id, chat)),
+            _ => None,
+        })
+        .expect("asked again");
+    let done = &asked.turns.last().unwrap().results[0].content;
+    assert!(done.starts_with("Approved. Done: added to Calendar, as e"), "{done}");
+    let name = done.trim_end_matches('.').rsplit(' ').next().unwrap().to_string();
+    answer(&mut s, q, &format!("[Zoom the team](mailcraft:{name}) is in your calendar."));
+    let opened = s.run("assistant.open", &json!({"chat": c, "link": format!("mailcraft:{name}")})).unwrap();
+    assert_eq!(opened["event"]["uid"], json!(added[0].uid), "{opened}");
+    assert_eq!(s.module, crate::Module::Calendar);
+    assert_eq!(s.cal_day(), tomorrow);
+}
+
+/// An event is checked as it's proposed: its title, its times, its calendar, and an account
+/// whose mail the model may read. Each refused goes back to the model at once.
+#[test]
+fn an_event_is_checked_as_it_is_proposed() {
+    let mut s = sample_session("assistant-event-checked");
+    s.run("ai.allow", &json!({"account": "sample", "reach": "local"})).unwrap();
+    let cloud = cloud(&mut s, "Claude");
+    let local = local(&mut s, "Local");
+    s.run("ai.use", &json!({"task": "chat", "profile": local})).unwrap();
+    s.take_jobs();
+    send(&mut s, None, "Add it");
+    let (q, _) = question(&mut s);
+    let at = |more: Value| {
+        let mut v = json!({"summary": "Zoom the team", "start": "2026-11-24T10:00"});
+        v.as_object_mut().unwrap().extend(more.as_object().unwrap().clone());
+        v
+    };
+    let tries = [
+        json!({"start": "2026-11-24T10:00"}),
+        at(json!({"start": "tomorrow"})),
+        at(json!({"end": "2026-11-24T09:00"})),
+        at(json!({"calendar": "Holidays"})),
+        at(json!({"reminder": -5})),
+    ];
+    calls(&mut s, q, "", &tries.iter().map(|t| ("add_event", t.clone())).collect::<Vec<_>>());
+    let (_, asked) = question(&mut s);
+    let results = &asked.turns.last().unwrap().results;
+    let said: Vec<&str> = results.iter().map(|r| r.content.as_str()).collect();
+    assert!(results.iter().all(|r| r.error), "{said:?}");
+    for (n, why) in
+        ["`summary`", "not a date", "ends before it starts", "no calendar `Holidays`: those an event can go in are Calendar", "`reminder`"]
+            .iter()
+            .enumerate()
+    {
+        assert!(said[n].contains(why), "{n}: {}", said[n]);
+    }
+    // A model the account's mail may not go to adds nothing to its calendar.
+    s.run("ai.use", &json!({"task": "chat", "profile": cloud})).unwrap();
+    s.take_jobs();
+    send(&mut s, None, "Add it");
+    let (q, _) = question(&mut s);
+    calls(&mut s, q, "", &[("add_event", at(json!({}))), ("add_event", at(json!({"account": "sample"})))]);
+    let (_, asked) = question(&mut s);
+    let results = &asked.turns.last().unwrap().results;
+    assert!(results.iter().all(|r| r.error), "{results:?}");
+    assert!(results[0].content.contains("no account whose mail may go to Claude has one"), "{}", results[0].content);
+    assert!(results[1].content.contains("account sample's mail may not go to Claude"), "{}", results[1].content);
 }

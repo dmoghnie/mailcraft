@@ -2,8 +2,9 @@
 //! tools, and proposes changes they approve one by one.
 //!
 //! What it reads runs at once (finding, reading, listing folders); what it would change (moving,
-//! deleting, marking, categorising, writing a message) is a proposal, and nothing changes until
-//! the person approves it. A message it writes is opened for the person to send: it never sends.
+//! deleting, marking, categorising, writing a message, adding an event) is a proposal, and
+//! nothing changes until the person approves it. A message it writes is opened for the person to
+//! send: it never sends.
 //! Mail goes only to a model each account's setting allows (File › Options › AI), and a model
 //! asked about a chat must be allowed every account whose mail is in it. Chats are kept on this
 //! computer, in the data folder, never in the record of what went where nor the log.
@@ -24,6 +25,7 @@ mod exchange;
 mod kept;
 mod links;
 mod looking;
+mod new_event;
 mod pim;
 mod tools;
 mod window;

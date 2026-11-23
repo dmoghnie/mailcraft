@@ -186,3 +186,25 @@ fn an_event_or_a_person_an_answer_links_to_opens_with_a_click() {
     assert_eq!(a.ui.people_view, crate::panes::people::PeopleView::People, "the card shown");
     assert!(has(&texts(&ctx, &mut a), "Director"), "Zoe's card");
 }
+
+/// An event the model proposes is a card named as the window's New event, added once Approve is
+/// clicked; the answer's link to it opens it.
+#[test]
+fn an_event_proposed_is_added_from_its_card_and_opens_from_the_answer() {
+    let (mut a, ctx) = ready("assistant-new-event");
+    a.run("assistant.pane", json!({"on": true}));
+    a.run("assistant.send", json!({"text": "Remind me tomorrow to zoom the team"}));
+    let chat = a.ui.assistant.chat.clone().unwrap();
+    let day = mailcraft_engine::model::dates::day_string(mailcraft_engine::model::dates::today(&a.session.clock) + 1);
+    answers(&mut a, &chat, "", &[("add_event", json!({"summary": "Zoom the team", "start": format!("{day}T10:00")}))]);
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "New event") && has(&t, "Needs your approval"), "{t:?}");
+    click_named(&ctx, &mut a, "Approve");
+    let run = a.session.ai.assistant.chat(&chat).unwrap().runs[0].clone();
+    assert_eq!(run.state, mailcraft_engine::RunState::Done, "{}", run.result);
+    let name = run.result.trim_end_matches('.').rsplit(' ').next().unwrap().to_string();
+    answers(&mut a, &chat, &format!("[Zoom the team](mailcraft:{name}) is in your calendar."), &[]);
+    click_named(&ctx, &mut a, "Zoom the team");
+    assert_eq!(a.session.module, mailcraft_engine::Module::Calendar);
+    assert!(matches!(&a.ui.dialog, Some(Dialog::Event(f)) if f.summary == "Zoom the team"), "the event opens");
+}

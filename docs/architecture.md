@@ -114,7 +114,9 @@ and `cargo xtask sizes` enforces them.
   matching over the summaries, each account's index and the sources downloaded, without its list,
   selection or search). A change is a proposal: made only once the person approves it, checked
   again then, on the messages it names (never the selection), and undone with Undo; a message it
-  writes opens to be sent. A model asked about a chat must be allowed every account whose mail
+  writes opens to be sent; an event it adds (`session/ai/assistant/new_event.rs`) is made as
+  the window's New event makes one (`cmd::event_from`), in a calendar of an account its model may
+  read, and invites no one. A model asked about a chat must be allowed every account whose mail
   is in it (`AiPrefs::allows_all`), its fallbacks too. A chat that outgrows its profile's
   context (a token for every three bytes) loses what tools gave early on, then its oldest
   turns. At most 24 steps for one thing the person says.
@@ -134,7 +136,8 @@ and `cargo xtask sizes` enforces them.
   the person's card). A name is looked up only among what the chat has found or seen, and names
   are kept in saved chats, so how one is made never changes.
 - **Not yet:** embeddings (for search), pictures, a monthly budget, the browser and the phones;
-  the assistant's tools for tasks, notes and rules, and changes to the calendar and contacts.
+  the assistant's tools for tasks, notes and rules, changing or deleting events, inviting
+  people, and changes to the contacts.
   A question waits up to five minutes for its answer to start.
 
 ## The session
