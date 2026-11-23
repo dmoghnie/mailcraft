@@ -8,9 +8,9 @@ use mailcraft_model::ical::{self, CalEvent};
 use mailcraft_model::pim::{Pim, is_web_calendar};
 use serde_json::{Value, json};
 
-use super::changes::Change;
-use super::links::Found;
-use super::looking::said;
+use super::super::changes::Change;
+use super::super::links::Found;
+use super::super::looking::said;
 use super::*;
 use crate::Session;
 
@@ -22,7 +22,7 @@ const FIELDS: [(&str, &str); 5] = [("summary", "summary"), ("start", "start"), (
 
 impl Session {
     /// The event `add_event` asks for with `input`, checked; why not, for the model.
-    pub(super) fn event_change(&self, chat: &Chat, input: &Value) -> Result<Change, String> {
+    pub(in super::super) fn event_change(&self, chat: &Chat, input: &Value) -> Result<Change, String> {
         let text = |k: &str| input.get(k).and_then(Value::as_str).map(str::trim).filter(|v| !v.is_empty());
         let profile = self.assistant_profile(chat).map_err(|e| said(&e))?;
         let account = match text("account") {
@@ -85,7 +85,7 @@ impl Session {
     }
 
     /// What adding `e` to `calendar` of `account` does, in a line for its card.
-    pub(super) fn event_what(&self, account: &str, calendar: &str, e: &CalEvent) -> String {
+    pub(in super::super) fn event_what(&self, account: &str, calendar: &str, e: &CalEvent) -> String {
         let whose = match self.account(account) {
             Some(a) if self.accounts.len() > 1 => format!(" ({})", a.config.email),
             _ => String::new(),
@@ -110,7 +110,7 @@ impl Session {
 
     /// `event`, approved, added to `calendar` of `account`: what was done, and the event, for
     /// the answer to link.
-    pub(super) fn add_event(&mut self, account: &str, calendar: &str, event: CalEvent) -> Result<(String, Found), String> {
+    pub(in super::super) fn add_event(&mut self, account: &str, calendar: &str, event: CalEvent) -> Result<(String, Found), String> {
         let (start, _) = shown(self, &event);
         let occurrence = event.start;
         let added = self.create_event(Some(account), Some(calendar), event).map_err(|e| said(&e))?;

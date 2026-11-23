@@ -114,7 +114,7 @@ and `cargo xtask sizes` enforces them.
   matching over the summaries, each account's index and the sources downloaded, without its list,
   selection or search). A change is a proposal: made only once the person approves it, checked
   again then, on the messages it names (never the selection), and undone with Undo; a message it
-  writes opens to be sent; an event it adds (`session/ai/assistant/new_event.rs`) is made as
+  writes opens to be sent; an event it adds (`session/ai/assistant/pim_changes/events.rs`) is made as
   the window's New event makes one (`cmd::event_from`), in a calendar of an account its model may
   read, and invites no one. A model asked about a chat must be allowed every account whose mail
   is in it (`AiPrefs::allows_all`), its fallbacks too. A chat that outgrows its profile's

@@ -25,8 +25,8 @@ mod exchange;
 mod kept;
 mod links;
 mod looking;
-mod new_event;
 mod pim;
+mod pim_changes;
 mod tools;
 mod window;
 

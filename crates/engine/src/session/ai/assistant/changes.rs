@@ -2,7 +2,7 @@
 //! for the person's card, and made only once they approve it, checked again then (the messages
 //! may have moved since). Each acts on the messages it names, never on the window's selection,
 //! and is undone with Undo as the window's own changes are. A message written is opened for the
-//! person to send; an event, added to the calendar (`new_event.rs`).
+//! person to send; an event, added to the calendar (`pim_changes/events.rs`).
 
 use mailcraft_mime::ReplyMode;
 use mailcraft_model::ical::CalEvent;
