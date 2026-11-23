@@ -2,9 +2,10 @@
 //! tools, and proposes changes they approve one by one.
 //!
 //! What it reads runs at once (finding, reading, listing folders); what it would change (moving,
-//! deleting, marking, categorising, writing a message, adding an event) is a proposal, and
-//! nothing changes until the person approves it. A message it writes is opened for the person to
-//! send: it never sends.
+//! deleting, marking, categorising or writing messages; adding, changing or deleting events,
+//! contacts, tasks and notes) is a proposal, and nothing changes until the person approves it. A
+//! message it writes is opened for the person to send: it never sends, nor invites or tells
+//! anyone.
 //! Mail goes only to a model each account's setting allows (File › Options › AI), and a model
 //! asked about a chat must be allowed every account whose mail is in it. Chats are kept on this
 //! computer, in the data folder, never in the record of what went where nor the log.

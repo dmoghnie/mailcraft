@@ -187,6 +187,32 @@ fn an_event_or_a_person_an_answer_links_to_opens_with_a_click() {
     assert!(has(&texts(&ctx, &mut a), "Director"), "Zoe's card");
 }
 
+/// A task or a note an answer links to opens with a click: the task's form, or the note in
+/// Notes, to write on.
+#[test]
+fn a_task_or_a_note_an_answer_links_to_opens_with_a_click() {
+    let (mut a, ctx) = ready("assistant-link-todo");
+    a.run("assistant.pane", json!({"on": true}));
+    a.run("assistant.send", json!({"text": "When's the sound stage booked, and what did I note about the poster?"}));
+    let chat = a.ui.assistant.chat.clone().unwrap();
+    answers(&mut a, &chat, "", &[("find_tasks", json!({"query": "sound stage"})), ("find_notes", json!({"query": "poster"}))]);
+    let runs = a.session.ai.assistant.chat(&chat).unwrap().runs.clone();
+    let name = |n: usize| runs[n].result.split(['[', ']']).nth(1).unwrap().to_string();
+    let (task, note) = (name(0), name(1));
+    answers(&mut a, &chat, &format!("- [the stage](mailcraft:{task})\n- [the poster note](mailcraft:{note})"), &[]);
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "Searched the tasks") && has(&t, "Searched the notes"), "the tools' cards: {t:?}");
+    click_named(&ctx, &mut a, "the stage");
+    assert_eq!(a.session.module, mailcraft_engine::Module::Tasks);
+    assert!(matches!(&a.ui.dialog, Some(Dialog::Task(f)) if f.title == "Book the sound stage"), "the task opens");
+    a.ui.dialog = None;
+    a.ui.notes_query = "fox".into();
+    click_named(&ctx, &mut a, "the poster note");
+    assert_eq!(a.session.module, mailcraft_engine::Module::Notes);
+    assert_eq!(a.ui.note_edit.as_ref().map(|(uid, _)| uid.as_str()), Some("note-poster@sample.mailcraft"));
+    assert!(a.ui.notes_query.is_empty(), "shown, whatever the list was searching for");
+}
+
 /// An event the model proposes is a card named as the window's New event, added once Approve is
 /// clicked; the answer's link to it opens it.
 #[test]

@@ -114,9 +114,12 @@ and `cargo xtask sizes` enforces them.
   matching over the summaries, each account's index and the sources downloaded, without its list,
   selection or search). A change is a proposal: made only once the person approves it, checked
   again then, on the messages it names (never the selection), and undone with Undo; a message it
-  writes opens to be sent; an event it adds (`session/ai/assistant/pim_changes/events.rs`) is made as
-  the window's New event makes one (`cmd::event_from`), in a calendar of an account its model may
-  read, and invites no one. A model asked about a chat must be allowed every account whose mail
+  writes opens to be sent. An event, a contact, a task or a note it adds or changes
+  (`session/ai/assistant/pim_changes/`) is made as the window's forms make one
+  (`cmd::event_from`, `card_from`, `task_from`), in an account its model may read; what it
+  changes or deletes is named as the chat found it. It invites and tells no one: a meeting with
+  others is left to the calendar (but for its reminder, the person's own), as is the time of an
+  event that repeats. A model asked about a chat must be allowed every account whose mail
   is in it (`AiPrefs::allows_all`), its fallbacks too. A chat that outgrows its profile's
   context (a token for every three bytes) loses what tools gave early on, then its oldest
   turns. At most 24 steps for one thing the person says.
@@ -129,15 +132,15 @@ and `cargo xtask sizes` enforces them.
   button takes it a frame after it's pressed (`reading/text_selection/asking.rs`).
 - **Links** (`session/ai/assistant/links.rs`): the tools name each message by `m` and ten hex
   digits of its id's FNV-1a hash, since an id holds its folder's name (spaces and all) and a
-  Markdown link can't; events (`e`, `find_events`) and people (`p`, `find_people`,
-  `session/ai/assistant/pim.rs`) the same way, of what finds them again. The model links what
-  it names as `[subject](mailcraft:m…)`, and `assistant.open` goes to it: a message opened in
-  its folder; the calendar on an event's day, or People, with what the window opens (the event,
-  the person's card). A name is looked up only among what the chat has found or seen, and names
-  are kept in saved chats, so how one is made never changes.
+  Markdown link can't; events (`e`, `find_events`), people (`p`, `find_people`), tasks (`t`)
+  and notes (`n`) the same way (`session/ai/assistant/pim.rs`), of what finds them again. The
+  model links what it names as `[subject](mailcraft:m…)`, and `assistant.open` goes to it: a
+  message opened in its folder; the calendar on an event's day, People, Tasks or Notes, with
+  what the window opens (the event, the person's card, the task, the note). A name is looked up
+  only among what the chat has found or seen, and names are kept in saved chats, so how one is
+  made never changes.
 - **Not yet:** embeddings (for search), pictures, a monthly budget, the browser and the phones;
-  the assistant's tools for tasks, notes and rules, changing or deleting events, inviting
-  people, and changes to the contacts.
+  the assistant's tools for rules, and inviting people or telling them of a change.
   A question waits up to five minutes for its answer to start.
 
 ## The session

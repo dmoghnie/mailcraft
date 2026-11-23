@@ -1,8 +1,10 @@
-//! The assistant's tools that look in the calendar and the contacts: run at once, changing
-//! nothing. Each gives only what's of an account whose mail may go to the chat's model, and
-//! names each event and person found, so an answer can link to it.
+//! The assistant's tools that look in the calendar, the contacts, the tasks and the notes: run
+//! at once, changing nothing. Each gives only what's of an account whose mail may go to the
+//! chat's model, and names each event, person, task and note found, so an answer can link to it
+//! (and a change can name it).
 
 use mailcraft_model::dates;
+use mailcraft_model::pim::{Task, TaskPriority, TaskStatus};
 use serde_json::Value;
 
 use super::context::cut;
@@ -18,6 +20,8 @@ const FOUND_AT_FIRST: usize = 20;
 const NOTES_CHARS: usize = 300;
 /// The most attendees named for an event.
 const ATTENDEES_MOST: usize = 12;
+/// The most of a note's text given, in characters.
+const NOTE_CHARS: usize = 500;
 
 /// How many to give: what the model asked, within bounds.
 fn how_many(input: &Value) -> usize {
@@ -160,6 +164,80 @@ impl Session {
         });
         Outcome::listed(&what, found, out.join("\n"))
     }
+
+    /// `find_tasks`: the person's tasks, as the Tasks list finds them, in its order.
+    pub(super) fn tool_find_tasks(&self, chat: &mut Chat, profile: &AiProfile, input: &Value) -> Outcome {
+        let query = text(input, "query").unwrap_or_default();
+        let what =
+            if query.is_empty() { "List the tasks".to_string() } else { format!("Find tasks “{}”", query.chars().take(80).collect::<String>()) };
+        let most = how_many(input);
+        let today = dates::today(&self.clock);
+        let tasks: Vec<_> = self.tasks(query).into_iter().filter(|t| self.prefs.ai.allows(profile, Some(t.account))).collect();
+        let found: Vec<Found> = tasks.iter().take(most).map(|t| Found::Task { account: t.account.to_string(), uid: t.task.uid.clone() }).collect();
+        let mut out = Vec::new();
+        for (t, f) in tasks.iter().zip(&found) {
+            chat.holds(t.account);
+            let task = t.task;
+            let mut row = format!("[{}] {}", f.name(), task.title.trim());
+            if let Some(d) = task.due_day() {
+                let late = if task.overdue(today) { " (late)" } else { "" };
+                row.push_str(&format!(" | Due: {}{late}", dates::day_text(d, &self.clock)));
+            }
+            row.push_str(&format!(" | {}", status_said(task)));
+            if task.priority != TaskPriority::Normal {
+                row.push_str(&format!(" | {} priority", task.priority.code()));
+            }
+            if task.rrule.is_some() {
+                row.push_str(" | repeats");
+            }
+            if let Some(at) = task.reminder {
+                row.push_str(&format!(" | Reminder: {}", dates::full_time(at, &self.clock)));
+            }
+            if !task.categories.is_empty() {
+                row.push_str(&format!(" | Categories: {}", task.categories.join(", ")));
+            }
+            let notes = task.notes.split_whitespace().collect::<Vec<_>>().join(" ");
+            if !notes.is_empty() {
+                row.push_str(&format!(" | Notes: {}", cut(&notes, NOTES_CHARS)));
+            }
+            out.push(row);
+        }
+        let hidden = if self.prefs.tasks_hide_done { " Done ones are hidden in the Tasks list, so they're left out." } else { "" };
+        out.push(match tasks.len() {
+            0 => format!("No tasks found.{hidden}"),
+            n if n > found.len() => format!("{n} found in all; these are the first {}.{hidden}", found.len()),
+            n => format!("{n} found.{hidden}"),
+        });
+        Outcome::listed(&what, found, out.join("\n"))
+    }
+
+    /// `find_notes`: the person's notes, by words in them, as the Notes list orders them.
+    pub(super) fn tool_find_notes(&self, chat: &mut Chat, profile: &AiProfile, input: &Value) -> Outcome {
+        let query = text(input, "query").unwrap_or_default();
+        let what =
+            if query.is_empty() { "List the notes".to_string() } else { format!("Find notes “{}”", query.chars().take(80).collect::<String>()) };
+        let most = how_many(input);
+        let notes: Vec<_> = self.notes(query).into_iter().filter(|n| self.prefs.ai.allows(profile, Some(n.account))).collect();
+        let found: Vec<Found> = notes.iter().take(most).map(|n| Found::Note { account: n.account.to_string(), uid: n.note.uid.clone() }).collect();
+        let mut out = Vec::new();
+        for (n, f) in notes.iter().zip(&found) {
+            chat.holds(n.account);
+            let lines: Vec<&str> = n.note.text.lines().map(str::trim).filter(|l| !l.is_empty()).collect();
+            let mut row =
+                format!("[{}] Changed {} | {}", f.name(), dates::full_time(n.note.modified, &self.clock), cut(&lines.join(" / "), NOTE_CHARS));
+            let files = n.note.kept_files().len();
+            if files > 0 {
+                row.push_str(&format!(" | {files} file{}", if files == 1 { "" } else { "s" }));
+            }
+            out.push(row);
+        }
+        out.push(match notes.len() {
+            0 => "No notes found.".to_string(),
+            n if n > found.len() => format!("{n} found in all; these are the first {}.", found.len()),
+            n => format!("{n} found."),
+        });
+        Outcome::listed(&what, found, out.join("\n"))
+    }
 }
 
 /// What names an event found: its account, calendar, series and the occurrence shown.
@@ -170,4 +248,15 @@ fn event_found(h: &EventHit) -> Found {
 /// Someone at an event: their name and address.
 fn who(a: &mailcraft_model::pim::ical::Attendee) -> String {
     if a.name.trim().is_empty() { a.email.clone() } else { format!("{} <{}>", a.name.trim(), a.email) }
+}
+
+/// How far along a task is, said.
+fn status_said(t: &Task) -> String {
+    match t.status {
+        TaskStatus::NotStarted => "not started".into(),
+        TaskStatus::InProgress => format!("in progress, {}%", t.percent),
+        TaskStatus::Completed => "done".into(),
+        TaskStatus::Waiting => "waiting on someone else".into(),
+        TaskStatus::Deferred => "deferred".into(),
+    }
 }

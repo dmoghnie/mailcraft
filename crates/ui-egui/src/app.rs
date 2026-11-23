@@ -173,6 +173,16 @@ impl MailApp {
         } else if let Some(uid) = v.get("person").and_then(Value::as_str) {
             self.ui.person = Some(uid.to_string());
             self.ui.people_view = crate::panes::people::PeopleView::People;
+        } else if let Some(uid) = v.get("task").and_then(Value::as_str) {
+            self.ui.dialog = Dialog::open_task(&self.session, uid);
+        } else if let Some(uid) = v.get("note").and_then(Value::as_str) {
+            // Shown (whatever the list was searching for) and open to write on.
+            let text = self.session.notes("").into_iter().find(|n| n.note.uid == uid).map(|n| n.note.text.clone());
+            if let Some(text) = text {
+                self.ui.notes_query.clear();
+                self.ui.note_edit = Some((uid.to_string(), text));
+                self.ui.note_focus = true;
+            }
         } else {
             self.ui.scroll_to_focus = true;
         }

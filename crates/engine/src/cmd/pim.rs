@@ -523,7 +523,7 @@ pub(crate) fn event_from(s: &Session, v: &Value, mut e: mailcraft_model::ical::C
 }
 
 /// A card from command params, starting from `c`.
-pub(super) fn card_from(v: &Value, mut c: mailcraft_model::vcard::Card) -> Result<mailcraft_model::vcard::Card, CmdError> {
+pub(crate) fn card_from(v: &Value, mut c: mailcraft_model::vcard::Card) -> Result<mailcraft_model::vcard::Card, CmdError> {
     let list = |k: &str| -> Option<Vec<String>> {
         match v.get(k)? {
             Value::String(s) => Some(s.split([',', ';', '\n']).map(str::trim).filter(|x| !x.is_empty()).map(str::to_string).collect()),
@@ -670,4 +670,13 @@ pub(crate) fn go_to_person(s: &mut Session, account: &str, uid: &str) -> CmdResu
     }
     set_module(s, crate::Module::People)?;
     Ok(json!({"person": uid}))
+}
+
+/// Go to Notes, for the window to open a note to write on.
+pub(crate) fn go_to_note(s: &mut Session, account: &str, uid: &str) -> CmdResult {
+    if !s.pim.get(account).is_some_and(|p| p.notes.iter().any(|n| n.note.uid == uid)) {
+        return Err(CmdError::Failed("the note isn't in the notes any more".into()));
+    }
+    set_module(s, crate::Module::Notes)?;
+    Ok(json!({"note": uid}))
 }

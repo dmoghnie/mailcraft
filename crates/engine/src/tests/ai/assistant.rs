@@ -7,6 +7,8 @@ use mailcraft_model::{AiChat, AiRole, AiToolCall, MessageKey};
 
 const STORYBOARD: &str = "Storyboard review on Thursday";
 
+mod pim_changes;
+
 /// A sample session whose mail may go to a model on this computer, which is the one asked.
 fn ready(name: &str) -> Session {
     let mut s = sample_session(name);
@@ -298,17 +300,17 @@ fn a_long_chat_is_fitted_into_its_models_context() {
     assert!(asked.turns.last().unwrap().results[0].content.contains(STORYBOARD), "the latest kept whole");
     // A long thing said, answered: the next goes without it, the chat beginning with the person.
     answer(&mut s, listed, "Listed.");
-    let c = send(&mut s, None, &format!("{}first", "word ".repeat(1800)));
+    let c = send(&mut s, None, &format!("{}first", "word ".repeat(1200)));
     let (q, _) = question(&mut s);
     answer(&mut s, q, "Long.");
-    send(&mut s, Some(&c), &format!("{}second", "word ".repeat(1800)));
+    send(&mut s, Some(&c), &format!("{}second", "word ".repeat(1200)));
     let (_, asked) = question(&mut s);
     assert!(asked.system.contains("left out for room"));
     assert_eq!(asked.turns.len(), 1);
     assert!(asked.turns[0].text.ends_with("second"));
     // What the person said, and what its calls gave, too long together: said so, never sent
     // without them (what the calls gave alone, their call and the words gone).
-    let c = send(&mut s, None, &"word ".repeat(2500));
+    let c = send(&mut s, None, &"word ".repeat(1200));
     let (q, _) = question(&mut s);
     calls(&mut s, q, "", &[("find_messages", json!({"limit": 50}))]);
     assert!(questions(&mut s).is_empty());

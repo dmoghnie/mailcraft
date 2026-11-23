@@ -30,6 +30,7 @@ mod reminders;
 mod series;
 mod sync;
 mod tasks;
+pub(crate) use tasks::check_task;
 pub use tasks::{ListedTask, TASKS_CALENDAR, TaskRef, TasksOrder};
 mod todo;
 pub use todo::{TODO_BAR_SPLIT, TODO_BAR_WIDTH, TodoBar, TodoGroup, TodoItem, TodoMail, TodoWhat};
@@ -761,7 +762,7 @@ pub(crate) fn check_event(e: &CalEvent) -> Result<(), CmdError> {
     Ok(())
 }
 
-fn check_card(c: &Card) -> Result<(), CmdError> {
+pub(crate) fn check_card(c: &Card) -> Result<(), CmdError> {
     if c.display().trim().is_empty() {
         return Err(CmdError::Params("give the contact a name or an address".into()));
     }

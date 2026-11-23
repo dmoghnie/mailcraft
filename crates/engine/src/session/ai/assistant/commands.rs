@@ -89,8 +89,9 @@ fn show(s: &mut Session, v: &Value) -> CmdResult {
     Ok(json!({"chat": chat, "asking": asking.is_some(), "part": part, "waitsOnYou": chat.waits_on_person(), "profile": profile}))
 }
 
-/// A message an answer links to, gone to: Mail, its folder, and it open. Only one the chat has
-/// seen: a link is written by the model, from mail others wrote.
+/// What an answer links to, gone to: a message (Mail, its folder, and it open), or the place of
+/// an event, a person, a task or a note, for the window to open it. Only what the chat has seen:
+/// a link is written by the model, from mail others wrote.
 fn open(s: &mut Session, v: &Value) -> CmdResult {
     let id = p::req_str(v, "chat")?.to_string();
     let link = p::req_str(v, "link")?;
@@ -99,6 +100,8 @@ fn open(s: &mut Session, v: &Value) -> CmdResult {
         Linked::Message(key) => crate::cmd::go_to_message(s, &key),
         Linked::Found(Found::Event { account, uid, occurrence, start, .. }) => crate::cmd::go_to_event(s, &account, &uid, occurrence, start),
         Linked::Found(Found::Person { account, uid }) => crate::cmd::go_to_person(s, &account, &uid),
+        Linked::Found(Found::Task { account, uid }) => crate::cmd::go_to_task(s, &account, &uid),
+        Linked::Found(Found::Note { account, uid }) => crate::cmd::go_to_note(s, &account, &uid),
     }
 }
 

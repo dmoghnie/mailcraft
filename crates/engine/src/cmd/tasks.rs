@@ -80,7 +80,7 @@ fn day_param(s: &Session, v: &Value, k: &str) -> Result<Option<Option<i64>>, Cmd
 }
 
 /// A task from command params, starting from `t` (what's not given stays).
-pub(super) fn task_from(s: &Session, v: &Value, mut t: Task) -> Result<Task, CmdError> {
+pub(crate) fn task_from(s: &Session, v: &Value, mut t: Task) -> Result<Task, CmdError> {
     if let Some(x) = p::str(v, "title") {
         t.title = x.chars().take(1_000).collect();
     }
@@ -131,4 +131,13 @@ pub(super) fn task_from(s: &Session, v: &Value, mut t: Task) -> Result<Task, Cmd
         t.rrule = rule;
     }
     Ok(t)
+}
+
+/// Go to Tasks, for the window to open a task's form.
+pub(crate) fn go_to_task(s: &mut Session, account: &str, uid: &str) -> CmdResult {
+    if !s.find_task(uid).is_some_and(|t| t.account == account) {
+        return Err(CmdError::Failed("the task isn't in the tasks any more".into()));
+    }
+    set_module(s, crate::Module::Tasks)?;
+    Ok(json!({"task": uid}))
 }

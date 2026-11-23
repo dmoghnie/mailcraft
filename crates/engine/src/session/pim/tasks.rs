@@ -85,7 +85,7 @@ fn task_matches(t: &Task, words: &[String]) -> bool {
 
 /// A task as given: a title, unless `before` (the task as it was) had none either, as one
 /// brought in from Outlook or a calendar file may not; due no earlier than it starts.
-fn check_task(t: &Task, before: Option<&Task>) -> Result<(), CmdError> {
+pub(crate) fn check_task(t: &Task, before: Option<&Task>) -> Result<(), CmdError> {
     if t.title.trim().is_empty() && before.is_none_or(|b| !b.title.trim().is_empty()) {
         return Err(CmdError::Params("give the task a title".into()));
     }

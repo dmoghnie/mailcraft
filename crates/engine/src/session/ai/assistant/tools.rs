@@ -23,6 +23,8 @@ pub(super) enum Outcome {
 /// The tools, as the model is told them.
 pub(super) fn tools() -> Vec<AiTool> {
     let ids = json!({"type": "array", "items": {"type": "string"}, "description": "The messages' ids, as the tools give them", "maxItems": changes::IDS_MOST});
+    let limit = json!({"type": "integer", "minimum": 1, "maximum": 50, "description": "How many to give at most (20 when not said)"});
+    let id = |of: &str| json!({"type": "string", "description": format!("The {of}'s id, as the tools gave it")});
     let tool = |name: &str, description: &str, schema: Value| AiTool { name: name.into(), description: description.into(), schema };
     vec![
         tool(
@@ -59,6 +61,16 @@ pub(super) fn tools() -> Vec<AiTool> {
             json!({"type": "object", "properties": {
                 "query": {"type": "string", "description": "A name, organization or address, or part of one"},
                 "limit": {"type": "integer", "minimum": 1, "maximum": 50, "description": "How many to give at most (20 when not said)"}}}),
+        ),
+        tool(
+            "find_tasks",
+            "Find the person's tasks, by words of their title, notes or categories. With no query, all of them. Gives each task's id, title, due day, how far along it is, priority and the start of its notes.",
+            json!({"type": "object", "properties": {"query": {"type": "string"}, "limit": limit}}),
+        ),
+        tool(
+            "find_notes",
+            "Find the person's notes, by words in them. With no query, the newest. Gives each note's id, when it was changed and its text (its first line is its title).",
+            json!({"type": "object", "properties": {"query": {"type": "string"}, "limit": limit}}),
         ),
         tool(
             "selected_messages",
@@ -109,12 +121,75 @@ pub(super) fn tools() -> Vec<AiTool> {
                 "account": {"type": "string", "description": "The account whose calendar it goes in (its id; the first you may read when not said)"},
                 "calendar": {"type": "string", "description": "Its calendar's name, when not the one new events go to"}}, "required": ["summary", "start"]}),
         ),
+        tool(
+            "change_event",
+            "Propose changing an event: what's given changes, the rest stays. Not the time of one that repeats, nor a meeting with others but for its reminder (they'd have to be told).",
+            json!({"type": "object", "properties": {
+                "id": id("event"), "summary": {"type": "string"}, "start": {"type": "string", "description": "As add_event's"},
+                "end": {"type": "string"}, "location": {"type": "string"}, "notes": {"type": "string"},
+                "reminder": {"type": "integer", "minimum": 0, "maximum": mailcraft_model::ical::REMINDER_MAX_MINUTES, "description": "Minutes before it starts"}}, "required": ["id"]}),
+        ),
+        tool(
+            "add_person",
+            "Propose adding someone to the person's contacts.",
+            json!({"type": "object", "properties": {
+                "name": {"type": "string"}, "emails": {"type": "string", "description": "Their addresses, separated by commas"},
+                "phones": {"type": "string", "description": "Their numbers, separated by commas"}, "organization": {"type": "string"},
+                "title": {"type": "string", "description": "Their job title"}, "birthday": {"type": "string", "description": "YYYY-MM-DD"},
+                "notes": {"type": "string"}, "account": {"type": "string", "description": "The account whose contacts they go in (its id)"}}, "required": ["name"]}),
+        ),
+        tool(
+            "change_person",
+            "Propose changing someone in the contacts: what's given replaces what they have (emails: all their addresses), the rest stays.",
+            json!({"type": "object", "properties": {
+                "id": id("person"), "name": {"type": "string"}, "emails": {"type": "string"}, "phones": {"type": "string"},
+                "organization": {"type": "string"}, "title": {"type": "string"}, "birthday": {"type": "string"}, "notes": {"type": "string"}}, "required": ["id"]}),
+        ),
+        tool(
+            "add_task",
+            "Propose adding a task to the person's tasks.",
+            json!({"type": "object", "properties": {
+                "title": {"type": "string"}, "due": {"type": "string", "description": "YYYY-MM-DD"}, "notes": {"type": "string"},
+                "priority": {"type": "string", "enum": ["low", "normal", "high"]},
+                "reminder": {"type": "string", "description": "When it reminds: YYYY-MM-DDTHH:MM"},
+                "account": {"type": "string", "description": "The account whose tasks it goes in (its id)"}}, "required": ["title"]}),
+        ),
+        tool(
+            "change_task",
+            "Propose changing a task, or marking it done: what's given changes, the rest stays.",
+            json!({"type": "object", "properties": {
+                "id": id("task"), "title": {"type": "string"}, "due": {"type": "string", "description": "YYYY-MM-DD, or \"\" for none"},
+                "notes": {"type": "string"}, "priority": {"type": "string", "enum": ["low", "normal", "high"]},
+                "reminder": {"type": "string", "description": "YYYY-MM-DDTHH:MM, or \"none\""}, "done": {"type": "boolean"}}, "required": ["id"]}),
+        ),
+        tool(
+            "add_note",
+            "Propose adding a note.",
+            json!({"type": "object", "properties": {
+                "text": {"type": "string", "description": "Its text; its first line is its title"},
+                "account": {"type": "string", "description": "The account whose notes it goes in (its id)"}}, "required": ["text"]}),
+        ),
+        tool(
+            "change_note",
+            "Propose changing a note's text.",
+            json!({"type": "object", "properties": {"id": id("note"), "text": {"type": "string", "description": "Its new text, all of it"}}, "required": ["id", "text"]}),
+        ),
+        tool(
+            "delete_items",
+            "Propose deleting events, contacts, tasks or notes, by the ids the tools gave (messages: delete_messages). What's deleted is gone for good.",
+            json!({"type": "object", "properties": {
+                "ids": {"type": "array", "items": {"type": "string"}, "maxItems": 50},
+                "series": {"type": "boolean", "description": "For an event that repeats: every time, not only the one named"}}, "required": ["ids"]}),
+        ),
     ]
 }
 
 /// Whether `tool` only reads.
 pub(super) fn reads(tool: &str) -> bool {
-    matches!(tool, "list_folders" | "find_messages" | "read_message" | "find_events" | "find_people" | "selected_messages")
+    matches!(
+        tool,
+        "list_folders" | "find_messages" | "read_message" | "find_events" | "find_people" | "find_tasks" | "find_notes" | "selected_messages"
+    )
 }
 
 impl Session {
@@ -131,6 +206,8 @@ impl Session {
             "read_message" => self.tool_read_message(chat, profile, &input),
             "find_events" => self.tool_find_events(chat, profile, &input),
             "find_people" => self.tool_find_people(chat, profile, &input),
+            "find_tasks" => self.tool_find_tasks(chat, profile, &input),
+            "find_notes" => self.tool_find_notes(chat, profile, &input),
             "selected_messages" => self.tool_selected(profile),
             name if !reads(name) && tools().iter().any(|t| t.name == name) => match self.change_of(chat, name, &input) {
                 Ok(change) => Outcome::Proposed { what: change.what(self), messages: change.ids() },

@@ -2219,6 +2219,8 @@ count	occurrences	előfordulás
 	Searched the mail	Keresett a levelekben
 	Searched the calendar	Keresett a naptárban
 	Searched the contacts	Keresett a névjegyek között
+	Searched the tasks	Keresett a feladatok között
+	Searched the notes	Keresett a jegyzetek között
 	Set up AI	MI beállítása
 	Shift+Enter for a new line	Shift+Enter: új sor
 	Sum up the selected messages	Foglald össze a kijelölt üzeneteket

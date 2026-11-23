@@ -1,10 +1,10 @@
 //! How a chat names what its tools show the model: a short name, a letter (`m` a message, `e`
-//! an event, `p` a person) and ten hex digits of a hash of what it is. A message's id holds its
-//! folder's name, which can have spaces and brackets, so it can't be a Markdown link; a name can
-//! (`[subject](mailcraft:m…)`), and the window opens it. A name is looked up only among what the
-//! chat has seen (found, read, changed or pointed at), so a link opens nothing else, whoever
-//! wrote it: an answer quotes mail others wrote. Names are kept in saved chats: how one is made
-//! must never change.
+//! an event, `p` a person, `t` a task, `n` a note) and ten hex digits of a hash of what it is.
+//! A message's id holds its folder's name, which can have spaces and brackets, so it can't be a
+//! Markdown link; a name can (`[subject](mailcraft:m…)`), and the window opens it. A name is
+//! looked up only among what the chat has seen (found, read, changed or pointed at), so a link
+//! opens nothing else, whoever wrote it: an answer quotes mail others wrote. Names are kept in
+//! saved chats: how one is made must never change.
 
 use mailcraft_model::MessageKey;
 use mailcraft_model::hash::fnv1a;
@@ -28,8 +28,8 @@ fn name(letter: char, what: &str) -> String {
     format!("{letter}{:010x}", fnv1a(what.as_bytes()) & NAME_BITS)
 }
 
-/// What a chat's tools found besides messages: an event, at one of its occurrences, or a person
-/// in the contacts.
+/// What a chat's tools found besides messages: an event, at one of its occurrences, a person in
+/// the contacts, a task or a note.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum Found {
@@ -45,6 +45,14 @@ pub enum Found {
         account: String,
         uid: String,
     },
+    Task {
+        account: String,
+        uid: String,
+    },
+    Note {
+        account: String,
+        uid: String,
+    },
 }
 
 impl Found {
@@ -53,6 +61,25 @@ impl Found {
         match self {
             Found::Event { account, calendar, uid, occurrence, .. } => name('e', &format!("event:{account}:{calendar}:{occurrence}:{uid}")),
             Found::Person { account, uid } => name('p', &format!("person:{account}:{uid}")),
+            Found::Task { account, uid } => name('t', &format!("task:{account}:{uid}")),
+            Found::Note { account, uid } => name('n', &format!("note:{account}:{uid}")),
+        }
+    }
+
+    /// What it is, in a word.
+    pub(super) fn kind(&self) -> &'static str {
+        match self {
+            Found::Event { .. } => "event",
+            Found::Person { .. } => "person",
+            Found::Task { .. } => "task",
+            Found::Note { .. } => "note",
+        }
+    }
+
+    /// The account it's of.
+    pub(super) fn account(&self) -> &str {
+        match self {
+            Found::Event { account, .. } | Found::Person { account, .. } | Found::Task { account, .. } | Found::Note { account, .. } => account,
         }
     }
 }
@@ -98,13 +125,18 @@ impl Chat {
         self.seen().any(|s| s == id).then_some(key)
     }
 
-    /// What `link` opens: a message, an event or a person it has seen.
+    /// What `link` opens: a message, an event, a person, a task or a note it has seen.
     pub fn linked(&self, link: &str) -> Option<Linked> {
         if let Some(key) = self.linked_message(link) {
             return Some(Linked::Message(key));
         }
-        let name = link.trim();
+        self.found_named(link).cloned().map(Linked::Found)
+    }
+
+    /// What its tools found that `name` (or its link) names.
+    pub(super) fn found_named(&self, name: &str) -> Option<&Found> {
+        let name = name.trim();
         let name = name.strip_prefix(LINK).unwrap_or(name);
-        self.runs.iter().flat_map(|r| r.found.iter()).find(|f| f.name() == name).cloned().map(Linked::Found)
+        self.runs.iter().flat_map(|r| r.found.iter()).find(|f| f.name() == name)
     }
 }

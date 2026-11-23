@@ -566,9 +566,10 @@ impl MailApp {
                 let least = if pane == ReadingPane::Right { LIST_LEAST + READING_LEAST } else { LIST_LEAST };
                 assistant::panel(&mut self.session, &mut self.ui, ui, least, acts);
                 todo_bar::panel(&mut self.session, &mut self.ui, ui, least, acts);
-            } else if matches!(module, Module::Calendar | Module::People) {
-                // MailCraft's AI beside the calendar and the contacts too: it finds events and
-                // people, and a link in its answer to one goes there, the chat still in view.
+            } else if matches!(module, Module::Calendar | Module::People | Module::Tasks | Module::Notes) {
+                // MailCraft's AI beside the calendar, the contacts, the tasks and the notes too:
+                // it finds and changes them, and a link in its answer to one goes there, the chat
+                // still in view.
                 assistant::panel(&mut self.session, &mut self.ui, ui, READING_LEAST, acts);
             }
             let list_frame = egui::Frame::new().fill(t.surface).stroke(egui::Stroke::new(1.0, t.border));

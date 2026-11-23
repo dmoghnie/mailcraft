@@ -2,14 +2,15 @@
 //! for the person's card, and made only once they approve it, checked again then (the messages
 //! may have moved since). Each acts on the messages it names, never on the window's selection,
 //! and is undone with Undo as the window's own changes are. A message written is opened for the
-//! person to send; an event, added to the calendar (`pim_changes/events.rs`).
+//! person to send. Those to the calendar, the contacts, the tasks and the notes are
+//! `pim_changes.rs`'s.
 
 use mailcraft_mime::ReplyMode;
-use mailcraft_model::ical::CalEvent;
 use mailcraft_model::{Flag, FolderRole, MessageKey, Op, addr};
 use serde_json::Value;
 
 use super::looking::said;
+use super::pim_changes::PimChange;
 use super::*;
 use crate::Session;
 use crate::session::MoveTarget;
@@ -19,14 +20,15 @@ pub(super) const IDS_MOST: usize = 200;
 /// The longest message the assistant writes, in bytes.
 const BODY_MOST: usize = 256 << 10;
 
-/// A change, checked. An event is added to `calendar` (its id) of `account`.
+/// A change, checked. One to the calendar, the contacts, the tasks or the notes is said in its
+/// line as it's checked.
 pub(super) enum Change {
     Move { keys: Vec<MessageKey>, to: MoveTarget },
     Delete { keys: Vec<MessageKey> },
     Mark { keys: Vec<MessageKey>, read: Option<bool>, flagged: Option<bool> },
     Categorize { keys: Vec<MessageKey>, name: String, keyword: String, on: bool },
     Write { to: String, cc: String, subject: String, body: String, reply_to: Option<MessageKey>, account: Option<String> },
-    Event { account: String, calendar: String, event: Box<CalEvent> },
+    Pim { what: String, change: Box<PimChange> },
 }
 
 impl Change {
@@ -37,7 +39,7 @@ impl Change {
                 keys.iter().map(MessageKey::to_id).collect()
             }
             Change::Write { reply_to, .. } => reply_to.iter().map(MessageKey::to_id).collect(),
-            Change::Event { .. } => Vec::new(),
+            Change::Pim { .. } => Vec::new(),
         }
     }
 
@@ -75,7 +77,7 @@ impl Change {
                 let about = if subject.trim().is_empty() { String::new() } else { format!(": {}", subject.trim()) };
                 format!("Write a message{to}{about}")
             }
-            Change::Event { account, calendar, event } => s.event_what(account, calendar, event),
+            Change::Pim { what, .. } => what.clone(),
         }
     }
 }
@@ -128,8 +130,9 @@ impl Session {
                 Ok(Change::Categorize { keys, name: c.name.clone(), keyword: c.keyword.clone(), on: b("on").unwrap_or(true) })
             }
             "write_message" => self.write_of(chat, input),
-            "add_event" => self.event_change(chat, input),
-            other => Err(format!("there's no tool `{}`", other.chars().take(64).collect::<String>())),
+            other => self
+                .pim_change_of(chat, other, input)
+                .unwrap_or_else(|| Err(format!("there's no tool `{}`", other.chars().take(64).collect::<String>()))),
         }
     }
 
@@ -218,9 +221,7 @@ impl Session {
                 Ok(format!("Done: {} {} category {name}.", sel.len(), if on { "put in" } else { "taken out of" }))
             }
             Change::Write { to, cc, subject, body, reply_to, account } => self.write_named(to, cc, subject, body, reply_to, account),
-            Change::Event { account, calendar, event } => {
-                return self.add_event(&account, &calendar, *event).map(|(done, found)| (done, vec![found]));
-            }
+            Change::Pim { change, .. } => return self.apply_pim(*change),
         };
         done.map(|done| (done, Vec::new()))
     }
