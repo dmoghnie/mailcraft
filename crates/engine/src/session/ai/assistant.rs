@@ -154,6 +154,9 @@ pub enum RunState {
     Done,
     /// A change the person declined, or went on without deciding.
     Declined,
+    /// A change proposed beside a find or a read: not shown, for the model to propose again with
+    /// the others, so the person approves them together.
+    PutOff,
 }
 
 /// A tool call as it went: what a card in the chat shows.

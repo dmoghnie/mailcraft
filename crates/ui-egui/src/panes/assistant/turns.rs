@@ -106,8 +106,9 @@ fn answered(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, i: usize,
     if turn.cut {
         ui.label(RichText::new(tl!("The answer was cut short at the longest answer set for this model.")).small().color(t.faint));
     }
+    // A change put off is proposed again, with the others, in a card of its own.
     for call in &turn.turn.calls {
-        if let Some(run) = chat.run(&call.id) {
+        if let Some(run) = chat.run(&call.id).filter(|r| r.state != RunState::PutOff) {
             card(ui, t, &chat.id, run, acts);
         }
     }
@@ -117,7 +118,7 @@ fn answered(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, i: usize,
 fn card(ui: &mut Ui, t: &Tokens, chat: &str, run: &ToolRun, acts: &mut Vec<Action>) {
     let proposed = run.state == RunState::Proposed;
     let (icon, color, state) = match run.state {
-        RunState::Ran => (tool_icon(&run.tool), t.dim, None),
+        RunState::Ran | RunState::PutOff => (tool_icon(&run.tool), t.dim, None),
         RunState::Failed => (Icon::Warning, t.warn, Some(tl!("Couldn't be done"))),
         RunState::Waiting => (Icon::Clock, t.dim, Some(tl!("Downloading the message…"))),
         RunState::Proposed => (tool_icon(&run.tool), t.accent, Some(tl!("Needs your approval"))),

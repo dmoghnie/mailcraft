@@ -114,7 +114,9 @@ and `cargo xtask sizes` enforces them.
   matching over the summaries, each account's index and the sources downloaded, without its list,
   selection or search). A change is a proposal: made only once the person approves it, checked
   again then, on the messages it names (never the selection), and undone with Undo; a message it
-  writes opens to be sent. An event, a contact, a task or a note it adds or changes
+  writes opens to be sent. One proposed beside a find or a read is put off (`RunState::PutOff`,
+  no card), for the model to propose again with the rest, so a request's changes are approved
+  together. An event, a contact, a task or a note it adds or changes
   (`session/ai/assistant/pim_changes/`) is made as the window's forms make one
   (`cmd::event_from`, `card_from`, `task_from`), in an account its model may read; what it
   changes or deletes is named as the chat found it. It invites and tells no one: a meeting with

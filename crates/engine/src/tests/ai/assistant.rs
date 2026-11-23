@@ -107,7 +107,9 @@ fn changes_wait_for_the_person_and_happen_only_when_approved() {
     let mut s = ready("assistant-changes");
     let story = id_of(&s, STORYBOARD);
     let c = send(&mut s, None, "Archive Zoe's storyboard mail and delete it");
-    let (q, _) = question(&mut s);
+    let (q, asked) = question(&mut s);
+    // Proposed together, the person approves them with one click (Approve all).
+    assert!(asked.system.contains("in a reply of its own, propose every one at once"), "told to propose a request's changes together");
     calls(&mut s, q, "", &[("move_messages", json!({"ids": [story], "folder": "archive"})), ("delete_messages", json!({"ids": [story]}))]);
     assert!(questions(&mut s).is_empty(), "nothing asked while the person decides");
     let v = chat(&mut s, &c);
@@ -131,6 +133,42 @@ fn changes_wait_for_the_person_and_happen_only_when_approved() {
     // Undone as the window's own moves are.
     s.run("edit.undo", &json!({})).unwrap();
     assert!(s.folder_state("sample", "INBOX").messages.iter().any(|m| m.subject == STORYBOARD), "back in the Inbox");
+}
+
+/// A change proposed beside a find is put off, the chat going on at once, for the model to
+/// propose it again with the others: the person approves them together, with one click.
+#[test]
+fn a_change_proposed_beside_a_find_is_put_off_to_be_approved_with_the_others() {
+    let mut s = ready("assistant-together");
+    let story = id_of(&s, STORYBOARD);
+    let c = send(&mut s, None, "Flag Zoe's storyboard mail and archive it");
+    let (q, _) = question(&mut s);
+    calls(&mut s, q, "", &[("find_messages", json!({"query": "from:zoe"})), ("move_messages", json!({"ids": [story], "folder": "archive"}))]);
+    let v = chat(&mut s, &c);
+    assert_eq!(v["waitsOnYou"], false, "nothing to approve yet");
+    assert_eq!(v["chat"]["runs"][1]["state"], "putOff");
+    assert!(s.list.iter().any(|m| m.key.to_id() == story), "nothing moved");
+    // Asked again at once: what it found, and the change to propose again.
+    let (q, asked) = question(&mut s);
+    let results = &asked.turns.last().unwrap().results;
+    assert!(results[0].content.contains(STORYBOARD), "{:?}", results[0].content);
+    assert!(results[1].content.starts_with("Not proposed yet") && !results[1].error, "{:?}", results[1].content);
+    // Proposed together, both are approved at once, and the model is asked once.
+    // (Flagged first: moved, its id is its new folder's.)
+    calls(
+        &mut s,
+        q,
+        "",
+        &[("mark_messages", json!({"ids": [story], "flagged": true})), ("move_messages", json!({"ids": [story], "folder": "archive"}))],
+    );
+    let v = chat(&mut s, &c);
+    let runs = v["chat"]["runs"].as_array().unwrap();
+    assert_eq!(runs.iter().filter(|r| r["state"] == "proposed").count(), 2, "{runs:?}");
+    assert!(questions(&mut s).is_empty(), "nothing asked while the person decides");
+    s.run("assistant.decide", &json!({"chat": c, "approve": true})).unwrap();
+    let (_, asked) = question(&mut s);
+    let results = &asked.turns.last().unwrap().results;
+    assert!(results.iter().all(|r| r.content.starts_with("Approved.")), "{results:?}");
 }
 
 /// A message it writes is opened for the person to send, an answer threaded to the message it

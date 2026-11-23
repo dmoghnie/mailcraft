@@ -75,15 +75,24 @@ fn the_assistant_asks_about_whats_selected_and_a_change_is_approved_on_its_card(
     let t = texts(&ctx, &mut a);
     assert!(has(&t, "Sum up the selected messages") && has(&t, &m.subject), "what was said, and its message: {t:?}");
     assert!(has(&t, "Stop"), "it can be stopped while it answers");
-    // The answer: formatted, a picture shown as a link; a read, and a move proposed.
+    // The answer: formatted, a picture shown as a link; a read, and a move proposed beside it,
+    // put off (no card) for the model to propose again with any other changes.
+    let move_it = ("move_messages", json!({"ids": [m.key.to_id()], "folder": "archive"}));
     answers(
         &mut a,
         &chat,
         "It's about **the review**. ![tracker](https://tracker.example/p.png)",
-        &[("read_message", json!({"id": m.key.to_id()})), ("move_messages", json!({"ids": [m.key.to_id()], "folder": "archive"}))],
+        &[("read_message", json!({"id": m.key.to_id()})), move_it.clone()],
     );
     let t = texts(&ctx, &mut a);
-    for line in ["the review", "tracker", "Read a message", "Move", "Needs your approval", "Approve", "Decline"] {
+    for line in ["the review", "tracker", "Read a message"] {
+        assert!(has(&t, line), "{line}: {t:?}");
+    }
+    assert!(!has(&t, "Needs your approval") && !has(&t, "to Archive"), "put off: {t:?}");
+    // Proposed again: a card to approve it on.
+    answers(&mut a, &chat, "", &[move_it]);
+    let t = texts(&ctx, &mut a);
+    for line in ["Move", "Needs your approval", "Approve", "Decline"] {
         assert!(has(&t, line), "{line}: {t:?}");
     }
     assert!(a.session.list.iter().any(|x| x.key == m.key), "nothing moved before it's approved");
