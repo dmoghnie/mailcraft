@@ -22,7 +22,7 @@ fn asked(s: &mut Session) -> Vec<(u64, Option<String>, AiEndpoint, mailcraft_mod
     s.take_jobs()
         .into_iter()
         .filter_map(|j| match j {
-            Job::Ai { work: AiWork::Ask { id, endpoint, key, chat } } => Some((id, key, endpoint, chat)),
+            Job::Ai { work: AiWork::Ask { id, endpoint, key, chat, .. } } => Some((id, key, endpoint, chat)),
             _ => None,
         })
         .collect()
@@ -328,4 +328,40 @@ fn a_model_is_local_only_on_this_computer_or_its_network() {
     ] {
         assert!(!at(url), "{url}");
     }
+}
+
+/// Streamed, an answer's parts are kept as they come, given by `ai.answer` while it waits, and
+/// begun again when a failed question goes to its fallback.
+#[test]
+fn a_streamed_answer_is_kept_as_it_comes() {
+    let mut s = sample_session("ai-stream");
+    s.run("ai.allow", &json!({"account": "sample", "reach": "any"})).unwrap();
+    let first = local(&mut s, "Ollama");
+    let second = local(&mut s, "Another");
+    s.run(
+        "ai.saveProfile",
+        &json!({"id": first, "name": "Ollama", "api": "openAi", "url": "http://localhost:11434/v1", "model": "llama3.2", "fallback": second}),
+    )
+    .unwrap();
+    s.take_jobs();
+    let id = s.run("ai.ask", &json!({"account": "sample", "question": "Summarise", "stream": true})).unwrap()["id"].as_u64().unwrap();
+    let streamed = |s: &mut Session| s.take_jobs().into_iter().any(|j| matches!(j, Job::Ai { work: AiWork::Ask { stream: true, .. } }));
+    assert!(streamed(&mut s), "asked streamed");
+    let part = |s: &mut Session, text: &str, thinking: &str| {
+        s.apply(Event::Ai { done: AiDone::Part { id, text: text.into(), thinking: thinking.into() } });
+    };
+    part(&mut s, "Two ", "Read it. ");
+    part(&mut s, "meetings", "");
+    assert_eq!(s.run("ai.answer", &json!({"id": id})).unwrap(), json!({"waiting": true, "text": "Two meetings", "thinking": "Read it. "}));
+    // Failed: its fallback asked, from nothing again.
+    fail(&mut s, id, "the model's answer stopped before its end");
+    assert!(streamed(&mut s), "the fallback asked streamed too");
+    assert_eq!(s.run("ai.answer", &json!({"id": id})).unwrap(), json!({"waiting": true, "text": "", "thinking": ""}));
+    part(&mut s, "Two meetings moved.", "");
+    answer(&mut s, id, "Two meetings moved.");
+    assert_eq!(s.run("ai.answer", &json!({"id": id})).unwrap()["text"], "Two meetings moved.");
+    assert_eq!(s.run("ai.answer", &json!({"id": id})).unwrap(), json!({"waiting": false}), "its parts gone with it");
+    // A part for a question not waiting, or not streamed, is dropped.
+    part(&mut s, "late", "");
+    assert_eq!(s.run("ai.answer", &json!({"id": id})).unwrap(), json!({"waiting": false}));
 }

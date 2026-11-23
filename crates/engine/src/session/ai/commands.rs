@@ -47,14 +47,17 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
         })
         .params(r#"{"profile": string}"#),
         CommandSpec::new("ai.ask", "Ask MailCraft's AI about an account's mail", WHERE, ask).params(
-            r#"{"account": string (whose mail the question holds: its setting decides which models may be asked), "question": string, "system"?: string, "task"?: "chat"|"decision", "purpose"?: string (recorded with it)}"#,
+            r#"{"account": string (whose mail the question holds: its setting decides which models may be asked), "question": string, "system"?: string, "task"?: "chat"|"decision", "purpose"?: string (recorded with it), "stream"?: bool (the answer kept as it's written: ai.answer gives what came so far)}"#,
         ),
         CommandSpec::new("ai.answer", "Take the answer to a question asked", WHERE, |s, v| {
             let id = p::u64(v, "id").ok_or_else(|| CmdError::Params("`id` (number) is required".into()))?;
             match s.ai_answer(id) {
                 Some(Ok(a)) => Ok(json!({"text": a.text, "cut": a.cut, "inputTokens": a.input_tokens, "outputTokens": a.output_tokens})),
                 Some(Err(e)) => Err(CmdError::Failed(e)),
-                None => Ok(json!({"waiting": s.ai.is_waiting(id)})),
+                None => match s.ai.part(id) {
+                    Some((text, thinking)) => Ok(json!({"waiting": true, "text": text, "thinking": thinking})),
+                    None => Ok(json!({"waiting": s.ai.is_waiting(id)})),
+                },
             }
         })
         .params(r#"{"id": number (from ai.ask)}"#),
@@ -219,7 +222,7 @@ fn ask(s: &mut Session, v: &Value) -> CmdResult {
     };
     let purpose: String = p::str(v, "purpose").unwrap_or("question").chars().filter(|c| !c.is_control()).take(40).collect();
     let chat = mailcraft_model::AiChat::ask(system, question, TOKENS_MOST);
-    let id = s.ai_ask(task, Some(&account), &purpose, chat)?;
+    let id = s.ai_ask(task, Some(&account), &purpose, chat, p::bool(v, "stream").unwrap_or(false))?;
     Ok(json!({"id": id}))
 }
 

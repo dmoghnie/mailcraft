@@ -6,7 +6,7 @@ use std::net::TcpListener;
 
 fn ask(id: u64, url: &str, key: Option<&str>) -> Job {
     let endpoint = AiEndpoint { api: AiApi::OpenAi, url: url.into(), model: "m".into() };
-    Job::Ai { work: AiWork::Ask { id, endpoint, key: key.map(str::to_string), chat: AiChat::ask("", "hi", 16) } }
+    Job::Ai { work: AiWork::Ask { id, endpoint, key: key.map(str::to_string), chat: AiChat::ask("", "hi", 16), stream: false } }
 }
 
 /// The answer to question `id`: its text, or its error.
@@ -99,4 +99,33 @@ fn past_the_most_waiting_a_question_is_answered_at_once() {
     p.submit(ask(99, &server.base, None));
     let seen = until(&p, "a question asked again", |e| matches!(e, Event::Ai { done: AiDone::Answered { id: 99, .. } }));
     assert_eq!(answer_to(&seen, 99), Some(Ok("You said: hi".into())));
+}
+
+/// Streamed, what more of the answer came is sent on as it's written, a while apart, and the
+/// answer whole after it.
+#[test]
+fn a_streamed_answer_comes_in_parts_then_whole() {
+    let server = ModelServer::start();
+    let chunk = |text: &str| format!("data: {}\n\n", serde_json::json!({"choices": [{"delta": {"content": text, "reasoning": "."}}]}));
+    let pieces =
+        [chunk("One "), chunk("two "), chunk("three "), chunk("four."), "data: {\"choices\":[{\"delta\":{},\"finish_reason\":\"stop\"}]}\n\n".into()];
+    let pieces: Vec<&str> = pieces.iter().map(String::as_str).collect();
+    server.then_events_every(&pieces, PART_EVERY + std::time::Duration::from_millis(40));
+    let mut p = Pool::new(crate::fake::store("ai-stream"), Arc::new(MemoryCredentials::default()));
+    let endpoint = AiEndpoint { api: AiApi::OpenAi, url: server.base.clone(), model: "m".into() };
+    p.submit(Job::Ai { work: AiWork::Ask { id: 7, endpoint, key: None, chat: AiChat::ask("", "hi", 16), stream: true } });
+    let seen = events_until(&p, "the answer", |s| answer_to(s, 7).is_some());
+    let parts: Vec<(&str, &str)> = seen
+        .iter()
+        .filter_map(|e| match e {
+            Event::Ai { done: AiDone::Part { id: 7, text, thinking } } => Some((text.as_str(), thinking.as_str())),
+            _ => None,
+        })
+        .collect();
+    assert!(parts.len() >= 2, "sent on as it came: {parts:?}");
+    let so_far: String = parts.iter().map(|(t, _)| *t).collect();
+    assert!("One two three four.".starts_with(&so_far) && !so_far.is_empty(), "{so_far:?}");
+    assert!(parts.iter().any(|(_, th)| !th.is_empty()), "thinking too");
+    assert_eq!(answer_to(&seen, 7), Some(Ok("One two three four.".into())), "then the answer whole");
+    assert_eq!(server.seen()[0].body["stream"], true);
 }

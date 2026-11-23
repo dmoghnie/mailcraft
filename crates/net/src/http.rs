@@ -13,7 +13,7 @@ use crate::{NetError, Result};
 
 mod body;
 mod streamed;
-pub use streamed::{exchange_into, get_into};
+pub use streamed::{exchange_into, exchange_into_as, get_into};
 
 /// Longest header block accepted.
 const MAX_HEAD: usize = 64 << 10;
@@ -306,11 +306,17 @@ pub fn get(url: &str, max: usize) -> Result<Response> {
 /// [`stream::IO_TIMEOUT`] (a language model thinking before it answers). Redirects aren't
 /// followed: what it posts (a key, mail) goes to the address given alone.
 pub fn send_waiting(req: &Request, wait: std::time::Duration) -> Result<Response> {
-    use stream::Timeouts;
     let url = Url::parse(&req.url)?;
-    let mut s = connect(&url, false)?;
+    exchange(&mut open_waiting(&url, wait)?, req, &url)
+}
+
+/// A connection to `url`'s server whose answers may take up to `wait` to come, as
+/// [`send_waiting`] uses (and a model's answer streamed, through [`exchange_into_as`]).
+pub fn open_waiting(url: &Url, wait: std::time::Duration) -> Result<Stream> {
+    use stream::Timeouts;
+    let mut s = connect(url, false)?;
     s.set_read_timeout(Some(wait))?;
-    exchange(&mut s, req, &url)
+    Ok(s)
 }
 
 /// A connection to `url`'s server: to the internet only when `public_only`

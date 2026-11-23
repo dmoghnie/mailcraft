@@ -93,18 +93,24 @@ and `cargo xtask sizes` enforces them.
   account's mail may go, the local-only switch), words each question and records it. It queues
   `Job::Ai`; `net/src/worker/ai.rs` reads the profile's key from the keychain and asks on a
   thread of its own, at most four at once; `net/src/protocols/ai.rs` speaks the two wire
-  formats.
+  formats, with the tools a model may call, and reads an answer whole or streamed as it's
+  written (`ai/streamed.rs`: the server-sent events both formats stream, its growth sent on as
+  `AiDone::Part` every 80 ms at most).
 - **Two formats cover the servers.** OpenAI's Chat Completions is spoken by OpenAI, xAI, Mistral,
   OpenRouter, Groq, DeepSeek, Gemini's compatible address and the local servers (Ollama, LM
   Studio, llama.cpp); Anthropic's Messages is the other.
 - **Why not the `genai` crate.** It is async on tokio and reqwest, with TLS of its own: it would
   bring a second HTTP stack that bypasses MailCraft's certificate rules (`net/src/stream`), and a
-  runtime the worker threads don't need. The two formats are about two hundred lines over `net::http`.
+  runtime the worker threads don't need. The two formats, tools and streaming are about seven
+  hundred lines over `net::http`.
 - **The record.** Each question is recorded before it goes (`ai-log.json`, saved as the jobs are
   taken): when, what for, which profile and server, whose mail, and its sizes; never what it
   said. The newest 500 are kept.
-- **Not yet:** embeddings (for search), pictures, streaming answers, a monthly budget, the
-  browser and the phones. A question waits up to five minutes for its answer to start.
+- **Keys stay out of errors.** What a server says is quoted with the key blanked out, before it's
+  cut short; an error of the network layer that quotes a server's words (a status line it
+  couldn't read) and holds the key, or the start of it, says less instead.
+- **Not yet:** embeddings (for search), pictures, a monthly budget, the browser and the phones.
+  A question waits up to five minutes for its answer to start.
 
 ## The session
 

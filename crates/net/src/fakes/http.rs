@@ -65,6 +65,23 @@ pub(crate) fn respond(s: &mut impl Write, status: &str, headers: &[(&str, String
     let _ = s.write_all(body);
 }
 
+/// Answer `status` with a chunked body, each of `pieces` a chunk of its own, sent as it's
+/// written, `gap` apart (a stream of events, its lines split wherever the pieces split them).
+pub(crate) fn respond_chunked(s: &mut impl Write, status: &str, headers: &[(&str, String)], pieces: &[String], gap: std::time::Duration) {
+    let mut head = format!("HTTP/1.1 {status}\r\nTransfer-Encoding: chunked\r\n");
+    for (k, v) in headers {
+        head.push_str(&format!("{k}: {v}\r\n"));
+    }
+    head.push_str("\r\n");
+    let _ = s.write_all(head.as_bytes());
+    for piece in pieces.iter().filter(|p| !p.is_empty()) {
+        let _ = s.write_all(format!("{:x}\r\n{piece}\r\n", piece.len()).as_bytes());
+        let _ = s.flush();
+        std::thread::sleep(gap);
+    }
+    let _ = s.write_all(b"0\r\n\r\n");
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

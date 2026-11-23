@@ -24,6 +24,17 @@ pub fn exchange_into<S: Read + Write, W: Write>(
     url: &Url,
     open: impl FnOnce(&Response) -> Result<Option<W>>,
 ) -> Result<Response> {
+    exchange_into_as(s, req, url, "download", open)
+}
+
+/// [`exchange_into`], its errors naming the body as `what` ("answer": a model's, streamed).
+pub fn exchange_into_as<S: Read + Write, W: Write>(
+    s: &mut S,
+    req: &Request,
+    url: &Url,
+    what: &str,
+    open: impl FnOnce(&Response) -> Result<Option<W>>,
+) -> Result<Response> {
     write_request(s, req, url, false)?;
     let (status, headers, rest) = read_head(s)?;
     let head = Response { status, headers, body: Vec::new() };
@@ -31,7 +42,7 @@ pub fn exchange_into<S: Read + Write, W: Write>(
         return Ok(head);
     }
     if let Some(mut out) = open(&head)? {
-        copy_body(&mut Ahead::new(s, rest), &head, u64::try_from(req.max).unwrap_or(u64::MAX), &mut out, "download")?;
+        copy_body(&mut Ahead::new(s, rest), &head, u64::try_from(req.max).unwrap_or(u64::MAX), &mut out, what)?;
         out.flush()?;
     }
     Ok(head)

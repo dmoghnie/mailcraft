@@ -1,0 +1,30 @@
+@HTTP/1.1 200 OK
+Content-Type: text/event-stream
+Transfer-Encoding: chunked
+
+54
+data: {"choices":[{"index":0,"delta":{"reasoning":"Look."},"finish_reason":null}]}
+
+
+53
+data: {"choices":[{"index":0,"delta":{"content":"Found "},"finish_reason":null}]}
+
+
+a2
+data: {"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_1","type":"function","function":{"name":"search_mail","arguments":"{\"query\":"}}]}}]}
+
+
+8b
+data: {"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"invoice\"}"}}]},"finish_reason":"tool_calls"}]}
+
+
+49
+data: {"choices":[],"usage":{"prompt_tokens":12,"completion_tokens":5}}
+
+
+e
+data: [DONE]
+
+
+0
+

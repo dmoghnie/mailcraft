@@ -64,7 +64,7 @@ The fuzzer keeps what it finds in `corpus/` and `artifacts/`. Git ignores both f
 | `ical` | iCalendar, written and read back; WebDAV `multistatus` replies |
 | `vcard` | vCard, written and read back |
 | `backup` | A backup file of what the browser keeps: read, written and read back |
-| `http` | HTTP answers, whole and streamed; `Content-Range`; release data and `SHA256SUMS.txt`; a language model's reply, whose errors never show its key |
+| `http` | HTTP answers, whole and streamed; `Content-Range`; release data and `SHA256SUMS.txt`; a language model's reply, whole or streamed as events with its tool calls, whose errors never show its key |
 | `imap` | A whole IMAP session, including a folder sync |
 | `jmap` | JMAP sign-in, sync, push events and URLs |
 | `ews` | Exchange Web Services answers: an Exchange mailbox's Inbox rules, read, written and read back; colleagues' free/busy times; which folders changed |

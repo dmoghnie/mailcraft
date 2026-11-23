@@ -1,8 +1,9 @@
 //! What a web server sends: an HTTP answer read whole and read as it streams (lengths, chunks, to
 //! the end of the connection), an event stream (JMAP push), a download's `Content-Range`; what
 //! the updater reads from GitHub: the release list, a `SHA256SUMS.txt`, the quota header and
-//! release tags; and a language model's reply, in OpenAI's and Anthropic's formats, whose errors
-//! never show the key.
+//! release tags; and a language model's reply, in OpenAI's and Anthropic's formats, whole and
+//! streamed as events (its text handed on as it comes, its tool calls built from their pieces),
+//! whose errors never show the key.
 #![no_main]
 
 use std::io::{Read, Write};
@@ -59,6 +60,17 @@ fuzz_target!(|data: &[u8]| {
             if let Err(e) = ai::read_reply(api, &resp, Some(KEY)) {
                 assert!(!e.to_string().contains(KEY), "an error showed the key: {e}");
             }
+        }
+    }
+    // Streamed: what was handed on is what the answer says.
+    let Ok(model) = Url::parse("https://models.example/v1/chat/completions") else { return };
+    let ask = Request::post(&model.path, "application/json", b"{}".to_vec(), 1 << 16);
+    for api in [AiApi::OpenAi, AiApi::Anthropic] {
+        let mut said = String::new();
+        let mut on = |text: &str, _: &str| said.push_str(text);
+        match ai::read_stream(api, &mut Server { data: body, step }, &ask, &model, Some(KEY), &mut on) {
+            Ok(a) => assert!(a.calls.len() <= 64, "more calls than an answer may make"),
+            Err(e) => assert!(!e.to_string().contains(KEY), "an error showed the key: {e}"),
         }
     }
     let mut got = Vec::new();

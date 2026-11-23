@@ -12,6 +12,9 @@ mod tests;
 /// with why. Each waits on a thread of its own for up to [`crate::ai::THINKING`], so a command
 /// run in a loop can't start threads without end.
 pub(crate) const ASKING_MOST: usize = 4;
+/// How often a streamed answer's growth is sent on: often enough to read as it's written, not
+/// an event for every word.
+const PART_EVERY: std::time::Duration = std::time::Duration::from_millis(80);
 
 /// One of the [`ASKING_MOST`] places of the pool's `asking`; given back when dropped, whatever
 /// ends the wait.
@@ -33,7 +36,7 @@ impl Drop for Asking {
 impl Pool {
     pub(super) fn ai(&self, work: AiWork) {
         match work {
-            AiWork::Ask { id, endpoint, key, chat } => {
+            AiWork::Ask { id, endpoint, key, chat, stream } => {
                 let failed = |error: String| Event::Ai { done: AiDone::Answered { id, answer: None, error: Some(error) } };
                 let Some(slot) = Asking::take(&self.asking) else {
                     return self.sink.emit(failed(format!("MailCraft is already waiting for {ASKING_MOST} answers; ask again once one comes")));
@@ -44,7 +47,9 @@ impl Pool {
                     let kept = key.as_deref().map(|name| creds.get_key(name));
                     let done = match kept {
                         Some(None) => AiDone::Answered { id, answer: None, error: Some("no key is kept for this model".into()) },
-                        Some(Some(k)) => answered(id, crate::ai::ask(&endpoint, Some(&k), &chat)),
+                        Some(k) if stream => answered(id, streamed(&sink, id, &endpoint, k.as_deref(), &chat)),
+                        Some(k) => answered(id, crate::ai::ask(&endpoint, k.as_deref(), &chat)),
+                        None if stream => answered(id, streamed(&sink, id, &endpoint, None, &chat)),
                         None => answered(id, crate::ai::ask(&endpoint, None, &chat)),
                     };
                     sink.emit(Event::Ai { done });
@@ -65,6 +70,29 @@ impl Pool {
             }
         }
     }
+}
+
+/// Ask with the answer streamed: what more came of it sent on as [`AiDone::Part`]s, every
+/// [`PART_EVERY`] at most, and what came last with the answer itself.
+fn streamed(
+    sink: &Sink,
+    id: u64,
+    endpoint: &mailcraft_model::AiEndpoint,
+    key: Option<&str>,
+    chat: &mailcraft_model::AiChat,
+) -> Result<mailcraft_model::AiAnswer> {
+    let (mut text, mut thinking) = (String::new(), String::new());
+    let mut sent = std::time::Instant::now();
+    let mut on = |said: &str, thought: &str| {
+        text.push_str(said);
+        thinking.push_str(thought);
+        if sent.elapsed() >= PART_EVERY {
+            let (text, thinking) = (std::mem::take(&mut text), std::mem::take(&mut thinking));
+            sink.emit(Event::Ai { done: AiDone::Part { id, text, thinking } });
+            sent = std::time::Instant::now();
+        }
+    };
+    crate::ai::ask_streamed(endpoint, key, chat, &mut on)
 }
 
 fn answered(id: u64, r: Result<mailcraft_model::AiAnswer>) -> AiDone {

@@ -1,6 +1,9 @@
 use super::*;
 use crate::fakes::fake_ai::ModelServer;
-use mailcraft_model::{AiRole, AiTurn};
+
+mod streaming;
+mod tools;
+use mailcraft_model::AiTurn;
 use serde_json::json;
 
 const KEY: &str = "sk-test-0123456789";
@@ -12,12 +15,9 @@ fn endpoint(server: &ModelServer, api: AiApi) -> AiEndpoint {
 fn chat() -> AiChat {
     AiChat {
         system: "Answer briefly.".into(),
-        turns: vec![
-            AiTurn { role: AiRole::User, text: "Who wrote?".into() },
-            AiTurn { role: AiRole::Assistant, text: "Sam did.".into() },
-            AiTurn { role: AiRole::User, text: "hello".into() },
-        ],
+        turns: vec![AiTurn::user("Who wrote?"), AiTurn::assistant("Sam did."), AiTurn::user("hello")],
         max_tokens: 256,
+        tools: Vec::new(),
     }
 }
 
@@ -47,7 +47,7 @@ fn openais_format_is_asked_with_the_key_and_answered() {
 #[test]
 fn openais_own_server_is_given_max_completion_tokens() {
     let e = AiEndpoint { api: AiApi::OpenAi, url: "https://api.openai.com/v1".into(), model: "m".into() };
-    let r = openai::request("https://api.openai.com/v1", &e, None, &chat());
+    let r = openai::request("https://api.openai.com/v1", &e, None, &chat(), false);
     let body: Value = serde_json::from_slice(&r.body).unwrap();
     assert_eq!(body["max_completion_tokens"], 256);
     assert!(body.get("max_tokens").is_none(), "its reasoning models refuse max_tokens");
@@ -187,4 +187,23 @@ fn a_question_too_long_isnt_sent() {
     let e = ask(&endpoint(&server, AiApi::OpenAi), None, &long).unwrap_err().to_string();
     assert!(e.contains("too long"), "{e}");
     assert!(server.seen().is_empty());
+}
+
+/// A server whose status line quotes the key back, whole, split by a control character, or cut
+/// where the HTTP layer cuts what it quotes: the error says so without it, whole or streamed.
+#[test]
+fn a_key_in_a_broken_status_line_never_shows() {
+    let cut = format!("{}{KEY}", "x".repeat(60 - "HTTP/1.1 ".len() - 8));
+    let split = format!("2x0 {}\u{7}{}", &KEY[..6], &KEY[6..]);
+    for status in [format!("2x0 {KEY} oops"), split, cut] {
+        let server = ModelServer::start();
+        server.then(&status, "{}");
+        server.then(&status, "{}");
+        let whole = ask(&endpoint(&server, AiApi::OpenAi), Some(KEY), &chat()).unwrap_err().to_string();
+        let streamed = ask_streamed(&endpoint(&server, AiApi::Anthropic), Some(KEY), &chat(), &mut |_, _| {}).unwrap_err().to_string();
+        for e in [whole, streamed] {
+            assert!(!e.contains(&KEY[..6]), "{status:?} -> {e}");
+            assert!(e.contains("couldn't be read"), "{e}");
+        }
+    }
 }

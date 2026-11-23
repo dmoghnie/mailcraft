@@ -1,7 +1,9 @@
 //! Asking a language model over HTTP: OpenAI's Chat Completions (most servers, the ones on the
-//! person's own computer included) and Anthropic's Messages. A key goes over https only, or to
-//! this computer.
+//! person's own computer included) and Anthropic's Messages, the tools it may call with them,
+//! its answer whole or streamed as it's written. A key goes over https only, or to this
+//! computer.
 
+use std::io::{Read, Write};
 use std::time::Duration;
 
 use mailcraft_model::{AiAnswer, AiApi, AiChat, AiEndpoint};
@@ -12,6 +14,7 @@ use crate::{NetError, Result};
 
 mod anthropic;
 mod openai;
+mod streamed;
 #[cfg(test)]
 mod tests;
 
@@ -23,22 +26,63 @@ pub(crate) const MAX_QUESTION: usize = 4 << 20;
 pub(crate) const THINKING: Duration = Duration::from_secs(300);
 /// The most of a server's error message shown, in characters.
 const MAX_ERROR: usize = 300;
+/// The shortest start of a key taken for part of it, where words quoting it were cut.
+const KEY_START: usize = 4;
 
 /// Ask `endpoint`'s model `chat`, with `key` when the server takes one.
 pub fn ask(endpoint: &AiEndpoint, key: Option<&str>, chat: &AiChat) -> Result<AiAnswer> {
-    let base = address(&endpoint.url)?;
     let key = key.filter(|k| !k.trim().is_empty()).map(str::trim);
+    let req = request(endpoint, key, chat, false)?;
+    let resp = http::send_waiting(&req, THINKING).map_err(|e| keyless(e, key))?;
+    let answer = read_reply(endpoint.api, &resp, key)?;
+    Ok(AiAnswer { sent: bytes(req.body.len()), received: bytes(resp.body.len()), ..answer })
+}
+
+/// Ask as [`ask`] does, the answer streamed: its text and its thinking go to `on` as they're
+/// written (what more came of each), then the whole answer comes back.
+pub fn ask_streamed(endpoint: &AiEndpoint, key: Option<&str>, chat: &AiChat, on: &mut dyn FnMut(&str, &str)) -> Result<AiAnswer> {
+    let key = key.filter(|k| !k.trim().is_empty()).map(str::trim);
+    let req = request(endpoint, key, chat, true)?;
+    let url = Url::parse(&req.url)?;
+    let answer = read_stream(endpoint.api, &mut http::open_waiting(&url, THINKING)?, &req, &url, key, on)?;
+    Ok(AiAnswer { sent: bytes(req.body.len()), ..answer })
+}
+
+/// Send `req` on `s` and read the streamed answer, in `api`'s format: its text and thinking to
+/// `on` as they come, then the answer, or why there's none (a server's words [`quoted`]). A
+/// server that answers whole, or with an error, is read as [`read_reply`] reads it.
+pub fn read_stream<S: Read + Write>(
+    api: AiApi,
+    s: &mut S,
+    req: &Request,
+    url: &Url,
+    key: Option<&str>,
+    on: &mut dyn FnMut(&str, &str),
+) -> Result<AiAnswer> {
+    let mut events = streamed::Events::new(api, key, on);
+    let reading = &mut events;
+    let got = http::exchange_into_as(s, req, url, "model's answer", move |head| {
+        reading.opened(head);
+        Ok(Some(reading))
+    });
+    events.finish(got).map_err(|e| keyless(e, key))
+}
+
+/// The request asking `chat`, streamed or not; one past [`MAX_QUESTION`] isn't sent.
+fn request(endpoint: &AiEndpoint, key: Option<&str>, chat: &AiChat, stream: bool) -> Result<Request> {
+    let base = address(&endpoint.url)?;
     let req = match endpoint.api {
-        AiApi::OpenAi => openai::request(&base, endpoint, key, chat),
-        AiApi::Anthropic => anthropic::request(&base, endpoint, key, chat),
+        AiApi::OpenAi => openai::request(&base, endpoint, key, chat, stream),
+        AiApi::Anthropic => anthropic::request(&base, endpoint, key, chat, stream),
     };
     if req.body.len() > MAX_QUESTION {
         return Err(NetError::Protocol(format!("the question is too long to send ({} bytes, at most {MAX_QUESTION})", req.body.len())));
     }
-    let resp = http::send_waiting(&req, THINKING)?;
-    let answer = read_reply(endpoint.api, &resp, key)?;
-    let bytes = |n: usize| u64::try_from(n).unwrap_or(u64::MAX);
-    Ok(AiAnswer { sent: bytes(req.body.len()), received: bytes(resp.body.len()), ..answer })
+    Ok(req)
+}
+
+fn bytes(n: usize) -> u64 {
+    u64::try_from(n).unwrap_or(u64::MAX)
 }
 
 /// A model's server's reply read, in `api`'s format: its answer, or why there's none. What the
@@ -59,12 +103,33 @@ pub fn read_reply(api: AiApi, resp: &Response, key: Option<&str>) -> Result<AiAn
 /// out (what an error says is shown, and may be logged), and cut short, in that order: no
 /// character taken out can join a key back together, and no cut leaves part of one.
 pub(crate) fn quoted(said: &str, key: Option<&str>) -> String {
+    blanked(said, key).chars().take(MAX_ERROR).collect::<String>().trim().to_string()
+}
+
+/// `said` without control characters, then `key` blanked out of it, and the start of one where
+/// it ends (words quoting it that were cut short before they came here).
+fn blanked(said: &str, key: Option<&str>) -> String {
     let clean: String = said.chars().filter(|c| !c.is_control()).collect();
-    let clean = match key.filter(|k| !k.is_empty()) {
-        Some(k) => clean.replace(k, "…"),
-        None => clean,
-    };
-    clean.chars().take(MAX_ERROR).collect::<String>().trim().to_string()
+    let Some(k) = key.filter(|k| !k.is_empty()) else { return clean };
+    let mut clean = clean.replace(k, "…");
+    let start = (KEY_START..k.len()).rev().filter(|n| k.is_char_boundary(*n)).find(|n| clean.ends_with(k.get(..*n).unwrap_or(k)));
+    if let Some(n) = start {
+        clean.truncate(clean.len().saturating_sub(n));
+        clean.push('…');
+    }
+    clean
+}
+
+/// An error from asking a model, `key` kept out of it: the network layer's own errors quote what
+/// a server sent (a status line it couldn't read, cut short), which could hold the key, whole
+/// or in part. One that does says less.
+fn keyless(e: NetError, key: Option<&str>) -> NetError {
+    let said = e.to_string();
+    let clean: String = said.chars().filter(|c| !c.is_control()).collect();
+    if blanked(&said, key) == clean {
+        return e;
+    }
+    NetError::Protocol("the model's server sent an answer that couldn't be read".into())
 }
 
 /// The server's API address without its trailing `/`: https, or plain http to this computer
@@ -99,6 +164,12 @@ fn refused(resp: &Response, key: Option<&str>) -> NetError {
         s => format!("HTTP {s}"),
     };
     if said.is_empty() { NetError::No(format!("the model's server: {what}")) } else { NetError::No(format!("the model's server: {what}: {said}")) }
+}
+
+/// Why a stream stopped, in the server's words when it gave them ([`quoted`]).
+fn stopped(said: &str, key: Option<&str>) -> String {
+    let said = quoted(said, key);
+    if said.is_empty() { "the model's server stopped".into() } else { format!("the model's server stopped: {said}") }
 }
 
 /// A number the server counted, when it gave one.

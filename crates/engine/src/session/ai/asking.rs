@@ -59,6 +59,8 @@ struct Waiting {
     account: Option<String>,
     purpose: String,
     chat: AiChat,
+    /// Its answer streamed, kept as it grows ([`AiState::part`]).
+    stream: bool,
     profile: String,
     /// The profiles asked so far, the one waiting last.
     tried: Vec<String>,
@@ -84,6 +86,8 @@ pub struct AiState {
     answers: HashMap<u64, Result<AiAnswer, String>>,
     /// Why a key couldn't be kept, by profile id.
     pub key_errors: BTreeMap<String, String>,
+    /// What came so far of each streamed answer waiting: its text and its thinking.
+    parts: HashMap<u64, (String, String)>,
 }
 
 impl AiState {
@@ -95,6 +99,11 @@ impl AiState {
     /// Whether question `id` waits for its answer.
     pub fn is_waiting(&self, id: u64) -> bool {
         self.waiting.contains_key(&id)
+    }
+
+    /// What came so far of streamed answer `id`, while it waits: its text and its thinking.
+    pub fn part(&self, id: u64) -> Option<(&str, &str)> {
+        self.parts.get(&id).map(|(text, thinking)| (text.as_str(), thinking.as_str()))
     }
 }
 
@@ -133,8 +142,9 @@ impl Session {
     }
 
     /// Ask the model `task` goes to about mail of `account` (`None`: no mail in it), for
-    /// `purpose`; the answer is taken with [`Session::ai_answer`] by the id returned.
-    pub(crate) fn ai_ask(&mut self, task: AiTask, account: Option<&str>, purpose: &str, chat: AiChat) -> Result<u64, CmdError> {
+    /// `purpose`; the answer is taken with [`Session::ai_answer`] by the id returned. Streamed,
+    /// what came of it so far is [`AiState::part`] while it waits.
+    pub(crate) fn ai_ask(&mut self, task: AiTask, account: Option<&str>, purpose: &str, chat: AiChat, stream: bool) -> Result<u64, CmdError> {
         let profile = self.prefs.ai.route(task, account).map_err(CmdError::Disabled)?.clone();
         self.ai.next += 1;
         let id = self.ai.next;
@@ -142,6 +152,7 @@ impl Session {
             account: account.map(str::to_string),
             purpose: purpose.to_string(),
             chat,
+            stream,
             profile: profile.id.clone(),
             tried: Vec::new(),
             logged: 0,
@@ -153,7 +164,7 @@ impl Session {
     /// Ask `profile` question `id`, and record it.
     fn ai_send(&mut self, id: u64, mut w: Waiting, profile: &AiProfile) {
         let chat = AiChat { max_tokens: w.chat.max_tokens.min(profile.max_tokens.max(1)), ..w.chat.clone() };
-        let size = chat.system.len().saturating_add(chat.turns.iter().map(|t| t.text.len()).sum());
+        let size = chat.size();
         w.logged = self.ai_record(AiLogEntry {
             at: self.clock.now,
             purpose: w.purpose.clone(),
@@ -168,7 +179,12 @@ impl Session {
         w.profile = profile.id.clone();
         w.tried.push(profile.id.clone());
         let key = profile.has_key.then(|| profile.id.clone());
-        self.jobs.push(Job::Ai { work: AiWork::Ask { id, endpoint: profile.endpoint.clone(), key, chat } });
+        let stream = w.stream;
+        self.jobs.push(Job::Ai { work: AiWork::Ask { id, endpoint: profile.endpoint.clone(), key, chat, stream } });
+        if stream {
+            // A fallback asked starts again.
+            self.ai.parts.insert(id, Default::default());
+        }
         self.ai.waiting.insert(id, w);
     }
 
@@ -194,8 +210,15 @@ impl Session {
     /// What the network layer's models did.
     pub(crate) fn ai_done(&mut self, done: AiDone) {
         match done {
+            AiDone::Part { id, text, thinking } => {
+                if let Some((t, th)) = self.ai.parts.get_mut(&id) {
+                    t.push_str(&text);
+                    th.push_str(&thinking);
+                }
+            }
             AiDone::Answered { id, answer, error } => {
                 let Some(w) = self.ai.waiting.remove(&id) else { return };
+                self.ai.parts.remove(&id);
                 let result = match (answer, error) {
                     (Some(a), _) => Ok(a),
                     (None, e) => Err(e.unwrap_or_else(|| "no answer came".into())),
@@ -273,6 +296,7 @@ impl Session {
             account: None,
             purpose: TEST_PURPOSE.into(),
             chat: AiChat::ask("", TEST_QUESTION, TEST_TOKENS),
+            stream: false,
             profile: profile.id.clone(),
             // Its own answer alone: a fallback's would say nothing of this one.
             tried: ai.profiles.iter().map(|p| p.id.clone()).collect(),
