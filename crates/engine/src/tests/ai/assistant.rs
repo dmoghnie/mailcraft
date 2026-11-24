@@ -440,6 +440,38 @@ fn a_stopped_chat_lets_its_answer_go() {
     assert!(stopped(&mut s, q), "deleted, its question stopped");
 }
 
+/// A question that fails goes to its profile's fallback fitted again for what that model takes
+/// in, not as it was fitted for the first; one too long for any fallback goes to none.
+#[test]
+fn a_fallback_gets_the_chat_fitted_for_its_own_context() {
+    let mut s = ready("assistant-fallback-fitted");
+    let profile = |s: &mut Session, name: &str, context: u32, fallback: &str| {
+        let v = json!({"name": name, "api": "openAi", "url": "http://localhost:11434/v1", "model": name, "context": context, "maxTokens": 512, "fallback": fallback});
+        s.run("ai.saveProfile", &v).unwrap()["id"].as_str().unwrap().to_string()
+    };
+    let small = profile(&mut s, "small", 8192, "");
+    let big = profile(&mut s, "big", 131_072, &small);
+    s.run("ai.use", &json!({"task": "chat", "profile": big})).unwrap();
+    send(&mut s, None, "Read everything");
+    for _ in 0..10 {
+        let (q, _) = question(&mut s);
+        calls(&mut s, q, "", &[("find_messages", json!({"limit": 50}))]);
+    }
+    let size = |c: &AiChat| c.turns.iter().map(|t| t.size() / 3 + 1).sum::<usize>();
+    let (q, asked) = question(&mut s);
+    assert!(size(&asked) > 8192, "the big model took it all: {}", size(&asked));
+    fail(&mut s, q, "network: connection refused");
+    let (q, again) = question(&mut s);
+    assert!(size(&again) < 8192 - 512, "fitted for the small one: {}", size(&again));
+    // Too long for the small one at all: not asked.
+    fail(&mut s, q, "network: connection refused");
+    let c = send(&mut s, None, &"word ".repeat(9000));
+    let (q, _) = question(&mut s);
+    fail(&mut s, q, "network: connection refused");
+    assert!(questions(&mut s).is_empty(), "no fallback that can't hold it");
+    assert!(chat(&mut s, &c)["chat"]["error"].as_str().is_some_and(|e| e.contains("connection refused")));
+}
+
 /// A chat longer than its model takes in loses what tools gave early on, then its oldest
 /// turns; it still begins with the person.
 #[test]

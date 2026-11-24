@@ -236,9 +236,9 @@ impl Session {
                 // A chat stopped or deleted is let go: its mail goes to no other model.
                 if result.is_err()
                     && !self.ai.assistant.let_go(id)
-                    && let Some(next) = self.ai_fallback(&w)
+                    && let Some((next, chat)) = self.ai_fallback(id, &w)
                 {
-                    return self.ai_send(id, w, &next);
+                    return self.ai_send(id, Waiting { chat, ..w }, &next);
                 }
                 if w.purpose == TEST_PURPOSE {
                     let test = match &result {
@@ -274,18 +274,34 @@ impl Session {
 
     /// The profile a failed question goes to next: along the fallbacks of the one asked, the
     /// first allowed and not asked yet (each looked at once, however they loop).
-    fn ai_fallback(&self, w: &Waiting) -> Option<AiProfile> {
+    fn ai_fallback(&self, id: u64, w: &Waiting) -> Option<(AiProfile, AiChat)> {
         let ai = &self.prefs.ai;
         let mut seen: Vec<&str> = vec![w.profile.as_str()];
         let mut at = ai.profile(&w.profile).and_then(|p| p.fallback.as_deref()).and_then(|id| ai.profile(id));
         while let Some(p) = at.filter(|p| !seen.contains(&p.id.as_str())) {
-            if !w.tried.contains(&p.id) && ai.allows_all(p, &w.accounts) {
-                return Some(p.clone());
+            if !w.tried.contains(&p.id)
+                && ai.allows_all(p, &w.accounts)
+                && let Some(chat) = self.chat_for(id, w, p)
+            {
+                return Some((p.clone(), chat));
             }
             seen.push(&p.id);
             at = p.fallback.as_deref().and_then(|id| ai.profile(id));
         }
         None
+    }
+
+    /// Question `id`'s chat as `profile` takes it in: a chat with the assistant fitted again for
+    /// its context, another as it is when it fits; none when it can't hold it (a server would
+    /// cut it short, or refuse it).
+    fn chat_for(&self, id: u64, w: &Waiting, profile: &AiProfile) -> Option<AiChat> {
+        if let Some(fitted) = self.assistant_refit(id, profile) {
+            return fitted.ok();
+        }
+        let context = if profile.context > 0 { profile.context } else { super::CONTEXT_AT_FIRST };
+        let answer = w.chat.max_tokens.min(profile.max_tokens.max(1));
+        let size = u32::try_from(w.chat.size() / 3).unwrap_or(u32::MAX);
+        (size.saturating_add(answer) <= context).then(|| w.chat.clone())
     }
 
     /// The answer to question `id`, once it came (taken: asked again, it's gone).

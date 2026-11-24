@@ -3,7 +3,7 @@
 //! failed, approved or declined) what they gave goes back, until the model answers without
 //! calling any, or [`STEPS_MOST`] steps were taken.
 
-use mailcraft_model::{AiRole, AiToolCall, AiToolResult, AiTurn, AiWork, Job, MessageKey};
+use mailcraft_model::{AiChat, AiRole, AiToolCall, AiToolResult, AiTurn, AiWork, Job, MessageKey};
 
 use super::looking::said;
 use super::tools::{Outcome, reads, tools};
@@ -182,6 +182,13 @@ impl Session {
                 Err(e)
             }
         }
+    }
+
+    /// Question `q`'s chat fitted again for `profile`, a fallback that may take in less than the
+    /// model first asked; none when `q` isn't a chat's, an error when `profile` can't hold it.
+    pub(crate) fn assistant_refit(&self, q: u64, profile: &AiProfile) -> Option<Result<AiChat, CmdError>> {
+        let chat = self.ai.assistant.asking.get(&q).and_then(|id| self.ai.assistant.chats.get(id))?;
+        Some(self.fitted(chat, profile, self.assistant_system(profile), tools()))
     }
 
     /// Question `q`'s answer came: put in its chat, its calls made, and the chat goes on.
