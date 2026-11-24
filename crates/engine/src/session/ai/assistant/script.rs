@@ -2,10 +2,11 @@
 //! the tools that find and read as functions that give data rather than text, so that what
 //! would take the model many steps (a call, its answer read, the next call) takes one. Its
 //! calls are the tools' own, with their checks (an account's mail goes only to a model it may
-//! go to), and each shows on the chat under the script's card. A read of a message still to
-//! download waits for it; the script then runs again from its start with what its calls were
-//! answered so far ([`run`]). A model runs scripts only when the person let it (File › Options
-//! › AI).
+//! go to), and each shows on the chat under the script's card. A change it calls for is
+//! proposed, as the model's own are: the script is told so, and the person approves it or not
+//! once the script ended. A read of a message still to download waits for it; the script then
+//! runs again from its start with what its calls were answered so far ([`run`]). A model runs
+//! scripts only when the person let it (File › Options › AI).
 
 mod run;
 #[cfg(test)]
@@ -19,7 +20,7 @@ use self::run::{Answer, CALLS_MOST, Call, OPS_ALL, Ran, Runner};
 use super::context::cut;
 use super::exchange::run_of;
 use super::looking::said;
-use super::tools::{Outcome, reads};
+use super::tools::{Outcome, reads, tools};
 use super::*;
 use crate::Session;
 
@@ -31,12 +32,18 @@ const SOURCE_MOST: usize = 20_000;
 const VALUE_MOST: usize = 8_000;
 /// What a script's card says it does when the model didn't say.
 const WHAT_AT_FIRST: &str = "Run a script";
+/// The most changes a script proposes: each is a card to decide, and approved, a write opens
+/// a message.
+const PROPOSALS_MOST: usize = 20;
+/// What a change says when its script failed after proposing it.
+const WITHDRAWN: &str = "not made: the script failed before it ended";
 
-/// The tools a script calls, as functions of its own: those that find and read.
-const SCRIPT_TOOLS: [&str; 8] =
-    ["list_folders", "find_messages", "read_message", "find_events", "find_people", "find_tasks", "find_notes", "selected_messages"];
+/// The tools a script calls, as functions of its own: every one the model has (not scripts).
+fn script_tools() -> Vec<String> {
+    tools().into_iter().map(|t| t.name).collect()
+}
 
-const DESCRIPTION: &str = "Run a script, in Rhai (a small language like Rust and JavaScript), that calls the tools that find and read as functions, to do in one step what would take many calls. Each takes a map of what the tool takes, or nothing, and gives data (maps and arrays) rather than text: `let found = find_messages(#{query: \"is:unread\", limit: 50}); for m in found.messages { if m.from.email.ends_with(\"@acme.example\") { print(`${m.when}: ${m.subject}`); } }`. read_message(id) gives a message with its text. Messages, events, people, tasks and notes have the ids the tools take; dates are Unix seconds, with `when` as the person reads them; now() is the time now. What it prints, and the value it ends with, come back to you. A tool that fails throws an error (try/catch). It can't change anything: propose changes with the tools, as ever. At most 100 calls; no files, network or modules.";
+const DESCRIPTION: &str = "Run a script, in Rhai (a small language like Rust and JavaScript), that calls the tools that find and read as functions, to do in one step what would take many calls. Each takes a map of what the tool takes, or nothing, and gives data (maps and arrays) rather than text: `let found = find_messages(#{query: \"is:unread\", limit: 50}); for m in found.messages { if m.from.email.ends_with(\"@acme.example\") { print(`${m.when}: ${m.subject}`); } }`. read_message(id) gives a message with its text. Messages, events, people, tasks and notes have the ids the tools take; dates are Unix seconds, with `when` as the person reads them; now() is the time now. What it prints, and the value it ends with, come back to you. A tool that fails throws an error (try/catch). A tool that changes (move_messages, add_task…) proposes the change and gives #{proposed: what it does}: nothing changes until the person approves it, after the script ended, and you're told what they decided. At most 100 calls and 20 changes; no files, network or modules.";
 
 /// `run_script`, as the model is told it.
 pub(super) fn tool() -> AiTool {
@@ -112,7 +119,9 @@ impl Session {
     fn script_go(&mut self, chat: &mut Chat, profile: &AiProfile, mut script: Script) -> Outcome {
         let what = what_of(&script.call.input);
         let source = script.call.input.get("script").and_then(Value::as_str).unwrap_or_default();
-        let mut runner = match Runner::new(source, &SCRIPT_TOOLS, script.now) {
+        let names = script_tools();
+        let names: Vec<&str> = names.iter().map(String::as_str).collect();
+        let mut runner = match Runner::new(source, &names, script.now) {
             Ok(r) => r,
             Err(why) => return Outcome::failed(&what, why),
         };
@@ -122,7 +131,10 @@ impl Session {
             script.ops = script.ops.saturating_add(ops);
             let call = match ran {
                 Ran::Done { printed, value } => return Outcome::ran(&what, Vec::new(), came_to(&printed, &value), Value::Null),
-                Ran::Failed(why) => return Outcome::failed(&what, why),
+                Ran::Failed(why) => {
+                    withdraw(chat, &script.call.id);
+                    return Outcome::failed(&what, why);
+                }
                 Ran::Needs(call) => call,
             };
             match self.script_call(chat, profile, &script, &call) {
@@ -137,22 +149,27 @@ impl Session {
     }
 
     /// Make a script's call (its next): what it was answered, or the message it waits for. Its
-    /// run shows under the script's card, and holds what it found, as the model's own do.
+    /// run shows under the script's card, and holds what it found, as the model's own do; a
+    /// change proposed holds what it was called with, to be made from once approved.
     fn script_call(&mut self, chat: &mut Chat, profile: &AiProfile, script: &Script, call: &Call) -> Result<Answer, MessageKey> {
         let id = format!("{}#{}", script.call.id, script.log.len().saturating_add(1));
         let made = AiToolCall { id, name: call.name.clone(), input: call.input.clone() };
-        let outcome = if reads(&call.name) {
-            self.tool_call(chat, profile, &made)
-        } else {
+        let proposed = chat.runs.iter().filter(|r| r.part_of.as_deref() == Some(script.call.id.as_str()) && !r.input.is_null()).count();
+        let outcome = if !script_tools().contains(&call.name) {
             Outcome::failed(&call.name, format!("a script can't call `{}`", call.name.chars().take(64).collect::<String>()))
+        } else if proposed >= PROPOSALS_MOST && !reads(&call.name) {
+            Outcome::failed(&call.name, format!("a script proposes at most {PROPOSALS_MOST} changes: propose the rest after it"))
+        } else {
+            self.tool_call(chat, profile, &made)
         };
-        let answer = match &outcome {
-            Outcome::Ran { data, .. } => Ok(Answer::Gave(data.clone())),
-            Outcome::Failed { result, .. } => Ok(Answer::Failed(result.clone())),
-            Outcome::Waiting { key, .. } => Err(key.clone()),
-            Outcome::Proposed { .. } | Outcome::Scripting { .. } => Ok(Answer::Failed("a script can't do that".into())),
+        let (answer, input) = match &outcome {
+            Outcome::Ran { data, .. } => (Ok(Answer::Gave(data.clone())), Value::Null),
+            Outcome::Failed { result, .. } => (Ok(Answer::Failed(result.clone())), Value::Null),
+            Outcome::Waiting { key, .. } => (Err(key.clone()), Value::Null),
+            Outcome::Proposed { what, .. } => (Ok(Answer::Gave(json!({"proposed": what}))), call.input.clone()),
+            Outcome::Scripting { .. } => (Ok(Answer::Failed("a script can't run a script".into())), Value::Null),
         };
-        let run = ToolRun { part_of: Some(script.call.id.clone()), ..run_of(&made, outcome) };
+        let run = ToolRun { part_of: Some(script.call.id.clone()), input, ..run_of(&made, outcome) };
         match chat.run_mut(&run.call) {
             Some(r) => *r = run,
             None => chat.runs.push(run),
@@ -172,7 +189,10 @@ impl Session {
                 continue;
             }
             let outcome = match self.assistant_profile(&chat) {
-                Err(e) => Outcome::failed(&what_of(&script.call.input), said(&e)),
+                Err(e) => {
+                    withdraw(&mut chat, &script.call.id);
+                    Outcome::failed(&what_of(&script.call.input), said(&e))
+                }
                 Ok(profile) => {
                     let answer = match failed {
                         Some(e) => Answer::Failed(format!("the message couldn't be downloaded: {e}")),
@@ -213,6 +233,35 @@ impl Session {
     }
 }
 
+/// Script `call` failed: the changes it proposed are not to be made, as only a run that ends
+/// is heard.
+fn withdraw(chat: &mut Chat, call: &str) {
+    for r in chat.runs.iter_mut().filter(|r| r.part_of.as_deref() == Some(call) && r.state == RunState::Proposed) {
+        r.state = RunState::Failed;
+        r.result = WITHDRAWN.into();
+    }
+}
+
+/// What became of the changes script `call` proposed, for the model, after what it came to:
+/// nothing when it proposed none.
+pub(super) fn decided(chat: &Chat, call: &str) -> String {
+    let lines: Vec<String> = chat
+        .runs
+        .iter()
+        .filter(|r| r.part_of.as_deref() == Some(call) && !r.input.is_null())
+        .map(|r| {
+            let went = match r.state {
+                RunState::Done => format!("approved. {}", r.result),
+                RunState::Declined => format!("the person declined: nothing changed. {}", r.result),
+                RunState::Proposed => "not decided".into(),
+                _ => format!("couldn't be done: {}", r.result),
+            };
+            format!("- {}: {}", r.what, went.trim_end())
+        })
+        .collect();
+    if lines.is_empty() { String::new() } else { format!("\n\nWhat it proposed:\n{}", lines.join("\n")) }
+}
+
 /// The fuzzer's: `source` run as the assistant runs a script, its calls answered in turn by the
 /// JSON values `answers` holds, one after another (past them, a call fails). What it came to,
 /// as the model would be told.
@@ -220,7 +269,9 @@ impl Session {
 pub fn run_script_against(source: &str, answers: &[u8]) -> String {
     let answers: Vec<Value> =
         serde_json::Deserializer::from_slice(answers).into_iter::<Value>().map_while(Result::ok).take(CALLS_MOST.saturating_add(1)).collect();
-    let mut runner = match Runner::new(source, &SCRIPT_TOOLS, 0) {
+    let names = script_tools();
+    let names: Vec<&str> = names.iter().map(String::as_str).collect();
+    let mut runner = match Runner::new(source, &names, 0) {
         Ok(r) => r,
         Err(why) => return why,
     };

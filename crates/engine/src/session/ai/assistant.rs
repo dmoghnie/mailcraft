@@ -18,6 +18,7 @@ use std::fmt;
 
 use mailcraft_model::{AiToolCall, AiTurn};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 mod changes;
 mod commands;
@@ -101,8 +102,22 @@ impl Chat {
 
     /// Whether it waits on the person: a change proposed, not decided yet.
     pub fn waits_on_person(&self) -> bool {
-        let open: HashSet<String> = self.open_calls().into_iter().map(|c| c.id).collect();
-        self.runs.iter().any(|r| r.state == RunState::Proposed && open.contains(&r.call))
+        !self.proposals().is_empty()
+    }
+
+    /// The changes proposed that wait for the person, as calls: its open calls', and those their
+    /// scripts proposed (with what the script called them with).
+    fn proposals(&self) -> Vec<AiToolCall> {
+        let open = self.open_calls();
+        let ids: HashSet<&str> = open.iter().map(|c| c.id.as_str()).collect();
+        let proposed = |id: &str| self.run(id).is_some_and(|r| r.state == RunState::Proposed);
+        let own = open.iter().filter(|c| proposed(&c.id)).cloned();
+        let scripts = self
+            .runs
+            .iter()
+            .filter(|r| r.state == RunState::Proposed && r.part_of.as_deref().is_some_and(|p| ids.contains(p)))
+            .map(|r| AiToolCall { id: r.call.clone(), name: r.tool.clone(), input: r.input.clone() });
+        own.chain(scripts).collect()
     }
 
     /// A message read for it is of `account`: its mail is in the chat now.
@@ -188,6 +203,10 @@ pub struct ToolRun {
     /// The script whose call it is (its call), shown under it: none, the model's own.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub part_of: Option<String>,
+    /// A change a script proposed: what the script called it with, made from it when approved
+    /// (the model's own are made from its call).
+    #[serde(default, skip_serializing_if = "Value::is_null")]
+    pub input: Value,
 }
 
 /// A chat as listed: its name and dates, without what was said.

@@ -106,6 +106,7 @@ fn a_chat_cut_short_by_closing_says_so_when_read_again() {
         found: Vec::new(),
         result: String::new(),
         part_of: None,
+        input: Value::Null,
     };
     store.save_doc(&file, &crate::Chat { turns: [kept.turns.clone(), vec![turn]].concat(), runs: vec![run], ..kept }).unwrap();
     let v = chat(&mut open(), &c);

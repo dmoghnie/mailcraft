@@ -146,3 +146,142 @@ fn a_models_call_named_as_a_scripts_own_keeps_its_place() {
     assert!(r[0].content.starts_with("It came to: "), "{}", r[0].content);
     assert!(r[1].content.contains("Inbox") && !r[1].content.contains(STORYBOARD), "the folders: {}", r[1].content);
 }
+
+/// The script that archives the storyboard mail: what it proposes.
+const ARCHIVES: &str = r#"
+    let found = find_messages(#{query: "storyboard"});
+    let ids = [];
+    for m in found.messages { ids.push(m.id); }
+    let p = move_messages(#{ids: ids, folder: "archive"});
+    print(p.proposed);
+    ids.len()
+"#;
+
+/// The proposal script `call` made: its run.
+fn proposal(c: &Value, call: &str) -> Value {
+    c["chat"]["runs"].as_array().unwrap().iter().find(|r| r["partOf"] == call && r["tool"] != "find_messages").cloned().unwrap()
+}
+
+/// A change a script calls for is proposed, on a card under it: nothing changes, and the
+/// model isn't asked again, until the person decides; approved, it's made, and the model is told.
+#[test]
+fn a_script_proposes_a_change_made_once_approved() {
+    let mut s = ready("script-proposes");
+    scripts_on(&mut s);
+    let story = id_of(&s, STORYBOARD);
+    let id = send(&mut s, None, "Archive the storyboard mail");
+    let (q, _) = question(&mut s);
+    calls(&mut s, q, "", &[("run_script", json!({"script": ARCHIVES, "what": "Archive the storyboard mail"}))]);
+    assert!(questions(&mut s).is_empty(), "not asked again before the person decides");
+    let c = chat(&mut s, &id);
+    assert_eq!(c["waitsOnYou"], true);
+    let p = proposal(&c, "call_0");
+    assert_eq!((p["tool"].as_str(), p["state"].as_str()), (Some("move_messages"), Some("proposed")), "{p}");
+    assert!(s.list.iter().any(|r| r.key.to_id() == story), "nothing moved before it's approved");
+    let decided = s.run("assistant.decide", &json!({"chat": id, "call": p["call"], "approve": true})).unwrap();
+    assert_eq!(decided["decided"], 1);
+    assert!(!s.list.iter().any(|r| r.key.to_id() == story), "approved: moved");
+    assert_eq!(proposal(&chat(&mut s, &id), "call_0")["state"], "done");
+    let (_, asked) = question(&mut s);
+    let r = &results(&asked)[0];
+    assert!(r.content.contains("It came to: 2") && r.content.contains("What it proposed:"), "{}", r.content);
+    assert!(r.content.contains(": approved."), "{}", r.content);
+}
+
+/// Declined, a script's change isn't made, and the model is told so.
+#[test]
+fn a_script_change_declined_is_not_made() {
+    let mut s = ready("script-declined");
+    scripts_on(&mut s);
+    let story = id_of(&s, STORYBOARD);
+    let id = send(&mut s, None, "Archive the storyboard mail");
+    let (q, _) = question(&mut s);
+    calls(&mut s, q, "", &[("run_script", json!({"script": ARCHIVES}))]);
+    s.run("assistant.decide", &json!({"chat": id, "approve": false})).unwrap();
+    assert!(s.list.iter().any(|r| r.key.to_id() == story));
+    let (_, asked) = question(&mut s);
+    let r = &results(&asked)[0];
+    assert!(r.content.contains("the person declined: nothing changed"), "{}", r.content);
+}
+
+/// A script's change still waiting when MailCraft closed is decided after it opens again: what
+/// the script called it with is kept with the chat.
+#[test]
+fn a_script_change_waiting_is_decided_after_a_restart() {
+    let mut s = ready("script-kept");
+    scripts_on(&mut s);
+    let id = send(&mut s, None, "Archive the storyboard mail");
+    let (q, _) = question(&mut s);
+    calls(&mut s, q, "", &[("run_script", json!({"script": ARCHIVES}))]);
+    s.take_jobs();
+    let store = s.store.clone().unwrap();
+    let mut again = Session::open(Some(store), mailcraft_model::dates::Clock::new(NOW, 0));
+    let c = chat(&mut again, &id);
+    assert_eq!(c["waitsOnYou"], true, "{c}");
+    let p = proposal(&c, "call_0");
+    assert_eq!(p["input"]["folder"], "archive");
+    let decided = again.run("assistant.decide", &json!({"chat": id, "call": p["call"], "approve": false})).unwrap();
+    assert_eq!(decided["decided"], 1);
+    assert_eq!(proposal(&chat(&mut again, &id), "call_0")["state"], "declined");
+}
+
+/// A script proposes so many changes at most: past them, a call fails (as an error it can
+/// catch), and nothing is proposed.
+#[test]
+fn a_script_proposes_so_many_changes_at_most() {
+    let mut s = ready("script-most");
+    scripts_on(&mut s);
+    let id = send(&mut s, None, "Mark the storyboard mail read, many times");
+    let (q, _) = question(&mut s);
+    let script = r#"
+        let m = find_messages(#{query: "storyboard"}).messages[0].id;
+        let n = 0;
+        for i in 0..25 { try { mark_messages(#{ids: [m], read: true}); n += 1; } catch (e) { print(e); } }
+        n
+    "#;
+    calls(&mut s, q, "", &[("run_script", json!({"script": script}))]);
+    let c = chat(&mut s, &id);
+    let proposed = c["chat"]["runs"].as_array().unwrap().iter().filter(|r| r["state"] == "proposed").count();
+    assert_eq!(proposed, 20);
+    s.run("assistant.decide", &json!({"chat": id, "approve": false})).unwrap();
+    let (_, asked) = question(&mut s);
+    let r = &results(&asked)[0];
+    assert!(r.content.contains("It came to: 20") && r.content.contains("at most 20 changes"), "{}", r.content);
+}
+
+/// A script stopped after its MailCraft closed while it waited for a message says so.
+#[test]
+fn a_script_waiting_when_mailcraft_closed_says_it_never_ended() {
+    let mut s = ready("script-closed");
+    online(&mut s, &["Quarterly figures"]);
+    scripts_on(&mut s);
+    let id = send(&mut s, None, "What do the quarterly figures say?");
+    let (q, _) = question(&mut s);
+    let script = r#"let f = find_messages(#{query: "Quarterly"}); read_message(f.messages[0].id).text"#;
+    calls(&mut s, q, "", &[("run_script", json!({"script": script}))]);
+    s.take_jobs();
+    let store = s.store.clone().unwrap();
+    let mut again = Session::open(Some(store), mailcraft_model::dates::Clock::new(NOW, 0));
+    let c = chat(&mut again, &id);
+    let card = c["chat"]["runs"].as_array().unwrap().iter().find(|r| r["tool"] == "run_script").cloned().unwrap();
+    assert_eq!((card["state"].as_str(), card["result"].as_str()), (Some("failed"), Some("MailCraft closed before the script ended")));
+}
+
+/// A script that fails after proposing a change withdraws it: only a script that ends is heard,
+/// and the model, asked again at once, is told.
+#[test]
+fn a_script_that_fails_withdraws_what_it_proposed() {
+    let mut s = ready("script-withdraws");
+    scripts_on(&mut s);
+    let id = send(&mut s, None, "Archive the storyboard mail");
+    let (q, _) = question(&mut s);
+    let script = format!("{ARCHIVES}; throw \"something went wrong\"");
+    calls(&mut s, q, "", &[("run_script", json!({"script": script}))]);
+    let c = chat(&mut s, &id);
+    assert_eq!(c["waitsOnYou"], false);
+    let p = proposal(&c, "call_0");
+    assert_eq!((p["state"].as_str(), p["result"].as_str()), (Some("failed"), Some("not made: the script failed before it ended")));
+    let (_, asked) = question(&mut s);
+    let r = &results(&asked)[0];
+    assert!(r.error && r.content.contains("something went wrong") && r.content.contains("couldn't be done: not made"), "{}", r.content);
+}

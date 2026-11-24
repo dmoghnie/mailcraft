@@ -2206,7 +2206,7 @@ count	occurrences	opakovaní
 	Ran a script	Spustil skript
 	The script	Skript
 	Let it write and run scripts	Povoliť písať a spúšťať skripty
-	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	Skript nájde a prečíta poštu, udalosti, kontakty, úlohy a poznámky v jednom kroku namiesto mnohých. Beží v MailCrafte, bez súborov a siete, a nič nemení.
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Skript nájde a prečíta poštu, udalosti, kontakty, úlohy a poznámky v jednom kroku namiesto mnohých. Beží v MailCrafte, bez súborov a siete, a každá zmena, o ktorú žiada, čaká na vaše schválenie.
 	When it fails, ask	Keď zlyhá, opýtať sa
 	No other model	Žiadny iný model
 	A message no longer here	Správa, ktorá tu už nie je

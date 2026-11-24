@@ -2191,7 +2191,7 @@ count	occurrences	ripetizioni
 	Ran a script	Ha eseguito uno script
 	The script	Lo script
 	Let it write and run scripts	Lascia che scriva ed esegua script
-	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	Uno script trova e legge posta, eventi, contatti, attività e note in un solo passo anziché molti. Gira dentro MailCraft, senza file né rete, e non cambia nulla.
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Uno script trova e legge posta, eventi, contatti, attività e note in un solo passo anziché molti. Gira dentro MailCraft, senza file né rete, e ogni modifica che chiede attende la tua approvazione.
 	When it fails, ask	Se non riesce, chiedi a
 	No other model	Nessun altro modello
 	A message no longer here	Un messaggio non più presente

@@ -2187,7 +2187,7 @@ count	occurrences	مرات
 	Ran a script	شغّل نصًا برمجيًا
 	The script	النص البرمجي
 	Let it write and run scripts	السماح له بكتابة نصوص برمجية وتشغيلها
-	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	يبحث النص البرمجي في البريد والأحداث وجهات الاتصال والمهام والملاحظات ويقرؤها في خطوة واحدة بدلًا من خطوات كثيرة. يعمل داخل MailCraft، بلا ملفات ولا شبكة، ولا يغيّر شيئًا.
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	يبحث النص البرمجي في البريد والأحداث وجهات الاتصال والمهام والملاحظات ويقرؤها في خطوة واحدة بدلًا من خطوات كثيرة. يعمل داخل MailCraft، بلا ملفات ولا شبكة، وأي تغيير يطلبه ينتظر موافقتك.
 	When it fails, ask	عند الفشل، اسأل
 	No other model	لا نموذج آخر
 	A message no longer here	رسالة لم تعد موجودة

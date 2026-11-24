@@ -18,6 +18,9 @@ const CUT_SHORT: &str = "MailCraft closed before the answer came: send again to 
 /// What a read says, read again, when MailCraft closed before its message was downloaded.
 const NOT_READ: &str = "MailCraft closed before the message came";
 
+/// What a script says, read again, when MailCraft closed while it waited for a message.
+const NOT_ENDED: &str = "MailCraft closed before the script ended";
+
 /// `chat` as the last run left it, read again: nothing is on its way now, so the answer or the
 /// message it waited for says it never came, and the person sends again to go on.
 fn left_off(chat: Chat) -> Chat {
@@ -26,7 +29,13 @@ fn left_off(chat: Chat) -> Chat {
     let runs = chat
         .runs
         .into_iter()
-        .map(|r| if r.state == RunState::Waiting { ToolRun { state: RunState::Failed, result: NOT_READ.into(), ..r } } else { r })
+        .map(|r| match r.state {
+            RunState::Waiting => {
+                let result = if r.tool == script::RUN_SCRIPT { NOT_ENDED } else { NOT_READ };
+                ToolRun { state: RunState::Failed, result: result.into(), ..r }
+            }
+            _ => r,
+        })
         .collect();
     let cut = chat.answer_due || (waited && !deciding);
     let error = chat.error.or_else(|| cut.then(|| CUT_SHORT.to_string()));

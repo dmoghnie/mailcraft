@@ -292,3 +292,29 @@ fn a_script_shows_on_its_card_and_its_code_and_calls_unfold_under_it() {
     let t = texts(&ctx, &mut a);
     assert!(has(&t, "find_messages(#{limit: 3}).total") && has(&t, "Searched the mail"), "{t:?}");
 }
+
+/// A change a script proposes shows on a card of its own under the script, unfolded, and is
+/// approved there.
+#[test]
+fn a_change_a_script_proposes_is_approved_on_its_card() {
+    let (mut a, ctx) = ready("assistant-script-change");
+    let id = a.session.prefs.ai.profiles[0].id.clone();
+    a.run(
+        "ai.saveProfile",
+        json!({"id": id, "name": "Local", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small", "scripts": true}),
+    );
+    let m = a.session.list.first().cloned().unwrap();
+    click_named(&ctx, &mut a, "Ask AI");
+    click_named(&ctx, &mut a, "What needs my attention today?");
+    let chat = a.ui.assistant.chat.clone().expect("a chat begun");
+    let script = r#"let m = find_messages(#{limit: 1}).messages[0]; move_messages(#{ids: [m.id], folder: "archive"}).proposed"#;
+    answers(&mut a, &chat, "", &[("run_script", json!({"script": script, "what": "Archive the newest"}))]);
+    let t = texts(&ctx, &mut a);
+    for line in ["Ran a script", "Move", "Needs your approval", "Approve", "Decline"] {
+        assert!(has(&t, line), "{line}: {t:?}");
+    }
+    assert!(!has(&t, "Searched the mail"), "its reads stay folded: {t:?}");
+    click_named(&ctx, &mut a, "Approve");
+    assert!(!a.session.list.iter().any(|x| x.key == m.key), "approved: moved");
+    assert!(has(&texts(&ctx, &mut a), "Done"));
+}

@@ -2187,7 +2187,7 @@ count	occurrences	keer
 	Ran a script	Script uitgevoerd
 	The script	Het script
 	Let it write and run scripts	Laten scripts schrijven en uitvoeren
-	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	Een script vindt en leest mail, afspraken, contacten, taken en notities in één stap in plaats van vele. Het draait binnen MailCraft, zonder bestanden of netwerk, en verandert niets.
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Een script vindt en leest mail, afspraken, contacten, taken en notities in één stap in plaats van vele. Het draait binnen MailCraft, zonder bestanden of netwerk, en elke wijziging die het vraagt wacht op je goedkeuring.
 	When it fails, ask	Als het mislukt, vragen aan
 	No other model	Geen ander model
 	A message no longer here	Een bericht dat er niet meer is

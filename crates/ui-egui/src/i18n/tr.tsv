@@ -2192,7 +2192,7 @@ count	occurrences	kez
 	Ran a script	Bir betik çalıştırdı
 	The script	Betik
 	Let it write and run scripts	Betik yazıp çalıştırmasına izin ver
-	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	Bir betik postaları, etkinlikleri, kişileri, görevleri ve notları birçok adım yerine tek adımda bulur ve okur. MailCraft'ın içinde çalışır, dosya ya da ağ kullanmaz ve hiçbir şeyi değiştirmez.
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Bir betik postaları, etkinlikleri, kişileri, görevleri ve notları birçok adım yerine tek adımda bulur ve okur. MailCraft'ın içinde çalışır, dosya ya da ağ kullanmaz ve istediği her değişiklik onayınızı bekler.
 	When it fails, ask	Başarısız olursa şuna sor
 	No other model	Başka model yok
 	A message no longer here	Artık burada olmayan bir ileti

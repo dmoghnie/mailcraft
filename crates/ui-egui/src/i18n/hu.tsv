@@ -2192,7 +2192,7 @@ count	occurrences	előfordulás
 	Ran a script	Szkriptet futtatott
 	The script	A szkript
 	Let it write and run scripts	Szkripteket írhat és futtathat
-	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	Egy szkript egyetlen lépésben keres és olvas leveleket, eseményeket, névjegyeket, feladatokat és jegyzeteket, sok helyett. A MailCraftban fut, fájlok és hálózat nélkül, és semmit sem módosít.
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Egy szkript egyetlen lépésben keres és olvas leveleket, eseményeket, névjegyeket, feladatokat és jegyzeteket, sok helyett. A MailCraftban fut, fájlok és hálózat nélkül, és minden módosítás, amelyet kér, jóváhagyásra vár.
 	When it fails, ask	Ha nem sikerül, ezt kérdezze
 	No other model	Nincs másik modell
 	A message no longer here	Egy már nem létező üzenet

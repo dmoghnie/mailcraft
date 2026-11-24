@@ -262,7 +262,7 @@ impl Session {
     pub(super) fn assistant_go_on(&mut self, id: &str) {
         let Some(chat) = self.ai.assistant.chats.get(id) else { return };
         let open = chat.open_calls();
-        let waits = open.iter().any(|c| chat.run(&c.id).is_some_and(|r| matches!(r.state, RunState::Waiting | RunState::Proposed)));
+        let waits = open.iter().any(|c| chat.run(&c.id).is_some_and(|r| r.state == RunState::Waiting)) || chat.waits_on_person();
         if open.is_empty() || waits || self.ai.assistant.asking(id).is_some() {
             return;
         }
@@ -283,16 +283,25 @@ impl Session {
     /// says why), one waiting is stopped.
     fn settle_open(&mut self, chat: &mut Chat, declined: &str) -> Vec<AiToolResult> {
         let calls = chat.open_calls();
+        let not_decided = if declined.is_empty() { "Not decided: nothing changed." } else { declined };
+        let ids: HashSet<&str> = calls.iter().map(|c| c.id.as_str()).collect();
+        let scripts = |r: &ToolRun| r.part_of.as_deref().is_some_and(|p| ids.contains(p));
+        for r in chat.runs.iter_mut().filter(|r| r.state == RunState::Proposed && scripts(r)) {
+            r.state = RunState::Declined;
+            r.result = not_decided.into();
+        }
         let mut results = Vec::new();
-        for c in calls {
+        for c in &calls {
+            // What became of the changes a script proposed comes after what it came to.
+            let proposed = if c.name == script::RUN_SCRIPT { script::decided(chat, &c.id) } else { String::new() };
             let Some(run) = chat.run_mut(&c.id) else {
-                results.push(AiToolResult { id: c.id, content: "not run".into(), error: true });
+                results.push(AiToolResult { id: c.id.clone(), content: "not run".into(), error: true });
                 continue;
             };
             match run.state {
                 RunState::Proposed => {
                     run.state = RunState::Declined;
-                    run.result = if declined.is_empty() { "Not decided: nothing changed.".into() } else { declined.into() };
+                    run.result = not_decided.into();
                 }
                 RunState::Waiting if run.tool == script::RUN_SCRIPT => {
                     run.state = RunState::Failed;
@@ -307,9 +316,9 @@ impl Session {
             let content = match run.state {
                 RunState::Done => format!("Approved. {}", run.result),
                 RunState::Declined => format!("The person declined: nothing changed. {}", run.result),
-                _ => run.result.clone(),
+                _ => format!("{}{proposed}", run.result),
             };
-            results.push(AiToolResult { id: c.id, content, error: run.state == RunState::Failed });
+            results.push(AiToolResult { id: c.id.clone(), content, error: run.state == RunState::Failed });
         }
         self.scripts_stopped(chat);
         results
@@ -348,12 +357,7 @@ impl Session {
     /// Approve or decline what chat `id` proposed: `call`'s, or all of it. What was decided.
     pub(crate) fn assistant_decide(&mut self, id: &str, call: Option<&str>, approve: bool) -> Result<usize, CmdError> {
         let mut chat = self.take_chat(id)?;
-        let mut open: Vec<AiToolCall> = chat
-            .open_calls()
-            .into_iter()
-            .filter(|c| call.is_none_or(|x| x == c.id))
-            .filter(|c| chat.run(&c.id).is_some_and(|r| r.state == RunState::Proposed))
-            .collect();
+        let mut open: Vec<AiToolCall> = chat.proposals().into_iter().filter(|c| call.is_none_or(|x| x == c.id)).collect();
         // Moves and deletes last, as the window's own changes: a message's id says its folder,
         // so a change after its move would find it gone.
         open.sort_by_key(|c| matches!(c.name.as_str(), "move_messages" | "delete_messages"));
@@ -441,5 +445,6 @@ pub(super) fn run_of(call: &AiToolCall, outcome: Outcome) -> ToolRun {
         Outcome::Scripting { what } => (RunState::Waiting, what, Vec::new(), Vec::new(), String::new()),
         Outcome::Proposed { what, messages } => (RunState::Proposed, what, messages, Vec::new(), String::new()),
     };
-    ToolRun { call: call.id.clone(), tool: call.name.chars().take(64).collect(), state, what, messages, found, result, part_of: None }
+    let tool = call.name.chars().take(64).collect();
+    ToolRun { call: call.id.clone(), tool, state, what, messages, found, result, part_of: None, input: serde_json::Value::Null }
 }

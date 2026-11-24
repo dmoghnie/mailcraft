@@ -120,15 +120,20 @@ fn answered(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, i: usize,
 /// The tool that runs a script the model wrote.
 const SCRIPT: &str = "run_script";
 
-/// A script's own, folded under its card: its code, and a card for each call it made.
+/// A script's own, under its card: a card for each change it proposed, to decide on; and,
+/// folded, its code and a card for each read it made.
 fn script_parts(ui: &mut Ui, t: &Tokens, chat: &Chat, call: &str, code: &str, acts: &mut Vec<Action>) {
+    let parts: Vec<&ToolRun> = chat.runs.iter().filter(|r| r.part_of.as_deref() == Some(call)).collect();
     ui.indent(("assistant-script", &chat.id, call), |ui| {
+        for change in parts.iter().filter(|r| !r.input.is_null()) {
+            card(ui, t, &chat.id, change, acts);
+        }
         egui::CollapsingHeader::new(RichText::new(tl!("The script")).small().color(t.dim)).id_salt(("assistant-script-code", &chat.id, call)).show(
             ui,
             |ui| {
                 ui.add(egui::Label::new(RichText::new(code).monospace().small().color(t.dim)).wrap().selectable(true));
-                for part in chat.runs.iter().filter(|r| r.part_of.as_deref() == Some(call)) {
-                    card(ui, t, &chat.id, part, acts);
+                for read in parts.iter().filter(|r| r.input.is_null()) {
+                    card(ui, t, &chat.id, read, acts);
                 }
             },
         );

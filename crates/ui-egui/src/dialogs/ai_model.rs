@@ -144,7 +144,7 @@ pub(super) fn draw(ui: &mut Ui, f: &mut AiModelForm, s: &Session, t: &Tokens, ac
     ui.add_space(6.0);
     ui.checkbox(&mut f.scripts, tl!("Let it write and run scripts"));
     let scripts = tl!(
-        "A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing."
+        "A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval."
     );
     ui.add(egui::Label::new(RichText::new(scripts).color(t.faint).small()).wrap());
     let local = mailcraft_engine::ai_url_is_local(&f.url);

@@ -2191,7 +2191,7 @@ count	occurrences	회
 	Ran a script	스크립트를 실행함
 	The script	스크립트
 	Let it write and run scripts	스크립트 작성 및 실행 허용
-	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	스크립트는 메일, 일정, 연락처, 작업, 메모를 여러 단계가 아닌 한 단계로 찾아 읽습니다. MailCraft 안에서 실행되며 파일이나 네트워크를 쓰지 않고 아무것도 바꾸지 않습니다.
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	스크립트는 메일, 일정, 연락처, 작업, 메모를 여러 단계가 아닌 한 단계로 찾아 읽습니다. MailCraft 안에서 실행되며 파일이나 네트워크를 쓰지 않고, 요청하는 변경은 승인을 기다립니다.
 	When it fails, ask	실패하면 물어볼 모델
 	No other model	다른 모델 없음
 	A message no longer here	더 이상 없는 메시지

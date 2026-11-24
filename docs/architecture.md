@@ -139,8 +139,12 @@ and `cargo xtask sizes` enforces them.
   is made, and it runs again, so a read of a message still to download pauses it
   (`Assistant::scripts`) until `Event::Body`. Only the run that ends is heard. Bounded in calls,
   operations, sizes, variables, and depth of calls, expressions and data (measured on a 1 MiB
-  stack); no `eval`, modules, clock or custom syntax; each run in `catch_unwind`. It can't
-  change anything (proposals still go through the tools).
+  stack); no `eval`, modules, clock or custom syntax; each run in `catch_unwind`. A change it
+  calls for is proposed (at most 20), the script told so: the run keeps what it was called with
+  (`ToolRun::input`), kept with the chat, to make it from once approved after the script
+  ended (a script that fails withdraws them), and the model is told what became of each with
+  what the script came to. The model's call ids never hold a `#`; the script's calls are
+  `{script}#{n}`.
 - **Chats stay on this computer**: `assistant.json` lists them, each in `assistant-<id>.json`
   (read when first wanted, its file removed when it's deleted); never in the record or the log.
 - **The pane** (`ui-egui/src/panes/assistant/`) shows the chat from the session, never a copy:
