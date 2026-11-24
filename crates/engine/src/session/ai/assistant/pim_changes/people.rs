@@ -80,8 +80,8 @@ impl Session {
     /// The contact `found` names, as kept, when they may be changed.
     fn person_kept(&self, found: &Found) -> Result<&Card, String> {
         let Found::Person { account, uid } = found else { return Err(format!("{} isn't a contact", found.name())) };
-        let p = self.find_person(uid).filter(|p| p.account == account).ok_or("that contact isn't in the contacts any more")?;
-        if self.person_read_only(uid) {
+        let p = self.find_person_in(Some(account), uid).ok_or("that contact isn't in the contacts any more")?;
+        if self.person_read_only_in(Some(account), uid) {
             return Err(format!("{} is in a shared address book that can't be changed", p.card.display()));
         }
         Ok(p.card)
@@ -98,8 +98,8 @@ impl Session {
 
     /// The contact `found` names, approved, changed to `card`.
     pub(super) fn change_found_person(&mut self, found: Found, card: Card) -> Result<(String, Vec<Found>), String> {
-        let Found::Person { uid, .. } = &found else { return Err("that isn't a contact".into()) };
-        self.update_card(uid, |c| *c = card).map_err(|e| said(&e))?;
+        let Found::Person { account, uid } = &found else { return Err("that isn't a contact".into()) };
+        self.update_card(Some(account), uid, |c| *c = card).map_err(|e| said(&e))?;
         Ok(("Done: changed.".into(), vec![found]))
     }
 }

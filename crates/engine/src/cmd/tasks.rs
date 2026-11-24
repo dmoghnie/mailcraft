@@ -40,16 +40,16 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             let uid = p::req_str(v, "uid")?.to_string();
             let before = s.find_task(&uid).ok_or_else(|| CmdError::Params(format!("no task `{uid}`")))?.task;
             let t = task_from(s, v, before)?;
-            s.update_task(&uid, |x| *x = t)
+            s.update_task(None, &uid, |x| *x = t)
         })
         .params(r#"{"uid": string, … as task.create (what's not given stays)}"#)
         .when(has_task),
         CommandSpec::new("task.complete", "Mark complete", "Tasks", |s, v| {
-            s.complete_task(p::req_str(v, "uid")?, p::bool(v, "done").unwrap_or(true))
+            s.complete_task(None, p::req_str(v, "uid")?, p::bool(v, "done").unwrap_or(true))
         })
         .params(r#"{"uid": string, "done"?: bool (default true; false takes it back up)}"#)
         .when(has_task),
-        CommandSpec::new("task.delete", "Delete task", "Tasks", |s, v| s.delete_task(p::req_str(v, "uid")?))
+        CommandSpec::new("task.delete", "Delete task", "Tasks", |s, v| s.delete_task(None, p::req_str(v, "uid")?))
             .params(r#"{"uid": string}"#)
             .when(has_task),
         CommandSpec::new("task.arrange", "Arrange tasks", "Tasks › Arrange by", |s, v| {

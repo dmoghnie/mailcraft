@@ -319,12 +319,12 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             let uid = p::req_str(v, "uid")?.to_string();
             let current = s.find_person(&uid).map(|x| x.card.clone()).ok_or_else(|| CmdError::Params(format!("no contact `{uid}`")))?;
             let c = card_from(v, current)?;
-            s.update_card(&uid, |x| *x = c)
+            s.update_card(None, &uid, |x| *x = c)
         })
         .params(r#"{"uid": string, … the fields of contact.create to change}"#),
         CommandSpec::new("contact.delete", "Delete contact", "People › Contact", |s, v| {
             let uid = p::req_str(v, "uid")?.to_string();
-            s.delete_card(&uid)
+            s.delete_card(None, &uid)
         })
         .params(r#"{"uid": string}"#),
         CommandSpec::new("contact.fromMessage", "Add sender to contacts", "Reading pane", |s, _| {

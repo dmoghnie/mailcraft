@@ -169,7 +169,16 @@ impl Session {
 
     /// The task with a uid, and its account.
     pub fn find_task(&self, uid: &str) -> Option<TaskRef> {
-        self.pim.iter().find_map(|(a, p)| p.tasks.iter().find(|t| t.task.uid == uid).map(|t| TaskRef { account: a.clone(), task: t.task.clone() }))
+        self.find_task_in(None, uid)
+    }
+
+    /// As [`Session::find_task`], in `account` when one is named: a task two accounts both hold
+    /// has one uid in each.
+    pub fn find_task_in(&self, account: Option<&str>, uid: &str) -> Option<TaskRef> {
+        self.pim
+            .iter()
+            .filter(|(a, _)| account.is_none_or(|x| x == a.as_str()))
+            .find_map(|(a, p)| p.tasks.iter().find(|t| t.task.uid == uid).map(|t| TaskRef { account: a.clone(), task: t.task.clone() }))
     }
 
     /// Tasks go to the server only where it keeps them: an on-premises Exchange account's Tasks
@@ -178,8 +187,9 @@ impl Session {
         self.notes_sync(account)
     }
 
-    fn task_account(&self, uid: &str) -> Result<String, CmdError> {
-        self.find_task(uid).map(|r| r.account).ok_or_else(|| CmdError::Params(format!("no task `{uid}`")))
+    /// The account with the task `uid`: `account` when one is named, else the first that has it.
+    fn task_account(&self, account: Option<&str>, uid: &str) -> Result<String, CmdError> {
+        self.find_task_in(account, uid).map(|r| r.account).ok_or_else(|| CmdError::Params(format!("no task `{uid}`")))
     }
 
     /// Add a task; returns its uid (a new one when it has none, or its own is taken).
@@ -232,9 +242,9 @@ impl Session {
         Ok(serde_json::json!({"uid": uid, "account": account}))
     }
 
-    /// Change a task.
-    pub fn update_task(&mut self, uid: &str, change: impl FnOnce(&mut Task)) -> CmdResult {
-        let account = self.task_account(uid)?;
+    /// Change a task, in `account` when one is named (else the first account that has it).
+    pub fn update_task(&mut self, account: Option<&str>, uid: &str, change: impl FnOnce(&mut Task)) -> CmdResult {
+        let account = self.task_account(account, uid)?;
         let now = self.clock.now;
         let remote = self.tasks_sync(&account);
         let p = self.pim_mut(&account);
@@ -258,14 +268,15 @@ impl Session {
     /// Mark a task done or not. A repeating one marked done stays, moved to its next due day,
     /// and a done copy of this time is kept beside it (its uid in the answer's `done`); one
     /// whose rule ends after so many times (`COUNT`) counts down, and is done after its last.
-    pub fn complete_task(&mut self, uid: &str, done: bool) -> CmdResult {
-        let Some(r) = self.find_task(uid) else { return Err(CmdError::Params(format!("no task `{uid}`"))) };
+    /// In `account` when one is named (else the first account that has it).
+    pub fn complete_task(&mut self, account: Option<&str>, uid: &str, done: bool) -> CmdResult {
+        let Some(r) = self.find_task_in(account, uid) else { return Err(CmdError::Params(format!("no task `{uid}`"))) };
         let now = self.clock.now;
         let next = match (&r.task.rrule, r.task.due.or(r.task.start)) {
             (Some(rule), Some(from)) if done && !r.task.is_done() => next_due(rule, from).zip(count_down(rule)),
             _ => None,
         };
-        let Some((next, rule)) = next else { return self.update_task(uid, |t| t.set_done(done, now)) };
+        let Some((next, rule)) = next else { return self.update_task(Some(&r.account), uid, |t| t.set_done(done, now)) };
         // This time, done.
         let mut copy = r.task.clone();
         copy.uid = String::new();
@@ -275,7 +286,7 @@ impl Session {
         let copied = self.add_task(Some(&r.account), copy, false)?;
         // The task, from its next time on.
         let shift = next.saturating_sub(r.task.due.or(r.task.start).unwrap_or(next));
-        self.update_task(uid, |t| {
+        self.update_task(Some(&r.account), uid, |t| {
             t.rrule = Some(rule);
             t.start = t.start.map(|s| s.saturating_add(shift));
             t.due = t.due.map(|d| d.saturating_add(shift));
@@ -287,8 +298,9 @@ impl Session {
         Ok(serde_json::json!({"uid": uid, "done": copied.get("uid"), "due": next}))
     }
 
-    pub fn delete_task(&mut self, uid: &str) -> CmdResult {
-        let account = self.task_account(uid)?;
+    /// Delete a task, from `account` when one is named (else the first account that has it).
+    pub fn delete_task(&mut self, account: Option<&str>, uid: &str) -> CmdResult {
+        let account = self.task_account(account, uid)?;
         let p = self.pim_mut(&account);
         // One on the server is deleted there too.
         let mut remote = false;

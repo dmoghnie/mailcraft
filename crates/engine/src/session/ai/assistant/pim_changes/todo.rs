@@ -51,7 +51,7 @@ impl Session {
     /// The task `found` names, as kept.
     fn task_kept(&self, found: &Found) -> Result<Task, String> {
         let Found::Task { account, uid } = found else { return Err(format!("{} isn't a task", found.name())) };
-        self.find_task(uid).filter(|t| t.account == *account).map(|t| t.task).ok_or_else(|| "that task isn't in the tasks any more".into())
+        self.find_task_in(Some(account), uid).map(|t| t.task).ok_or_else(|| "that task isn't in the tasks any more".into())
     }
 
     /// `base` with what `input` says, as the window's task form makes it, checked (`was`: the
@@ -107,11 +107,11 @@ impl Session {
     /// The task `found` names, approved, changed to `task`, and marked done (or not) when `done`
     /// says.
     pub(super) fn change_found_task(&mut self, found: Found, task: Task, done: Option<bool>) -> Result<(String, Vec<Found>), String> {
-        let Found::Task { uid, .. } = &found else { return Err("that isn't a task".into()) };
-        self.update_task(uid, |t| *t = task).map_err(|e| said(&e))?;
+        let Found::Task { account, uid } = &found else { return Err("that isn't a task".into()) };
+        self.update_task(Some(account), uid, |t| *t = task).map_err(|e| said(&e))?;
         let mut said_done = String::from("Done: changed.");
         if let Some(d) = done {
-            let marked = self.complete_task(uid, d).map_err(|e| said(&e))?;
+            let marked = self.complete_task(Some(account), uid, d).map_err(|e| said(&e))?;
             // One that repeats is due again: said, so the answer doesn't call it gone.
             if let Some(next) = marked.get("due").and_then(Value::as_i64) {
                 said_done =

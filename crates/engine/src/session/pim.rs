@@ -527,7 +527,13 @@ impl Session {
     }
 
     pub fn find_person(&self, uid: &str) -> Option<Person<'_>> {
-        self.pim.iter().find_map(|(a, p)| {
+        self.find_person_in(None, uid)
+    }
+
+    /// As [`Session::find_person`], in `account` when one is named: someone two accounts'
+    /// contacts both hold has one uid in each.
+    pub fn find_person_in(&self, account: Option<&str>, uid: &str) -> Option<Person<'_>> {
+        self.pim.iter().filter(|(a, _)| account.is_none_or(|x| x == a.as_str())).find_map(|(a, p)| {
             p.cards.iter().enumerate().find(|(_, c)| c.card.uid == uid).map(|(at, c)| Person { account: a, book: &c.book, card: &c.card, at })
         })
     }
@@ -551,12 +557,22 @@ impl Session {
     /// Whether a person is in an address book that can't be changed here (an organisation's
     /// shared contacts).
     pub fn person_read_only(&self, uid: &str) -> bool {
-        self.pim.values().any(|p| p.cards.iter().any(|c| c.card.uid == uid && p.books.iter().any(|b| b.id == c.book && b.read_only)))
+        self.person_read_only_in(None, uid)
     }
 
-    pub fn update_card(&mut self, uid: &str, change: impl FnOnce(&mut Card)) -> CmdResult {
-        let account = self.find_person(uid).map(|p| p.account.to_string()).ok_or_else(|| CmdError::Params(format!("no contact `{uid}`")))?;
-        if self.person_read_only(uid) {
+    /// As [`Session::person_read_only`], in `account` when one is named.
+    pub(crate) fn person_read_only_in(&self, account: Option<&str>, uid: &str) -> bool {
+        self.pim
+            .iter()
+            .filter(|(a, _)| account.is_none_or(|x| x == a.as_str()))
+            .any(|(_, p)| p.cards.iter().any(|c| c.card.uid == uid && p.books.iter().any(|b| b.id == c.book && b.read_only)))
+    }
+
+    /// Change someone, in `account` when one is named (else the first account that has them).
+    pub fn update_card(&mut self, account: Option<&str>, uid: &str, change: impl FnOnce(&mut Card)) -> CmdResult {
+        let account =
+            self.find_person_in(account, uid).map(|p| p.account.to_string()).ok_or_else(|| CmdError::Params(format!("no contact `{uid}`")))?;
+        if self.person_read_only_in(Some(&account), uid) {
             return Err(CmdError::Disabled("this contact is in a shared address book that can't be changed here".into()));
         }
         let p = self.pim_mut(&account);
@@ -571,9 +587,11 @@ impl Session {
         Ok(serde_json::json!({"uid": uid}))
     }
 
-    pub fn delete_card(&mut self, uid: &str) -> CmdResult {
-        let account = self.find_person(uid).map(|p| p.account.to_string()).ok_or_else(|| CmdError::Params(format!("no contact `{uid}`")))?;
-        if self.person_read_only(uid) {
+    /// Delete someone, from `account` when one is named (else the first account that has them).
+    pub fn delete_card(&mut self, account: Option<&str>, uid: &str) -> CmdResult {
+        let account =
+            self.find_person_in(account, uid).map(|p| p.account.to_string()).ok_or_else(|| CmdError::Params(format!("no contact `{uid}`")))?;
+        if self.person_read_only_in(Some(&account), uid) {
             return Err(CmdError::Disabled("this contact is in a shared address book that can't be changed here".into()));
         }
         let p = self.pim_mut(&account);

@@ -324,3 +324,46 @@ fn what_two_accounts_hold_under_one_uid_is_changed_in_the_one_found() {
     assert_eq!(place(&s, &home).as_deref(), Some("Kitchen"), "the other copy kept");
     assert!(text(&s, &home).is_some());
 }
+
+/// A contact or a task two accounts hold under one uid (someone in both address books) is
+/// checked, changed and deleted in the account the chat found it in, whichever comes first;
+/// the other's copy is left as it was.
+#[test]
+fn a_contact_or_task_two_accounts_hold_is_changed_in_the_one_found() {
+    use mailcraft_model::pim::{LOCAL, StoredCard, StoredTask};
+    let mut s = ready("assistant-one-uid-people");
+    let home = s.run("account.add", &json!({"email": "riley@home.example", "password": "pw"})).unwrap()["account"].as_str().unwrap().to_string();
+    s.run("ai.allow", &json!({"account": home, "reach": "local"})).unwrap();
+    let zoe = s.people("zoe@studio.example").first().map(|p| p.card.clone()).unwrap();
+    let posters = s.tasks("festival posters").first().map(|t| t.task.clone()).unwrap();
+    let (person, task) = (zoe.uid.clone(), posters.uid.clone());
+    let card = mailcraft_model::vcard::Card { org: "Home".into(), ..zoe };
+    s.pim_mut(&home).cards.push(StoredCard { book: LOCAL.into(), card, ..Default::default() });
+    let copy = mailcraft_model::pim::Task { title: "Hang the festival posters".into(), ..posters };
+    s.pim_mut(&home).tasks.push(StoredTask { task: copy, ..Default::default() });
+    s.take_jobs();
+    let title = |s: &Session, account: &str| s.find_person_in(Some(account), &person).map(|p| p.card.title.clone());
+    let notes = |s: &Session, account: &str| s.find_task_in(Some(account), &task).map(|t| t.task.notes);
+    let c = send(&mut s, None, "Tidy my contacts and tasks");
+    let (q, _) = question(&mut s);
+    let (mut q, found) = results(&mut s, q, &[("find_people", json!({"query": "zoe"})), ("find_tasks", json!({"query": "posters"}))]);
+    let (people, tasks) = (&found[0].0, &found[1].0);
+    let zoe =
+        |home: bool| bracketed(people.lines().find(|l| l.contains("Zoe Park") && l.ends_with("Home") == home).unwrap_or_else(|| panic!("{people}")));
+    let (work_zoe, home_zoe) = (zoe(false), zoe(true));
+    let (work_task, home_task) = (named(tasks, "Order the festival posters"), named(tasks, "Hang the festival posters"));
+    // Changing both copies: before, whichever account came first, the other's was refused.
+    for (zoe, task, account) in [(&home_zoe, &home_task, home.as_str()), (&work_zoe, &work_task, "sample")] {
+        let what = format!("{account}'s");
+        calls(&mut s, q, "", &[("change_person", json!({"id": zoe, "title": what})), ("change_task", json!({"id": task, "notes": what}))]);
+        let (next, _) = approve(&mut s, &c);
+        q = next;
+        assert_eq!((title(&s, account), notes(&s, account)), (Some(what.clone()), Some(what)), "changed in {account}");
+    }
+    assert_eq!(title(&s, &home), Some(format!("{home}'s")), "each copy its own");
+    calls(&mut s, q, "", &[("delete_items", json!({"ids": [home_zoe, home_task]}))]);
+    let (_, done) = approve(&mut s, &c);
+    assert_eq!(done, "Approved. Done: 2 deleted.");
+    assert_eq!((title(&s, &home), notes(&s, &home)), (None, None), "deleted in the account found");
+    assert!(title(&s, "sample").is_some() && notes(&s, "sample").is_some(), "the other copy kept");
+}
