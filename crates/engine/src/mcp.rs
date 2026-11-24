@@ -66,6 +66,7 @@ pub const READS: &[&str] = &[
     "folder.noAnswer",
     "folder.open",
     "folder.vip",
+    "invite.findWaiting",
     "list.first",
     "list.last",
     "list.messages",

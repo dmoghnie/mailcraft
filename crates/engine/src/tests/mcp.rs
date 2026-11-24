@@ -191,6 +191,18 @@ fn an_agent_only_reads_until_the_user_lets_it_act() {
     assert_eq!(tools["result"]["tools"][1]["annotations"]["readOnlyHint"], json!(false));
 }
 
+/// Listing the invitations waiting in the Inbox changes nothing (it may download what it hasn't
+/// read, as opening a folder does), so an agent that may only read runs it; putting them in the
+/// calendar changes it, and is still refused.
+#[test]
+fn an_agent_that_only_reads_lists_the_invitations_waiting() {
+    let mut s = let_in("mcp-invitations");
+    let a = call(&mut s, "run_command", json!({"id": "invite.findWaiting"}));
+    assert_eq!(a["result"]["isError"], json!(false), "{a}");
+    let a = call(&mut s, "run_command", json!({"id": "invite.placeWaiting", "params": {"keys": ["x:1:1:INBOX"]}}));
+    assert_eq!((&a["result"]["isError"], &a["result"]["content"][0]["text"]), (&json!(true), &json!(READ_ONLY_SAID)), "{a}");
+}
+
 /// What an agent that may only read runs are commands there are, and whatever params it gives
 /// them, none changes the settings, the accounts or the mail kept here (its flags, where it is),
 /// or has the servers change anything: what they ask of the servers is to sync, search, index
