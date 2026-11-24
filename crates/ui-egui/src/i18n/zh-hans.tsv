@@ -2176,6 +2176,7 @@ count	occurrences	次
 	Format	格式
 	OpenAI's, which most servers speak	OpenAI 的格式（大多数服务器支持）
 	Anthropic's	Anthropic 的格式
+	Ollama's own	Ollama 自己的格式
 	Up to its version, such as /v1. Plain http only to this computer	到版本为止，如 /v1。未加密的 http 只能连到这台电脑
 	Model	模型
 	API key	API 密钥
@@ -2183,6 +2184,7 @@ count	occurrences	次
 	None needed for a model on this computer	这台电脑上的模型不需要
 	Forget the key kept	忘记已保存的密钥
 	Longest answer, in tokens	最长回答（token 数）
+	Takes in at once, in tokens	一次能接收的量（token 数）
 	When it fails, ask	失败时改问
 	No other model	不改问其他模型
 	A message no longer here	已不存在的邮件

@@ -2175,6 +2175,7 @@ count	occurrences	keer
 	Format	Indeling
 	OpenAI's, which most servers speak	Die van OpenAI, die de meeste servers spreken
 	Anthropic's	Die van Anthropic
+	Ollama's own	Die van Ollama zelf
 	Up to its version, such as /v1. Plain http only to this computer	Tot en met de versie, zoals /v1. Onversleuteld http alleen naar deze computer
 	Model	Model
 	API key	API-sleutel
@@ -2182,6 +2183,7 @@ count	occurrences	keer
 	None needed for a model on this computer	Niet nodig voor een model op deze computer
 	Forget the key kept	Bewaarde sleutel vergeten
 	Longest answer, in tokens	Langste antwoord, in tokens
+	Takes in at once, in tokens	Neemt in één keer op, in tokens
 	When it fails, ask	Als het mislukt, vragen aan
 	No other model	Geen ander model
 	A message no longer here	Een bericht dat er niet meer is

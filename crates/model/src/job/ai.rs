@@ -19,6 +19,10 @@ pub enum AiApi {
     OpenAi,
     /// Anthropic's Messages.
     Anthropic,
+    /// Ollama's own (`/api/chat`): told how much the model takes in, which its
+    /// OpenAI-compatible address can't be (there, a longer prompt can lose its start without a
+    /// word).
+    Ollama,
 }
 
 /// A model on a server: what a profile names.
@@ -27,7 +31,7 @@ pub enum AiApi {
 pub struct AiEndpoint {
     pub api: AiApi,
     /// The server's API address, up to its version: `https://api.openai.com/v1`,
-    /// `http://localhost:11434/v1`.
+    /// `http://localhost:11434/v1`; Ollama's own, the server's: `http://localhost:11434`.
     pub url: String,
     pub model: String,
 }
@@ -135,12 +139,16 @@ pub struct AiChat {
     pub max_tokens: u32,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tools: Vec<AiTool>,
+    /// What the model takes in at once, in tokens, for a server that's told (Ollama's own
+    /// format); 0: the server's own.
+    #[serde(default)]
+    pub context: u32,
 }
 
 impl AiChat {
     /// One question, with its instructions.
     pub fn ask(system: &str, question: &str, max_tokens: u32) -> AiChat {
-        AiChat { system: system.into(), turns: vec![AiTurn::user(question)], max_tokens, tools: Vec::new() }
+        AiChat { system: system.into(), turns: vec![AiTurn::user(question)], max_tokens, tools: Vec::new(), context: 0 }
     }
 
     /// Its bytes, as the record counts them: the instructions and every turn.

@@ -117,7 +117,7 @@ impl Session {
     /// Chat `chat` as `profile` is asked it: its turns as sent, fitted into the profile's
     /// context (what tools gave early on left out first, then the oldest turns).
     pub(super) fn fitted(&self, chat: &Chat, profile: &AiProfile, system: String, tools: Vec<mailcraft_model::AiTool>) -> Result<AiChat, CmdError> {
-        let context = usize::try_from(if profile.context > 0 { profile.context } else { CONTEXT_AT_FIRST }).unwrap_or(usize::MAX);
+        let context = usize::try_from(profile.takes_in()).unwrap_or(usize::MAX);
         let answer = usize::try_from(profile.max_tokens.max(1)).unwrap_or(usize::MAX);
         let tool_room: usize = tools.iter().map(|t| tokens(t.description.len().saturating_add(t.schema.to_string().len()))).sum();
         let room = context.saturating_sub(answer).saturating_sub(ROOM_KEPT).saturating_sub(tool_room).saturating_sub(tokens(system.len()));
@@ -164,7 +164,7 @@ impl Session {
             )));
         }
         let system = if dropped > 0 { format!("{system}\n\nThe start of this chat was left out for room.") } else { system };
-        Ok(AiChat { system, turns, max_tokens: profile.max_tokens.max(1), tools })
+        Ok(AiChat { system, turns, max_tokens: profile.max_tokens.max(1), tools, context: 0 })
     }
 }
 

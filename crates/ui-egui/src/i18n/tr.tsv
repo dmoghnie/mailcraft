@@ -2180,6 +2180,7 @@ count	occurrences	kez
 	Format	Biçim
 	OpenAI's, which most servers speak	OpenAI'ninki, çoğu sunucunun konuştuğu
 	Anthropic's	Anthropic'inki
+	Ollama's own	Ollama'nın kendi biçimi
 	Up to its version, such as /v1. Plain http only to this computer	Sürümüne kadar, örneğin /v1. Şifresiz http yalnızca bu bilgisayara
 	Model	Model
 	API key	API anahtarı
@@ -2187,6 +2188,7 @@ count	occurrences	kez
 	None needed for a model on this computer	Bu bilgisayardaki bir model için gerekmez
 	Forget the key kept	Kayıtlı anahtarı unut
 	Longest answer, in tokens	En uzun yanıt, token olarak
+	Takes in at once, in tokens	Bir seferde alabildiği, token olarak
 	When it fails, ask	Başarısız olursa şuna sor
 	No other model	Başka model yok
 	A message no longer here	Artık burada olmayan bir ileti

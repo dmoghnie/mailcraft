@@ -92,17 +92,21 @@ and `cargo xtask sizes` enforces them.
   person set up (`Prefs::ai`: model profiles, which one does each kind of work, how far each
   account's mail may go, the local-only switch), words each question and records it. It queues
   `Job::Ai`; `net/src/worker/ai.rs` reads the profile's key from the keychain and asks on a
-  thread of its own, at most four at once; `net/src/protocols/ai.rs` speaks the two wire
+  thread of its own, at most four at once; `net/src/protocols/ai.rs` speaks the three wire
   formats, with the tools a model may call, and reads an answer whole or streamed as it's
-  written (`ai/streamed.rs`: the server-sent events both formats stream, its growth sent on as
-  `AiDone::Part` every 80 ms at most).
-- **Two formats cover the servers.** OpenAI's Chat Completions is spoken by OpenAI, xAI, Mistral,
+  written (`ai/streamed.rs`: the server-sent events OpenAI's and Anthropic's formats stream, or
+  Ollama's JSON lines, its growth sent on as `AiDone::Part` every 80 ms at most).
+- **Three formats cover the servers.** OpenAI's Chat Completions is spoken by OpenAI, xAI, Mistral,
   OpenRouter, Groq, DeepSeek, Gemini's compatible address and the local servers (Ollama, LM
-  Studio, llama.cpp); Anthropic's Messages is the other.
+  Studio, llama.cpp); Anthropic's Messages is the second. Ollama's own (`/api/chat`) is the
+  third, because only there is the server told how much the model takes in (`num_ctx`, from the
+  profile's context): through its OpenAI-compatible address Ollama keeps to the server's own
+  (4096 tokens in some versions, unless set) and can drop the start of a longer question without
+  a word. It's asked to refuse one still too long (`truncate` and `shift` off) rather than cut it.
 - **Why not the `genai` crate.** It is async on tokio and reqwest, with TLS of its own: it would
   bring a second HTTP stack that bypasses MailCraft's certificate rules (`net/src/stream`), and a
-  runtime the worker threads don't need. The two formats, tools and streaming are about seven
-  hundred lines over `net::http`.
+  runtime the worker threads don't need. The three formats, tools and streaming are under a
+  thousand lines over `net::http`.
 - **The record.** Each question is recorded before it goes (`ai-log.json`, saved as the jobs are
   taken): when, what for, which profile and server, whose mail, and its sizes; never what it
   said. The newest 500 are kept.

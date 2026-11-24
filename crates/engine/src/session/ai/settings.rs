@@ -67,6 +67,11 @@ pub struct AiProfile {
 }
 
 impl AiProfile {
+    /// What it takes in at once, in tokens: its own, or [`CONTEXT_AT_FIRST`](super::CONTEXT_AT_FIRST).
+    pub fn takes_in(&self) -> u32 {
+        if self.context > 0 { self.context } else { super::CONTEXT_AT_FIRST }
+    }
+
     /// Whether its server is on this computer or its own network: a loopback, private or
     /// link-local address, `localhost`, or a `.local` name. Anything else is taken for a third
     /// party's, whatever it's called.

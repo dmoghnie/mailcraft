@@ -1,5 +1,5 @@
 //! Asking a language model over HTTP: OpenAI's Chat Completions (most servers, the ones on the
-//! person's own computer included) and Anthropic's Messages, the tools it may call with them,
+//! person's own computer included), Anthropic's Messages and Ollama's own, the tools it may call with them,
 //! its answer whole or streamed as it's written. A key goes over https only, or to this
 //! computer.
 
@@ -15,6 +15,7 @@ use crate::http::{self, Request, Response, Url};
 use crate::{NetError, Result};
 
 mod anthropic;
+mod ollama;
 mod openai;
 mod streamed;
 #[cfg(test)]
@@ -148,6 +149,7 @@ fn request(endpoint: &AiEndpoint, key: Option<&str>, chat: &AiChat, stream: bool
     let req = match endpoint.api {
         AiApi::OpenAi => openai::request(&base, endpoint, key, chat, stream),
         AiApi::Anthropic => anthropic::request(&base, endpoint, key, chat, stream),
+        AiApi::Ollama => ollama::request(&base, endpoint, key, chat, stream),
     };
     if req.body.len() > MAX_QUESTION {
         return Err(NetError::Protocol(format!("the question is too long to send ({} bytes, at most {MAX_QUESTION})", req.body.len())));
@@ -170,6 +172,7 @@ pub fn read_reply(api: AiApi, resp: &Response, key: Option<&str>) -> Result<AiAn
     match api {
         AiApi::OpenAi => openai::answer(&body, key),
         AiApi::Anthropic => anthropic::answer(&body),
+        AiApi::Ollama => ollama::answer(&body, key),
     }
 }
 

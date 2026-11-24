@@ -2193,6 +2193,7 @@ count	occurrences	повторений
 	Format	Формат
 	OpenAI's, which most servers speak	Формат OpenAI, который понимает большинство серверов
 	Anthropic's	Формат Anthropic
+	Ollama's own	Собственный формат Ollama
 	Up to its version, such as /v1. Plain http only to this computer	До версии включительно, например /v1. Незашифрованный http — только к этому компьютеру
 	Model	Модель
 	API key	Ключ API
@@ -2200,6 +2201,7 @@ count	occurrences	повторений
 	None needed for a model on this computer	Не нужен для модели на этом компьютере
 	Forget the key kept	Забыть сохранённый ключ
 	Longest answer, in tokens	Самый длинный ответ, в токенах
+	Takes in at once, in tokens	Вмещает за раз, в токенах
 	When it fails, ask	Если не ответит, спросить
 	No other model	Никакую другую модель
 	A message no longer here	Сообщение, которого больше нет

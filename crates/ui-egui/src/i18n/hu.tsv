@@ -2180,6 +2180,7 @@ count	occurrences	előfordulás
 	Format	Formátum
 	OpenAI's, which most servers speak	Az OpenAI-é, ezt beszéli a legtöbb kiszolgáló
 	Anthropic's	Az Anthropicé
+	Ollama's own	Az Ollama sajátja
 	Up to its version, such as /v1. Plain http only to this computer	A verzióig, például /v1. Titkosítatlan http csak ehhez a számítógéphez
 	Model	Modell
 	API key	API-kulcs
@@ -2187,6 +2188,7 @@ count	occurrences	előfordulás
 	None needed for a model on this computer	Ezen a számítógépen futó modellhez nem kell
 	Forget the key kept	A megőrzött kulcs elfelejtése
 	Longest answer, in tokens	Leghosszabb válasz, tokenben
+	Takes in at once, in tokens	Egyszerre befogad, tokenben
 	When it fails, ask	Ha nem sikerül, ezt kérdezze
 	No other model	Nincs másik modell
 	A message no longer here	Egy már nem létező üzenet

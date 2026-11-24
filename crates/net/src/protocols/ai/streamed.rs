@@ -1,5 +1,6 @@
-//! A model's answer as it's written: the server-sent events both formats stream (`data:` lines,
-//! an `event:` name, a blank line ending each), read as they come and built into the answer,
+//! A model's answer as it's written: the server-sent events OpenAI's and Anthropic's formats
+//! stream (`data:` lines, an `event:` name, a blank line ending each), or the JSON object a line
+//! Ollama's own streams, read as they come and built into the answer,
 //! its text and thinking handed on as they grow. Hostile input as every answer is: an event and
 //! the tool calls are capped, and the whole answer is capped by the body's own limit.
 
@@ -55,7 +56,7 @@ impl Building {
     }
 
     /// The answer it built, or why there's none.
-    fn finish(self) -> Result<AiAnswer> {
+    pub(super) fn finish(self) -> Result<AiAnswer> {
         if let Some(no) = self.refused {
             return Err(NetError::No(no));
         }
@@ -101,6 +102,8 @@ pub(super) struct Events<'a> {
     key: Option<&'a str>,
     on: &'a mut dyn FnMut(&str, &str),
     reading: Reading,
+    /// Each line is an event of its own (Ollama's JSON lines).
+    lines: bool,
     line: Vec<u8>,
     data: Vec<u8>,
     name: String,
@@ -117,6 +120,7 @@ impl<'a> Events<'a> {
             key,
             on,
             reading: Reading::Events,
+            lines: false,
             line: Vec::new(),
             data: Vec::new(),
             name: String::new(),
@@ -126,10 +130,12 @@ impl<'a> Events<'a> {
         }
     }
 
-    /// The answer's head came: its body is events when it says so, and whole otherwise.
+    /// The answer's head came: its body is events (or JSON lines) when it says so, and whole
+    /// otherwise.
     pub fn opened(&mut self, head: &Response) {
-        let events = head.header("Content-Type").is_some_and(|t| t.to_ascii_lowercase().contains("text/event-stream"));
-        if !head.ok() || !events {
+        let kind = head.header("Content-Type").map(str::to_ascii_lowercase).unwrap_or_default();
+        self.lines = kind.contains("ndjson");
+        if !head.ok() || !(self.lines || kind.contains("text/event-stream")) {
             self.reading = Reading::Whole(Vec::new());
         }
     }
@@ -161,6 +167,10 @@ impl<'a> Events<'a> {
         let mut line = std::mem::take(&mut self.line);
         if line.last() == Some(&b'\r') {
             line.pop();
+        }
+        if self.lines {
+            self.data = line;
+            return self.dispatch();
         }
         if line.is_empty() {
             return self.dispatch();
@@ -207,6 +217,7 @@ impl<'a> Events<'a> {
         match self.api {
             AiApi::OpenAi => openai::event(built, &v, key),
             AiApi::Anthropic => anthropic::event(built, &name, &v, key),
+            AiApi::Ollama => ollama::event(built, &v, key),
         }
         let said = self.built.text.get(text..).unwrap_or_default();
         let thought = self.built.thinking.get(thinking..).unwrap_or_default();

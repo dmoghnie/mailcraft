@@ -2194,6 +2194,7 @@ count	occurrences	opakovaní
 	Format	Formát
 	OpenAI's, which most servers speak	Formát OpenAI, ktorým hovorí väčšina serverov
 	Anthropic's	Formát Anthropic
+	Ollama's own	Vlastný formát Ollama
 	Up to its version, such as /v1. Plain http only to this computer	Až po verziu, napríklad /v1. Nešifrované http len do tohto počítača
 	Model	Model
 	API key	Kľúč API
@@ -2201,6 +2202,7 @@ count	occurrences	opakovaní
 	None needed for a model on this computer	Pre model na tomto počítači netreba
 	Forget the key kept	Zabudnúť uložený kľúč
 	Longest answer, in tokens	Najdlhšia odpoveď, v tokenoch
+	Takes in at once, in tokens	Prijme naraz, v tokenoch
 	When it fails, ask	Keď zlyhá, opýtať sa
 	No other model	Žiadny iný model
 	A message no longer here	Správa, ktorá tu už nie je

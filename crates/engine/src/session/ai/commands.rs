@@ -28,7 +28,7 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
     vec![
         CommandSpec::new("ai.settings", "Show MailCraft's AI settings", WHERE, |s, _| Ok(settings(s))),
         CommandSpec::new("ai.saveProfile", "Add or change a model MailCraft's AI may ask", WHERE, save_profile).params(
-            r#"{"id"?: string (none: a new profile), "name": string, "api": "openAi"|"anthropic", "url": string (the API address, up to its version: https://api.openai.com/v1, http://localhost:11434/v1), "model": string, "maxTokens"?: number, "context"?: number (what the model takes in at once, in tokens; 0: 32768, Ollama's own), "fallback"?: string (a profile asked instead when this one fails; "": none), "key"?: string (kept in the keychain; "": forgotten)}"#,
+            r#"{"id"?: string (none: a new profile), "name": string, "api": "openAi"|"anthropic"|"ollama" (Ollama's own, told what the model takes in), "url": string (the API address, up to its version: https://api.openai.com/v1; Ollama's own: http://localhost:11434), "model": string, "maxTokens"?: number, "context"?: number (what the model takes in at once, in tokens; 0: 32768, Ollama's own), "fallback"?: string (a profile asked instead when this one fails; "": none), "key"?: string (kept in the keychain; "": forgotten)}"#,
         ),
         CommandSpec::new("ai.removeProfile", "Remove a model and forget its key", WHERE, |s, v| {
             let id = p::req_str(v, "id")?.to_string();
@@ -120,7 +120,8 @@ fn save_profile(s: &mut Session, v: &Value) -> CmdResult {
     let api = match p::req_str(v, "api")? {
         "openAi" => AiApi::OpenAi,
         "anthropic" => AiApi::Anthropic,
-        other => return Err(CmdError::Params(format!("unknown api `{}`: openAi or anthropic", other.chars().take(40).collect::<String>()))),
+        "ollama" => AiApi::Ollama,
+        other => return Err(CmdError::Params(format!("unknown api `{}`: openAi, anthropic or ollama", other.chars().take(40).collect::<String>()))),
     };
     let endpoint = AiEndpoint { api, url: address(v)?, model: text(v, "model")? };
     let name = text(v, "name")?;

@@ -367,3 +367,23 @@ fn a_streamed_answer_is_kept_as_it_comes() {
     part(&mut s, "late", "");
     assert_eq!(s.run("ai.answer", &json!({"id": id})).unwrap(), json!({"waiting": false}));
 }
+
+/// A question says what its model takes in, for a server that's told (Ollama's own format, so
+/// it neither cuts the question's start nor sets aside less): the profile's context, or what
+/// MailCraft takes at first.
+#[test]
+fn a_question_says_what_its_model_takes_in() {
+    let mut s = sample_session("ai-context");
+    s.run("ai.allow", &json!({"account": "sample", "reach": "local"})).unwrap();
+    let v = json!({"name": "Ollama", "api": "ollama", "url": "http://localhost:11434", "model": "qwen3", "context": 16_384});
+    let p = s.run("ai.saveProfile", &v).unwrap()["id"].as_str().unwrap().to_string();
+    s.take_jobs();
+    ask(&mut s, "What's new?").unwrap();
+    let q = asked(&mut s);
+    assert_eq!((q[0].2.api, q[0].2.url.as_str(), q[0].3.context), (AiApi::Ollama, "http://localhost:11434", 16_384));
+    s.run("ai.saveProfile", &json!({"id": p, "name": "Ollama", "api": "ollama", "url": "http://localhost:11434", "model": "qwen3", "context": 0}))
+        .unwrap();
+    s.take_jobs();
+    ask(&mut s, "And now?").unwrap();
+    assert_eq!(asked(&mut s)[0].3.context, crate::CONTEXT_AT_FIRST);
+}

@@ -2180,6 +2180,7 @@ count	occurrences	Terminen
 	Format	Format
 	OpenAI's, which most servers speak	Das von OpenAI, das die meisten Server sprechen
 	Anthropic's	Das von Anthropic
+	Ollama's own	Das eigene von Ollama
 	Up to its version, such as /v1. Plain http only to this computer	Bis zur Version, etwa /v1. Unverschlüsseltes http nur zu diesem Computer
 	Model	Modell
 	API key	API-Schlüssel
@@ -2187,6 +2188,7 @@ count	occurrences	Terminen
 	None needed for a model on this computer	Für ein Modell auf diesem Computer nicht nötig
 	Forget the key kept	Gespeicherten Schlüssel vergessen
 	Longest answer, in tokens	Längste Antwort, in Token
+	Takes in at once, in tokens	Nimmt auf einmal auf, in Token
 	When it fails, ask	Wenn es fehlschlägt, fragen
 	No other model	Kein anderes Modell
 	A message no longer here	Eine Nachricht, die nicht mehr da ist

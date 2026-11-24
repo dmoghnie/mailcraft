@@ -2175,6 +2175,7 @@ count	occurrences	مرات
 	Format	التنسيق
 	OpenAI's, which most servers speak	تنسيق OpenAI، الذي تتحدثه معظم الخوادم
 	Anthropic's	تنسيق Anthropic
+	Ollama's own	تنسيق Ollama الخاص
 	Up to its version, such as /v1. Plain http only to this computer	حتى الإصدار، مثل /v1. ولا يُستخدم http غير المشفّر إلا مع هذا الكمبيوتر
 	Model	النموذج
 	API key	مفتاح API
@@ -2182,6 +2183,7 @@ count	occurrences	مرات
 	None needed for a model on this computer	غير مطلوب لنموذج على هذا الكمبيوتر
 	Forget the key kept	نسيان المفتاح المحفوظ
 	Longest answer, in tokens	أطول إجابة، بالرموز المميّزة
+	Takes in at once, in tokens	ما يستوعبه دفعة واحدة، بالرموز المميّزة
 	When it fails, ask	عند الفشل، اسأل
 	No other model	لا نموذج آخر
 	A message no longer here	رسالة لم تعد موجودة

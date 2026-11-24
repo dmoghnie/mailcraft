@@ -2175,6 +2175,7 @@ count	occurrences	פעמים
 	Format	תבנית
 	OpenAI's, which most servers speak	של OpenAI, שרוב השרתים מדברים
 	Anthropic's	של Anthropic
+	Ollama's own	של Ollama עצמה
 	Up to its version, such as /v1. Plain http only to this computer	עד הגרסה, כמו /v1. http לא מוצפן רק אל המחשב הזה
 	Model	מודל
 	API key	מפתח API
@@ -2182,6 +2183,7 @@ count	occurrences	פעמים
 	None needed for a model on this computer	לא נדרש למודל במחשב הזה
 	Forget the key kept	לשכוח את המפתח השמור
 	Longest answer, in tokens	התשובה הארוכה ביותר, בטוקנים
+	Takes in at once, in tokens	קולט בבת אחת, בטוקנים
 	When it fails, ask	אם נכשל, לשאול את
 	No other model	בלי מודל אחר
 	A message no longer here	הודעה שכבר אינה כאן

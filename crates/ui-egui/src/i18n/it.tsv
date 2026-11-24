@@ -2179,6 +2179,7 @@ count	occurrences	ripetizioni
 	Format	Formato
 	OpenAI's, which most servers speak	Quello di OpenAI, usato dalla maggior parte dei server
 	Anthropic's	Quello di Anthropic
+	Ollama's own	Quello proprio di Ollama
 	Up to its version, such as /v1. Plain http only to this computer	Fino alla versione, come /v1. http in chiaro solo verso questo computer
 	Model	Modello
 	API key	Chiave API
@@ -2186,6 +2187,7 @@ count	occurrences	ripetizioni
 	None needed for a model on this computer	Non serve per un modello su questo computer
 	Forget the key kept	Dimentica la chiave conservata
 	Longest answer, in tokens	Risposta più lunga, in token
+	Takes in at once, in tokens	Accoglie in una volta, in token
 	When it fails, ask	Se non riesce, chiedi a
 	No other model	Nessun altro modello
 	A message no longer here	Un messaggio non più presente

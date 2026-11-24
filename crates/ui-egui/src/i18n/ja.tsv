@@ -2176,6 +2176,7 @@ count	occurrences	回
 	Format	形式
 	OpenAI's, which most servers speak	OpenAI の形式 (ほとんどのサーバーが対応)
 	Anthropic's	Anthropic の形式
+	Ollama's own	Ollama 独自の形式
 	Up to its version, such as /v1. Plain http only to this computer	バージョンまで (/v1 など)。暗号化なしの http はこのコンピューターへのみ
 	Model	モデル
 	API key	API キー
@@ -2183,6 +2184,7 @@ count	occurrences	回
 	None needed for a model on this computer	このコンピューター上のモデルには不要です
 	Forget the key kept	保存したキーを削除
 	Longest answer, in tokens	最長の回答 (トークン数)
+	Takes in at once, in tokens	一度に受け取れる量 (トークン数)
 	When it fails, ask	失敗したときに使う
 	No other model	ほかのモデルを使わない
 	A message no longer here	見つからなくなったメッセージ

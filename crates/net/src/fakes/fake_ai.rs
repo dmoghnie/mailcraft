@@ -1,8 +1,9 @@
 //! A model server of the tests' own, so MailCraft's AI is tested without a network: it speaks
-//! OpenAI's Chat Completions (`/v1/chat/completions`) and Anthropic's Messages (`/v1/messages`),
-//! keeps every request it was sent, and gives the answers a test scripted, in order: whole, or
-//! streamed as events. With none scripted, it answers in the request's own format with "You
-//! said: " and the last turn, streamed when the request asks.
+//! OpenAI's Chat Completions (`/v1/chat/completions`), Anthropic's Messages (`/v1/messages`) and
+//! Ollama's own (`/api/chat`), keeps every request it was sent, and gives the answers a test
+//! scripted, in order: whole, or streamed as events or JSON lines. With none scripted, it
+//! answers in the request's own format with "You said: " and the last turn, streamed when the
+//! request asks.
 
 use std::collections::VecDeque;
 use std::io::BufReader;
@@ -31,6 +32,7 @@ impl Seen {
 enum Answer {
     Whole(String, String),
     Events(Vec<String>, Duration),
+    Lines(Vec<String>),
 }
 
 #[derive(Default)]
@@ -73,6 +75,10 @@ impl ModelServer {
                         let headers = [("Content-Type", "text/event-stream".to_string()), ("Connection", "close".into())];
                         super::http::respond_chunked(&mut s, "200 OK", &headers, &pieces, gap);
                     }
+                    Answer::Lines(pieces) => {
+                        let headers = [("Content-Type", "application/x-ndjson".to_string()), ("Connection", "close".into())];
+                        super::http::respond_chunked(&mut s, "200 OK", &headers, &pieces, Duration::ZERO);
+                    }
                 }
             }
         });
@@ -94,6 +100,11 @@ impl ModelServer {
         self.shared.lock().unwrap().script.push_back(Answer::Events(pieces.iter().map(|p| p.to_string()).collect(), gap));
     }
 
+    /// Stream `pieces` to the next request as JSON lines (Ollama's), each a chunk of its own.
+    pub fn then_lines(&self, pieces: &[&str]) {
+        self.shared.lock().unwrap().script.push_back(Answer::Lines(pieces.iter().map(|p| p.to_string()).collect()));
+    }
+
     /// Every request sent so far, in order.
     pub fn seen(&self) -> Vec<Seen> {
         self.shared.lock().unwrap().seen.clone()
@@ -105,6 +116,9 @@ fn echo(r: &Seen) -> Answer {
     let last = r.body.get("messages").and_then(Value::as_array).and_then(|m| m.last());
     let said = last.and_then(|m| m.get("content")).and_then(Value::as_str).unwrap_or_default();
     let text = format!("You said: {said}");
+    if r.target.ends_with("/api/chat") {
+        return ollama(r.body.get("stream") != Some(&Value::Bool(false)), &text);
+    }
     let anthropic = r.target.ends_with("/messages");
     if r.body.get("stream") == Some(&Value::Bool(true)) {
         return Answer::Events(stream(anthropic, &text), Duration::ZERO);
@@ -148,4 +162,17 @@ fn whole(anthropic: bool, text: &str) -> String {
                "usage": {"prompt_tokens": 12, "completion_tokens": 5}})
     }
     .to_string()
+}
+
+/// `text` as Ollama's own answer: JSON lines, a word each, then its end with the tokens counted;
+/// or whole.
+fn ollama(stream: bool, text: &str) -> Answer {
+    let end = json!({"message": {"role": "assistant", "content": ""}, "done": true, "done_reason": "stop", "prompt_eval_count": 12, "eval_count": 5});
+    if !stream {
+        let whole =
+            json!({"message": {"role": "assistant", "content": text}, "done": true, "done_reason": "stop", "prompt_eval_count": 12, "eval_count": 5});
+        return Answer::Whole("200 OK".into(), whole.to_string());
+    }
+    let words = text.split_inclusive(' ').map(|w| format!("{}\n", json!({"message": {"role": "assistant", "content": w}, "done": false})));
+    Answer::Lines(words.chain([format!("{end}\n")]).collect())
 }

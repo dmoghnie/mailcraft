@@ -9,7 +9,7 @@ use super::*;
 /// Servers whose address and format are known, to fill in: two that run on this computer, two
 /// cloud providers. Their names are their own, in every language.
 const KNOWN: [(&str, AiApi, &str); 4] = [
-    ("Ollama", AiApi::OpenAi, "http://localhost:11434/v1"),
+    ("Ollama", AiApi::Ollama, "http://localhost:11434"),
     ("LM Studio", AiApi::OpenAi, "http://localhost:1234/v1"),
     ("OpenAI", AiApi::OpenAi, "https://api.openai.com/v1"),
     ("Anthropic", AiApi::Anthropic, "https://api.anthropic.com/v1"),
@@ -32,6 +32,8 @@ pub struct AiModelForm {
     pub forget_key: bool,
     /// The longest answer, in tokens, as typed.
     pub max_tokens: String,
+    /// What the model takes in at once, in tokens, as typed (empty: as at first).
+    pub context: String,
     /// The profile asked instead when this one fails.
     pub fallback: Option<String>,
     pub error: Option<String>,
@@ -48,6 +50,7 @@ impl AiModelForm {
             model: p.endpoint.model.clone(),
             has_key: p.has_key,
             max_tokens: p.max_tokens.to_string(),
+            context: if p.context > 0 { p.context.to_string() } else { String::new() },
             fallback: p.fallback.clone(),
             ..AiModelForm::default()
         }
@@ -62,6 +65,7 @@ impl AiModelForm {
         let api = match self.api {
             AiApi::OpenAi => "openAi",
             AiApi::Anthropic => "anthropic",
+            AiApi::Ollama => "ollama",
         };
         let mut p = json!({"name": self.name.trim(), "api": api, "url": self.url.trim(), "model": self.model.trim(), "fallback": self.fallback.clone().unwrap_or_default()});
         if let Some(id) = &self.id {
@@ -69,6 +73,12 @@ impl AiModelForm {
         }
         if let Ok(n) = self.max_tokens.trim().parse::<u64>() {
             p["maxTokens"] = json!(n);
+        }
+        let context = self.context.trim();
+        if context.is_empty() {
+            p["context"] = json!(0);
+        } else if let Ok(n) = context.parse::<u64>() {
+            p["context"] = json!(n);
         }
         let key = self.key.0.trim();
         if !key.is_empty() {
@@ -104,10 +114,11 @@ pub(super) fn draw(ui: &mut Ui, f: &mut AiModelForm, s: &Session, t: &Tokens, ac
     field(ui, tl!("Name"));
     ui.add(egui::TextEdit::singleline(&mut f.name).desired_width(w));
     field(ui, tl!("Format"));
-    let formats = [tl!("OpenAI's, which most servers speak"), tl!("Anthropic's")];
-    let now = usize::from(f.api == AiApi::Anthropic);
-    if let Some(i) = widgets::segmented(ui, t, "ai-format", &formats, now) {
-        f.api = if i == 1 { AiApi::Anthropic } else { AiApi::OpenAi };
+    // One a line: three in a row are wider than the dialog in some languages.
+    for (api, label) in
+        [(AiApi::OpenAi, tl!("OpenAI's, which most servers speak")), (AiApi::Anthropic, tl!("Anthropic's")), (AiApi::Ollama, tl!("Ollama's own"))]
+    {
+        ui.radio_value(&mut f.api, api, label);
     }
     field(ui, tl!("Address"));
     ui.add(egui::TextEdit::singleline(&mut f.url).hint_text("https://api.example.com/v1").desired_width(w));
@@ -123,6 +134,9 @@ pub(super) fn draw(ui: &mut Ui, f: &mut AiModelForm, s: &Session, t: &Tokens, ac
     }
     field(ui, tl!("Longest answer, in tokens"));
     ui.add(egui::TextEdit::singleline(&mut f.max_tokens).hint_text("4096").desired_width(120.0));
+    field(ui, tl!("Takes in at once, in tokens"));
+    let at_first = mailcraft_engine::CONTEXT_AT_FIRST.to_string();
+    ui.add(egui::TextEdit::singleline(&mut f.context).hint_text(at_first).desired_width(120.0));
     fallback(ui, f, s);
     let local = mailcraft_engine::ai_url_is_local(&f.url);
     let place = if f.url.trim().is_empty() {
