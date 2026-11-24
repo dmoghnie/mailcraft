@@ -7,7 +7,7 @@
 
 use std::fmt;
 
-use mailcraft_model::{AiChat, AiRole, AiTurn, MessageKey};
+use mailcraft_model::{AiChat, AiRole, AiToolResult, AiTurn, MessageKey};
 
 use super::links::message_name;
 use super::*;
@@ -25,6 +25,8 @@ pub const CONTEXT_AT_FIRST: u32 = 32_768;
 const ROOM_KEPT: usize = 1024;
 /// What a tool's result early in a chat becomes when there's no room for it.
 const LEFT_OUT: &str = "[Left out for room: call the tool again if it's needed.]";
+/// The least a tool's result is cut to for room, in tokens: shorter, it would say too little.
+const RESULT_LEAST: usize = 200;
 
 /// Something the person points at.
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -150,6 +152,11 @@ impl Session {
                 t.results.clear();
             }
         }
+        // What the tools gave since (several messages read at once) is cut, each to a share of
+        // the room the rest leaves, rather than the chat stopping.
+        if size(&turns) > room {
+            turns = shortened(turns, room);
+        }
         if size(&turns) > room {
             return Err(CmdError::Failed(format!(
                 "this is more than {} takes in at once ({context} tokens): point at less, or set its context higher in File › Options › AI",
@@ -159,6 +166,25 @@ impl Session {
         let system = if dropped > 0 { format!("{system}\n\nThe start of this chat was left out for room.") } else { system };
         Ok(AiChat { system, turns, max_tokens: profile.max_tokens.max(1), tools })
     }
+}
+
+/// `turns` with what the tools gave cut, each to an even share of the room the rest leaves
+/// (unless that's less than [`RESULT_LEAST`]: they stay as they are).
+fn shortened(turns: Vec<AiTurn>, room: usize) -> Vec<AiTurn> {
+    let results: usize = turns.iter().map(|t| t.results.len()).sum();
+    let given = |t: &AiTurn| t.results.iter().map(|r| r.content.len()).sum::<usize>();
+    let rest: usize = turns.iter().map(|t| tokens(t.size().saturating_sub(given(t)))).sum();
+    let share = room.saturating_sub(rest).checked_div(results).unwrap_or(0);
+    if share < RESULT_LEAST {
+        return turns;
+    }
+    // A character is a token at most (three bytes), a few take four; the note a cut adds is room
+    // too.
+    let chars = share.saturating_sub(24).saturating_mul(3) / 4;
+    turns
+        .into_iter()
+        .map(|t| AiTurn { results: t.results.into_iter().map(|r| AiToolResult { content: cut(&r.content, chars), ..r }).collect(), ..t })
+        .collect()
 }
 
 /// About how many tokens `bytes` of text are: a token for every three bytes (a little more than

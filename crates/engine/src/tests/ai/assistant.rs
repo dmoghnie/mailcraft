@@ -477,14 +477,19 @@ fn a_long_chat_is_fitted_into_its_models_context() {
     assert!(asked.system.contains("left out for room"));
     assert_eq!(asked.turns.len(), 1);
     assert!(asked.turns[0].text.ends_with("second"));
-    // What the person said, and what its calls gave, too long together: said so, never sent
-    // without them (what the calls gave alone, their call and the words gone).
-    let c = send(&mut s, None, &"word ".repeat(1200));
+    // What the person said, and what its calls gave, too long together: what the calls gave is
+    // cut to fit, never left out (their call and the words would go with it).
+    send(&mut s, None, &"word ".repeat(1200));
     let (q, _) = question(&mut s);
     calls(&mut s, q, "", &[("find_messages", json!({"limit": 50}))]);
-    assert!(questions(&mut s).is_empty());
-    let v = chat(&mut s, &c);
-    assert!(v["chat"]["error"].as_str().is_some_and(|e| e.contains("more than Local takes in")), "{}", v["chat"]["error"]);
+    let (_, asked) = question(&mut s);
+    let size: usize = asked.turns.iter().map(|t| t.size() / 3 + 1).sum();
+    assert!(size < 8192 - 512, "{size}");
+    let given = &asked.turns.last().unwrap().results[0].content;
+    assert!(given.contains("[… cut here: ") && given.contains(STORYBOARD), "{given}");
+    // The person's own words too long: said so.
+    let e = s.run("assistant.send", &json!({"text": "word ".repeat(9000)})).unwrap_err();
+    assert!(e.to_string().contains("more than Local takes in"), "{e}");
     let e = s
         .run(
             "ai.saveProfile",
