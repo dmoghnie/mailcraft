@@ -102,14 +102,16 @@ impl Session {
             .then(|| format!("account {account}'s mail may not go to {}: the person decides that in File › Options › AI", profile.name))
     }
 
-    /// `list_folders`: the accounts it may read, and their folders.
-    pub(super) fn tool_list_folders(&mut self, profile: &AiProfile, input: &Value) -> Outcome {
+    /// `list_folders`: the accounts it may read, and their folders (each account listed is in the
+    /// chat then: its name, address and folders).
+    pub(super) fn tool_list_folders(&mut self, chat: &mut Chat, profile: &AiProfile, input: &Value) -> Outcome {
         let only = input.get("account").and_then(Value::as_str).filter(|a| !a.is_empty());
         if let Some(why) = only.and_then(|a| self.unreadable(a, profile)) {
             return Outcome::failed("List folders", why);
         }
         let mut out = Vec::new();
         for a in self.readable_accounts(profile).into_iter().filter(|a| only.is_none_or(|o| o == a.config.id)) {
+            chat.holds(&a.config.id);
             out.push(format!("Account {} ({} <{}>):", a.config.id, a.config.name, a.config.email));
             for f in a.folders.iter().filter(|f| f.selectable).take(FOLDERS_MOST) {
                 let role = if f.role == FolderRole::Other { String::new() } else { format!(" [{}]", f.role.code()) };
@@ -152,8 +154,9 @@ impl Session {
         Ok(out)
     }
 
-    /// `find_messages`: a search (as the search box takes it), or the newest messages.
-    pub(super) fn tool_find_messages(&mut self, profile: &AiProfile, input: &Value) -> Outcome {
+    /// `find_messages`: a search (as the search box takes it), or the newest messages. What it
+    /// finds is in the chat then, as a message read is: who wrote it, about what, its start.
+    pub(super) fn tool_find_messages(&mut self, chat: &mut Chat, profile: &AiProfile, input: &Value) -> Outcome {
         let s = |k: &str| input.get(k).and_then(Value::as_str).map(str::trim).filter(|v| !v.is_empty());
         let query = s("query").unwrap_or_default();
         let what = if query.is_empty() {
@@ -179,6 +182,9 @@ impl Session {
         } else {
             self.search_aside(query, &folders, most)
         };
+        for m in &found.found {
+            chat.holds(&m.key.account);
+        }
         let ids: Vec<String> = found.found.iter().map(|m| m.key.to_id()).collect();
         let mut out: Vec<String> = found.found.iter().map(|m| self.message_row(m)).collect();
         out.push(match found.total {
@@ -225,8 +231,9 @@ impl Session {
         }
     }
 
-    /// `selected_messages`: what the window has selected, and the message open.
-    pub(super) fn tool_selected(&mut self, profile: &AiProfile) -> Outcome {
+    /// `selected_messages`: what the window has selected, and the message open (each shown is in
+    /// the chat then).
+    pub(super) fn tool_selected(&mut self, chat: &mut Chat, profile: &AiProfile) -> Outcome {
         let mut keys: Vec<MessageKey> = self.selection.clone();
         if let Some(r) = &self.reading
             && !keys.contains(&r.key)
@@ -241,6 +248,7 @@ impl Session {
                 continue;
             }
             if let Some(m) = self.shared_of(key) {
+                chat.holds(&key.account);
                 let open = if self.reading.as_ref().is_some_and(|r| &r.key == key) { " (open)" } else { "" };
                 out.push(format!("{}{open}", self.message_row(&m)));
                 ids.push(key.to_id());

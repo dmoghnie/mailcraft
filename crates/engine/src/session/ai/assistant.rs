@@ -229,4 +229,9 @@ impl Assistant {
     pub(crate) fn owns(&self, q: u64) -> bool {
         self.asking.contains_key(&q) || self.dropped.contains(&q)
     }
+
+    /// Whether question `q` was let go: its chat stopped or deleted.
+    pub(crate) fn let_go(&self, q: u64) -> bool {
+        self.dropped.contains(&q)
+    }
 }

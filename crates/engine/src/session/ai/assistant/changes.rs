@@ -154,16 +154,15 @@ impl Session {
         let reply_to = match input.get("reply_to").and_then(Value::as_str).filter(|v| !v.is_empty()) {
             Some(id) => {
                 let k = chat.message_named(id).ok_or("`reply_to` must be a message's id, as the tools give it")?;
+                self.readable_by(chat, &k.account)?;
                 self.shared_of(&k).ok_or_else(|| format!("there's no message {id} (any more)"))?;
                 Some(k)
             }
             None => None,
         };
         let account = Some(s("account")).filter(|a| !a.is_empty());
-        if let Some(a) = &account
-            && self.account(a).is_none()
-        {
-            return Err(format!("there's no account {a}"));
+        if let Some(a) = &account {
+            self.readable_by(chat, a)?;
         }
         Ok(Change::Write { to: s("to"), cc: s("cc"), subject: s("subject"), body, reply_to, account })
     }
@@ -179,6 +178,8 @@ impl Session {
             let id = id.as_str().ok_or("each id is a string")?;
             let k =
                 chat.message_named(id).ok_or_else(|| format!("`{}` isn't a message's id the tools gave", id.chars().take(80).collect::<String>()))?;
+            // Before looking for it: whether it's there is the account's to say, too.
+            self.readable_by(chat, &k.account)?;
             if self.shared_of(&k).is_none() {
                 return Err(format!("there's no message {id} (any more)"));
             }
@@ -187,6 +188,12 @@ impl Session {
             }
         }
         Ok(keys)
+    }
+
+    /// Mail of `account` may go to the chat's model: a change to it is the model's to propose.
+    fn readable_by(&self, chat: &Chat, account: &str) -> Result<(), String> {
+        let profile = self.assistant_profile(chat).map_err(|e| said(&e))?;
+        self.unreadable(account, &profile).map_or(Ok(()), Err)
     }
 
     fn in_role(&self, k: &MessageKey, role: FolderRole) -> bool {

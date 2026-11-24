@@ -228,6 +228,92 @@ fn mail_never_goes_to_a_model_its_account_does_not_allow() {
     assert!(questions(&mut s).is_empty());
 }
 
+/// What a search found, what's selected and the folders listed are in the chat as a message read
+/// is (who wrote what, about what; the account's name and folders): a chat holding them never
+/// goes to a model their account doesn't allow.
+#[test]
+fn mail_found_listed_or_selected_is_kept_from_a_model_its_account_does_not_allow() {
+    let mut s = sample_session("assistant-found-allowed");
+    s.run("ai.allow", &json!({"account": "sample", "reach": "local"})).unwrap();
+    let cloud = cloud(&mut s, "Claude");
+    let local = local(&mut s, "Local");
+    s.run("ai.use", &json!({"task": "chat", "profile": local})).unwrap();
+    let story = id_of(&s, STORYBOARD);
+    s.run("list.select", &json!({"key": story})).unwrap();
+    s.take_jobs();
+    for tool in [("find_messages", json!({"query": "storyboard"})), ("list_folders", json!({})), ("selected_messages", json!({}))] {
+        let c = send(&mut s, None, "Look");
+        let (q, _) = question(&mut s);
+        calls(&mut s, q, "", std::slice::from_ref(&tool));
+        let (q, asked) = question(&mut s);
+        assert!(!asked.turns.last().unwrap().results[0].error, "{}: {:?}", tool.0, asked.turns.last().unwrap().results);
+        answer(&mut s, q, "Done");
+        s.run("assistant.model", &json!({"chat": c, "profile": cloud})).unwrap();
+        let e = s.run("assistant.send", &json!({"chat": c, "text": "And now?"})).unwrap_err().to_string();
+        assert!(e.contains("holds mail that may not go to Claude"), "{}: {e}", tool.0);
+        assert!(questions(&mut s).is_empty(), "{}", tool.0);
+    }
+}
+
+/// A change to mail is the model's to propose only when that mail may go to it: named by its id
+/// or not, no move, mark or answer of an account the model may not read is proposed, and it
+/// isn't told whether such a message is there.
+#[test]
+fn a_change_is_never_proposed_on_mail_its_model_may_not_read() {
+    let mut s = sample_session("assistant-change-allowed");
+    s.run("ai.allow", &json!({"account": "sample", "reach": "local"})).unwrap();
+    let cloud = cloud(&mut s, "Claude");
+    s.run("ai.use", &json!({"task": "chat", "profile": cloud})).unwrap();
+    s.take_jobs();
+    let story = id_of(&s, STORYBOARD);
+    let c = send(&mut s, None, "Tidy up");
+    let (q, _) = question(&mut s);
+    calls(
+        &mut s,
+        q,
+        "",
+        &[
+            ("move_messages", json!({"ids": [story], "folder": "archive"})),
+            ("mark_messages", json!({"ids": ["sample:1:999999:INBOX"], "read": true})),
+            ("write_message", json!({"reply_to": story, "body": "Hi"})),
+            ("write_message", json!({"account": "sample", "to": "zoe@studio.example", "body": "Hi"})),
+        ],
+    );
+    let v = chat(&mut s, &c);
+    let runs = v["chat"]["runs"].as_array().unwrap();
+    assert_eq!(runs.len(), 4);
+    for r in runs {
+        assert_eq!(r["state"], "failed", "{r}");
+        assert!(r["result"].as_str().unwrap().contains("may not go to Claude"), "{r}");
+    }
+    assert_eq!(v["waitsOnYou"], false);
+}
+
+/// A chat stopped (or deleted) is let go: when its model then fails, its mail goes to no
+/// fallback model.
+#[test]
+fn a_stopped_chat_goes_to_no_fallback() {
+    let mut s = sample_session("assistant-stop-fallback");
+    s.run("ai.allow", &json!({"account": "sample", "reach": "any"})).unwrap();
+    let cloud = cloud(&mut s, "Claude");
+    let local = local(&mut s, "Local");
+    s.run(
+        "ai.saveProfile",
+        &json!({"id": local, "name": "Local", "api": "openAi", "url": "http://localhost:11434/v1/", "model": "llama3.2", "fallback": cloud}),
+    )
+    .unwrap();
+    s.run("ai.use", &json!({"task": "chat", "profile": local})).unwrap();
+    s.take_jobs();
+    let story = id_of(&s, STORYBOARD);
+    let c = send(&mut s, None, "Summarise");
+    let (q, _) = question(&mut s);
+    calls(&mut s, q, "", &[("read_message", json!({"id": story}))]);
+    let (q, _) = question(&mut s);
+    s.run("assistant.stop", &json!({"chat": c})).unwrap();
+    fail(&mut s, q, "network: connection refused");
+    assert!(questions(&mut s).is_empty(), "nothing asked of the fallback");
+}
+
 /// What the person points at goes with what they say: a message whole, a part they selected,
 /// a folder.
 #[test]

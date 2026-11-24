@@ -226,7 +226,9 @@ impl Session {
                 };
                 let received = result.as_ref().map_or(0, |a| a.received);
                 self.ai_settle(w.logged, if result.is_ok() { "answered" } else { "failed" }, received);
+                // A chat stopped or deleted is let go: its mail goes to no other model.
                 if result.is_err()
+                    && !self.ai.assistant.let_go(id)
                     && let Some(next) = self.ai_fallback(&w)
                 {
                     return self.ai_send(id, w, &next);

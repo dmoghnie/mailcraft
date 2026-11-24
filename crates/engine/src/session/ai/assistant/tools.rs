@@ -201,14 +201,14 @@ impl Session {
             return Outcome::failed(&call.name, "what was given isn't a JSON object".into());
         }
         match call.name.as_str() {
-            "list_folders" => self.tool_list_folders(profile, &input),
-            "find_messages" => self.tool_find_messages(profile, &input),
+            "list_folders" => self.tool_list_folders(chat, profile, &input),
+            "find_messages" => self.tool_find_messages(chat, profile, &input),
             "read_message" => self.tool_read_message(chat, profile, &input),
             "find_events" => self.tool_find_events(chat, profile, &input),
             "find_people" => self.tool_find_people(chat, profile, &input),
             "find_tasks" => self.tool_find_tasks(chat, profile, &input),
             "find_notes" => self.tool_find_notes(chat, profile, &input),
-            "selected_messages" => self.tool_selected(profile),
+            "selected_messages" => self.tool_selected(chat, profile),
             name if !reads(name) && tools().iter().any(|t| t.name == name) => match self.change_of(chat, name, &input) {
                 Ok(change) => Outcome::Proposed { what: change.what(self), messages: change.ids() },
                 Err(why) => Outcome::failed(name, why),
