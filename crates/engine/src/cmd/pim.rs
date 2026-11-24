@@ -148,7 +148,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             let current = s.find_event(&uid).map(|(_, e)| e.event.clone()).ok_or_else(|| CmdError::Params(format!("no event `{uid}`")))?;
             let before = current.sequence;
             let e = event_from(s, v, current)?;
-            let r = s.update_event(&uid, |x| *x = e)?;
+            let r = s.update_event(None, &uid, |x| *x = e)?;
             tell_of_change(s, &uid, before)?;
             Ok(r)
         })
@@ -169,7 +169,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             // Decided before it's gone: a server that schedules hears of it first.
             let route = before.as_ref().map(|(a, _, _)| s.meeting_route(a, &uid));
             let occurrence = p::i64(v, "occurrence");
-            let r = s.delete_event(&uid, occurrence)?;
+            let r = s.delete_event(None, &uid, occurrence)?;
             if let Some((account, mut e, href)) = before
                 && let Some(route) = route
                 && organized_by_me(s, &e)
@@ -387,10 +387,10 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         .params(r#"{"text"?: string, "color"?: 0|1|2|3|4 (blue, green, pink, yellow, white), "account"?: string}"#),
         CommandSpec::new("note.update", "Edit note", "Notes", |s, v| {
             let color = p::u64(v, "color").and_then(|c| u8::try_from(c).ok());
-            s.update_note(p::req_str(v, "uid")?, p::str(v, "text"), color)
+            s.update_note(None, p::req_str(v, "uid")?, p::str(v, "text"), color)
         })
         .params(r#"{"uid": string, "text"?: string, "color"?: 0|1|2|3|4}"#),
-        CommandSpec::new("note.delete", "Delete note", "Notes", |s, v| s.delete_note(p::req_str(v, "uid")?)).params(r#"{"uid": string}"#),
+        CommandSpec::new("note.delete", "Delete note", "Notes", |s, v| s.delete_note(None, p::req_str(v, "uid")?)).params(r#"{"uid": string}"#),
         CommandSpec::new("note.saveFile", "Save note's file", "Notes", save_note_file)
             .params(r#"{"uid": string, "index": number (its place among the note's files), "path": string, "open"?: bool (saved to be opened by another app: never a file that runs code)}"#),
     ]

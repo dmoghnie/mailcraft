@@ -277,3 +277,50 @@ fn pim_changes_are_checked_as_they_are_proposed() {
     assert_eq!((r[0].0.as_str(), r[1].0.as_str()), ("No tasks found.", "No notes found."));
     assert!(r[2..].iter().all(|(said, error)| *error && said.contains("mail may go to Claude")), "{r:?}");
 }
+
+/// An event or a note two accounts hold under one uid (a meeting invited at two of the person's
+/// addresses) is changed and deleted in the account the chat found it in; the other's copy is
+/// left as it was.
+#[test]
+fn what_two_accounts_hold_under_one_uid_is_changed_in_the_one_found() {
+    let mut s = ready("assistant-one-uid");
+    let home = s.run("account.add", &json!({"email": "riley@home.example", "password": "pw"})).unwrap()["account"].as_str().unwrap().to_string();
+    s.run("ai.allow", &json!({"account": home, "reach": "local"})).unwrap();
+    let (lunch, poster) = ("lunch@sample.mailcraft", "note-poster@sample.mailcraft");
+    let event = s.find_event(lunch).map(|(_, e)| e.event.clone()).unwrap();
+    s.create_event(Some(&home), None, ical::CalEvent { summary: "Lunch at home".into(), ..event }).unwrap();
+    let note = s.notes("poster").first().map(|n| n.note.clone()).unwrap();
+    let copy = mailcraft_model::pim::Note { text: "Home poster\nThe draft.".into(), ..note };
+    s.pim_mut(&home).notes.push(mailcraft_model::pim::StoredNote { note: copy, ..Default::default() });
+    s.take_jobs();
+    let place = |s: &Session, account: &str| {
+        s.pim.get(account).and_then(|p| p.events.iter().find(|e| e.event.uid == lunch)).map(|e| e.event.location.clone())
+    };
+    let text =
+        |s: &Session, account: &str| s.pim.get(account).and_then(|p| p.notes.iter().find(|n| n.note.uid == poster)).map(|n| n.note.text.clone());
+    let c = send(&mut s, None, "Tidy my calendar and notes");
+    let (q, _) = question(&mut s);
+    let (q, found) = results(&mut s, q, &[("find_events", json!({"query": "lunch"})), ("find_notes", json!({"query": "poster"}))]);
+    let (events, notes) = (&found[0].0, &found[1].0);
+    let (at_work, at_home) = (named(events, "Lunch with Jun"), named(events, "Lunch at home"));
+    let (work_note, home_note) = (named(notes, "Festival poster"), named(notes, "Home poster"));
+    calls(
+        &mut s,
+        q,
+        "",
+        &[
+            ("change_event", json!({"id": at_home, "location": "Kitchen"})),
+            ("change_note", json!({"id": home_note, "text": "Home poster\nThe final."})),
+        ],
+    );
+    let (q, _) = approve(&mut s, &c);
+    assert_eq!(place(&s, &home).as_deref(), Some("Kitchen"));
+    assert_eq!(place(&s, "sample").as_deref(), Some("Café on the corner"), "the other copy as it was");
+    assert_eq!(text(&s, &home).as_deref(), Some("Home poster\nThe final."));
+    assert!(text(&s, "sample").is_some_and(|t| t.starts_with("Festival poster")));
+    calls(&mut s, q, "", &[("delete_items", json!({"ids": [at_work, work_note]}))]);
+    approve(&mut s, &c);
+    assert_eq!((place(&s, "sample"), text(&s, "sample")), (None, None), "deleted in the account found");
+    assert_eq!(place(&s, &home).as_deref(), Some("Kitchen"), "the other copy kept");
+    assert!(text(&s, &home).is_some());
+}

@@ -184,7 +184,7 @@ impl Session {
                 Found::Event { .. } => self.delete_found_event(found, series),
                 Found::Person { uid, .. } => self.delete_card(uid).map(drop).map_err(|e| said(&e)),
                 Found::Task { uid, .. } => self.delete_task(uid).map(drop).map_err(|e| said(&e)),
-                Found::Note { uid, .. } => self.delete_note(uid).map(drop).map_err(|e| said(&e)),
+                Found::Note { account, uid } => self.delete_note(Some(account), uid).map(drop).map_err(|e| said(&e)),
             };
             match done {
                 Ok(()) => deleted += 1,

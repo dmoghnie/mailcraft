@@ -58,7 +58,7 @@ impl Session {
         if all_day && by % 86_400 != 0 {
             return Err(CmdError::Params("an all-day event is moved by whole days".into()));
         }
-        self.update_event(uid, |e| {
+        self.update_event(None, uid, |e| {
             e.start = e.start.saturating_add(by);
             e.end = e.end.saturating_add(by);
         })

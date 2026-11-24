@@ -115,7 +115,7 @@ fn an_occurrence_moved_on_its_own_stays_where_it_was_put() {
 #[test]
 fn a_changed_occurrence_the_series_no_longer_has_goes() {
     let mut s = series("moving-shorter", (berlin(20, 18, 10), berlin(20, 18, 40)));
-    s.update_event("daily", |e| e.rrule = Some("FREQ=DAILY;COUNT=2".into())).unwrap();
+    s.update_event(None, "daily", |e| e.rrule = Some("FREQ=DAILY;COUNT=2".into())).unwrap();
     let left = parts(&s);
     assert_eq!(left.iter().filter_map(|e| e.recurrence_id).collect::<Vec<_>>(), Vec::<i64>::new(), "{left:?}");
     assert_eq!(s.pim["sample"].deleted.iter().map(|t| t.href.as_str()).collect::<Vec<_>>(), ["I2"]);

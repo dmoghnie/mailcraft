@@ -165,8 +165,8 @@ impl Session {
 
     /// The note `found` names, approved, given `text`.
     pub(super) fn change_found_note(&mut self, found: Found, text: &str) -> Result<(String, Vec<Found>), String> {
-        let Found::Note { uid, .. } = &found else { return Err("that isn't a note".into()) };
-        self.update_note(uid, Some(text), None).map_err(|e| said(&e))?;
+        let Found::Note { account, uid } = &found else { return Err("that isn't a note".into()) };
+        self.update_note(Some(account), uid, Some(text), None).map_err(|e| said(&e))?;
         Ok(("Done: changed.".into(), vec![found]))
     }
 }

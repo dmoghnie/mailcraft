@@ -485,10 +485,10 @@ fn reminders_come_snooze_and_go() {
     assert!(due(&s).is_empty());
     s.run("event.update", &json!({"uid": review, "reminder": 60})).unwrap();
     assert_eq!(due(&s), ["Review"]);
-    s.update_event(&review, |e| e.status = "CANCELLED".into()).unwrap();
+    s.update_event(None, &review, |e| e.status = "CANCELLED".into()).unwrap();
     assert!(due(&s).is_empty());
     // Long after it ended, an unanswered reminder no longer waits.
-    s.update_event(&review, |e| e.status = String::new()).unwrap();
+    s.update_event(None, &review, |e| e.status = String::new()).unwrap();
     s.clock.now = review_at + 3 * 86_400;
     assert!(!due(&s).contains(&"Review".to_string()));
     // Junk.

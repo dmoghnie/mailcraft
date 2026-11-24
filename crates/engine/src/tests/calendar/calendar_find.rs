@@ -48,7 +48,7 @@ fn private_and_show_as_are_set_kept_and_shown() {
     let mut odd = s.find_event(&uid).unwrap().1.event.clone();
     odd.extra.retain(|l| !l.starts_with("CLASS"));
     odd.extra.insert(0, "CLASS:X-TEAM".into());
-    s.update_event(&uid, |x| *x = odd).unwrap();
+    s.update_event(None, &uid, |x| *x = odd).unwrap();
     s.run("event.update", &json!({"uid": uid, "summary": "Doctor (moved)", "privacy": "private"})).unwrap();
     assert!(s.find_event(&uid).unwrap().1.event.extra.iter().any(|l| l == "CLASS:X-TEAM"), "already private: kept as written");
 }

@@ -355,7 +355,16 @@ impl Session {
 
     /// The event (master, not an instance) with a uid, and its account.
     pub fn find_event(&self, uid: &str) -> Option<(&str, &StoredEvent)> {
-        self.pim.iter().find_map(|(a, p)| p.events.iter().find(|e| e.event.uid == uid && e.event.recurrence_id.is_none()).map(|e| (a.as_str(), e)))
+        self.find_event_in(None, uid)
+    }
+
+    /// As [`Session::find_event`], in `account` when one is named: a meeting invited at two of
+    /// the person's addresses has one uid in both.
+    fn find_event_in(&self, account: Option<&str>, uid: &str) -> Option<(&str, &StoredEvent)> {
+        self.pim
+            .iter()
+            .filter(|(a, _)| account.is_none_or(|x| x == a.as_str()))
+            .find_map(|(a, p)| p.events.iter().find(|e| e.event.uid == uid && e.event.recurrence_id.is_none()).map(|e| (a.as_str(), e)))
     }
 
     fn new_uid(&mut self) -> String {
@@ -390,9 +399,10 @@ impl Session {
         Ok(serde_json::json!({"uid": uid, "account": account}))
     }
 
-    /// Change an event (all of its occurrences).
-    pub fn update_event(&mut self, uid: &str, change: impl FnOnce(&mut CalEvent)) -> CmdResult {
-        let account = self.find_event(uid).map(|(a, _)| a.to_string()).ok_or_else(|| CmdError::Params(format!("no event `{uid}`")))?;
+    /// Change an event (all of its occurrences), in `account` when one is named, else the first
+    /// that has it.
+    pub fn update_event(&mut self, account: Option<&str>, uid: &str, change: impl FnOnce(&mut CalEvent)) -> CmdResult {
+        let account = self.find_event_in(account, uid).map(|(a, _)| a.to_string()).ok_or_else(|| CmdError::Params(format!("no event `{uid}`")))?;
         let p = self.pim_mut(&account);
         let Some(stored) = p.events.iter_mut().find(|e| e.event.uid == uid && e.event.recurrence_id.is_none()) else {
             return Err(CmdError::Params(format!("no event `{uid}`")));
@@ -429,10 +439,13 @@ impl Session {
         Ok(serde_json::json!({"uid": uid}))
     }
 
-    /// Delete an event, or one occurrence of a recurring one (`occurrence`: its start).
-    pub fn delete_event(&mut self, uid: &str, occurrence: Option<i64>) -> CmdResult {
-        let (account, calendar) =
-            self.find_event(uid).map(|(a, e)| (a.to_string(), e.calendar.clone())).ok_or_else(|| CmdError::Params(format!("no event `{uid}`")))?;
+    /// Delete an event, or one occurrence of a recurring one (`occurrence`: its start), in
+    /// `account` when one is named, else the first that has it.
+    pub fn delete_event(&mut self, account: Option<&str>, uid: &str, occurrence: Option<i64>) -> CmdResult {
+        let (account, calendar) = self
+            .find_event_in(account, uid)
+            .map(|(a, e)| (a.to_string(), e.calendar.clone()))
+            .ok_or_else(|| CmdError::Params(format!("no event `{uid}`")))?;
         let p = self.pim_mut(&account);
         // As changing it: not in a calendar that's read-only (someone else's, one subscribed to).
         if p.calendars.iter().any(|c| c.id == calendar && c.read_only) {
@@ -658,10 +671,11 @@ impl Session {
         out
     }
 
-    fn note_account(&self, uid: &str) -> Result<String, CmdError> {
+    /// The account with the note `uid`: `account` when one is named, else the first that has it.
+    fn note_account(&self, account: Option<&str>, uid: &str) -> Result<String, CmdError> {
         self.pim
             .iter()
-            .find(|(_, p)| p.notes.iter().any(|n| n.note.uid == uid))
+            .find(|(a, p)| account.is_none_or(|x| x == a.as_str()) && p.notes.iter().any(|n| n.note.uid == uid))
             .map(|(a, _)| a.clone())
             .ok_or_else(|| CmdError::Params(format!("no note `{uid}`")))
     }
@@ -692,9 +706,9 @@ impl Session {
         Ok(serde_json::json!({"uid": uid, "account": account}))
     }
 
-    /// Change a note's text or colour.
-    pub fn update_note(&mut self, uid: &str, text: Option<&str>, color: Option<u8>) -> CmdResult {
-        let account = self.note_account(uid)?;
+    /// Change a note's text or colour, in `account` when one is named, else the first that has it.
+    pub fn update_note(&mut self, account: Option<&str>, uid: &str, text: Option<&str>, color: Option<u8>) -> CmdResult {
+        let account = self.note_account(account, uid)?;
         let remote = self.notes_sync(&account);
         let now = self.clock.now;
         let p = self.pim_mut(&account);
@@ -727,8 +741,9 @@ impl Session {
         Ok((mailcraft_mime::sanitize_filename(f.file_name()), data))
     }
 
-    pub fn delete_note(&mut self, uid: &str) -> CmdResult {
-        let account = self.note_account(uid)?;
+    /// Delete a note, in `account` when one is named, else the first that has it.
+    pub fn delete_note(&mut self, account: Option<&str>, uid: &str) -> CmdResult {
+        let account = self.note_account(account, uid)?;
         let p = self.pim_mut(&account);
         let mut remote = false;
         for n in p.notes.iter().filter(|n| n.note.uid == uid && !n.href.is_empty()) {

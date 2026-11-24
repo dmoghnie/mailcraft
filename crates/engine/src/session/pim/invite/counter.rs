@@ -87,7 +87,7 @@ impl Session {
     pub fn accept_proposal(&mut self) -> CmdResult {
         let (account, uid, proposal, _) = self.open_proposal()?;
         let before = self.find_event(&uid).map(|(_, e)| e.event.sequence).unwrap_or_default();
-        self.update_event(&uid, |e| {
+        self.update_event(None, &uid, |e| {
             e.start = proposal.start;
             e.end = proposal.end;
             e.all_day = proposal.all_day;

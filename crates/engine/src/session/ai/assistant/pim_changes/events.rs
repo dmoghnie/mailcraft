@@ -199,12 +199,15 @@ impl Session {
     /// by when it is, so moved, it has a new name.
     pub(super) fn change_found_event(&mut self, found: Found, event: CalEvent) -> Result<(String, Vec<Found>), String> {
         let Found::Event { account, calendar, uid, occurrence, start } = found else { return Err("that isn't an event".into()) };
+        // Changed in the account it was found in, where it was checked: one invited at two of
+        // the person's addresses has the same uid in both.
+        let at = account.clone();
         let now = if event.rrule.is_some() {
             Found::Event { account, calendar, uid: uid.clone(), occurrence, start }
         } else {
             Found::Event { account, calendar, uid: uid.clone(), occurrence: event.start, start: shown(self, &event).0 }
         };
-        self.update_event(&uid, |x| *x = event).map_err(|e| said(&e))?;
+        self.update_event(Some(&at), &uid, |x| *x = event).map_err(|e| said(&e))?;
         Ok((format!("Done: changed; it's {} now.", now.name()), vec![now]))
     }
 
@@ -212,9 +215,9 @@ impl Session {
     /// unless `series`.
     pub(super) fn delete_found_event(&mut self, found: &Found, series: bool) -> Result<(), String> {
         let repeats = self.event_kept(found)?.rrule.is_some();
-        let Found::Event { uid, occurrence, .. } = found else { return Err("that isn't an event".into()) };
+        let Found::Event { account, uid, occurrence, .. } = found else { return Err("that isn't an event".into()) };
         let only = if repeats && !series { Some(*occurrence) } else { None };
-        self.delete_event(uid, only).map(drop).map_err(|e| said(&e))
+        self.delete_event(Some(account), uid, only).map(drop).map_err(|e| said(&e))
     }
 }
 
