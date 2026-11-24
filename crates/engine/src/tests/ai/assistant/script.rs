@@ -122,3 +122,27 @@ fn a_script_stopped_while_it_waits_is_let_go() {
     s.apply(Event::Body { key: keys[0].clone(), raw: raw.to_vec() });
     assert!(questions(&mut s).is_empty(), "nothing runs");
 }
+
+/// A call the model names as a script's own would be named (`s#1`) is given another id: the
+/// script's call doesn't take its place, and each goes back to the model.
+#[test]
+fn a_models_call_named_as_a_scripts_own_keeps_its_place() {
+    let mut s = ready("script-ids");
+    scripts_on(&mut s);
+    let id = send(&mut s, None, "How many folders, and how much mail about the storyboard?");
+    let (q, _) = question(&mut s);
+    let script = r#"find_messages(#{query: "storyboard"}).total"#;
+    let made = [("s", "run_script", json!({"script": script})), ("s#1", "list_folders", json!({}))];
+    let calls = made.iter().map(|(id, name, input)| AiToolCall { id: (*id).into(), name: (*name).into(), input: input.clone() }).collect();
+    let a = AiAnswer { calls, ..AiAnswer::default() };
+    s.apply(Event::Ai { done: AiDone::Answered { id: q, answer: Some(a), error: None } });
+    let c = chat(&mut s, &id);
+    let tools: Vec<(&str, &str)> =
+        c["chat"]["runs"].as_array().unwrap().iter().map(|r| (r["call"].as_str().unwrap(), r["tool"].as_str().unwrap())).collect();
+    assert_eq!(tools.iter().filter(|(_, t)| *t == "list_folders").count(), 1, "{tools:?}");
+    assert_eq!(tools.iter().filter(|(_, t)| *t == "find_messages").count(), 1, "{tools:?}");
+    let (_, asked) = question(&mut s);
+    let r = results(&asked);
+    assert!(r[0].content.starts_with("It came to: "), "{}", r[0].content);
+    assert!(r[1].content.contains("Inbox") && !r[1].content.contains(STORYBOARD), "the folders: {}", r[1].content);
+}

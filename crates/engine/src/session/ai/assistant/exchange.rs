@@ -411,17 +411,19 @@ impl Session {
 
 /// `calls` with ids of their own in `chat`: none used by an earlier call or another of these (a
 /// server that numbers them again in each answer, `call_0`, or gives two the same) would have one
-/// call's results, or its approval, taken for another's.
+/// call's results, or its approval, taken for another's. Nor has one a `#`: a script's own calls
+/// are named `{its call}#{n}` as it makes them, after these.
 fn own_ids(chat: &Chat, calls: Vec<AiToolCall>) -> Vec<AiToolCall> {
     let mut taken: HashSet<String> = HashSet::new();
     calls
         .into_iter()
         .map(|c| {
             let free = |id: &str| !id.is_empty() && chat.run(id).is_none() && !taken.contains(id);
-            let mut id = c.id.clone();
+            let base = c.id.replace('#', "-");
+            let mut id = base.clone();
             let mut n = chat.turns.len();
             while !free(&id) {
-                id = format!("{}-{n}", c.id);
+                id = format!("{base}-{n}");
                 n = n.saturating_add(1);
             }
             taken.insert(id.clone());
