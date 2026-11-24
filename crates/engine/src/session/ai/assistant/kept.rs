@@ -168,9 +168,30 @@ impl Session {
             self.assistant_let_go(q);
         }
         if let Some(store) = &self.store {
-            store.remove_doc(&chat_doc(id)).map_err(|e| CmdError::Failed(format!("the chat couldn't be deleted: {e}")))?;
+            // Its copy set aside as damaged too: it holds mail as well.
+            for doc in [chat_doc(id), format!("{}.bad", chat_doc(id))] {
+                store.remove_doc(&doc).map_err(|e| CmdError::Failed(format!("the chat couldn't be deleted: {e}")))?;
+            }
         }
         Ok(())
+    }
+
+    /// Every chat deleted, and every chat file left with them: one never listed, a copy set
+    /// aside as damaged, the list's own (each holds mail, or what was asked). How many listed
+    /// chats went.
+    pub(super) fn assistant_delete_all(&mut self) -> Result<usize, CmdError> {
+        self.assistant_load();
+        let ids: Vec<String> = self.ai.assistant.heads().map(|h| h.id.clone()).collect();
+        for id in &ids {
+            self.assistant_delete(id)?;
+        }
+        if let Some(store) = &self.store {
+            let left = store.doc_names(CHAT_DOC).into_iter().chain(store.doc_names(&format!("{HEADS_DOC}.bad")));
+            for doc in left {
+                store.remove_doc(&doc).map_err(|e| CmdError::Failed(format!("a chat couldn't be deleted: {e}")))?;
+            }
+        }
+        Ok(ids.len())
     }
 }
 

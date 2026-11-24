@@ -68,12 +68,7 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
         })
         .params(r#"{"chat": string}"#),
         CommandSpec::new("assistant.deleteAll", "Delete every chat with MailCraft's AI", WHERE, |s, _| {
-            s.assistant_load();
-            let ids: Vec<String> = s.ai.assistant.heads().map(|h| h.id.clone()).collect();
-            for id in &ids {
-                s.assistant_delete(id)?;
-            }
-            Ok(json!({"deleted": ids.len()}))
+            Ok(json!({"deleted": s.assistant_delete_all()?}))
         }),
     ]
 }

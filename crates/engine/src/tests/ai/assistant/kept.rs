@@ -112,3 +112,30 @@ fn a_chat_cut_short_by_closing_says_so_when_read_again() {
     assert_eq!(v["chat"]["runs"][0]["result"], "MailCraft closed before the message came");
     assert_eq!(v["chat"]["error"], "MailCraft closed before the answer came: send again to go on");
 }
+
+/// Deleted, a chat's copy set aside as damaged goes with it; Delete all leaves no chat file
+/// at all, listed or not, nor the list's damaged copy.
+#[test]
+fn deleting_chats_leaves_no_copy_of_them() {
+    let mut s = ready("assistant-no-copies");
+    let c = send(&mut s, None, "Keep this");
+    let (q, _) = question(&mut s);
+    answer(&mut s, q, "Kept.");
+    s.take_jobs();
+    let store = s.store.clone().unwrap();
+    let root = store.root().to_path_buf();
+    std::fs::write(root.join(format!("assistant-{c}.json.bad")), b"{ mail").unwrap();
+    s.run("assistant.delete", &json!({"chat": c})).unwrap();
+    assert!(!root.join(format!("assistant-{c}.json.bad")).exists(), "its damaged copy deleted with it");
+    let d = send(&mut s, None, "And this");
+    let (q, _) = question(&mut s);
+    answer(&mut s, q, "Kept.");
+    s.take_jobs();
+    for left in ["assistant-c90.json.bad", "assistant-c91.json", "assistant.json.bad"] {
+        std::fs::write(root.join(left), b"{ mail").unwrap();
+    }
+    assert_eq!(s.run("assistant.deleteAll", &json!({})).unwrap()["deleted"], 1);
+    s.take_jobs();
+    let files: Vec<String> = std::fs::read_dir(&root).unwrap().flatten().map(|e| e.file_name().to_string_lossy().into_owned()).collect();
+    assert!(files.iter().all(|f| !f.starts_with("assistant") || f == "assistant.json"), "{d}: {files:?}");
+}
