@@ -171,6 +171,68 @@ fn a_change_proposed_beside_a_find_is_put_off_to_be_approved_with_the_others() {
     assert!(results.iter().all(|r| r.content.starts_with("Approved.")), "{results:?}");
 }
 
+/// A change proposed beside a read that found nothing (it failed) stands: there's nothing to
+/// propose it again with.
+#[test]
+fn a_change_beside_a_read_that_failed_is_not_put_off() {
+    let mut s = ready("assistant-not-put-off");
+    let story = id_of(&s, STORYBOARD);
+    let c = send(&mut s, None, "Flag Zoe's storyboard mail");
+    let (q, _) = question(&mut s);
+    calls(&mut s, q, "", &[("read_message", json!({"id": "no-such-message"})), ("mark_messages", json!({"ids": [story], "flagged": true}))]);
+    let v = chat(&mut s, &c);
+    let runs = v["chat"]["runs"].as_array().unwrap();
+    assert_eq!((&runs[0]["state"], &runs[1]["state"]), (&json!("failed"), &json!("proposed")), "{runs:?}");
+    assert_eq!(v["waitsOnYou"], true);
+}
+
+/// Two calls an answer gave one id get one each: a card each, and approving one applies only
+/// its change.
+#[test]
+fn calls_given_one_id_are_approved_each_on_its_own() {
+    let mut s = ready("assistant-one-id");
+    let story = id_of(&s, STORYBOARD);
+    let c = send(&mut s, None, "Mark Zoe's storyboard mail read and archive it");
+    let (q, _) = question(&mut s);
+    let call = |name: &str, input: Value| AiToolCall { id: "call_0".into(), name: name.into(), input };
+    let calls =
+        vec![call("mark_messages", json!({"ids": [story], "read": true})), call("move_messages", json!({"ids": [story], "folder": "archive"}))];
+    s.apply(Event::Ai { done: AiDone::Answered { id: q, answer: Some(AiAnswer { calls, ..AiAnswer::default() }), error: None } });
+    let v = chat(&mut s, &c);
+    let runs = v["chat"]["runs"].as_array().unwrap();
+    let ids: Vec<&str> = runs.iter().map(|r| r["call"].as_str().unwrap()).collect();
+    assert_eq!(ids.len(), 2);
+    assert_ne!(ids[0], ids[1], "{runs:?}");
+    assert!(runs[1]["what"].as_str().unwrap().starts_with("Move"), "each card its own change: {runs:?}");
+    s.run("assistant.decide", &json!({"chat": c, "call": ids[0], "approve": true})).unwrap();
+    let m = s.list.iter().find(|m| m.key.to_id() == story).expect("not moved");
+    assert!(m.flags.seen, "read");
+    let v = chat(&mut s, &c);
+    assert_eq!(v["chat"]["runs"][1]["state"], "proposed", "the move still waits");
+}
+
+/// Approved together, a message's move comes after its other changes, whatever the model's
+/// order: moved first, its id would be its new folder's, and the mark would find it gone.
+#[test]
+fn approved_together_a_move_comes_after_the_other_changes() {
+    let mut s = ready("assistant-move-last");
+    let story = id_of(&s, STORYBOARD);
+    let c = send(&mut s, None, "Archive Zoe's storyboard mail and mark it read");
+    let (q, _) = question(&mut s);
+    calls(
+        &mut s,
+        q,
+        "",
+        &[("move_messages", json!({"ids": [story], "folder": "archive"})), ("mark_messages", json!({"ids": [story], "read": true}))],
+    );
+    s.run("assistant.decide", &json!({"chat": c, "approve": true})).unwrap();
+    let archived = s.folder_state("sample", "Archive").messages.iter().find(|m| m.subject == STORYBOARD).map(|m| m.flags.seen);
+    assert_eq!(archived, Some(true), "archived and read");
+    let (_, asked) = question(&mut s);
+    let results = &asked.turns.last().unwrap().results;
+    assert!(results.iter().all(|r| r.content.starts_with("Approved.")), "{results:?}");
+}
+
 /// A message it writes is opened for the person to send, an answer threaded to the message it
 /// answers; it's never sent.
 #[test]

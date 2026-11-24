@@ -196,14 +196,7 @@ impl Session {
         match answer {
             Err(e) => chat.error = Some(e),
             Ok(a) => {
-                let mut calls = a.calls;
-                // Each call's id its own in the chat: a server that numbers them again in each
-                // answer (`call_0`) would have its results taken for another's.
-                for c in &mut calls {
-                    if chat.run(&c.id).is_some() || c.id.is_empty() {
-                        c.id = format!("{}-{}", c.id, chat.turns.len());
-                    }
-                }
+                let calls = own_ids(&chat, a.calls);
                 let turn = AiTurn { role: AiRole::Assistant, text: a.text, calls, results: Vec::new() };
                 let at = self.clock.now;
                 chat.turns.push(ChatTurn { turn, thinking: a.thinking, context: Vec::new(), context_text: String::new(), cut: a.cut, at });
@@ -224,9 +217,7 @@ impl Session {
         *steps = steps.saturating_add(1);
         let over = *steps > STEPS_MOST;
         let profile = self.assistant_profile(chat);
-        // A change proposed beside a find or a read is put off, for the model to propose again
-        // with the others what it finds leads to: the person approves them together, at once.
-        let finding = calls.iter().any(|c| reads(&c.name));
+        let start = chat.runs.len();
         for (n, call) in calls.iter().enumerate() {
             let outcome = match &profile {
                 _ if over => Outcome::failed(&call.name, format!("stopped: {STEPS_MOST} steps were taken")),
@@ -234,10 +225,18 @@ impl Session {
                 Err(e) => Outcome::failed(&call.name, said(e)),
                 Ok(p) => self.tool_call(chat, p, call),
             };
-            let run = run_of(call, outcome);
-            let run =
-                if finding && run.state == RunState::Proposed { ToolRun { state: RunState::PutOff, result: PUT_OFF.into(), ..run } } else { run };
-            chat.runs.push(run);
+            chat.runs.push(run_of(call, outcome));
+        }
+        // A change proposed beside a find or a read that ran (or waits for its message) is put
+        // off, for the model to propose again with the others what it finds leads to: the
+        // person approves them together, at once. Beside one that failed or never ran, nothing
+        // was found: the change stands.
+        let finding = chat.runs.iter().skip(start).any(|r| reads(&r.tool) && matches!(r.state, RunState::Ran | RunState::Waiting));
+        if finding {
+            for r in chat.runs.iter_mut().skip(start).filter(|r| r.state == RunState::Proposed) {
+                r.state = RunState::PutOff;
+                r.result = PUT_OFF.into();
+            }
         }
         if over {
             chat.error = Some(format!("MailCraft's AI stopped after {STEPS_MOST} steps: say what to do next to go on"));
@@ -328,12 +327,15 @@ impl Session {
     /// Approve or decline what chat `id` proposed: `call`'s, or all of it. What was decided.
     pub(crate) fn assistant_decide(&mut self, id: &str, call: Option<&str>, approve: bool) -> Result<usize, CmdError> {
         let mut chat = self.take_chat(id)?;
-        let open: Vec<AiToolCall> = chat
+        let mut open: Vec<AiToolCall> = chat
             .open_calls()
             .into_iter()
             .filter(|c| call.is_none_or(|x| x == c.id))
             .filter(|c| chat.run(&c.id).is_some_and(|r| r.state == RunState::Proposed))
             .collect();
+        // Moves and deletes last, as the window's own changes: a message's id says its folder,
+        // so a change after its move would find it gone.
+        open.sort_by_key(|c| matches!(c.name.as_str(), "move_messages" | "delete_messages"));
         for c in &open {
             let (state, result, found) = if approve {
                 match self.change_of(&chat, &c.name, &c.input).and_then(|ch| self.apply_change(ch)) {
@@ -376,6 +378,27 @@ impl Session {
         self.put_chat(chat);
         Ok(asked.is_some() || open)
     }
+}
+
+/// `calls` with ids of their own in `chat`: none used by an earlier call or another of these (a
+/// server that numbers them again in each answer, `call_0`, or gives two the same) would have one
+/// call's results, or its approval, taken for another's.
+fn own_ids(chat: &Chat, calls: Vec<AiToolCall>) -> Vec<AiToolCall> {
+    let mut taken: HashSet<String> = HashSet::new();
+    calls
+        .into_iter()
+        .map(|c| {
+            let free = |id: &str| !id.is_empty() && chat.run(id).is_none() && !taken.contains(id);
+            let mut id = c.id.clone();
+            let mut n = chat.turns.len();
+            while !free(&id) {
+                id = format!("{}-{n}", c.id);
+                n = n.saturating_add(1);
+            }
+            taken.insert(id.clone());
+            AiToolCall { id, ..c }
+        })
+        .collect()
 }
 
 /// A call's run, as it went.
