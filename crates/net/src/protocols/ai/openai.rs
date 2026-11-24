@@ -50,13 +50,11 @@ fn messages(t: &AiTurn) -> Vec<Value> {
     }
 }
 
-/// A call's input as this format sends it: JSON in a string (the model's own text, when it
-/// wasn't JSON).
+/// A call's input as this format sends it: JSON in a string. One that wasn't an object (its
+/// text cut short, broken, an array) goes back empty, as Anthropic's format sends it: a server
+/// that reads the history's calls refuses the whole chat for one it can't read.
 fn arguments(c: &AiToolCall) -> String {
-    match &c.input {
-        Value::String(s) => s.clone(),
-        v => v.to_string(),
-    }
+    if c.input.is_object() { c.input.to_string() } else { "{}".into() }
 }
 
 /// The first choice's text, thinking and tool calls: its text a string, or its text parts

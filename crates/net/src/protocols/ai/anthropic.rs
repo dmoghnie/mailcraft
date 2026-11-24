@@ -8,6 +8,8 @@ use serde_json::json;
 /// The API version asked for. Since this one, no model takes `temperature`, which MailCraft
 /// doesn't send.
 const VERSION: &str = "2026-10-21";
+/// What a turn that said nothing is sent as: the API takes no empty content but the last.
+const NO_TEXT: &str = "(no answer)";
 
 pub(super) fn request(base: &str, endpoint: &AiEndpoint, key: Option<&str>, chat: &AiChat, stream: bool) -> Request {
     let messages: Vec<Value> = chat.turns.iter().map(message).collect();
@@ -33,10 +35,13 @@ fn message(t: &AiTurn) -> Value {
         AiRole::User => "user",
         AiRole::Assistant => "assistant",
     };
+    // No content may be empty or blank, but the last: an answer that came with none (an empty
+    // end of turn, thinking cut at the longest answer) is said to have been so.
     if t.calls.is_empty() && t.results.is_empty() {
-        return json!({"role": role, "content": t.text});
+        let text = if t.text.trim().is_empty() { NO_TEXT } else { t.text.as_str() };
+        return json!({"role": role, "content": text});
     }
-    let text = (!t.text.is_empty()).then(|| json!({"type": "text", "text": t.text}));
+    let text = (!t.text.trim().is_empty()).then(|| json!({"type": "text", "text": t.text}));
     let blocks: Vec<Value> = match t.role {
         AiRole::User => t
             .results

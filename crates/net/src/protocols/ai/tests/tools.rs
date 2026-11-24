@@ -64,6 +64,49 @@ fn anthropics_format_offers_tools_and_sends_their_calls_and_results() {
     assert_eq!(m[2]["content"][2], json!({"type": "text", "text": "And the dates?"}), "what was said after the results");
 }
 
+/// A call whose input wasn't an object (its text cut short or broken, an array) goes back as an
+/// empty one in both formats: a server that reads the history's calls would refuse the chat for
+/// it. An answer that said nothing, or only blanks beside its calls, is never sent as empty or
+/// blank content, which Anthropic's refuses.
+#[test]
+fn what_a_model_gave_broken_or_empty_goes_back_as_each_format_takes_it() {
+    let mut said = AiTurn::assistant("\n\n");
+    said.calls = vec![
+        AiToolCall { id: "c1".into(), name: "search_mail".into(), input: json!("{\"query\": \"inv") },
+        AiToolCall { id: "c2".into(), name: "search_mail".into(), input: json!(["invoice"]) },
+    ];
+    let mut back = AiTurn::user("");
+    back.results = vec![
+        AiToolResult { id: "c1".into(), content: "not JSON".into(), error: true },
+        AiToolResult { id: "c2".into(), content: "not JSON".into(), error: true },
+    ];
+    let chat = AiChat {
+        system: "Help.".into(),
+        turns: vec![AiTurn::user("Find it"), said, back, AiTurn::assistant(""), AiTurn::user("Again?")],
+        max_tokens: 512,
+        tools: Vec::new(),
+    };
+    let server = ModelServer::start();
+    ask(&endpoint(&server, AiApi::OpenAi), None, &chat).unwrap();
+    let m = server.seen()[0].body["messages"].clone();
+    assert_eq!(m[2]["tool_calls"][0]["function"]["arguments"], "{}", "{m}");
+    assert_eq!(m[2]["tool_calls"][1]["function"]["arguments"], "{}", "{m}");
+    ask(&endpoint(&server, AiApi::Anthropic), Some(KEY), &chat).unwrap();
+    let m = server.seen()[1].body["messages"].clone();
+    for msg in m.as_array().unwrap() {
+        match &msg["content"] {
+            Value::String(t) => assert!(!t.trim().is_empty(), "{msg}"),
+            Value::Array(blocks) => {
+                assert!(!blocks.is_empty(), "{msg}");
+                for b in blocks.iter().filter(|b| b["type"] == "text") {
+                    assert!(!b["text"].as_str().unwrap().trim().is_empty(), "{msg}");
+                }
+            }
+            other => panic!("content of an unknown kind: {other}"),
+        }
+    }
+}
+
 #[test]
 fn a_models_calls_are_read_from_a_whole_answer() {
     let server = ModelServer::start();
