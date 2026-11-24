@@ -300,6 +300,14 @@ impl Store {
         self.write_json(&self.root.join(safe_doc(name)), value)
     }
 
+    /// The names of the documents at the top of the data folder ([`Store::save_doc`]) that begin
+    /// with `prefix`, sorted.
+    pub fn doc_names(&self, prefix: &str) -> Vec<String> {
+        let mut names: Vec<String> = self.files.list(&self.root).into_iter().map(|(n, _)| n).filter(|n| n.starts_with(prefix)).collect();
+        names.sort();
+        names
+    }
+
     /// A document at the top of the data folder ([`Store::save_doc`]) removed; one not there is
     /// no matter.
     pub fn remove_doc(&self, name: &str) -> Result<()> {

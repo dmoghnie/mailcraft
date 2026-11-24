@@ -4,26 +4,56 @@
 
 use super::*;
 use crate::{CmdError, Session};
+use mailcraft_store::Store;
 
 /// The list of chats kept.
 const HEADS_DOC: &str = "assistant.json";
 
+/// How each chat's file is named: this, its id, `.json`.
+const CHAT_DOC: &str = "assistant-";
+
 /// A chat's file.
 fn chat_doc(id: &str) -> String {
-    format!("assistant-{id}.json")
+    format!("{CHAT_DOC}{id}.json")
+}
+
+/// The ids of the chats whose files are kept, listed or not.
+fn kept_ids(store: &Store) -> Vec<String> {
+    store.doc_names(CHAT_DOC).iter().filter_map(|n| n.strip_prefix(CHAT_DOC)?.strip_suffix(".json").map(str::to_string)).collect()
 }
 
 impl Session {
-    /// The list of chats, read once.
+    /// The list of chats, read once. A chat whose file is kept but isn't listed (the list
+    /// damaged and set aside, or not read) is listed again from its file: left out, Delete all
+    /// would miss it.
     pub(super) fn assistant_load(&mut self) {
         if std::mem::replace(&mut self.ai.assistant.loaded, true) {
             return;
         }
         let Some(store) = self.store.clone() else { return };
-        match store.load_doc::<Vec<ChatHead>>(HEADS_DOC) {
-            Ok(heads) => self.ai.assistant.heads = heads,
-            Err(e) => log::warn!("the list of MailCraft's AI chats couldn't be read: {e}"),
+        let listed = match store.load_doc::<Vec<ChatHead>>(HEADS_DOC) {
+            Ok(heads) => heads,
+            Err(e) => {
+                log::warn!("the list of MailCraft's AI chats couldn't be read: {e}");
+                Vec::new()
+            }
+        };
+        let unlisted: Vec<ChatHead> = kept_ids(&store)
+            .into_iter()
+            .filter(|id| !listed.iter().any(|h| h.id == *id))
+            .filter_map(|id| match store.load_doc::<Chat>(&chat_doc(&id)) {
+                Ok(c) if !c.turns.is_empty() => Some(ChatHead { id, title: c.title, created: c.created, updated: c.updated }),
+                _ => None,
+            })
+            .collect();
+        if unlisted.is_empty() {
+            self.ai.assistant.heads = listed;
+            return;
         }
+        let mut heads: Vec<ChatHead> = listed.into_iter().chain(unlisted).collect();
+        heads.sort_by_key(|h| h.created);
+        self.ai.assistant.heads = heads;
+        self.ai.assistant.heads_changed = true;
     }
 
     /// Chat `id`, read if it isn't yet; an error when there's none.
@@ -49,7 +79,11 @@ impl Session {
     /// A new chat, named after what it begins with.
     pub(super) fn assistant_new(&mut self, title: &str, profile: Option<String>) -> String {
         self.assistant_load();
-        let n = self.ai.assistant.heads.iter().filter_map(|h| h.id.strip_prefix('c').and_then(|n| n.parse::<u64>().ok())).max().unwrap_or(0);
+        // Not the id of a chat whose file is kept, listed or not (one that couldn't be read):
+        // its file would be written over.
+        let kept = self.store.as_ref().map(kept_ids).unwrap_or_default();
+        let ids = self.ai.assistant.heads.iter().map(|h| h.id.as_str()).chain(kept.iter().map(String::as_str));
+        let n = ids.filter_map(|id| id.strip_prefix('c').and_then(|n| n.parse::<u64>().ok())).max().unwrap_or(0);
         let id = format!("c{}", n.saturating_add(1));
         let now = self.clock.now;
         let title = title_of(title);

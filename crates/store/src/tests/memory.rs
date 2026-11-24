@@ -92,3 +92,18 @@ fn a_memory_folder_lists_only_its_own_files() {
     assert!(!s.files.exists(&dir.join("8")) && !s.files.exists(&s.folder_dir("a1", "Other")));
     assert_eq!(s.files.main.walk(&dir).len(), 3);
 }
+
+/// The documents at the top of the data folder are listed by how their names begin: not one
+/// that begins otherwise, nor a file in a folder inside.
+#[test]
+fn documents_are_listed_by_how_their_names_begin() {
+    let s = Store::memory_from(vec![
+        ("assistant-c2.json".into(), b"{}".to_vec()),
+        ("assistant.json".into(), b"[]".to_vec()),
+        ("assistant-c1.json.bad".into(), b"{".to_vec()),
+        ("rules.json".into(), b"[]".to_vec()),
+        ("a1/assistant-c3.json".into(), b"{}".to_vec()),
+    ]);
+    assert_eq!(s.doc_names("assistant-"), ["assistant-c1.json.bad", "assistant-c2.json"]);
+    assert!(s.doc_names("nothing").is_empty());
+}
