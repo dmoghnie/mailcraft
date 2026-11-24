@@ -26,6 +26,8 @@ pub use mailcraft_model as model;
 pub use mailcraft_pgp as pgp;
 pub use mailcraft_smime as smime;
 pub use mailcraft_store as store;
+#[doc(hidden)]
+pub use session::run_script_against;
 pub use session::{
     ACCENTS, AI_LOG_KEPT, ARRANGE_HEADINGS, ASSISTANT_LINK, ASSISTANT_WIDTH, AccountState, AgeUnit, AiLogEntry, AiPrefs, AiProfile, AiReach, AiState,
     AiTask, AiTest, ArchiveRule, Arrange, Assistant, AssistantPane, AutoArchive, BodyWork, CONTEXT_AT_FIRST, CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST,

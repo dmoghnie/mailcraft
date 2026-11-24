@@ -8,6 +8,7 @@ workspace = { members = ["."] }
 
 # One binary per target, each kept out of `cargo test`, `cargo doc` and `cargo bench`.
 bin = [
+    { name = "ai_script", bench = false, test = false, doc = false, path = "fuzz_targets/ai_script.rs" }, # the scripts MailCraft's AI writes, run against made-up answers
     { name = "backup", bench = false, test = false, doc = false, path = "fuzz_targets/store/backup.rs" }, # a backup of what the browser keeps
     { name = "data_file", bench = false, test = false, doc = false, path = "fuzz_targets/store/data_file.rs" }, # an account's data file, measured and compressed again
     { name = "data_folder", bench = false, test = false, doc = false, path = "fuzz_targets/store/data_folder.rs" }, # a data folder's id, a data file's owner and a folder's list of data files
@@ -41,7 +42,7 @@ bin = [
 [dependencies]
 libfuzzer-sys = "0.4"
 # The MailCraft crates under test, straight from this checkout.
-mailcraft-engine.path = "../crates/engine" # a backup of what the browser keeps
+mailcraft-engine.path = "../crates/engine" # a backup of what the browser keeps, the AI's scripts
 mailcraft-jmap.path = "../crates/jmap" # the JMAP client
 mailcraft-mime.path = "../crates/mime" # MIME, HTML and markup
 mailcraft-model.path = "../crates/model" # iCalendar, vCard, search
@@ -52,6 +53,11 @@ mailcraft-print.path = "../crates/print" # messages as PDF pages
 mailcraft-pgp.path = "../crates/pgp" # OpenPGP
 rand_core = { version = "0.6", features = ["getrandom"] } # the decrypting generator
 mailcraft-store.path = "../crates/store" # the in-memory cache syncs write to, the search index
+
+# The forks the main workspace takes these crates from, at the same revisions (`cargo xtask ci`
+# checks they match).
+[patch.crates-io]
+rhai = { git = "https://github.com/dmoghnie/rhai.git", rev = "c305e8e8e5955eb03532ce715dd09a185e6ae3c4" }
 
 # `cargo fuzz ... -O` builds with this profile, debug assertions and overflow checks on.
 [profile.release]

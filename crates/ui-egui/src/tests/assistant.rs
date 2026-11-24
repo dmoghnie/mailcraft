@@ -266,3 +266,29 @@ fn a_long_model_name_keeps_the_pane_within_its_width() {
         assert!(pane.expand(1.0).contains_rect(r), "{label} at {r:?}, outside the pane {pane:?}");
     }
 }
+
+/// A script the model ran shows on a card of its own, saying what it does; its code and a card
+/// for each call it made unfold under it.
+#[test]
+fn a_script_shows_on_its_card_and_its_code_and_calls_unfold_under_it() {
+    let (mut a, ctx) = ready("assistant-script");
+    let id = a.session.prefs.ai.profiles[0].id.clone();
+    a.run(
+        "ai.saveProfile",
+        json!({"id": id, "name": "Local", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small", "scripts": true}),
+    );
+    click_named(&ctx, &mut a, "Ask AI");
+    click_named(&ctx, &mut a, "What needs my attention today?");
+    let chat = a.ui.assistant.chat.clone().expect("a chat begun");
+    answers(&mut a, &chat, "", &[("run_script", json!({"script": "find_messages(#{limit: 3}).total", "what": "Count the newest"}))]);
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "Ran a script") && has(&t, "Count the newest") && has(&t, "The script"), "{t:?}");
+    assert!(!has(&t, "Searched the mail"), "folded: {t:?}");
+    click_named(&ctx, &mut a, "The script");
+    // Unfolded once it's done opening.
+    for _ in 0..20 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "find_messages(#{limit: 3}).total") && has(&t, "Searched the mail"), "{t:?}");
+}

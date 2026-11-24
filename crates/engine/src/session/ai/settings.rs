@@ -64,6 +64,10 @@ pub struct AiProfile {
     /// computer, say).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fallback: Option<String>,
+    /// The assistant may run scripts it writes with it (code mode): off until the person turns
+    /// it on.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub scripts: bool,
 }
 
 impl AiProfile {

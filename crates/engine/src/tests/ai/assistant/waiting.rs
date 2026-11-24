@@ -6,7 +6,7 @@ use mailcraft_model::{FolderRole, Summary};
 
 /// An account online (the sample's mail is all here already), its mail allowed to the model, with
 /// a message of each of `subjects` in its Inbox, none of them downloaded.
-fn online(s: &mut Session, subjects: &[&str]) -> Vec<MessageKey> {
+pub(super) fn online(s: &mut Session, subjects: &[&str]) -> Vec<MessageKey> {
     let r = s.run("account.add", &json!({"email": "riley@online.example", "password": "pw"})).unwrap();
     let id = r["account"].as_str().unwrap().to_string();
     s.run("ai.allow", &json!({"account": id, "reach": "local"})).unwrap();

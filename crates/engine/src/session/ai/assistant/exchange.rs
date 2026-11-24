@@ -6,7 +6,7 @@
 use mailcraft_model::{AiChat, AiRole, AiToolCall, AiToolResult, AiTurn, AiWork, Job, MessageKey};
 
 use super::looking::said;
-use super::tools::{Outcome, reads, tools};
+use super::tools::{Outcome, reads, tools_for};
 use super::*;
 use crate::session::ai::AiTask;
 use crate::{CmdError, Session};
@@ -60,12 +60,12 @@ impl Session {
     }
 
     /// Chat `id`, taken out to work on (put back with [`Session::put_chat`]).
-    fn take_chat(&mut self, id: &str) -> Result<Chat, CmdError> {
+    pub(super) fn take_chat(&mut self, id: &str) -> Result<Chat, CmdError> {
         self.assistant_chat(id)?;
         self.ai.assistant.chats.remove(id).ok_or_else(|| CmdError::Params(format!("no chat {id}")))
     }
 
-    fn put_chat(&mut self, chat: Chat) {
+    pub(super) fn put_chat(&mut self, chat: Chat) {
         let id = chat.id.clone();
         self.ai.assistant.chats.insert(id.clone(), chat);
         self.assistant_changed(&id);
@@ -165,7 +165,7 @@ impl Session {
         let chat = self.take_chat(id)?;
         let asked = self.assistant_profile(&chat).and_then(|p| {
             let system = self.assistant_system(&p);
-            self.fitted(&chat, &p, system, tools()).map(|c| (p, c))
+            self.fitted(&chat, &p, system, tools_for(&p)).map(|c| (p, c))
         });
         let accounts = chat.accounts.clone();
         self.put_chat(Chat { answer_due: asked.is_ok(), ..chat });
@@ -188,7 +188,7 @@ impl Session {
     /// model first asked; none when `q` isn't a chat's, an error when `profile` can't hold it.
     pub(crate) fn assistant_refit(&self, q: u64, profile: &AiProfile) -> Option<Result<AiChat, CmdError>> {
         let chat = self.ai.assistant.asking.get(&q).and_then(|id| self.ai.assistant.chats.get(id))?;
-        Some(self.fitted(chat, profile, self.assistant_system(profile), tools()))
+        Some(self.fitted(chat, profile, self.assistant_system(profile), tools_for(profile)))
     }
 
     /// Question `q`'s answer came: put in its chat, its calls made, and the chat goes on.
@@ -239,9 +239,16 @@ impl Session {
         // off, for the model to propose again with the others what it finds leads to: the
         // person approves them together, at once. Beside one that failed or never ran, nothing
         // was found: the change stands.
-        let finding = chat.runs.iter().skip(start).any(|r| reads(&r.tool) && matches!(r.state, RunState::Ran | RunState::Waiting));
+        // A script's own calls are its; what it read makes it a find.
+        let mine = |r: &ToolRun| r.part_of.is_none();
+        let finding = chat
+            .runs
+            .iter()
+            .skip(start)
+            .filter(|r| mine(r))
+            .any(|r| (reads(&r.tool) || r.tool == script::RUN_SCRIPT) && matches!(r.state, RunState::Ran | RunState::Waiting));
         if finding {
-            for r in chat.runs.iter_mut().skip(start).filter(|r| r.state == RunState::Proposed) {
+            for r in chat.runs.iter_mut().skip(start).filter(|r| mine(r) && r.state == RunState::Proposed) {
                 r.state = RunState::PutOff;
                 r.result = PUT_OFF.into();
             }
@@ -252,7 +259,7 @@ impl Session {
     }
 
     /// Chat `id`, its open calls settled, sends what they gave back and asks again.
-    fn assistant_go_on(&mut self, id: &str) {
+    pub(super) fn assistant_go_on(&mut self, id: &str) {
         let Some(chat) = self.ai.assistant.chats.get(id) else { return };
         let open = chat.open_calls();
         let waits = open.iter().any(|c| chat.run(&c.id).is_some_and(|r| matches!(r.state, RunState::Waiting | RunState::Proposed)));
@@ -287,6 +294,10 @@ impl Session {
                     run.state = RunState::Declined;
                     run.result = if declined.is_empty() { "Not decided: nothing changed.".into() } else { declined.into() };
                 }
+                RunState::Waiting if run.tool == script::RUN_SCRIPT => {
+                    run.state = RunState::Failed;
+                    run.result = "stopped before the script ended".into();
+                }
                 RunState::Waiting => {
                     run.state = RunState::Failed;
                     run.result = "stopped before the message came".into();
@@ -300,11 +311,13 @@ impl Session {
             };
             results.push(AiToolResult { id: c.id, content, error: run.state == RunState::Failed });
         }
+        self.scripts_stopped(chat);
         results
     }
 
-    /// A message came, or couldn't: the reads waiting for it go on.
+    /// A message came, or couldn't: the reads and scripts waiting for it go on.
     pub(crate) fn assistant_body(&mut self, key: &MessageKey, failed: Option<&str>) {
+        self.script_body(key, failed);
         let id = key.to_id();
         let waiting = |c: &Chat| c.runs.iter().any(|r| r.state == RunState::Waiting && r.messages.first() == Some(&id));
         let chats: Vec<String> = self.ai.assistant.chats.values().filter(|c| waiting(c)).map(|c| c.id.clone()).collect();
@@ -418,12 +431,13 @@ fn own_ids(chat: &Chat, calls: Vec<AiToolCall>) -> Vec<AiToolCall> {
 }
 
 /// A call's run, as it went.
-fn run_of(call: &AiToolCall, outcome: Outcome) -> ToolRun {
+pub(super) fn run_of(call: &AiToolCall, outcome: Outcome) -> ToolRun {
     let (state, what, messages, found, result) = match outcome {
-        Outcome::Ran { what, messages, found, result } => (RunState::Ran, what, messages, found, result),
+        Outcome::Ran { what, messages, found, result, .. } => (RunState::Ran, what, messages, found, result),
         Outcome::Failed { what, result } => (RunState::Failed, what, Vec::new(), Vec::new(), result),
         Outcome::Waiting { what, key } => (RunState::Waiting, what, vec![key.to_id()], Vec::new(), String::new()),
+        Outcome::Scripting { what } => (RunState::Waiting, what, Vec::new(), Vec::new(), String::new()),
         Outcome::Proposed { what, messages } => (RunState::Proposed, what, messages, Vec::new(), String::new()),
     };
-    ToolRun { call: call.id.clone(), tool: call.name.chars().take(64).collect(), state, what, messages, found, result }
+    ToolRun { call: call.id.clone(), tool: call.name.chars().take(64).collect(), state, what, messages, found, result, part_of: None }
 }

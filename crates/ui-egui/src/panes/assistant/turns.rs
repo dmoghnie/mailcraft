@@ -110,8 +110,29 @@ fn answered(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, i: usize,
     for call in &turn.turn.calls {
         if let Some(run) = chat.run(&call.id).filter(|r| r.state != RunState::PutOff) {
             card(ui, t, &chat.id, run, acts);
+            if run.tool == SCRIPT {
+                script_parts(ui, t, chat, &call.id, call.input.get("script").and_then(|v| v.as_str()).unwrap_or_default(), acts);
+            }
         }
     }
+}
+
+/// The tool that runs a script the model wrote.
+const SCRIPT: &str = "run_script";
+
+/// A script's own, folded under its card: its code, and a card for each call it made.
+fn script_parts(ui: &mut Ui, t: &Tokens, chat: &Chat, call: &str, code: &str, acts: &mut Vec<Action>) {
+    ui.indent(("assistant-script", &chat.id, call), |ui| {
+        egui::CollapsingHeader::new(RichText::new(tl!("The script")).small().color(t.dim)).id_salt(("assistant-script-code", &chat.id, call)).show(
+            ui,
+            |ui| {
+                ui.add(egui::Label::new(RichText::new(code).monospace().small().color(t.dim)).wrap().selectable(true));
+                for part in chat.runs.iter().filter(|r| r.part_of.as_deref() == Some(call)) {
+                    card(ui, t, &chat.id, part, acts);
+                }
+            },
+        );
+    });
 }
 
 /// A tool the model called: what it did, or the change it proposes and whether it's made.
@@ -182,6 +203,7 @@ fn tool_title(tool: &str) -> &str {
         "add_note" => tl!("New note"),
         "change_event" | "change_person" | "change_task" | "change_note" => tl!("Edit"),
         "delete_items" => tl!("Delete"),
+        SCRIPT => tl!("Ran a script"),
         other => other,
     }
 }

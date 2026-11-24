@@ -2188,6 +2188,10 @@ count	occurrences	ripetizioni
 	Forget the key kept	Dimentica la chiave conservata
 	Longest answer, in tokens	Risposta più lunga, in token
 	Takes in at once, in tokens	Accoglie in una volta, in token
+	Ran a script	Ha eseguito uno script
+	The script	Lo script
+	Let it write and run scripts	Lascia che scriva ed esegua script
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	Uno script trova e legge posta, eventi, contatti, attività e note in un solo passo anziché molti. Gira dentro MailCraft, senza file né rete, e non cambia nulla.
 	When it fails, ask	Se non riesce, chiedi a
 	No other model	Nessun altro modello
 	A message no longer here	Un messaggio non più presente

@@ -2189,6 +2189,10 @@ count	occurrences	előfordulás
 	Forget the key kept	A megőrzött kulcs elfelejtése
 	Longest answer, in tokens	Leghosszabb válasz, tokenben
 	Takes in at once, in tokens	Egyszerre befogad, tokenben
+	Ran a script	Szkriptet futtatott
+	The script	A szkript
+	Let it write and run scripts	Szkripteket írhat és futtathat
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	Egy szkript egyetlen lépésben keres és olvas leveleket, eseményeket, névjegyeket, feladatokat és jegyzeteket, sok helyett. A MailCraftban fut, fájlok és hálózat nélkül, és semmit sem módosít.
 	When it fails, ask	Ha nem sikerül, ezt kérdezze
 	No other model	Nincs másik modell
 	A message no longer here	Egy már nem létező üzenet

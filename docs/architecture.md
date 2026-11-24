@@ -129,6 +129,18 @@ and `cargo xtask sizes` enforces them.
   is in it (`AiPrefs::allows_all`), its fallbacks too. A chat that outgrows its profile's
   context (a token for every three bytes) loses what tools gave early on, then its oldest
   turns. At most 24 steps for one thing the person says.
+- **Scripts** (code mode, `session/ai/assistant/script/`): a model the person lets
+  (`AiProfile::scripts`) gets `run_script`, a script in Rhai (MIT or Apache-2.0, through a fork
+  pinned in `[patch.crates-io]`: `compact_str` in place of `smartstring`, and a limit on how deep
+  arrays and maps nest) whose functions are the tools that find and read, giving data rather than
+  text. Each call is the tool's own, with its checks, and shows under the script's card
+  (`ToolRun::part_of`). A run is replayed: the script runs from its start against what its calls
+  were answered so far; at the first call not answered it stops (a non-catchable error), the call
+  is made, and it runs again, so a read of a message still to download pauses it
+  (`Assistant::scripts`) until `Event::Body`. Only the run that ends is heard. Bounded in calls,
+  operations, sizes, variables, and depth of calls, expressions and data (measured on a 1 MiB
+  stack); no `eval`, modules, clock or custom syntax; each run in `catch_unwind`. It can't
+  change anything (proposals still go through the tools).
 - **Chats stay on this computer**: `assistant.json` lists them, each in `assistant-<id>.json`
   (read when first wanted, its file removed when it's deleted); never in the record or the log.
 - **The pane** (`ui-egui/src/panes/assistant/`) shows the chat from the session, never a copy:

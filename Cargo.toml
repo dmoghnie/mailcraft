@@ -43,6 +43,12 @@ unicode-segmentation = "1"
 chrono = { version = "0.4", default-features = false }
 chrono-tz = { version = "0.10", default-features = false }
 
+# MailCraft's AI's scripts (code mode): Rhai, MIT OR Apache-2.0, sandboxed and bounded, pure
+# Rust and wasm-safe without its clock (`no_time`); no modules, no custom syntax. Its strings as
+# `compact_str`, from the fork in `[patch.crates-io]` that leaves out `smartstring` (MPL-2.0,
+# unmaintained).
+rhai = { version = "1.27", default-features = false, features = ["std", "compact_str", "no_time", "no_module", "no_custom_syntax"] }
+
 # mail (all MIT and/or Apache-2.0)
 # `full_encoding`: mail in Shift_JIS, GBK, Big5 and EUC-KR (without it those came out as U+FFFD).
 mail-parser = { version = "1.0.1", features = ["full_encoding"] }
@@ -96,3 +102,6 @@ egui-wgpu = { git = "https://github.com/storytold/egui.git", rev = "6d518fc79968
 egui_glow = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
 eframe = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
 winit = { git = "https://github.com/storytold/winit.git", rev = "a517b3846ee8457d84ee4975110bfda6797c44dc" }
+# Rhai 1.27 with `smartstring` optional, so `compact_str` leaves it out: MailCraft's fork, its
+# fixes listed in its PATCHES.md.
+rhai = { git = "https://github.com/dmoghnie/rhai.git", rev = "c305e8e8e5955eb03532ce715dd09a185e6ae3c4" }

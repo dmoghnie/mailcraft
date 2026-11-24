@@ -5,7 +5,7 @@
 
 use mailcraft_model::dates;
 use mailcraft_model::pim::{Task, TaskPriority, TaskStatus};
-use serde_json::Value;
+use serde_json::{Value, json};
 
 use super::context::cut;
 use super::links::Found;
@@ -22,6 +22,8 @@ const NOTES_CHARS: usize = 300;
 const ATTENDEES_MOST: usize = 12;
 /// The most of a note's text given, in characters.
 const NOTE_CHARS: usize = 500;
+/// The most of an event's notes, or a note's text, a script is given, in characters.
+const DATA_CHARS: usize = 10_000;
 
 /// How many to give: what the model asked, within bounds.
 fn how_many(input: &Value) -> usize {
@@ -61,6 +63,7 @@ impl Session {
         let hits: Vec<&EventHit> = all.iter().filter(|h| self.prefs.ai.allows(profile, Some(&h.account))).take(most).collect();
         let found: Vec<Found> = hits.iter().map(|h| event_found(h)).collect();
         let mut out: Vec<String> = hits.iter().zip(&found).map(|(h, f)| self.event_row(h, f)).collect();
+        let events: Vec<Value> = hits.iter().zip(&found).map(|(h, f)| self.event_data(h, f)).collect();
         for h in &hits {
             chat.holds(&h.account);
         }
@@ -69,7 +72,29 @@ impl Session {
             n if n > hits.len() => format!("{n} found in all; these are the first {}.", hits.len()),
             n => format!("{n} found."),
         });
-        Outcome::listed(&what, found, out.join("\n"))
+        Outcome::listed(&what, found, out.join("\n"), json!({"events": events, "total": total}))
+    }
+
+    /// An event found, as a script has it: what its row says, each part apart.
+    fn event_data(&self, h: &EventHit, found: &Found) -> Value {
+        let e = self.event_at(h);
+        let person = |a: &mailcraft_model::pim::ical::Attendee| json!({"name": a.name.trim(), "email": a.email});
+        json!({
+            "id": found.name(),
+            "account": h.account,
+            "start": h.start,
+            "end": h.end,
+            "all_day": h.all_day,
+            "when": self.when_text(h.all_day, h.start, h.end),
+            "summary": h.summary,
+            "location": h.location.trim(),
+            "calendar": self.calendar_name_of(&h.account, &h.calendar),
+            "repeats": h.recurring,
+            "past": !h.upcoming,
+            "organizer": e.and_then(|e| e.organizer.as_ref()).map(person),
+            "attendees": e.map(|e| e.attendees.iter().map(person).collect::<Vec<_>>()).unwrap_or_default(),
+            "notes": e.map(|e| cut(e.description.trim(), DATA_CHARS)).unwrap_or_default(),
+        })
     }
 
     /// An event found, in a line: its name first, then when, what, where, and who.
@@ -139,9 +164,19 @@ impl Session {
         let people: Vec<_> = self.people(query).into_iter().filter(|p| self.prefs.ai.allows(profile, Some(p.account))).collect();
         let found: Vec<Found> = people.iter().take(most).map(|p| Found::Person { account: p.account.to_string(), uid: p.card.uid.clone() }).collect();
         let mut out = Vec::new();
+        let mut data = Vec::new();
         for (p, f) in people.iter().zip(&found) {
             chat.holds(p.account);
             let c = p.card;
+            data.push(json!({
+                "id": f.name(),
+                "account": p.account,
+                "name": c.display(),
+                "emails": c.emails.iter().map(|e| e.value.as_str()).collect::<Vec<_>>(),
+                "phones": c.phones.iter().map(|e| e.value.as_str()).collect::<Vec<_>>(),
+                "title": c.title.trim(),
+                "organization": c.org.trim(),
+            }));
             let mut row = format!("[{}] {}", f.name(), c.display());
             let emails: Vec<&str> = c.emails.iter().map(|e| e.value.as_str()).collect();
             if !emails.is_empty() {
@@ -162,7 +197,8 @@ impl Session {
             n if n > found.len() => format!("{n} found in all; these are the first {}.", found.len()),
             n => format!("{n} found."),
         });
-        Outcome::listed(&what, found, out.join("\n"))
+        let total = people.len();
+        Outcome::listed(&what, found, out.join("\n"), json!({"people": data, "total": total}))
     }
 
     /// `find_tasks`: the person's tasks, as the Tasks list finds them, in its order.
@@ -175,9 +211,24 @@ impl Session {
         let tasks: Vec<_> = self.tasks(query).into_iter().filter(|t| self.prefs.ai.allows(profile, Some(t.account))).collect();
         let found: Vec<Found> = tasks.iter().take(most).map(|t| Found::Task { account: t.account.to_string(), uid: t.task.uid.clone() }).collect();
         let mut out = Vec::new();
+        let mut data = Vec::new();
         for (t, f) in tasks.iter().zip(&found) {
             chat.holds(t.account);
             let task = t.task;
+            data.push(json!({
+                "id": f.name(),
+                "account": t.account,
+                "title": task.title.trim(),
+                "due": task.due_day().map(dates::day_string),
+                "late": task.overdue(today),
+                "status": status_said(task),
+                "done": task.status == TaskStatus::Completed,
+                "priority": task.priority.code(),
+                "repeats": task.rrule.is_some(),
+                "reminder": task.reminder,
+                "categories": task.categories,
+                "notes": cut(task.notes.trim(), DATA_CHARS),
+            }));
             let mut row = format!("[{}] {}", f.name(), task.title.trim());
             if let Some(d) = task.due_day() {
                 let late = if task.overdue(today) { " (late)" } else { "" };
@@ -208,7 +259,8 @@ impl Session {
             n if n > found.len() => format!("{n} found in all; these are the first {}.{hidden}", found.len()),
             n => format!("{n} found.{hidden}"),
         });
-        Outcome::listed(&what, found, out.join("\n"))
+        let total = tasks.len();
+        Outcome::listed(&what, found, out.join("\n"), json!({"tasks": data, "total": total}))
     }
 
     /// `find_notes`: the person's notes, by words in them, as the Notes list orders them.
@@ -220,8 +272,17 @@ impl Session {
         let notes: Vec<_> = self.notes(query).into_iter().filter(|n| self.prefs.ai.allows(profile, Some(n.account))).collect();
         let found: Vec<Found> = notes.iter().take(most).map(|n| Found::Note { account: n.account.to_string(), uid: n.note.uid.clone() }).collect();
         let mut out = Vec::new();
+        let mut data = Vec::new();
         for (n, f) in notes.iter().zip(&found) {
             chat.holds(n.account);
+            data.push(json!({
+                "id": f.name(),
+                "account": n.account,
+                "changed": n.note.modified,
+                "when": dates::full_time(n.note.modified, &self.clock),
+                "text": cut(n.note.text.trim(), DATA_CHARS),
+                "files": n.note.kept_files().len(),
+            }));
             let lines: Vec<&str> = n.note.text.lines().map(str::trim).filter(|l| !l.is_empty()).collect();
             let mut row =
                 format!("[{}] Changed {} | {}", f.name(), dates::full_time(n.note.modified, &self.clock), cut(&lines.join(" / "), NOTE_CHARS));
@@ -236,7 +297,8 @@ impl Session {
             n if n > found.len() => format!("{n} found in all; these are the first {}.", found.len()),
             n => format!("{n} found."),
         });
-        Outcome::listed(&what, found, out.join("\n"))
+        let total = notes.len();
+        Outcome::listed(&what, found, out.join("\n"), json!({"notes": data, "total": total}))
     }
 }
 

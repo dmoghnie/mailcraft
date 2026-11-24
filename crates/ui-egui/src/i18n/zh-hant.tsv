@@ -2188,6 +2188,10 @@ count	occurrences	次
 	Forget the key kept	忘記已儲存的金鑰
 	Longest answer, in tokens	最長回答（token 數）
 	Takes in at once, in tokens	一次能接收的量（token 數）
+	Ran a script	執行了指令碼
+	The script	指令碼
+	Let it write and run scripts	允許編寫並執行指令碼
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	指令碼一步就能尋找並讀取郵件、行程、聯絡人、工作和筆記，不必分成許多步。它在 MailCraft 內執行，不使用檔案或網路，也不變更任何內容。
 	When it fails, ask	失敗時改問
 	No other model	不改問其他模型
 	A message no longer here	已不存在的郵件

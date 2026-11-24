@@ -2202,6 +2202,10 @@ count	occurrences	wystąpieniach
 	Forget the key kept	Zapomnij zapisany klucz
 	Longest answer, in tokens	Najdłuższa odpowiedź, w tokenach
 	Takes in at once, in tokens	Przyjmuje naraz, w tokenach
+	Ran a script	Uruchomił skrypt
+	The script	Skrypt
+	Let it write and run scripts	Pozwól pisać i uruchamiać skrypty
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	Skrypt znajduje i czyta pocztę, wydarzenia, kontakty, zadania i notatki w jednym kroku zamiast wielu. Działa wewnątrz MailCraft, bez plików i sieci, i niczego nie zmienia.
 	When it fails, ask	Gdy zawiedzie, zapytaj
 	No other model	Żaden inny model
 	A message no longer here	Wiadomość, której już nie ma

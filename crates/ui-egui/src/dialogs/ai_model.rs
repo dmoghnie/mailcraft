@@ -36,6 +36,8 @@ pub struct AiModelForm {
     pub context: String,
     /// The profile asked instead when this one fails.
     pub fallback: Option<String>,
+    /// The assistant may run scripts it writes with it.
+    pub scripts: bool,
     pub error: Option<String>,
 }
 
@@ -52,6 +54,7 @@ impl AiModelForm {
             max_tokens: p.max_tokens.to_string(),
             context: if p.context > 0 { p.context.to_string() } else { String::new() },
             fallback: p.fallback.clone(),
+            scripts: p.scripts,
             ..AiModelForm::default()
         }
     }
@@ -67,7 +70,7 @@ impl AiModelForm {
             AiApi::Anthropic => "anthropic",
             AiApi::Ollama => "ollama",
         };
-        let mut p = json!({"name": self.name.trim(), "api": api, "url": self.url.trim(), "model": self.model.trim(), "fallback": self.fallback.clone().unwrap_or_default()});
+        let mut p = json!({"name": self.name.trim(), "api": api, "url": self.url.trim(), "model": self.model.trim(), "fallback": self.fallback.clone().unwrap_or_default(), "scripts": self.scripts});
         if let Some(id) = &self.id {
             p["id"] = json!(id);
         }
@@ -138,6 +141,12 @@ pub(super) fn draw(ui: &mut Ui, f: &mut AiModelForm, s: &Session, t: &Tokens, ac
     let at_first = mailcraft_engine::CONTEXT_AT_FIRST.to_string();
     ui.add(egui::TextEdit::singleline(&mut f.context).hint_text(at_first).desired_width(120.0));
     fallback(ui, f, s);
+    ui.add_space(6.0);
+    ui.checkbox(&mut f.scripts, tl!("Let it write and run scripts"));
+    let scripts = tl!(
+        "A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing."
+    );
+    ui.add(egui::Label::new(RichText::new(scripts).color(t.faint).small()).wrap());
     let local = mailcraft_engine::ai_url_is_local(&f.url);
     let place = if f.url.trim().is_empty() {
         None

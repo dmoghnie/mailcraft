@@ -10,14 +10,26 @@ use crate::Session;
 
 /// How a call went, as soon as it's made.
 pub(super) enum Outcome {
-    /// Read: what it gave, and the messages, events and people in it.
-    Ran { what: String, messages: Vec<String>, found: Vec<Found>, result: String },
+    /// Read: what it gave (the text, for the model; the data, for a script), and the
+    /// messages, events and people in it.
+    Ran { what: String, messages: Vec<String>, found: Vec<Found>, result: String, data: Value },
     /// It couldn't be done: why.
     Failed { what: String, result: String },
     /// It reads a message still to download.
     Waiting { what: String, key: MessageKey },
+    /// A script, waiting for a message one of its calls reads.
+    Scripting { what: String },
     /// A change, for the person to approve.
     Proposed { what: String, messages: Vec<String> },
+}
+
+/// The tools `profile` is told of: [`tools`], and `run_script` when it may run scripts.
+pub(super) fn tools_for(profile: &AiProfile) -> Vec<AiTool> {
+    let mut all = tools();
+    if profile.scripts {
+        all.push(script::tool());
+    }
+    all
 }
 
 /// The tools, as the model is told them.
@@ -209,6 +221,7 @@ impl Session {
             "find_tasks" => self.tool_find_tasks(chat, profile, &input),
             "find_notes" => self.tool_find_notes(chat, profile, &input),
             "selected_messages" => self.tool_selected(chat, profile),
+            script::RUN_SCRIPT => self.tool_run_script(chat, profile, call),
             name if !reads(name) && tools().iter().any(|t| t.name == name) => match self.change_of(chat, name, &input) {
                 Ok(change) => Outcome::Proposed { what: change.what(self), messages: change.ids() },
                 Err(why) => Outcome::failed(name, why),

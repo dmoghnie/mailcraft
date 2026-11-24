@@ -28,7 +28,7 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
     vec![
         CommandSpec::new("ai.settings", "Show MailCraft's AI settings", WHERE, |s, _| Ok(settings(s))),
         CommandSpec::new("ai.saveProfile", "Add or change a model MailCraft's AI may ask", WHERE, save_profile).params(
-            r#"{"id"?: string (none: a new profile), "name": string, "api": "openAi"|"anthropic"|"ollama" (Ollama's own, told what the model takes in), "url": string (the API address, up to its version: https://api.openai.com/v1; Ollama's own: http://localhost:11434), "model": string, "maxTokens"?: number, "context"?: number (what the model takes in at once, in tokens; 0: 32768, Ollama's own), "fallback"?: string (a profile asked instead when this one fails; "": none), "key"?: string (kept in the keychain; "": forgotten)}"#,
+            r#"{"id"?: string (none: a new profile), "name": string, "api": "openAi"|"anthropic"|"ollama" (Ollama's own, told what the model takes in), "url": string (the API address, up to its version: https://api.openai.com/v1; Ollama's own: http://localhost:11434), "model": string, "maxTokens"?: number, "context"?: number (what the model takes in at once, in tokens; 0: 32768, Ollama's own), "fallback"?: string (a profile asked instead when this one fails; "": none), "scripts"?: boolean (the assistant may run scripts it writes: code mode), "key"?: string (kept in the keychain; "": forgotten)}"#,
         ),
         CommandSpec::new("ai.removeProfile", "Remove a model and forget its key", WHERE, |s, v| {
             let id = p::req_str(v, "id")?.to_string();
@@ -166,7 +166,8 @@ fn save_profile(s: &mut Session, v: &Value) -> CmdResult {
         None => old.as_ref().is_some_and(|o| o.has_key) && !moved,
     };
     let context = if context == u32::MAX { old.as_ref().map_or(0, |o| o.context) } else { context };
-    let profile = AiProfile { id: id.clone(), name, endpoint, has_key, max_tokens, context, fallback };
+    let scripts = p::bool(v, "scripts").unwrap_or_else(|| old.as_ref().is_some_and(|o| o.scripts));
+    let profile = AiProfile { id: id.clone(), name, endpoint, has_key, max_tokens, context, fallback, scripts };
     match key {
         Some(k) => s.jobs.push(Job::Ai { work: AiWork::SaveKey { name: id.clone(), key: (!k.is_empty()).then(|| Secret(k.to_string())) } }),
         None if moved => s.jobs.push(Job::Ai { work: AiWork::SaveKey { name: id.clone(), key: None } }),

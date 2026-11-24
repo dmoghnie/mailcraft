@@ -10,6 +10,8 @@ mod settings;
 
 pub use asking::{AI_LOG_KEPT, AiLogEntry, AiState, AiTest, server_of as ai_server};
 pub(crate) use assistant::assistant_commands;
+#[doc(hidden)]
+pub use assistant::run_script_against;
 pub use assistant::{
     ASSISTANT_LINK, ASSISTANT_WIDTH, Assistant, AssistantPane, CONTEXT_AT_FIRST, CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, Chat, ChatHead, ChatTurn,
     ContextItem, RunState, STEPS_MOST, ToolRun, assistant_message_link,

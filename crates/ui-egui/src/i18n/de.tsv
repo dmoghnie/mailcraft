@@ -2189,6 +2189,10 @@ count	occurrences	Terminen
 	Forget the key kept	Gespeicherten Schlüssel vergessen
 	Longest answer, in tokens	Längste Antwort, in Token
 	Takes in at once, in tokens	Nimmt auf einmal auf, in Token
+	Ran a script	Skript ausgeführt
+	The script	Das Skript
+	Let it write and run scripts	Skripte schreiben und ausführen lassen
+	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and changes nothing.	Ein Skript findet und liest E-Mails, Termine, Kontakte, Aufgaben und Notizen in einem Schritt statt in vielen. Es läuft in MailCraft, ohne Dateien oder Netzwerk, und ändert nichts.
 	When it fails, ask	Wenn es fehlschlägt, fragen
 	No other model	Kein anderes Modell
 	A message no longer here	Eine Nachricht, die nicht mehr da ist

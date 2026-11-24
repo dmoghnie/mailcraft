@@ -28,6 +28,7 @@ mod links;
 mod looking;
 mod pim;
 mod pim_changes;
+mod script;
 mod tools;
 mod window;
 
@@ -35,6 +36,8 @@ pub use commands::QUOTE_MOST as CONTEXT_QUOTE_MOST;
 pub(crate) use commands::commands as assistant_commands;
 pub use context::{CONTEXT_AT_FIRST, ContextItem, ITEMS_MOST as CONTEXT_ITEMS_MOST};
 pub use links::{Found, LINK as ASSISTANT_LINK, Linked, message_link as assistant_message_link};
+#[doc(hidden)]
+pub use script::run_script_against;
 pub use window::{ASSISTANT_WIDTH, AssistantPane};
 
 /// The most of steps (answers with tool calls) the assistant takes for one thing the person
@@ -182,6 +185,9 @@ pub struct ToolRun {
     /// What it gave back to the model.
     #[serde(default)]
     pub result: String,
+    /// The script whose call it is (its call), shown under it: none, the model's own.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub part_of: Option<String>,
 }
 
 /// A chat as listed: its name and dates, without what was said.
@@ -211,6 +217,8 @@ pub struct Assistant {
     steps: HashMap<String, u32>,
     /// Questions whose chat stopped waiting: their answers are let go as they come.
     dropped: HashSet<u64>,
+    /// The scripts waiting for a message to download, by chat and call.
+    scripts: HashMap<(String, String), script::Paused>,
 }
 
 impl Assistant {

@@ -2,8 +2,8 @@
 //! Each reads only mail of an account allowed to go to the chat's model; reading it puts that
 //! account's mail in the chat. Finding never touches the window's list or search.
 
-use mailcraft_model::{Flag, FolderRole, Job, MessageKey, Summary};
-use serde_json::Value;
+use mailcraft_model::{EmailAddress, Flag, FolderRole, Job, MessageKey, Summary};
+use serde_json::{Value, json};
 
 use super::context::{MESSAGE_CHARS, cut};
 use super::links::message_name;
@@ -31,13 +31,19 @@ impl Session {
         self.folder_state(&key.account, &key.folder).messages.iter().find(|m| &m.key == key).cloned()
     }
 
-    /// A message's text as it reads, when its source is kept here.
-    pub(super) fn message_text(&self, key: &MessageKey) -> Option<String> {
+    /// A message's text as it reads, and its files' names, when its source is kept here.
+    fn message_parts(&self, key: &MessageKey) -> Option<(String, Vec<String>)> {
         let raw = self.body_raw(key)?;
         let p = mailcraft_mime::parse(&raw)?;
-        let files: Vec<&str> = p.attachments.iter().map(|a| a.name.as_str()).filter(|n| !n.is_empty()).collect();
+        let files = p.attachments.iter().map(|a| a.name.clone()).filter(|n| !n.is_empty()).collect();
+        Some((p.text.trim().to_string(), files))
+    }
+
+    /// A message's text as it reads, its files named after it, when its source is kept here.
+    pub(super) fn message_text(&self, key: &MessageKey) -> Option<String> {
+        let (text, files) = self.message_parts(key)?;
         let files = if files.is_empty() { String::new() } else { format!("\n\n[Files: {}]", files.join(", ")) };
-        Some(format!("{}{files}", p.text.trim()))
+        Some(format!("{text}{files}"))
     }
 
     /// Who wrote a message to whom, when, about what, and where it is.
@@ -88,6 +94,27 @@ impl Session {
         )
     }
 
+    /// A message found, as a script has it: what its row says, each part apart.
+    fn message_data(&self, m: &Summary) -> Value {
+        let marks = self.prefs.categories.iter().filter(|c| m.flags.has(&c.keyword)).map(|c| c.name.as_str());
+        json!({
+            "id": message_name(&m.key.to_id()),
+            "account": m.key.account,
+            "folder": self.folder_name(&m.key.account, &m.key.folder),
+            "date": m.date,
+            "when": mailcraft_model::dates::full_time(m.date, &self.clock),
+            "from": address(&m.from),
+            "to": m.to.iter().map(address).collect::<Vec<_>>(),
+            "cc": m.cc.iter().map(address).collect::<Vec<_>>(),
+            "subject": m.subject,
+            "unread": !m.flags.seen,
+            "flagged": Flag::Flagged.get(&m.flags),
+            "files": m.has_attachments,
+            "categories": marks.collect::<Vec<_>>(),
+            "preview": m.preview.split_whitespace().collect::<Vec<_>>().join(" ").chars().take(PREVIEW_CHARS).collect::<String>(),
+        })
+    }
+
     /// The accounts whose mail may go to `profile`.
     pub(super) fn readable_accounts(&self, profile: &AiProfile) -> Vec<&AccountState> {
         self.accounts.iter().filter(|a| self.prefs.ai.allows(profile, Some(&a.config.id))).collect()
@@ -110,18 +137,23 @@ impl Session {
             return Outcome::failed("List folders", why);
         }
         let mut out = Vec::new();
+        let mut data = Vec::new();
         for a in self.readable_accounts(profile).into_iter().filter(|a| only.is_none_or(|o| o == a.config.id)) {
             chat.holds(&a.config.id);
             out.push(format!("Account {} ({} <{}>):", a.config.id, a.config.name, a.config.email));
+            let mut folders = Vec::new();
             for f in a.folders.iter().filter(|f| f.selectable).take(FOLDERS_MOST) {
                 let role = if f.role == FolderRole::Other { String::new() } else { format!(" [{}]", f.role.code()) };
                 out.push(format!("- {}{role}: {}, {} messages, {} unread", f.path, f.display_name(), f.total, f.unread));
+                let role = (f.role != FolderRole::Other).then(|| f.role.code());
+                folders.push(json!({"path": f.path, "name": f.display_name(), "role": role, "messages": f.total, "unread": f.unread}));
             }
+            data.push(json!({"account": a.config.id, "name": a.config.name, "email": a.config.email, "folders": folders}));
         }
         if out.is_empty() {
             out.push("No account's mail may go to this model.".into());
         }
-        Outcome::ran("List folders", Vec::new(), out.join("\n"))
+        Outcome::ran("List folders", Vec::new(), out.join("\n"), Value::Array(data))
     }
 
     /// The folders a search or listing looks in: an account's (one of them, by its path, role or
@@ -186,6 +218,8 @@ impl Session {
             chat.holds(&m.key.account);
         }
         let ids: Vec<String> = found.found.iter().map(|m| m.key.to_id()).collect();
+        let messages: Vec<Value> = found.found.iter().map(|m| self.message_data(m)).collect();
+        let data = json!({"messages": messages, "total": found.total, "unchecked": found.unchecked});
         let mut out: Vec<String> = found.found.iter().map(|m| self.message_row(m)).collect();
         out.push(match found.total {
             0 => "Nothing found.".to_string(),
@@ -195,7 +229,7 @@ impl Session {
         if found.unchecked > 0 {
             out.push(format!("{} more may match: their text isn't downloaded or indexed yet.", found.unchecked));
         }
-        Outcome::ran(&what, ids, out.join("\n"))
+        Outcome::ran(&what, ids, out.join("\n"), data)
     }
 
     /// `read_message`: a message whole, as it reads; one not downloaded yet is asked for, and
@@ -216,12 +250,19 @@ impl Session {
             .get("max_chars")
             .and_then(Value::as_u64)
             .map_or(MESSAGE_CHARS, |n| usize::try_from(n).unwrap_or(READ_CHARS_MOST).clamp(500, READ_CHARS_MOST));
-        match self.message_text(&key) {
-            Some(text) => {
+        match self.message_parts(&key) {
+            Some((text, files)) => {
                 chat.holds(&key.account);
-                let body = if text.is_empty() { "(No text: it may be encrypted, or only pictures.)".to_string() } else { cut(&text, chars) };
+                let body = cut(&text, chars);
+                let mut data = self.message_data(&m);
+                data["text"] = json!(body);
+                data["files"] = json!(files);
+                let mut shown = if text.is_empty() { "(No text: it may be encrypted, or only pictures.)".to_string() } else { body };
+                if !files.is_empty() {
+                    shown.push_str(&format!("\n\n[Files: {}]", files.join(", ")));
+                }
                 let name = message_name(&id);
-                Outcome::ran(&what, vec![id], format!("<message id=\"{name}\">\n{}\n\n{body}\n</message>", self.message_head(&m)))
+                Outcome::ran(&what, vec![id], format!("<message id=\"{name}\">\n{}\n\n{shown}\n</message>", self.message_head(&m)), data)
             }
             None if self.account(&key.account).is_some_and(AccountState::is_local) => Outcome::failed(&what, "its text isn't kept here".into()),
             None => {
@@ -242,6 +283,7 @@ impl Session {
         }
         let mut out = Vec::new();
         let mut ids = Vec::new();
+        let mut data = Vec::new();
         for key in keys.iter().take(FOUND_MOST) {
             if self.unreadable(&key.account, profile).is_some() {
                 out.push("(A message of an account whose mail may not go to this model.)".to_string());
@@ -249,26 +291,30 @@ impl Session {
             }
             if let Some(m) = self.shared_of(key) {
                 chat.holds(&key.account);
-                let open = if self.reading.as_ref().is_some_and(|r| &r.key == key) { " (open)" } else { "" };
+                let is_open = self.reading.as_ref().is_some_and(|r| &r.key == key);
+                let open = if is_open { " (open)" } else { "" };
                 out.push(format!("{}{open}", self.message_row(&m)));
+                let mut d = self.message_data(&m);
+                d["open"] = json!(is_open);
+                data.push(d);
                 ids.push(key.to_id());
             }
         }
         if out.is_empty() {
             out.push("Nothing is selected.".into());
         }
-        Outcome::ran("See what's selected", ids, out.join("\n"))
+        Outcome::ran("See what's selected", ids, out.join("\n"), json!({"messages": data}))
     }
 }
 
 impl Outcome {
-    pub(super) fn ran(what: &str, messages: Vec<String>, result: String) -> Outcome {
-        Outcome::Ran { what: what.to_string(), messages, found: Vec::new(), result }
+    pub(super) fn ran(what: &str, messages: Vec<String>, result: String, data: Value) -> Outcome {
+        Outcome::Ran { what: what.to_string(), messages, found: Vec::new(), result, data }
     }
 
     /// Read: the events or people `found`.
-    pub(super) fn listed(what: &str, found: Vec<Found>, result: String) -> Outcome {
-        Outcome::Ran { what: what.to_string(), messages: Vec::new(), found, result }
+    pub(super) fn listed(what: &str, found: Vec<Found>, result: String, data: Value) -> Outcome {
+        Outcome::Ran { what: what.to_string(), messages: Vec::new(), found, result, data }
     }
 
     pub(super) fn failed(what: &str, why: String) -> Outcome {
@@ -282,4 +328,9 @@ pub(super) fn said(e: &CmdError) -> String {
         CmdError::Params(s) | CmdError::Disabled(s) | CmdError::Failed(s) => s.clone(),
         other => other.to_string(),
     }
+}
+
+/// Someone a message is from or to, as a script has them.
+fn address(a: &EmailAddress) -> Value {
+    json!({"name": a.name, "email": a.email})
 }
