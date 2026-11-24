@@ -369,8 +369,8 @@ MailCraft uses what the other Craft apps share where it fits, so the suite's fix
 
 ## Crash safety
 
-MailCraft must never crash; the rules are in `CLAUDE.md`. `Session::run`, lanes and the
-importer's lanes catch escaped panics. A damaged cache file or index is set aside, never fatal.
+MailCraft must never crash; the rules are in `CLAUDE.md`. `Session::run` (a command),
+`Session::apply` (an event), lanes and the importer's lanes catch escaped panics. A damaged cache file or index is set aside, never fatal.
 
 ## Tests
 

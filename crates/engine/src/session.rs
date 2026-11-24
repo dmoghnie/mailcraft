@@ -248,9 +248,9 @@ const SNOOZES_DOC: &str = "snoozes.json";
 /// whole mailbox is several times this).
 const CACHE_MESSAGES: usize = 300_000;
 
-/// How many command panics [`Session::run`] has caught in this process: none is the only right
-/// number, so tests that drive the whole window check it (a caught panic is otherwise only a
-/// line in the log).
+/// How many panics [`Session::run`] (a command's) and [`Session::apply`] (an event's) have
+/// caught in this process: none is the only right number, so tests that drive the whole window
+/// check it (a caught panic is otherwise only a line in the log).
 pub static PANICS_CAUGHT: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
 
 pub struct Session {

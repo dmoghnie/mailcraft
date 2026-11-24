@@ -2,9 +2,36 @@
 
 use super::*;
 
+#[cfg(test)]
+thread_local! {
+    /// A test's: the next event applied on this thread stops part-way, as a bug would.
+    static EVENT_FAULT: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
 impl Session {
-    /// Apply an event from the network layer.
+    /// A test's: the next event applied stops part-way, as a bug would.
+    #[cfg(test)]
+    pub(crate) fn fail_next_event(&mut self) {
+        EVENT_FAULT.with(|f| f.set(true));
+    }
+
+    /// Apply an event from the network layer. A panic in it is caught (as [`Session::run`]
+    /// catches a command's): the event is lost, but not the events after it, which the window
+    /// applies in the same pass, nor the CLI, which has no guard of its own; where it happened
+    /// is in the log.
     pub fn apply(&mut self, e: Event) {
+        if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| self.apply_event(e))).is_err() {
+            log::error!("an event panicked and was stopped; MailCraft goes on");
+            PANICS_CAUGHT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            self.refresh_list();
+        }
+    }
+
+    fn apply_event(&mut self, e: Event) {
+        #[cfg(test)]
+        if EVENT_FAULT.with(|f| f.replace(false)) {
+            panic!("a test's event fault");
+        }
         if !self.importing.running.is_empty() {
             self.removal_backstop();
         }

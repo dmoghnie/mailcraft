@@ -15,6 +15,21 @@ mod server_rules;
 mod sweep;
 mod vips;
 
+/// An event that panics (a bug) is stopped there: the session goes on, and takes in the next
+/// one as ever.
+#[test]
+fn an_event_that_panics_is_stopped_and_the_next_one_taken_in() {
+    let mut s = sample_session("event-fault");
+    let caught = crate::PANICS_CAUGHT.load(std::sync::atomic::Ordering::Relaxed);
+    let event = || Event::SentCopyNotKept { account: "sample".into(), error: "Sent is full".into() };
+    s.fail_next_event();
+    s.apply(event());
+    assert!(crate::PANICS_CAUGHT.load(std::sync::atomic::Ordering::Relaxed) > caught, "caught");
+    assert!(!s.notices.iter().any(|n| n.text.contains("Sent is full")), "the event stopped");
+    s.apply(event());
+    assert!(s.notices.iter().any(|n| n.text.contains("Sent is full")), "the next one taken in");
+}
+
 #[test]
 fn every_command_survives_junk_params() {
     let mut s = sample_session("junk");
