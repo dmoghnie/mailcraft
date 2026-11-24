@@ -120,6 +120,13 @@ impl Session {
                 for e in entries.into_iter().skip(skip) {
                     let line = self.ai.next_line;
                     self.ai.next_line += 1;
+                    // Nothing waits as MailCraft starts: what did as it closed got no answer.
+                    let e = if e.outcome == "waiting" {
+                        self.ai.log_changed = true;
+                        AiLogEntry { outcome: "failed".into(), ..e }
+                    } else {
+                        e
+                    };
                     self.ai.log.push_back((line, e));
                 }
             }

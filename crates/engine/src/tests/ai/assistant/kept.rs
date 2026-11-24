@@ -61,3 +61,54 @@ fn a_damaged_list_of_chats_is_made_again_from_their_files() {
     let list = Session::open(Some(store), mailcraft_model::dates::Clock::new(NOW, 0)).run("assistant.chats", &json!({})).unwrap();
     assert_eq!(list["chats"].as_array().unwrap().len(), 3, "{list}");
 }
+
+/// Read again after MailCraft closed while it waited (for the model's answer, or a message a
+/// read needs), a chat says the answer never came, and the record no longer says it waits;
+/// sent again, it goes on.
+#[test]
+fn a_chat_cut_short_by_closing_says_so_when_read_again() {
+    let mut s = ready("assistant-cut-short");
+    let c = send(&mut s, None, "Anything new?");
+    question(&mut s);
+    let store = s.store.clone().unwrap();
+    let open = || Session::open(Some(store.clone()), mailcraft_model::dates::Clock::new(NOW, 0));
+    let mut again = open();
+    let v = chat(&mut again, &c);
+    assert_eq!(v["chat"]["error"], "MailCraft closed before the answer came: send again to go on", "{v}");
+    let log = again.run("ai.log", &json!({})).unwrap();
+    assert!(log.to_string().contains("\"failed\"") && !log.to_string().contains("\"waiting\""), "{log}");
+    again.run("ai.allow", &json!({"account": "sample", "reach": "local"})).unwrap();
+    local(&mut again, "Local");
+    send(&mut again, Some(&c), "Again?");
+    let (q, asked) = question(&mut again);
+    assert_eq!(asked.turns.first().map(|t| t.text.as_str()), Some("Anything new?"));
+    answer(&mut again, q, "Nothing.");
+    again.take_jobs();
+    assert!(chat(&mut open(), &c)["chat"]["error"].is_null(), "answered: nothing cut short");
+    // A read that waited for its message as MailCraft closed: failed, and the chat says so.
+    let file = format!("assistant-{c}.json");
+    let kept: crate::Chat = store.load_doc(&file).unwrap();
+    let call = AiToolCall { id: "call_0".into(), name: "read_message".into(), input: json!({"id": "m1"}) };
+    let turn = crate::ChatTurn {
+        turn: mailcraft_model::AiTurn { role: AiRole::Assistant, text: String::new(), calls: vec![call], results: Vec::new() },
+        thinking: String::new(),
+        context: Vec::new(),
+        context_text: String::new(),
+        cut: false,
+        at: NOW,
+    };
+    let run = crate::ToolRun {
+        call: "call_0".into(),
+        tool: "read_message".into(),
+        state: RunState::Waiting,
+        what: "Read a message".into(),
+        messages: Vec::new(),
+        found: Vec::new(),
+        result: String::new(),
+    };
+    store.save_doc(&file, &crate::Chat { turns: [kept.turns.clone(), vec![turn]].concat(), runs: vec![run], ..kept }).unwrap();
+    let v = chat(&mut open(), &c);
+    assert_eq!(v["chat"]["runs"][0]["state"], "failed", "{v}");
+    assert_eq!(v["chat"]["runs"][0]["result"], "MailCraft closed before the message came");
+    assert_eq!(v["chat"]["error"], "MailCraft closed before the answer came: send again to go on");
+}

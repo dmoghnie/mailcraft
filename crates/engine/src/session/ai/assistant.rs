@@ -66,6 +66,10 @@ pub struct Chat {
     /// Why its last question got no answer, or why it stopped.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+    /// A question of it was on its way to the model when it was kept: read again after
+    /// MailCraft closed, it says the answer never came.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub answer_due: bool,
 }
 
 impl fmt::Debug for Chat {

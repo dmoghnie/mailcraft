@@ -12,6 +12,27 @@ const HEADS_DOC: &str = "assistant.json";
 /// How each chat's file is named: this, its id, `.json`.
 const CHAT_DOC: &str = "assistant-";
 
+/// What a chat says, read again, when MailCraft closed before the answer it waited for came.
+const CUT_SHORT: &str = "MailCraft closed before the answer came: send again to go on";
+
+/// What a read says, read again, when MailCraft closed before its message was downloaded.
+const NOT_READ: &str = "MailCraft closed before the message came";
+
+/// `chat` as the last run left it, read again: nothing is on its way now, so the answer or the
+/// message it waited for says it never came, and the person sends again to go on.
+fn left_off(chat: Chat) -> Chat {
+    let waited = chat.runs.iter().any(|r| r.state == RunState::Waiting);
+    let deciding = chat.runs.iter().any(|r| r.state == RunState::Proposed);
+    let runs = chat
+        .runs
+        .into_iter()
+        .map(|r| if r.state == RunState::Waiting { ToolRun { state: RunState::Failed, result: NOT_READ.into(), ..r } } else { r })
+        .collect();
+    let cut = chat.answer_due || (waited && !deciding);
+    let error = chat.error.or_else(|| cut.then(|| CUT_SHORT.to_string()));
+    Chat { runs, error, answer_due: false, ..chat }
+}
+
 /// A chat's file.
 fn chat_doc(id: &str) -> String {
     format!("{CHAT_DOC}{id}.json")
@@ -70,7 +91,7 @@ impl Session {
             };
             let head = self.ai.assistant.heads.iter().find(|h| h.id == id).cloned().unwrap_or_default();
             // One whose file was lost is begun again, empty.
-            let chat = Chat { id: head.id, title: head.title, created: head.created, ..chat };
+            let chat = left_off(Chat { id: head.id, title: head.title, created: head.created, ..chat });
             self.ai.assistant.chats.insert(id.to_string(), chat);
         }
         self.ai.assistant.chats.get_mut(id).ok_or_else(|| CmdError::Params(format!("no chat {id}")))

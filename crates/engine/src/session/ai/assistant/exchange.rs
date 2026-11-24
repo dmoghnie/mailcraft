@@ -168,7 +168,7 @@ impl Session {
             self.fitted(&chat, &p, system, tools()).map(|c| (p, c))
         });
         let accounts = chat.accounts.clone();
-        self.put_chat(chat);
+        self.put_chat(Chat { answer_due: asked.is_ok(), ..chat });
         match asked {
             Ok((p, c)) => {
                 let q = self.ai_ask_profile(&p, accounts, PURPOSE, c, true);
@@ -193,6 +193,7 @@ impl Session {
         let Some(id) = self.ai.assistant.asking.remove(&q) else { return };
         let Some(answer) = self.ai_answer(q) else { return };
         let Ok(mut chat) = self.take_chat(&id) else { return };
+        chat.answer_due = false;
         match answer {
             Err(e) => chat.error = Some(e),
             Ok(a) => {
@@ -363,6 +364,7 @@ impl Session {
     /// declined.
     pub(crate) fn assistant_stop(&mut self, id: &str) -> Result<bool, CmdError> {
         let mut chat = self.take_chat(id)?;
+        chat.answer_due = false;
         let asked = self.ai.assistant.asking(id);
         if let Some(q) = asked {
             self.assistant_let_go(q);
