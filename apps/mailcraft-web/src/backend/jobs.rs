@@ -138,7 +138,11 @@ pub(super) async fn job(sh: &Rcs, id: &str, j: Job) {
             sh,
             Event::Identity { account: id.to_string(), chain: Vec::new(), older: Vec::new(), for_reading: false, error: Some(BROWSER_SMIME.into()) },
         ),
-        Job::Ai { work } => emit(sh, Event::Ai { done: browser_ai(work) }),
+        Job::Ai { work } => {
+            if let Some(done) = browser_ai(work) {
+                emit(sh, Event::Ai { done });
+            }
+        }
         Job::Start { .. }
         | Job::SmtpPassword { .. }
         | Job::DavPassword { .. }
@@ -171,10 +175,11 @@ pub(super) async fn job(sh: &Rcs, id: &str, j: Job) {
 
 /// MailCraft's own AI isn't in the browser yet: each question, and each key to keep, is answered
 /// with why.
-fn browser_ai(work: AiWork) -> AiDone {
+fn browser_ai(work: AiWork) -> Option<AiDone> {
     match work {
-        AiWork::Ask { id, .. } => AiDone::Answered { id, answer: None, error: Some(BROWSER_AI.into()) },
-        AiWork::SaveKey { name, .. } => AiDone::KeySaved { name, error: Some(BROWSER_AI.into()) },
+        AiWork::Ask { id, .. } => Some(AiDone::Answered { id, answer: None, error: Some(BROWSER_AI.into()) }),
+        AiWork::SaveKey { name, .. } => Some(AiDone::KeySaved { name, error: Some(BROWSER_AI.into()) }),
+        AiWork::Cancel { .. } => None,
     }
 }
 

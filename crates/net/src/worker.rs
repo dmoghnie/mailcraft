@@ -190,6 +190,8 @@ pub struct Pool {
     filing: Arc<changes::Filing>,
     /// Questions waiting for a language model now (`ai.rs`).
     asking: Arc<AtomicUsize>,
+    /// What stops each, by its id.
+    stops: Arc<Mutex<HashMap<u64, crate::ai::Stop>>>,
 }
 
 use changes::{DraftOrder, keep_draft};
@@ -249,6 +251,7 @@ impl Pool {
             order: changes::Order::default(),
             filing,
             asking: Arc::default(),
+            stops: Arc::default(),
         }
     }
 

@@ -41,21 +41,31 @@ impl Pool {
                 let Some(slot) = Asking::take(&self.asking) else {
                     return self.sink.emit(failed(format!("MailCraft is already waiting for {ASKING_MOST} answers; ask again once one comes")));
                 };
-                let (sink, creds) = (self.sink.clone(), self.creds.clone());
+                let stop = crate::ai::Stop::default();
+                lock(&self.stops).insert(id, stop.clone());
+                let (sink, creds, stops) = (self.sink.clone(), self.creds.clone(), self.stops.clone());
                 let spawned = spawn("mail-ai", move || {
                     let _slot = slot;
                     let kept = key.as_deref().map(|name| creds.get_key(name));
                     let done = match kept {
                         Some(None) => AiDone::Answered { id, answer: None, error: Some("no key is kept for this model".into()) },
-                        Some(k) if stream => answered(id, streamed(&sink, id, &endpoint, k.as_deref(), &chat)),
-                        Some(k) => answered(id, crate::ai::ask(&endpoint, k.as_deref(), &chat)),
-                        None if stream => answered(id, streamed(&sink, id, &endpoint, None, &chat)),
-                        None => answered(id, crate::ai::ask(&endpoint, None, &chat)),
+                        Some(k) if stream => answered(id, streamed(&sink, id, &endpoint, k.as_deref(), &chat, &stop)),
+                        Some(k) => answered(id, crate::ai::ask_stoppable(&endpoint, k.as_deref(), &chat, &stop)),
+                        None if stream => answered(id, streamed(&sink, id, &endpoint, None, &chat, &stop)),
+                        None => answered(id, crate::ai::ask_stoppable(&endpoint, None, &chat, &stop)),
                     };
+                    lock(&stops).remove(&id);
                     sink.emit(Event::Ai { done });
                 });
                 if let Err(e) = spawned {
+                    lock(&self.stops).remove(&id);
                     self.sink.emit(failed(e.to_string()));
+                }
+            }
+            // Stopped: its connection shut, the wait ends and gives its place back.
+            AiWork::Cancel { id } => {
+                if let Some(stop) = lock(&self.stops).remove(&id) {
+                    stop.stop();
                 }
             }
             AiWork::SaveKey { name, key } => {
@@ -80,6 +90,7 @@ fn streamed(
     endpoint: &mailcraft_model::AiEndpoint,
     key: Option<&str>,
     chat: &mailcraft_model::AiChat,
+    stop: &crate::ai::Stop,
 ) -> Result<mailcraft_model::AiAnswer> {
     let (mut text, mut thinking) = (String::new(), String::new());
     let mut sent = std::time::Instant::now();
@@ -92,7 +103,7 @@ fn streamed(
             sent = std::time::Instant::now();
         }
     };
-    crate::ai::ask_streamed(endpoint, key, chat, &mut on)
+    crate::ai::ask_streamed_stoppable(endpoint, key, chat, stop, &mut on)
 }
 
 fn answered(id: u64, r: Result<mailcraft_model::AiAnswer>) -> AiDone {

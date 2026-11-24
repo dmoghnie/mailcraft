@@ -60,6 +60,16 @@ impl Write for Stream {
     }
 }
 
+impl Stream {
+    /// Its socket, to be shut from another thread: a read waiting on it then ends at once.
+    pub fn socket(&self) -> io::Result<TcpStream> {
+        match self {
+            Stream::Plain(s) => s.try_clone(),
+            Stream::Tls(s) => s.sock.try_clone(),
+        }
+    }
+}
+
 impl Timeouts for Stream {
     fn set_read_timeout(&mut self, t: Option<Duration>) -> io::Result<()> {
         match self {

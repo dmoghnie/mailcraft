@@ -4,6 +4,8 @@
 //! computer.
 
 use std::io::{Read, Write};
+use std::net::{Shutdown, TcpStream};
+use std::sync::{Arc, Mutex, PoisonError};
 use std::time::Duration;
 
 use mailcraft_model::{AiAnswer, AiApi, AiChat, AiEndpoint};
@@ -29,11 +31,70 @@ const MAX_ERROR: usize = 300;
 /// The shortest start of a key taken for part of it, where words quoting it were cut.
 const KEY_START: usize = 4;
 
+/// What a question stopped ends with.
+const STOPPED: &str = "the question was stopped";
+
+/// A question that can be stopped from another thread: its connection, once open, is shut, so
+/// a read waiting on it (a model still reading the question, an answer half written) ends at
+/// once.
+#[derive(Clone, Default)]
+pub struct Stop(Arc<Mutex<Stopping>>);
+
+#[derive(Default)]
+struct Stopping {
+    stopped: bool,
+    socket: Option<TcpStream>,
+}
+
+impl Stop {
+    fn state(&self) -> std::sync::MutexGuard<'_, Stopping> {
+        self.0.lock().unwrap_or_else(PoisonError::into_inner)
+    }
+
+    /// Stopped: its connection shut now, or as it opens.
+    pub fn stop(&self) {
+        let mut s = self.state();
+        s.stopped = true;
+        if let Some(socket) = s.socket.take()
+            && let Err(e) = socket.shutdown(Shutdown::Both)
+        {
+            log::debug!("a model's connection was closed already: {e}");
+        }
+    }
+
+    pub fn stopped(&self) -> bool {
+        self.state().stopped
+    }
+
+    /// The question's connection, `s`, open: kept to be shut. Stopped already, it isn't used.
+    fn opened(&self, s: &crate::stream::Stream) -> Result<()> {
+        let mut state = self.state();
+        if state.stopped {
+            return Err(NetError::Refused(STOPPED.into()));
+        }
+        state.socket = s.socket().ok();
+        Ok(())
+    }
+
+    /// What `r` ended with, said as stopped when it was.
+    fn said<T>(&self, r: Result<T>) -> Result<T> {
+        r.map_err(|e| if self.stopped() { NetError::Refused(STOPPED.into()) } else { e })
+    }
+}
+
 /// Ask `endpoint`'s model `chat`, with `key` when the server takes one.
 pub fn ask(endpoint: &AiEndpoint, key: Option<&str>, chat: &AiChat) -> Result<AiAnswer> {
+    ask_stoppable(endpoint, key, chat, &Stop::default())
+}
+
+/// Ask as [`ask`] does; `stop` stops it.
+pub fn ask_stoppable(endpoint: &AiEndpoint, key: Option<&str>, chat: &AiChat, stop: &Stop) -> Result<AiAnswer> {
     let key = key.filter(|k| !k.trim().is_empty()).map(str::trim);
     let req = request(endpoint, key, chat, false)?;
-    let resp = http::send_waiting(&req, THINKING).map_err(|e| keyless(e, key))?;
+    let url = Url::parse(&req.url)?;
+    let mut s = http::open_waiting(&url, THINKING)?;
+    stop.opened(&s)?;
+    let resp = stop.said(http::exchange(&mut s, &req, &url)).map_err(|e| keyless(e, key))?;
     let answer = read_reply(endpoint.api, &resp, key)?;
     Ok(AiAnswer { sent: bytes(req.body.len()), received: bytes(resp.body.len()), ..answer })
 }
@@ -41,10 +102,23 @@ pub fn ask(endpoint: &AiEndpoint, key: Option<&str>, chat: &AiChat) -> Result<Ai
 /// Ask as [`ask`] does, the answer streamed: its text and its thinking go to `on` as they're
 /// written (what more came of each), then the whole answer comes back.
 pub fn ask_streamed(endpoint: &AiEndpoint, key: Option<&str>, chat: &AiChat, on: &mut dyn FnMut(&str, &str)) -> Result<AiAnswer> {
+    ask_streamed_stoppable(endpoint, key, chat, &Stop::default(), on)
+}
+
+/// Ask as [`ask_streamed`] does; `stop` stops it.
+pub fn ask_streamed_stoppable(
+    endpoint: &AiEndpoint,
+    key: Option<&str>,
+    chat: &AiChat,
+    stop: &Stop,
+    on: &mut dyn FnMut(&str, &str),
+) -> Result<AiAnswer> {
     let key = key.filter(|k| !k.trim().is_empty()).map(str::trim);
     let req = request(endpoint, key, chat, true)?;
     let url = Url::parse(&req.url)?;
-    let answer = read_stream(endpoint.api, &mut http::open_waiting(&url, THINKING)?, &req, &url, key, on)?;
+    let mut s = http::open_waiting(&url, THINKING)?;
+    stop.opened(&s)?;
+    let answer = stop.said(read_stream(endpoint.api, &mut s, &req, &url, key, on))?;
     Ok(AiAnswer { sent: bytes(req.body.len()), ..answer })
 }
 

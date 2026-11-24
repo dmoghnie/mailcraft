@@ -3,7 +3,7 @@
 //! failed, approved or declined) what they gave goes back, until the model answers without
 //! calling any, or [`STEPS_MOST`] steps were taken.
 
-use mailcraft_model::{AiRole, AiToolCall, AiToolResult, AiTurn, MessageKey};
+use mailcraft_model::{AiRole, AiToolCall, AiToolResult, AiTurn, AiWork, Job, MessageKey};
 
 use super::looking::said;
 use super::tools::{Outcome, reads, tools};
@@ -365,8 +365,7 @@ impl Session {
         let mut chat = self.take_chat(id)?;
         let asked = self.ai.assistant.asking(id);
         if let Some(q) = asked {
-            self.ai.assistant.asking.remove(&q);
-            self.ai.assistant.dropped.insert(q);
+            self.assistant_let_go(q);
         }
         let open = !chat.open_calls().is_empty();
         if open {
@@ -377,6 +376,14 @@ impl Session {
         }
         self.put_chat(chat);
         Ok(asked.is_some() || open)
+    }
+
+    /// Question `q` let go: its answer dropped as it comes, and the question stopped, so the
+    /// model answers no more (its time, or its tokens) and its place is free at once.
+    pub(super) fn assistant_let_go(&mut self, q: u64) {
+        self.ai.assistant.asking.remove(&q);
+        self.ai.assistant.dropped.insert(q);
+        self.jobs.push(Job::Ai { work: AiWork::Cancel { id: q } });
     }
 }
 

@@ -417,19 +417,27 @@ fn it_stops_after_its_steps_and_goes_on_when_told() {
     assert_eq!(last.results.len(), 1, "said with what the last call gave");
 }
 
-/// Stopped, the answer it waited for is let go as it comes; what it proposed is declined.
+/// Stopped, the answer it waited for is let go as it comes, and its question is stopped: the
+/// model answers no more. What it proposed is declined. A chat deleted as it waits is stopped
+/// too.
 #[test]
 fn a_stopped_chat_lets_its_answer_go() {
     let mut s = ready("assistant-stop");
+    let stopped = |s: &mut Session, q: u64| s.take_jobs().iter().any(|j| matches!(j, Job::Ai { work: AiWork::Cancel { id } } if *id == q));
     let c = send(&mut s, None, "Anything new?");
     let (q, _) = question(&mut s);
     assert_eq!(chat(&mut s, &c)["asking"], true);
     s.run("assistant.stop", &json!({"chat": c})).unwrap();
+    assert!(stopped(&mut s, q), "its question stopped");
     answer(&mut s, q, "Too late.");
     let v = chat(&mut s, &c);
     assert_eq!(v["chat"]["turns"].as_array().map(Vec::len), Some(1), "{v}");
     assert_eq!(v["asking"], false);
     assert!(questions(&mut s).is_empty());
+    let d = send(&mut s, None, "And now?");
+    let (q, _) = question(&mut s);
+    s.run("assistant.delete", &json!({"chat": d})).unwrap();
+    assert!(stopped(&mut s, q), "deleted, its question stopped");
 }
 
 /// A chat longer than its model takes in loses what tools gave early on, then its oldest

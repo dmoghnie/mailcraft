@@ -101,6 +101,37 @@ fn past_the_most_waiting_a_question_is_answered_at_once() {
     assert_eq!(answer_to(&seen, 99), Some(Ok("You said: hi".into())));
 }
 
+/// A question stopped ends at once, whether streamed or not, its server still silent: its
+/// connection is shut, and its place given back.
+#[test]
+fn a_question_stopped_ends_at_once_and_gives_its_place_back() {
+    let silent = TcpListener::bind("127.0.0.1:0").unwrap();
+    let url = format!("http://127.0.0.1:{}/v1", silent.local_addr().unwrap().port());
+    let held: Arc<Mutex<Vec<std::net::TcpStream>>> = Arc::default();
+    let holding = held.clone();
+    std::thread::spawn(move || {
+        for c in silent.incoming().flatten() {
+            holding.lock().unwrap().push(c);
+        }
+    });
+    let mut p = Pool::new(crate::fake::store("ai-stop"), Arc::new(MemoryCredentials::default()));
+    p.submit(ask(1, &url, None));
+    let endpoint = AiEndpoint { api: AiApi::OpenAi, url: url.clone(), model: "m".into() };
+    p.submit(Job::Ai { work: AiWork::Ask { id: 2, endpoint, key: None, chat: AiChat::ask("", "hi", 16), stream: true } });
+    crate::waiting::eventually("both questions to reach the server", || held.lock().unwrap().len() == 2);
+    p.submit(Job::Ai { work: AiWork::Cancel { id: 1 } });
+    p.submit(Job::Ai { work: AiWork::Cancel { id: 2 } });
+    let seen = events_until(&p, "both to end", |s| answer_to(s, 1).is_some() && answer_to(s, 2).is_some());
+    for id in [1, 2] {
+        assert_eq!(answer_to(&seen, id), Some(Err("the question was stopped".into())), "{seen:?}");
+    }
+    crate::waiting::eventually("the places given back", || p.asking.load(Ordering::Acquire) == 0);
+    assert_eq!(held.lock().unwrap().len(), 2, "the server never answered");
+    // Stopping one that's done, or never was, is no matter.
+    p.submit(Job::Ai { work: AiWork::Cancel { id: 1 } });
+    p.submit(Job::Ai { work: AiWork::Cancel { id: 7 } });
+}
+
 /// Streamed, what more of the answer came is sent on as it's written, a while apart, and the
 /// answer whole after it.
 #[test]

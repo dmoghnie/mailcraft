@@ -211,6 +211,9 @@ pub enum AiWork {
     /// Keep a key in the keychain under `name`, or forget it (`None`); answered by
     /// [`AiDone::KeySaved`].
     SaveKey { name: String, key: Option<Secret> },
+    /// Stop asking question `id`: its connection shut and its place given back at once, the
+    /// model answering no more. It's answered as it ends, with an error.
+    Cancel { id: u64 },
 }
 
 /// What the network layer's models did.

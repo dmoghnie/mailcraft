@@ -142,11 +142,10 @@ impl Session {
         a.changed.remove(id);
         a.steps.remove(id);
         let asked: Vec<u64> = a.asking.iter().filter(|(_, c)| *c == id).map(|(q, _)| *q).collect();
-        for q in asked {
-            a.asking.remove(&q);
-            a.dropped.insert(q);
-        }
         a.heads_changed = true;
+        for q in asked {
+            self.assistant_let_go(q);
+        }
         if let Some(store) = &self.store {
             store.remove_doc(&chat_doc(id)).map_err(|e| CmdError::Failed(format!("the chat couldn't be deleted: {e}")))?;
         }
