@@ -2380,3 +2380,11 @@ count	occurrences	ripetizioni
 	is of low importance	ha importanza bassa
 	is larger than {size} KB	è più grande di {size} KB
 	is smaller than {size} KB	è più piccolo di {size} KB
+	Add rule	Aggiungi regola
+	Let it go	Lascia perdere
+	MailCraft's AI is writing the rule…	L'IA di MailCraft sta scrivendo la regola…
+	No rule was written: {error}	Nessuna regola scritta: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	Le ricevute della tipografia vanno in Finanze con la categoria Ricevuta
+	Write a rule in your own words	Scrivi una regola con parole tue
+	Write rule	Scrivi regola
+	Written by {model}	Scritta da {model}

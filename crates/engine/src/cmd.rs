@@ -147,6 +147,7 @@ pub fn registry() -> Registry {
     all.extend(crate::session::digest_commands());
     all.extend(crate::session::style_commands());
     all.extend(crate::session::drafting_commands());
+    all.extend(crate::session::rule_words_commands());
     Registry::new(all)
 }
 

@@ -2381,3 +2381,11 @@ count	occurrences	Terminen
 	is of low importance	niedrige Wichtigkeit hat
 	is larger than {size} KB	größer als {size} KB ist
 	is smaller than {size} KB	kleiner als {size} KB ist
+	Add rule	Regel hinzufügen
+	Let it go	Verwerfen
+	MailCraft's AI is writing the rule…	Die KI von MailCraft schreibt die Regel…
+	No rule was written: {error}	Es wurde keine Regel geschrieben: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	Quittungen der Druckerei kommen nach „Finanzen“ und bekommen die Kategorie „Quittung“
+	Write a rule in your own words	Eine Regel in eigenen Worten schreiben
+	Write rule	Regel schreiben
+	Written by {model}	Geschrieben von {model}

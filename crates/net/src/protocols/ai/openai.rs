@@ -33,6 +33,10 @@ pub(super) fn request(base: &str, endpoint: &AiEndpoint, key: Option<&str>, chat
     if let Some(e) = chat.effort {
         body["reasoning_effort"] = json!(if e == AiEffort::Off { "none" } else { e.code() });
     }
+    // An answer kept to a schema, strictly: every property given, none more.
+    if let Some(schema) = &chat.answer_schema {
+        body["response_format"] = json!({"type": "json_schema", "json_schema": {"name": "answer", "strict": true, "schema": schema}});
+    }
     let bearer = key.map(|k| format!("Bearer {k}"));
     let headers: Vec<(&str, &str)> = bearer.iter().map(|b| ("Authorization", b.as_str())).collect();
     post(format!("{base}/chat/completions"), &headers, &body)

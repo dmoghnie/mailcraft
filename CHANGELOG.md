@@ -79,6 +79,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - **Propose meeting times**, in Rewrite with AI: MailCraft's AI proposes times for a meeting from your free time in your work hours over the next week, around everything in your calendars (`compose.rewrite` with `times`).
 - **Add a model** fills in llama.cpp, Google Gemini, xAI, Mistral and OpenRouter as well as Ollama, LM Studio, OpenAI and Anthropic.
 - Rules combine what they look at as a search's query does: all, any and not, nested, and a text that is, starts with or ends with a word as well as one that contains it; they can look at a message's opening text, its size and its importance too. Such a rule comes from `rules.add` or a rules file, and **Rules** says it in words; the rule editor keeps it as it is while its name and action change. Rules saved before read as they did.
+- **Write a rule in your own words**, in **Rules**: say what a rule should do ("receipts from the print shop go to Finance and get the Receipt category") and MailCraft's AI writes it as one of MailCraft's own rules, its answer kept to the rule's own form so what it writes is what runs. The rule is shown in words with the model that wrote it; **Add rule** adds it, making a category it names that isn't there yet. Only the words and the names of the account's folders and the categories go to the model, never mail.
 
 ### Changed
 

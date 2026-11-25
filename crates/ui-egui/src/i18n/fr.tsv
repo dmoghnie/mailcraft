@@ -2381,3 +2381,11 @@ count	occurrences	occurrences
 	is of low importance	est d’importance basse
 	is larger than {size} KB	a une taille supérieure à {size} Ko
 	is smaller than {size} KB	a une taille inférieure à {size} Ko
+	Add rule	Ajouter la règle
+	Let it go	Abandonner
+	MailCraft's AI is writing the rule…	L’IA de MailCraft écrit la règle…
+	No rule was written: {error}	Aucune règle n’a été écrite : {error}
+	Receipts from the print shop go to Finance and get the Receipt category	Les reçus de l’imprimerie vont dans Finances avec la catégorie Reçu
+	Write a rule in your own words	Écrire une règle avec vos mots
+	Write rule	Écrire la règle
+	Written by {model}	Écrite par {model}

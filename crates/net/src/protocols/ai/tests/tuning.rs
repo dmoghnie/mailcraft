@@ -4,13 +4,6 @@
 use super::*;
 use mailcraft_model::AiEffort;
 
-/// The request `api`'s server saw for `chat`.
-fn sent(api: AiApi, chat: &AiChat) -> Value {
-    let server = ModelServer::start();
-    let _ = ask(&endpoint(&server, api), None, chat);
-    server.seen().first().map(|r| r.body.clone()).unwrap_or_default()
-}
-
 fn tuned(effort: AiEffort) -> AiChat {
     AiChat { temperature: Some(70), effort: Some(effort), ..chat() }
 }

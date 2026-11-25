@@ -2381,3 +2381,11 @@ count	occurrences	ocorrências
 	is of low importance	tiver importância baixa
 	is larger than {size} KB	tiver mais de {size} KB
 	is smaller than {size} KB	tiver menos de {size} KB
+	Add rule	Adicionar regra
+	Let it go	Descartar
+	MailCraft's AI is writing the rule…	A IA do MailCraft está escrevendo a regra…
+	No rule was written: {error}	Nenhuma regra foi escrita: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	Recibos da gráfica vão para Finanças e recebem a categoria Recibo
+	Write a rule in your own words	Escreva uma regra com suas palavras
+	Write rule	Escrever regra
+	Written by {model}	Escrita por {model}

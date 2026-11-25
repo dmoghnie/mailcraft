@@ -2377,3 +2377,11 @@ count	occurrences	次
 	is of low importance	重要性为低
 	is larger than {size} KB	大于 {size} KB
 	is smaller than {size} KB	小于 {size} KB
+	Add rule	添加规则
+	Let it go	放弃
+	MailCraft's AI is writing the rule…	MailCraft 的 AI 正在编写规则…
+	No rule was written: {error}	未写出规则：{error}
+	Receipts from the print shop go to Finance and get the Receipt category	印刷厂发来的收据移到“财务”并添加“收据”类别
+	Write a rule in your own words	用你自己的话写一条规则
+	Write rule	编写规则
+	Written by {model}	由 {model} 编写

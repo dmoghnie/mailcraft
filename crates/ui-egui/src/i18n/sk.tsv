@@ -2395,3 +2395,11 @@ count	occurrences	opakovaní
 	is of low importance	má nízku dôležitosť
 	is larger than {size} KB	je väčšia ako {size} KB
 	is smaller than {size} KB	je menšia ako {size} KB
+	Add rule	Pridať pravidlo
+	Let it go	Zahodiť
+	MailCraft's AI is writing the rule…	AI MailCraftu píše pravidlo…
+	No rule was written: {error}	Nenapísalo sa žiadne pravidlo: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	Účtenky z tlačiarne idú do Financií a dostanú kategóriu Účtenka
+	Write a rule in your own words	Napíšte pravidlo vlastnými slovami
+	Write rule	Napísať pravidlo
+	Written by {model}	Napísal: {model}

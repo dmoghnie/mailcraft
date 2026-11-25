@@ -4,6 +4,7 @@ use super::*;
 
 mod conditions;
 mod quick_steps;
+mod rule_words;
 mod search_folders;
 mod server_rules;
 mod sweep;
@@ -134,6 +135,7 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
                     }
                 });
             });
+            rule_words::section(ui, s, t, acts);
             if !s.server_rule_accounts().is_empty() {
                 egui::ScrollArea::vertical().id_salt("server-rules").max_height(320.0).show(ui, |ui| server_rules::sections(ui, s, t, acts));
             }

@@ -41,6 +41,10 @@ pub(super) fn request(base: &str, endpoint: &AiEndpoint, key: Option<&str>, chat
         Some(e) => body["think"] = json!(e.code()),
         None => {}
     }
+    // An answer kept to a schema: Ollama takes the schema itself.
+    if let Some(schema) = &chat.answer_schema {
+        body["format"] = schema.clone();
+    }
     let bearer = key.map(|k| format!("Bearer {k}"));
     let headers: Vec<(&str, &str)> = bearer.iter().map(|b| ("Authorization", b.as_str())).collect();
     post(format!("{}/api/chat", root(base)), &headers, &body)

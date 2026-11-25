@@ -112,6 +112,8 @@ pub struct AiState {
     pub(super) style: super::style::StyleState,
     /// Replies being drafted (`drafting.rs`).
     pub(super) drafting: super::drafting::Drafting,
+    /// A rule being written from the person's words (`rule_words.rs`).
+    pub(super) rule_words: Option<super::rule_words::RuleProposal>,
 }
 
 impl AiState {
@@ -293,6 +295,7 @@ impl Session {
                     || self.digest_came(id, &w.profile, &result)
                     || self.style_came(id, &result)
                     || self.drafting_came(id, &result)
+                    || self.rule_words_came(id, &w.profile, &result)
                 {
                     return;
                 }

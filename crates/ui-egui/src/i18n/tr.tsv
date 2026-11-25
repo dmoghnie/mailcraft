@@ -2381,3 +2381,11 @@ count	occurrences	kez
 	is of low importance	önem derecesi düşük
 	is larger than {size} KB	{size} KB'tan büyük
 	is smaller than {size} KB	{size} KB'tan küçük
+	Add rule	Kuralı ekle
+	Let it go	Vazgeç
+	MailCraft's AI is writing the rule…	MailCraft'ın yapay zekâsı kuralı yazıyor…
+	No rule was written: {error}	Kural yazılamadı: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	Matbaadan gelen makbuzlar Finans'a gitsin ve Makbuz kategorisini alsın
+	Write a rule in your own words	Kendi sözlerinizle bir kural yazın
+	Write rule	Kural yaz
+	Written by {model}	Yazan: {model}

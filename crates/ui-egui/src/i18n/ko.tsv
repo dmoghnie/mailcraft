@@ -2380,3 +2380,11 @@ count	occurrences	회
 	is of low importance	중요도가 낮은
 	is larger than {size} KB	{size}KB보다 큰
 	is smaller than {size} KB	{size}KB보다 작은
+	Add rule	규칙 추가
+	Let it go	버리기
+	MailCraft's AI is writing the rule…	MailCraft의 AI가 규칙을 작성하는 중…
+	No rule was written: {error}	규칙을 작성하지 못했습니다: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	인쇄소에서 온 영수증은 재무로 옮기고 영수증 범주 지정
+	Write a rule in your own words	내 말로 규칙 작성
+	Write rule	규칙 작성
+	Written by {model}	작성: {model}

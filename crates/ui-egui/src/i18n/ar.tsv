@@ -2376,3 +2376,11 @@ count	occurrences	مرات
 	is of low importance	ذات أهمية منخفضة
 	is larger than {size} KB	أكبر من {size} كيلوبايت
 	is smaller than {size} KB	أصغر من {size} كيلوبايت
+	Add rule	إضافة القاعدة
+	Let it go	تجاهلها
+	MailCraft's AI is writing the rule…	يكتب ذكاء MailCraft الاصطناعي القاعدة…
+	No rule was written: {error}	لم تُكتب قاعدة: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	الإيصالات من المطبعة تذهب إلى المالية وتأخذ فئة الإيصالات
+	Write a rule in your own words	اكتب قاعدة بكلماتك
+	Write rule	اكتب القاعدة
+	Written by {model}	كتبها {model}

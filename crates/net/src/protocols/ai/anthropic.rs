@@ -34,6 +34,10 @@ pub(super) fn request(base: &str, endpoint: &AiEndpoint, key: Option<&str>, chat
         Some(e) => body["output_config"] = json!({"effort": e.code()}),
         None => {}
     }
+    // An answer kept to a schema, beside the effort.
+    if let Some(schema) = &chat.answer_schema {
+        body["output_config"]["format"] = json!({"type": "json_schema", "schema": schema});
+    }
     let headers: Vec<(&str, &str)> = key.map(|k| ("x-api-key", k)).into_iter().chain([("anthropic-version", VERSION)]).collect();
     post(format!("{base}/messages"), &headers, &body)
 }

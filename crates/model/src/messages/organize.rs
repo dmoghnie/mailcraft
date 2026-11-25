@@ -8,9 +8,11 @@ use crate::{FolderRole, Summary, keyword_for};
 
 mod conditions;
 pub mod keywords;
+mod rule_schema;
 pub mod server_rules;
 
 pub use conditions::{CONDITION_DEPTH, CONDITION_TESTS, Condition, Importance, TextOp};
+pub use rule_schema::{RuleAnswer, WORDS_DEPTH, rule_answer_schema};
 pub use server_rules::{ServerRule, ServerRuleOp, ServerRules};
 
 /// A category: a name and colour shown on messages, stored on the server as a keyword so other

@@ -2394,3 +2394,11 @@ count	occurrences	повторений
 	is of low importance	имеет низкую важность
 	is larger than {size} KB	больше {size} КБ
 	is smaller than {size} KB	меньше {size} КБ
+	Add rule	Добавить правило
+	Let it go	Отказаться
+	MailCraft's AI is writing the rule…	ИИ MailCraft пишет правило…
+	No rule was written: {error}	Правило не написано: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	Чеки из типографии попадают в «Финансы» и получают категорию «Чек»
+	Write a rule in your own words	Напишите правило своими словами
+	Write rule	Написать правило
+	Written by {model}	Написано: {model}

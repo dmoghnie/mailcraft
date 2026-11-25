@@ -198,6 +198,10 @@ pub struct AiChat {
     /// How much it thinks before it answers; none: as the model does.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub effort: Option<AiEffort>,
+    /// The JSON Schema its answer keeps to, as each server's structured output takes one (every
+    /// object closed and each of its properties required, nothing recursive); none: free text.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub answer_schema: Option<Value>,
 }
 
 impl AiChat {

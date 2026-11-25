@@ -2381,3 +2381,11 @@ count	occurrences	repeticiones
 	is of low importance	es de importancia baja
 	is larger than {size} KB	ocupa más de {size} KB
 	is smaller than {size} KB	ocupa menos de {size} KB
+	Add rule	Añadir regla
+	Let it go	Descartar
+	MailCraft's AI is writing the rule…	La IA de MailCraft está escribiendo la regla…
+	No rule was written: {error}	No se escribió ninguna regla: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	Los recibos de la imprenta van a Finanzas y reciben la categoría Recibo
+	Write a rule in your own words	Escribe una regla con tus palabras
+	Write rule	Escribir regla
+	Written by {model}	Escrita por {model}

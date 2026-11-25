@@ -9,6 +9,7 @@ mod folder_pane;
 mod inbox_groups;
 mod needs_me;
 mod no_answer;
+mod rule_words;
 mod sent_rules;
 mod server_rules;
 mod sweep;

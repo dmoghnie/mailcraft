@@ -2380,3 +2380,11 @@ count	occurrences	次
 	is of low importance	重要性為低
 	is larger than {size} KB	大於 {size} KB
 	is smaller than {size} KB	小於 {size} KB
+	Add rule	新增規則
+	Let it go	放棄
+	MailCraft's AI is writing the rule…	MailCraft 的 AI 正在撰寫規則…
+	No rule was written: {error}	未寫出規則：{error}
+	Receipts from the print shop go to Finance and get the Receipt category	印刷廠寄來的收據移到「財務」並加上「收據」類別
+	Write a rule in your own words	用你自己的話寫一條規則
+	Write rule	撰寫規則
+	Written by {model}	由 {model} 撰寫

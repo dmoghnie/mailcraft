@@ -1,6 +1,7 @@
 use super::*;
 use crate::fakes::fake_ai::ModelServer;
 
+mod answer_schema;
 mod ollama;
 mod pictures;
 mod streaming;
@@ -13,6 +14,13 @@ const KEY: &str = "sk-test-0123456789";
 
 fn endpoint(server: &ModelServer, api: AiApi) -> AiEndpoint {
     AiEndpoint { api, url: server.base.clone(), model: "small-model".into() }
+}
+
+/// The request `api`'s server saw for `chat`.
+fn sent(api: AiApi, chat: &AiChat) -> Value {
+    let server = ModelServer::start();
+    let _ = ask(&endpoint(&server, api), None, chat);
+    server.seen().first().map(|r| r.body.clone()).unwrap_or_default()
 }
 
 fn chat() -> AiChat {

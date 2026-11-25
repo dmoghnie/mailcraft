@@ -2394,3 +2394,11 @@ count	occurrences	wystąpieniach
 	is of low importance	ma niską ważność
 	is larger than {size} KB	jest większa niż {size} KB
 	is smaller than {size} KB	jest mniejsza niż {size} KB
+	Add rule	Dodaj regułę
+	Let it go	Odrzuć
+	MailCraft's AI is writing the rule…	AI MailCraft pisze regułę…
+	No rule was written: {error}	Nie napisano reguły: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	Paragony z drukarni trafiają do Finansów i dostają kategorię Paragon
+	Write a rule in your own words	Napisz regułę własnymi słowami
+	Write rule	Napisz regułę
+	Written by {model}	Napisane przez {model}

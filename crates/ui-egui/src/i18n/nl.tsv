@@ -2376,3 +2376,11 @@ count	occurrences	keer
 	is of low importance	lage prioriteit heeft
 	is larger than {size} KB	groter dan {size} KB is
 	is smaller than {size} KB	kleiner dan {size} KB is
+	Add rule	Regel toevoegen
+	Let it go	Laten varen
+	MailCraft's AI is writing the rule…	De AI van MailCraft schrijft de regel…
+	No rule was written: {error}	Er is geen regel geschreven: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	Bonnen van de drukkerij gaan naar Financiën en krijgen de categorie Bon
+	Write a rule in your own words	Schrijf een regel in je eigen woorden
+	Write rule	Regel schrijven
+	Written by {model}	Geschreven door {model}

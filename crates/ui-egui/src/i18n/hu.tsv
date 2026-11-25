@@ -2381,3 +2381,11 @@ count	occurrences	előfordulás
 	is of low importance	fontossága alacsony
 	is larger than {size} KB	nagyobb, mint {size} KB
 	is smaller than {size} KB	kisebb, mint {size} KB
+	Add rule	Szabály hozzáadása
+	Let it go	Elvetés
+	MailCraft's AI is writing the rule…	A MailCraft MI írja a szabályt…
+	No rule was written: {error}	Nem készült szabály: {error}
+	Receipts from the print shop go to Finance and get the Receipt category	A nyomda nyugtái a Pénzügyek mappába kerülnek Nyugta kategóriával
+	Write a rule in your own words	Írjon szabályt a saját szavaival
+	Write rule	Szabály írása
+	Written by {model}	Írta: {model}
