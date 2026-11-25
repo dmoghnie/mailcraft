@@ -120,6 +120,8 @@ fn changes_wait_for_the_person_and_happen_only_when_approved() {
     let (q, asked) = question(&mut s);
     // Proposed together, the person approves them with one click (Approve all).
     assert!(asked.system.contains("in a reply of its own, propose every one at once"), "told to propose a request's changes together");
+    // Asked first ("Shall I move it?"), the person would say yes twice: to the model, then on the card.
+    assert!(asked.system.contains("propose it: don't ask first whether to"), "told to propose a change asked for, not to ask about it");
     calls(&mut s, q, "", &[("move_messages", json!({"ids": [story], "folder": "archive"})), ("delete_messages", json!({"ids": [story]}))]);
     assert!(questions(&mut s).is_empty(), "nothing asked while the person decides");
     let v = chat(&mut s, &c);
