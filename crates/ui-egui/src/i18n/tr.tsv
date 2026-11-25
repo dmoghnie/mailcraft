@@ -2389,3 +2389,4 @@ count	occurrences	kez
 	Write a rule in your own words	Kendi sözlerinizle bir kural yazın
 	Write rule	Kural yaz
 	Written by {model}	Yazan: {model}
+	gets a yes from MailCraft's AI to “{question}”	MailCraft'ın yapay zekâsı “{question}” sorusuna evet diyor

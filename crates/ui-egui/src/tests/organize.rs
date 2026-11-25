@@ -574,15 +574,22 @@ fn a_rule_the_editor_cant_show_is_said_and_kept() {
     assert_eq!((saved.filter, saved.actions), (filter, vec![RuleAction::MarkRead]));
     let starts = Rule { name: "Replies".into(), filter: Condition::Subject { value: "Re:".into(), op: TextOp::StartsWith }, ..rule.clone() };
     assert!(RuleForm::from_rule(1, &starts).conditions_fixed());
+    // A question to MailCraft's AI is said, and kept as it is.
+    let asks =
+        Rule { name: "Contracts".into(), filter: Condition::all(vec![Condition::Asks { question: "Is it a contract?".into() }]), ..rule.clone() };
+    let f = RuleForm::from_rule(2, &asks);
+    assert!(f.conditions_fixed());
+    assert_eq!(f.to_rule().map(|r| r.filter), Ok(asks.filter.clone()));
 
     let (mut a, _) = app("rules-said");
     let ctx = egui::Context::default();
     frame(&ctx, &mut a, vec![]);
-    a.session.rules = vec![rule, starts];
+    a.session.rules = vec![rule, starts, asks];
     let texts: Vec<String> = rules_drawn(&ctx, &mut a, "").into_iter().map(|(t, _)| t).collect();
     let said = "If it from “printshop” and (subject has “receipt” or subject has “invoice”) and not (is list mail): flag";
     assert!(texts.iter().any(|t| *t == format!("Receipts{said}")), "{texts:?}");
     assert!(texts.iter().any(|t| t == "RepliesIf it has a subject that starts with “Re:”: flag"), "{texts:?}");
+    assert!(texts.iter().any(|t| t == "ContractsIf it gets a yes from MailCraft's AI to “Is it a contract?”: flag"), "{texts:?}");
     a.ui.dialog = Some(Dialog::EditRule(Box::new(RuleForm::from_rule(0, &a.session.rules[0]))));
     // A frame for the dialog to settle: a window is sized before it's drawn.
     frame(&ctx, &mut a, vec![]);

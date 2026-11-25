@@ -2389,3 +2389,4 @@ count	occurrences	előfordulás
 	Write a rule in your own words	Írjon szabályt a saját szavaival
 	Write rule	Szabály írása
 	Written by {model}	Írta: {model}
+	gets a yes from MailCraft's AI to “{question}”	a MailCraft MI igennel felel erre: „{question}”

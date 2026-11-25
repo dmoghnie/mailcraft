@@ -1,7 +1,7 @@
 //! Organising mail: categories, pinning, snoozing, inbox rules and the Focused/Other split (and
 //! its four groups, `inbox_groups`).
 
-use mailcraft_model::organize::{Rule, RuleAction, Snooze, actions_for};
+use mailcraft_model::organize::{Rule, RuleAction, Snooze};
 use mailcraft_model::{PINNED, is_keyword};
 
 use super::*;
@@ -16,6 +16,15 @@ mod sent_rules;
 pub mod server_rules;
 pub mod sweep;
 pub mod vips;
+
+/// What running the rules on some mail did: the messages not to announce, how many a rule
+/// matched, and how many wait on MailCraft's AI.
+#[derive(Default)]
+struct RulesRan {
+    quiet: Vec<MessageKey>,
+    matched: usize,
+    waiting: usize,
+}
 
 /// The folder snoozed mail waits in.
 const SNOOZED: &str = "Snoozed";
@@ -546,58 +555,94 @@ impl Session {
         if self.rules.is_empty() {
             return Vec::new();
         }
-        let rules = self.rules.clone();
-        self.apply_rules(&rules, msgs).0
+        self.apply_rules(None, msgs).quiet
     }
 
-    /// [`Session::run_rules`] with these rules: the keys not to announce, and how many of `msgs`
-    /// a rule matched.
-    fn apply_rules<S: std::borrow::Borrow<Summary>>(&mut self, rules: &[Rule], msgs: &[S]) -> (Vec<MessageKey>, usize) {
-        let (mut quiet, mut matched) = (Vec::new(), 0usize);
+    /// [`Session::run_rules`] with rule `only`, or those kept: the keys not to announce, how
+    /// many of `msgs` a rule matched, and how many wait on MailCraft's AI's answer to a rule's
+    /// question (`ai/rule_questions.rs`) before their rules can say.
+    fn apply_rules<S: std::borrow::Borrow<Summary>>(&mut self, only: Option<Rule>, msgs: &[S]) -> RulesRan {
+        let mut ran = RulesRan::default();
         let mut changes = Batch::default();
-        let (sending, arriving): (Vec<Rule>, Vec<Rule>) = rules.iter().cloned().partition(|r| r.sent);
+        let rules = only.clone().map_or_else(|| self.rules.clone(), |r| vec![r]);
+        let (sending, arriving): (Vec<Rule>, Vec<Rule>) = rules.into_iter().partition(|r| r.sent);
         for m in msgs {
             let m: &Summary = m.borrow();
-            let sent = self.folder(&m.key.account, &m.key.folder).is_some_and(|f| f.role == FolderRole::Sent);
-            let actions = actions_for(if sent { &sending } else { &arriving }, m);
+            // One waiting on MailCraft's AI for its rules is theirs till the answer comes.
+            if self.rule_question_waits(&m.key) {
+                ran.waiting += 1;
+                continue;
+            }
+            let rules = if self.in_sent(m) { &sending } else { &arriving };
+            let Some(actions) = self.rules_decide(rules, m, only.clone(), Vec::new()) else {
+                ran.waiting += 1;
+                continue;
+            };
             if actions.is_empty() {
                 continue;
             }
-            matched += 1;
-            let a = m.key.account.clone();
-            let keys = vec![m.key.clone()];
-            let mut dest: Option<String> = None;
-            for act in actions {
-                match act {
-                    RuleAction::MarkRead => {
-                        changes.add(&a, Op::SetFlag { keys: keys.clone(), flag: Flag::Seen, on: true });
-                        quiet.push(m.key.clone());
-                    }
-                    RuleAction::Flag => changes.add(&a, Op::SetFlag { keys: keys.clone(), flag: Flag::Flagged, on: true }),
-                    RuleAction::Pin => changes.add(&a, Op::SetKeyword { keys: keys.clone(), keyword: PINNED.into(), on: true }),
-                    RuleAction::Categorize(c) => {
-                        if let Some(kw) = self.category(&c).map(|c| c.keyword.clone()) {
-                            changes.add(&a, Op::SetKeyword { keys: keys.clone(), keyword: kw, on: true });
-                        }
-                    }
-                    RuleAction::MoveTo(f) => dest = self.folder(&a, &f).map(|f| f.path.clone()).or(dest),
-                    RuleAction::MoveToRole(r) => dest = self.account(&a).and_then(|x| x.folder(r)).map(|f| f.path.clone()).or(dest),
-                    RuleAction::Delete => dest = self.account(&a).and_then(|x| x.folder(FolderRole::Trash)).map(|f| f.path.clone()).or(dest),
-                }
-            }
-            // Moves last (`apply_changes`), so flags and categories are set on the message before
-            // it leaves. Mail filed in a folder is still new mail (announced, as Outlook does);
-            // mail a rule sends to Deleted Items or Junk isn't.
-            if let Some(to) = dest.filter(|to| *to != m.key.folder) {
-                let role = self.folder(&a, &to).map(|f| f.role);
-                if matches!(role, Some(FolderRole::Trash | FolderRole::Junk)) {
-                    quiet.push(m.key.clone());
-                }
-                changes.add(&a, Op::Move { keys, to });
-            }
+            ran.matched += 1;
+            self.act_on(&mut changes, &mut ran.quiet, m, actions);
         }
         self.apply_changes(changes);
-        (quiet, matched)
+        ran
+    }
+
+    /// The rules run again on `m` once MailCraft's AI answered their question about it, with all
+    /// it answered (`answers`): rule `only`, or those kept.
+    pub(crate) fn rules_answered(&mut self, m: &Summary, only: Option<Rule>, answers: Vec<(String, bool)>) {
+        let sent = self.in_sent(m);
+        let rules = only.clone().map_or_else(|| self.rules.clone(), |r| vec![r]);
+        let rules: Vec<Rule> = rules.into_iter().filter(|r| r.sent == sent).collect();
+        let Some(actions) = self.rules_decide(&rules, m, only, answers) else { return };
+        let mut changes = Batch::default();
+        // Announced when it came: nothing to keep quiet now.
+        self.act_on(&mut changes, &mut Vec::new(), m, actions);
+        self.apply_changes(changes);
+    }
+
+    /// Whether `m` is in its account's Sent folder: the rules for mail sent are its.
+    fn in_sent(&self, m: &Summary) -> bool {
+        self.folder(&m.key.account, &m.key.folder).is_some_and(|f| f.role == FolderRole::Sent)
+    }
+
+    /// What rules do to message `m` (`actions`) added to `changes`, and it to `quiet` when it
+    /// isn't to be announced (marked read, or sent to Deleted Items or Junk).
+    fn act_on(&mut self, changes: &mut Batch, quiet: &mut Vec<MessageKey>, m: &Summary, actions: Vec<RuleAction>) {
+        if actions.is_empty() {
+            return;
+        }
+        let a = m.key.account.clone();
+        let keys = vec![m.key.clone()];
+        let mut dest: Option<String> = None;
+        for act in actions {
+            match act {
+                RuleAction::MarkRead => {
+                    changes.add(&a, Op::SetFlag { keys: keys.clone(), flag: Flag::Seen, on: true });
+                    quiet.push(m.key.clone());
+                }
+                RuleAction::Flag => changes.add(&a, Op::SetFlag { keys: keys.clone(), flag: Flag::Flagged, on: true }),
+                RuleAction::Pin => changes.add(&a, Op::SetKeyword { keys: keys.clone(), keyword: PINNED.into(), on: true }),
+                RuleAction::Categorize(c) => {
+                    if let Some(kw) = self.category(&c).map(|c| c.keyword.clone()) {
+                        changes.add(&a, Op::SetKeyword { keys: keys.clone(), keyword: kw, on: true });
+                    }
+                }
+                RuleAction::MoveTo(f) => dest = self.folder(&a, &f).map(|f| f.path.clone()).or(dest),
+                RuleAction::MoveToRole(r) => dest = self.account(&a).and_then(|x| x.folder(r)).map(|f| f.path.clone()).or(dest),
+                RuleAction::Delete => dest = self.account(&a).and_then(|x| x.folder(FolderRole::Trash)).map(|f| f.path.clone()).or(dest),
+            }
+        }
+        // Moves last (`apply_changes`), so flags and categories are set on the message before
+        // it leaves. Mail filed in a folder is still new mail (announced, as Outlook does);
+        // mail a rule sends to Deleted Items or Junk isn't.
+        if let Some(to) = dest.filter(|to| *to != m.key.folder) {
+            let role = self.folder(&a, &to).map(|f| f.role);
+            if matches!(role, Some(FolderRole::Trash | FolderRole::Junk)) {
+                quiet.push(m.key.clone());
+            }
+            changes.add(&a, Op::Move { keys, to });
+        }
     }
 
     /// Run the rules (or one) now, on the list on screen or (`inbox`) on the mail already in the
@@ -630,10 +675,16 @@ impl Session {
         } else {
             self.list.clone()
         };
-        let (_, n) = self.apply_rules(&rules, &msgs);
+        let ran = self.apply_rules(only.and_then(|_| rules.into_iter().next()), &msgs);
+        let n = ran.matched;
         let what = if n == 1 { "1 message".to_string() } else { format!("{n} messages") };
-        self.notice(format!("Rules ran on the mail there now: {what} matched"), false);
-        Ok(serde_json::json!({ "matched": n }))
+        let waiting = match ran.waiting {
+            0 => String::new(),
+            1 => "; 1 waits on MailCraft's AI".into(),
+            w => format!("; {w} wait on MailCraft's AI"),
+        };
+        self.notice(format!("Rules ran on the mail there now: {what} matched{waiting}"), false);
+        Ok(serde_json::json!({ "matched": n, "waiting": ran.waiting }))
     }
 
     // ----- Focused / Other -----

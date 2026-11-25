@@ -82,5 +82,6 @@ fn said_at(c: &Condition, depth: usize) -> String {
         Condition::Importance { value: Importance::Low } => tl!("is of low importance").to_string(),
         Condition::Larger { kb } => tf!("is larger than {size} KB", size = kb),
         Condition::Smaller { kb } => tf!("is smaller than {size} KB", size = kb),
+        Condition::Asks { question } => tf!("gets a yes from MailCraft's AI to “{question}”", question = question),
     }
 }

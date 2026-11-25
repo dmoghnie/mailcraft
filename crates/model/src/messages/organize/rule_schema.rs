@@ -97,6 +97,14 @@ fn tests() -> Vec<Value> {
         ),
         tagged("if", "larger", "Larger than this.", &[("kb", kb())]),
         tagged("if", "smaller", "Smaller than this.", &[("kb", kb())]),
+        tagged(
+            "if",
+            "asks",
+            "A yes-or-no question about the message that MailCraft's AI answers from its text as it arrives, for what the other tests can't say \
+             (whether it's a contract, a complaint, about a project). The message's text goes to the AI for each one it decides: only when no \
+             other test can say it, and at most one in a rule.",
+            &[("question", json!({"type": "string", "description": "The question, answered yes or no about one message."}))],
+        ),
     ]
 }
 
@@ -202,12 +210,14 @@ mod tests {
             Condition::Importance { value: Importance::Low },
             Condition::Larger { kb: 500 },
             Condition::Smaller { kb: 20 },
+            Condition::Asks { question: "Is it a contract to sign?".into() },
         ];
         for t in &tests {
             match t {
                 Condition::From { .. } | Condition::To { .. } | Condition::Subject { .. } | Condition::AnyText { .. } | Condition::Preview { .. } => {
                 }
                 Condition::HasAttachment | Condition::Bulk | Condition::Importance { .. } | Condition::Larger { .. } | Condition::Smaller { .. } => {}
+                Condition::Asks { .. } => {}
                 Condition::All { .. } | Condition::Any { .. } | Condition::Not { .. } => panic!("a test, not a combination"),
             }
         }
@@ -354,7 +364,7 @@ mod tests {
             Value::Object(o)
         };
         let tests = s["$defs"]["test"]["anyOf"].as_array().unwrap();
-        assert_eq!(tests.len(), 10);
+        assert_eq!(tests.len(), 11);
         for t in tests {
             let c: Condition = serde_json::from_value(filled(t)).unwrap();
             assert!(c.simple().is_some());

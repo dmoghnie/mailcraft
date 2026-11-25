@@ -2384,3 +2384,4 @@ count	occurrences	مرات
 	Write a rule in your own words	اكتب قاعدة بكلماتك
 	Write rule	اكتب القاعدة
 	Written by {model}	كتبها {model}
+	gets a yes from MailCraft's AI to “{question}”	رسالة يجيب ذكاء MailCraft الاصطناعي بـ«نعم» عن «{question}» بشأنها

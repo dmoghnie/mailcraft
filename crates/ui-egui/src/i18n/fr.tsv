@@ -2389,3 +2389,4 @@ count	occurrences	occurrences
 	Write a rule in your own words	Écrire une règle avec vos mots
 	Write rule	Écrire la règle
 	Written by {model}	Écrite par {model}
+	gets a yes from MailCraft's AI to “{question}”	reçoit un oui de l’IA de MailCraft à « {question} »

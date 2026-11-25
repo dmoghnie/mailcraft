@@ -7,6 +7,8 @@ use mailcraft_model::organize::{Condition, RuleAction, WORDS_DEPTH};
 
 use super::*;
 
+mod questions;
+
 const PROOF: &str = "Your proof for the festival poster is ready";
 const WORDS: &str = "proofs and invoices from the print shop go to Projects and get the Print category";
 

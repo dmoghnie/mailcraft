@@ -2402,3 +2402,4 @@ count	occurrences	повторений
 	Write a rule in your own words	Напишите правило своими словами
 	Write rule	Написать правило
 	Written by {model}	Написано: {model}
+	gets a yes from MailCraft's AI to “{question}”	получает от ИИ MailCraft ответ «да» на «{question}»

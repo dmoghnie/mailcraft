@@ -2385,3 +2385,4 @@ count	occurrences	回
 	Write a rule in your own words	自分の言葉でルールを書く
 	Write rule	ルールを作成
 	Written by {model}	作成: {model}
+	gets a yes from MailCraft's AI to “{question}”	MailCraft の AI が「{question}」に「はい」と答える

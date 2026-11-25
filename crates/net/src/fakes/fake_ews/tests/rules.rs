@@ -187,6 +187,10 @@ fn a_rule_the_server_cant_hold_is_refused() {
         stop: false,
         sent: false,
     };
+    // Nor can a server ask MailCraft's AI.
+    let asks =
+        Rule { filter: Condition::all(vec![Condition::from("zoe"), Condition::Asks { question: "Is it a contract?".into() }]), ..bulk.clone() };
+    assert!(crate::ews::rule_written(&asks).is_err_and(|e| e.to_string().contains("ask MailCraft's AI")));
     let now = ServerRule { name: "Lists".into(), priority: 3, enabled: true, rule: Some(bulk), ..Default::default() };
     let (back, error) = set(&mut m, vec![ServerRuleOp::Create { now }], false);
     assert!(error.is_some_and(|e| e.contains("can't")), "refused");

@@ -11,7 +11,7 @@ pub mod keywords;
 mod rule_schema;
 pub mod server_rules;
 
-pub use conditions::{CONDITION_DEPTH, CONDITION_TESTS, Condition, Importance, TextOp};
+pub use conditions::{CONDITION_DEPTH, CONDITION_TESTS, Condition, Importance, QUESTION_CHARS, RULE_QUESTIONS, TextOp};
 pub use rule_schema::{RuleAnswer, WORDS_DEPTH, rule_answer_schema};
 pub use server_rules::{ServerRule, ServerRuleOp, ServerRules};
 
@@ -113,29 +113,53 @@ fn yes() -> bool {
 }
 
 impl Rule {
+    /// Whether it acts on `m`, a question it asks MailCraft's AI taken as answered no.
     pub fn matches(&self, m: &Summary) -> bool {
+        self.decides(m, Some(false)) == Some(true)
+    }
+
+    /// Whether it acts on `m`, given `answer` to the question it asks MailCraft's AI (none yet):
+    /// `None` when that answer, not yet had, decides it.
+    pub fn decides(&self, m: &Summary, answer: Option<bool>) -> Option<bool> {
         // One that looks at nothing, or past the limits, never matches (a text it looks for
         // left empty doesn't match by itself, as before rules combined their conditions).
         if !self.enabled || self.actions.is_empty() || self.filter.tests().is_empty() || self.filter.past_limits().is_some() {
-            return false;
+            return Some(false);
         }
         if self.account.as_ref().is_some_and(|a| *a != m.key.account) {
-            return false;
+            return Some(false);
         }
-        self.filter.matches(m)
+        self.filter.decides(m, answer)
     }
 }
 
-/// The actions of every enabled rule that matches `m`, in rule order.
-pub fn actions_for(rules: &[Rule], m: &Summary) -> Vec<RuleAction> {
+/// What rules do to a message: these actions, or nothing yet until MailCraft's AI answers this
+/// question about it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum RulesSay {
+    Act(Vec<RuleAction>),
+    Ask(String),
+}
+
+/// The actions of every enabled rule that matches `m`, in rule order, given `answers` to the
+/// questions asked about it; or the question the next rule waits on, when its answer decides it.
+pub fn actions_for(rules: &[Rule], m: &Summary, answers: &[(String, bool)]) -> RulesSay {
     let mut out = Vec::new();
-    for r in rules.iter().filter(|r| r.matches(m)) {
-        out.extend(r.actions.iter().cloned());
-        if r.stop {
-            break;
+    for r in rules {
+        let question = r.filter.question();
+        let answer = question.and_then(|q| answers.iter().find(|(asked, _)| asked == q)).map(|(_, yes)| *yes);
+        match (r.decides(m, answer), question) {
+            (Some(true), _) => {
+                out.extend(r.actions.iter().cloned());
+                if r.stop {
+                    break;
+                }
+            }
+            (None, Some(q)) => return RulesSay::Ask(q.to_string()),
+            (Some(false) | None, _) => {}
         }
     }
-    out
+    RulesSay::Act(out)
 }
 
 /// A snoozed message: it waits in the Snoozed folder and comes back to `back_to` at `until`.
@@ -317,9 +341,13 @@ mod tests {
             ..news.clone()
         };
         let rules = vec![news.clone(), flag.clone()];
-        assert_eq!(actions_for(&rules, &m("letters@shop.example", "Sale", true)), vec![RuleAction::MoveTo("News".into()), RuleAction::MarkRead]);
-        assert!(actions_for(&rules, &m("letters@shop.example", "Hi", false)).is_empty(), "all conditions must hold");
-        assert_eq!(actions_for(&rules, &m("BOSS@x.example", "Now", false)), vec![RuleAction::Flag]);
+        let act = |v: Vec<RuleAction>| RulesSay::Act(v);
+        assert_eq!(
+            actions_for(&rules, &m("letters@shop.example", "Sale", true), &[]),
+            act(vec![RuleAction::MoveTo("News".into()), RuleAction::MarkRead])
+        );
+        assert_eq!(actions_for(&rules, &m("letters@shop.example", "Hi", false), &[]), act(vec![]), "all conditions must hold");
+        assert_eq!(actions_for(&rules, &m("BOSS@x.example", "Now", false), &[]), act(vec![RuleAction::Flag]));
         let any = Rule { filter: Condition::Any { of: vec![Condition::Bulk, Condition::from("letters")] }, ..news.clone() };
         assert!(any.matches(&m("x@y.example", "Hi", true)));
         assert!(!Rule { enabled: false, ..news.clone() }.matches(&m("letters@x", "", true)));
@@ -330,6 +358,44 @@ mod tests {
         let json = serde_json::to_string(&rules).unwrap();
         assert!(json.contains("\"if\":\"bulk\""), "{json}");
         assert_eq!(serde_json::from_str::<Vec<Rule>>(&json).unwrap(), rules);
+    }
+
+    /// A rule's question to MailCraft's AI is asked only when its answer decides the rule (its
+    /// other tests leave it open), and the rules after it wait for it; once answered, they run on.
+    #[test]
+    fn a_rules_question_is_asked_only_when_its_answer_decides() {
+        let contract = Condition::Asks { question: "Is it a contract to sign?".into() };
+        let ask = Rule {
+            name: "Contracts".into(),
+            enabled: true,
+            account: None,
+            filter: Condition::all(vec![Condition::from("studio"), contract.clone()]),
+            actions: vec![RuleAction::Flag],
+            stop: true,
+            sent: false,
+        };
+        let pin = Rule { name: "All".into(), filter: Condition::all(vec![Condition::from("@")]), actions: vec![RuleAction::Pin], ..ask.clone() };
+        let rules = vec![ask.clone(), pin];
+        let studio = m("ops@studio.example", "Agreement", false);
+        let q = "Is it a contract to sign?".to_string();
+        assert_eq!(actions_for(&rules, &studio, &[]), RulesSay::Ask(q.clone()), "the answer decides it: the rules wait");
+        assert_eq!(actions_for(&rules, &studio, &[(q.clone(), true)]), RulesSay::Act(vec![RuleAction::Flag]), "yes, and it stops there");
+        assert_eq!(actions_for(&rules, &studio, &[(q.clone(), false)]), RulesSay::Act(vec![RuleAction::Pin]));
+        assert_eq!(actions_for(&rules, &m("a@shop.example", "Sale", false), &[]), RulesSay::Act(vec![RuleAction::Pin]), "not asked: from elsewhere");
+        let either = Rule { filter: Condition::Any { of: vec![Condition::from("studio"), contract.clone()] }, ..ask.clone() };
+        assert_eq!(either.decides(&studio, None), Some(true), "not asked: it matches either way");
+        assert!(!ask.matches(&studio), "unanswered is no");
+        let not = Rule { filter: Condition::all(vec![Condition::from("studio"), Condition::Not { of: Box::new(contract.clone()) }]), ..ask.clone() };
+        assert_eq!((not.decides(&studio, Some(false)), not.decides(&studio, Some(true))), (Some(true), Some(false)));
+        // More than one question, or one too long or empty, never runs, nor is it asked.
+        let two = Condition::all(vec![contract.clone(), Condition::Asks { question: "Is it urgent?".into() }]);
+        assert_eq!(two.past_limits(), Some("it asks MailCraft's AI more than one question"));
+        assert_eq!(Rule { filter: two, ..ask.clone() }.decides(&studio, None), Some(false));
+        let long = Condition::Asks { question: "?".repeat(QUESTION_CHARS + 1) };
+        assert_eq!(long.past_limits(), Some("a question it asks is too long"));
+        assert_eq!(Condition::Asks { question: " ".into() }.refused(), Some("a question it asks is empty"));
+        let json = serde_json::to_value(&contract).unwrap();
+        assert_eq!(json, serde_json::json!({"if": "asks", "question": "Is it a contract to sign?"}));
     }
 
     /// Rules written before conditions combined (a list, all or any of it) read as ever, and

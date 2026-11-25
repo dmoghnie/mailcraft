@@ -2388,3 +2388,4 @@ count	occurrences	회
 	Write a rule in your own words	내 말로 규칙 작성
 	Write rule	규칙 작성
 	Written by {model}	작성: {model}
+	gets a yes from MailCraft's AI to “{question}”	MailCraft의 AI가 "{question}"에 '예'라고 답하는

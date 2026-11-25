@@ -2403,3 +2403,4 @@ count	occurrences	opakovaní
 	Write a rule in your own words	Napíšte pravidlo vlastnými slovami
 	Write rule	Napísať pravidlo
 	Written by {model}	Napísal: {model}
+	gets a yes from MailCraft's AI to “{question}”	dostane od AI MailCraftu áno na „{question}“

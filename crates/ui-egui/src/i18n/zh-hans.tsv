@@ -2385,3 +2385,4 @@ count	occurrences	次
 	Write a rule in your own words	用你自己的话写一条规则
 	Write rule	编写规则
 	Written by {model}	由 {model} 编写
+	gets a yes from MailCraft's AI to “{question}”	MailCraft 的 AI 对“{question}”回答“是”

@@ -1,6 +1,7 @@
 //! What a rule looks at, as a query's `where` does: tests of a message's fields (who it's from
 //! and to, its subject and text, its size, importance, attachments, whether it's list mail),
-//! combined with all, any and not, within limits a damaged file or a model's answer can't pass.
+//! and a question MailCraft's AI answers about it, combined with all, any and not, within limits
+//! a damaged file or a model's answer can't pass.
 
 use serde::{Deserialize, Serialize};
 
@@ -10,6 +11,10 @@ use crate::Summary;
 /// hostile rules file, an answer of a model) is refused, and never matches.
 pub const CONDITION_DEPTH: usize = 6;
 pub const CONDITION_TESTS: usize = 50;
+/// The questions a rule may ask MailCraft's AI about a message (each costs a model's reading of
+/// it), and the longest one, in characters.
+pub const RULE_QUESTIONS: usize = 1;
+pub const QUESTION_CHARS: usize = 300;
 
 /// What a rule looks at, as a query's `where` does: tests of a message's fields, combined with
 /// all, any and not. Text tests ignore case. In JSON each is an object tagged `if`; the tests
@@ -72,6 +77,12 @@ pub enum Condition {
     /// Smaller than this many kilobytes.
     Smaller {
         kb: u32,
+    },
+    /// A yes-or-no question about it that MailCraft's AI (the model for quick decisions) answers
+    /// from its text, for what its fields can't say (whether it's a contract, a complaint):
+    /// asked only when the answer decides the rule.
+    Asks {
+        question: String,
     },
 }
 
@@ -143,12 +154,36 @@ impl Condition {
     }
 
     /// Whether message `m` is one this says, nested no deeper than [`CONDITION_DEPTH`]
-    /// (deeper never matches). All and any of nothing never match.
+    /// (deeper never matches), a question it asks taken as answered no. All and any of nothing
+    /// never match.
     pub fn matches(&self, m: &Summary) -> bool {
-        self.matches_at(m, 0)
+        self.matches_at(m, false, 0)
     }
 
-    fn matches_at(&self, m: &Summary, depth: usize) -> bool {
+    /// Whether `m` is one this says, given `answer` to the question it asks (none yet): `None`
+    /// when the answer, not yet had, decides it, so the question is asked only then.
+    pub fn decides(&self, m: &Summary, answer: Option<bool>) -> Option<bool> {
+        let given = self.matches_at(m, answer.unwrap_or(false), 0);
+        match answer {
+            None if self.question().is_some() && given != self.matches_at(m, true, 0) => None,
+            _ => Some(given),
+        }
+    }
+
+    /// The question it asks MailCraft's AI, if it asks one.
+    pub fn question(&self) -> Option<&str> {
+        self.questions().next()
+    }
+
+    fn questions(&self) -> impl Iterator<Item = &str> {
+        self.tests().into_iter().filter_map(|t| match t {
+            Condition::Asks { question } => Some(question.as_str()),
+            _ => None,
+        })
+    }
+
+    /// [`Condition::matches`], the question it asks answered `answer`.
+    fn matches_at(&self, m: &Summary, answer: bool, depth: usize) -> bool {
         if depth > CONDITION_DEPTH {
             return false;
         }
@@ -159,9 +194,9 @@ impl Condition {
         };
         let anyone = |op: TextOp, t: &str| m.to.iter().chain(&m.cc).any(|a| person(a, op, t));
         match self {
-            Condition::All { of } => !of.is_empty() && of.iter().all(|c| c.matches_at(m, depth + 1)),
-            Condition::Any { of } => of.iter().any(|c| c.matches_at(m, depth + 1)),
-            Condition::Not { of } => !of.matches_at(m, depth + 1),
+            Condition::All { of } => !of.is_empty() && of.iter().all(|c| c.matches_at(m, answer, depth + 1)),
+            Condition::Any { of } => of.iter().any(|c| c.matches_at(m, answer, depth + 1)),
+            Condition::Not { of } => !of.matches_at(m, answer, depth + 1),
             Condition::From { value, op } => person(&m.from, *op, value),
             Condition::To { value, op } => anyone(*op, value),
             Condition::Subject { value, op } => op.test(&m.subject, value),
@@ -173,6 +208,7 @@ impl Condition {
             Condition::Importance { value: Importance::Low } => m.importance < 0,
             Condition::Larger { kb } => u64::from(m.size) > u64::from(*kb) * 1024,
             Condition::Smaller { kb } => u64::from(m.size) < u64::from(*kb) * 1024,
+            Condition::Asks { .. } => answer,
         }
     }
 
@@ -206,16 +242,20 @@ impl Condition {
         }
     }
 
-    /// Why no rule can keep it: it nests too deep, or looks at too much.
+    /// Why no rule can keep it: it nests too deep, looks at too much, or asks MailCraft's AI more
+    /// than it may.
     pub fn past_limits(&self) -> Option<&'static str> {
         match () {
             _ if self.depth() > CONDITION_DEPTH => Some("its conditions nest too deep"),
             _ if self.tests().len() > CONDITION_TESTS => Some("it looks at too much"),
+            _ if self.questions().count() > RULE_QUESTIONS => Some("it asks MailCraft's AI more than one question"),
+            _ if self.questions().any(|q| q.chars().count() > QUESTION_CHARS) => Some("a question it asks is too long"),
             _ => None,
         }
     }
 
-    /// Why it can't be a new rule's: nothing it tests, an empty text, or past the limits.
+    /// Why it can't be a new rule's: nothing it tests, an empty text or question, or past the
+    /// limits.
     pub fn refused(&self) -> Option<&'static str> {
         let tests = self.tests();
         let empty_text = tests.iter().any(|t| match t {
@@ -223,9 +263,11 @@ impl Condition {
             Condition::AnyText { value, .. } | Condition::Preview { value, .. } => value.trim().is_empty(),
             _ => false,
         });
+        let empty_question = self.questions().any(|q| q.trim().is_empty());
         match () {
             _ if tests.is_empty() => Some("it looks at nothing"),
             _ if empty_text => Some("a text it looks for is empty"),
+            _ if empty_question => Some("a question it asks is empty"),
             _ => self.past_limits(),
         }
     }
@@ -332,6 +374,7 @@ mod tests {
             prop_oneof![Just(Importance::High), Just(Importance::Low)].prop_map(|value| Condition::Importance { value }),
             any::<u32>().prop_map(|kb| Condition::Larger { kb }),
             any::<u32>().prop_map(|kb| Condition::Smaller { kb }),
+            text().prop_map(|question| Condition::Asks { question }),
         ]
     }
 
@@ -348,7 +391,8 @@ mod tests {
 
     proptest::proptest! {
         /// Any conditions are written and read back the same (rules.json, the CLI, a model's
-        /// answer), and "not" says the opposite of what it holds, within the limits.
+        /// answer), and "not" says the opposite of what it holds, within the limits. A question
+        /// left unanswered decides nothing it wouldn't either way.
         #[test]
         fn conditions_round_trip_and_not_inverts(c in tree(), subject in text(), size in 0u32..100_000) {
             let json = serde_json::to_string(&c).unwrap();
@@ -357,6 +401,9 @@ mod tests {
             if c.depth() < CONDITION_DEPTH {
                 prop_assert_eq!(Condition::Not { of: Box::new(c.clone()) }.matches(&msg), !c.matches(&msg));
             }
+            let (yes, no) = (c.decides(&msg, Some(true)), c.decides(&msg, Some(false)));
+            prop_assert_eq!(no, Some(c.matches(&msg)));
+            prop_assert_eq!(c.decides(&msg, None), if yes == no { no } else { None });
         }
     }
 }

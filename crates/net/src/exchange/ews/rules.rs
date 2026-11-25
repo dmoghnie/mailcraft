@@ -237,6 +237,7 @@ fn what_it_does(rule: &Rule, folder_id: &dyn Fn(&str) -> Option<String>) -> Resu
             Condition::Preview { .. } => return Err(cant("look at a message's text")),
             Condition::Importance { .. } => return Err(cant("look at a message's importance")),
             Condition::Larger { .. } | Condition::Smaller { .. } => return Err(cant("look at a message's size")),
+            Condition::Asks { .. } => return Err(cant("ask MailCraft's AI about a message")),
             Condition::All { .. } | Condition::Any { .. } | Condition::Not { .. } => return Err(cant("nest conditions")),
         };
         if slot.replace(strings(t)).is_some() {
