@@ -10,6 +10,7 @@
 
 mod asking;
 mod run;
+mod strings;
 #[cfg(test)]
 mod tests;
 mod values;

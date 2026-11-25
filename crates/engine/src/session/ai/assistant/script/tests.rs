@@ -6,6 +6,7 @@ use serde_json::{Value, json};
 
 use super::EXAMPLE;
 use super::run::{Answer, CALLS_MOST, Call, OPS_ALL, PRINTED_MOST, Ran, Runner};
+use super::strings::replaced_len;
 use super::values::{to_json, to_script};
 
 const TOOLS: [&str; 3] = ["find_messages", "read_message", "move_messages"];
@@ -191,6 +192,26 @@ fn json_value() -> impl Strategy<Value = Value> {
     })
 }
 
+/// A replace that would make a string longer than a script may hold fails before it's built:
+/// Rhai's own builds it, then finds it too long, and `s.replace("", s)` of a string at the
+/// limit would ask for a million times the limit.
+#[test]
+fn a_replace_too_long_fails_before_its_string_is_built() {
+    for replace in [r#"s.replace("", s)"#, "s.replace('x', s)"] {
+        let source = format!(r#"let s = "x"; for i in 0..11 {{ s += s; }} {replace}"#);
+        let why = failed(run(&source, &[]));
+        assert!(why.contains("replace would make a string of") && why.contains("more than the 1048576"), "{why}");
+    }
+}
+
+/// A replace within the limit replaces as Rhai's does, an empty string found between each
+/// character and at both ends.
+#[test]
+fn a_replace_within_the_limit_replaces() {
+    let source = r#"let a = "a-b"; a.replace("-", "--"); let b = "ab"; b.replace("", "-"); let c = "a-b"; c.replace('-', "+"); [a, b, c]"#;
+    assert_eq!(run(source, &[]), Ran::Done { printed: String::new(), value: json!(["a--b", "-a-b-", "a+b"]) });
+}
+
 proptest! {
     /// What a tool gives comes back to JSON as it was, through a script's values.
     #[test]
@@ -204,5 +225,11 @@ proptest! {
         let log = [(call("find_messages", json!({})), Answer::Gave(v))];
         let source = "let f = find_messages(); print(`${f}`); f";
         prop_assert_eq!(run(source, &log), run(source, &log));
+    }
+
+    /// The length a replace is checked against is never less than the string it makes.
+    #[test]
+    fn a_replace_is_never_longer_than_its_check(s in ".{0,40}", find in ".{0,3}", with in ".{0,6}") {
+        prop_assert!(replaced_len(&s, &find, &with) >= s.replace(&find, &with).len());
     }
 }

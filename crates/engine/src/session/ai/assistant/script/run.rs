@@ -10,6 +10,7 @@ use std::rc::Rc;
 use rhai::{AST, Dynamic, Engine, EvalAltResult, Map, Position};
 use serde_json::{Value, json};
 
+use super::strings;
 use super::values::{to_json, to_script};
 
 /// Rhai as models get it wrong, writing it as Rust or Python: told with the tool, and again
@@ -175,6 +176,7 @@ impl Runner {
             r.borrow_mut().call(Call { name: "ask".into(), input: json!({"question": q, "text": text}) })
         });
         engine.register_fn("now", move || now);
+        strings::register(&mut engine, STRING_MOST);
         let ast = engine.compile(source).map_err(|e| format!("the script doesn't compile: {e}. {RHAI}"))?;
         Ok(Runner { engine, ast, replay, printed, ops })
     }
