@@ -17,13 +17,13 @@ mod backup;
 mod categories;
 mod closing;
 mod commands;
+use commands::ribbon;
 mod folders;
 mod importing;
 mod mailbox;
 mod organize;
 mod other;
 pub(crate) mod pim_dialogs;
-mod ribbon;
 mod signatures;
 #[cfg(test)]
 pub(crate) use signatures::has_web_pictures;

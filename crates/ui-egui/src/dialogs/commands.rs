@@ -9,6 +9,8 @@ use serde_json::Value;
 use super::*;
 use crate::i18n;
 
+pub(super) mod ribbon;
+
 /// How many rows the list shows.
 const ROWS: usize = 14;
 

@@ -4,8 +4,8 @@
 
 use mailcraft_engine::{HOME_BUTTONS, RIBBON_ADDED_MOST, RIBBON_ROW};
 
-use super::commands::{matching, ribbon_offers};
 use super::*;
+use super::{matching, ribbon_offers};
 
 /// How many commands found are listed to add.
 const FOUND: usize = 6;
@@ -22,7 +22,7 @@ fn name(s: &Session, id: &str) -> String {
     s.registry().get(id).map_or_else(|| id.to_string(), |c| tl!(c.label).to_string())
 }
 
-pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &mut Vec<Action>) -> bool {
+pub(crate) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &mut Vec<Action>) -> bool {
     let Dialog::CustomizeRibbon { buttons, picked, filter } = d else { return false };
     ui.set_width(460.0);
     title(ui, t, "Customize the ribbon");
