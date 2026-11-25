@@ -50,6 +50,12 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
             Ok(json!({"stopped": s.assistant_stop(&chat)?}))
         })
         .params(r#"{"chat": string}"#),
+        CommandSpec::new("assistant.retry", "Ask MailCraft's AI again in a chat, as it is", WHERE, |s, v| {
+            let chat = p::req_str(v, "chat")?.to_string();
+            s.assistant_retry(&chat)?;
+            Ok(json!({"chat": chat}))
+        })
+        .params(r#"{"chat": string}"#),
         CommandSpec::new("assistant.model", "Choose the model a chat asks", WHERE, |s, v| {
             let chat = p::req_str(v, "chat")?.to_string();
             let profile = match p::req_str(v, "profile")? {

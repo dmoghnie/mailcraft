@@ -35,6 +35,9 @@ pub(super) fn show(s: &Session, st: &mut UiState, ui: &mut Ui, chat: &Chat, acts
         if let Some(e) = &chat.error {
             trouble(ui, &t, e);
         }
+        if asking.is_none() && chat.can_ask_again() && ui.button(tl!("Try again")).clicked() {
+            acts.push(Action::Run("assistant.retry", json!({"chat": chat.id})));
+        }
         decide_all(ui, &t, chat, acts);
         ui.add_space(8.0);
     });
@@ -105,6 +108,9 @@ fn answered(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, i: usize,
     }
     if turn.cut {
         ui.label(RichText::new(tl!("The answer was cut short at the longest answer set for this model.")).small().color(t.faint));
+    }
+    if turn.stopped {
+        ui.label(RichText::new(tl!("Stopped")).small().color(t.faint));
     }
     // A change put off is proposed again, with the others, in a card of its own.
     for call in &turn.turn.calls {

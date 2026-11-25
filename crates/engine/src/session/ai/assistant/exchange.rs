@@ -155,7 +155,7 @@ impl Session {
             }
             _ => {
                 let turn = AiTurn { role: AiRole::User, text: text.to_string(), calls: Vec::new(), results };
-                chat.turns.push(ChatTurn { turn, thinking: String::new(), context: context.to_vec(), context_text, cut: false, at });
+                chat.turns.push(ChatTurn { turn, thinking: String::new(), context: context.to_vec(), context_text, cut: false, stopped: false, at });
             }
         }
         Ok(())
@@ -213,7 +213,15 @@ impl Session {
                 let calls = own_ids(&chat, a.calls);
                 let turn = AiTurn { role: AiRole::Assistant, text: a.text, calls, results: Vec::new() };
                 let at = self.clock.now;
-                chat.turns.push(ChatTurn { turn, thinking: a.thinking, context: Vec::new(), context_text: String::new(), cut: a.cut, at });
+                chat.turns.push(ChatTurn {
+                    turn,
+                    thinking: a.thinking,
+                    context: Vec::new(),
+                    context_text: String::new(),
+                    cut: a.cut,
+                    stopped: false,
+                    at,
+                });
                 self.make_calls(&mut chat);
             }
         }
@@ -277,7 +285,7 @@ impl Session {
         let results = self.settle_open(&mut chat, "");
         let turn = AiTurn { role: AiRole::User, text: String::new(), calls: Vec::new(), results };
         let at = self.clock.now;
-        chat.turns.push(ChatTurn { turn, thinking: String::new(), context: Vec::new(), context_text: String::new(), cut: false, at });
+        chat.turns.push(ChatTurn { turn, thinking: String::new(), context: Vec::new(), context_text: String::new(), cut: false, stopped: false, at });
         self.put_chat(chat);
         if !stopped {
             // Why not is kept with the chat.
@@ -397,17 +405,56 @@ impl Session {
         chat.answer_due = false;
         let asked = self.ai.assistant.asking(id);
         if let Some(q) = asked {
+            // What came of the answer stays, to read; the next answer takes its place.
+            let came = self
+                .ai
+                .part(q)
+                .filter(|(text, _)| !text.trim().is_empty())
+                .map(|(text, thinking)| (text.trim_end().to_string(), thinking.to_string()));
             self.assistant_let_go(q);
+            if let Some((text, thinking)) = came {
+                let at = self.clock.now;
+                let turn = AiTurn::assistant(&text);
+                chat.turns.push(ChatTurn { turn, thinking, context: Vec::new(), context_text: String::new(), cut: false, stopped: true, at });
+            }
         }
         let open = !chat.open_calls().is_empty();
         if open {
             let results = self.settle_open(&mut chat, "Stopped: nothing changed.");
             let turn = AiTurn { role: AiRole::User, text: String::new(), calls: Vec::new(), results };
             let at = self.clock.now;
-            chat.turns.push(ChatTurn { turn, thinking: String::new(), context: Vec::new(), context_text: String::new(), cut: false, at });
+            chat.turns.push(ChatTurn {
+                turn,
+                thinking: String::new(),
+                context: Vec::new(),
+                context_text: String::new(),
+                cut: false,
+                stopped: false,
+                at,
+            });
         }
         self.put_chat(chat);
         Ok(asked.is_some() || open)
+    }
+
+    /// Ask chat `id`'s model again, as the chat is, without the person writing (Try again): after
+    /// its question failed, it was stopped, or its steps ran out. An answer stopped as it came
+    /// gives way to the new one.
+    pub(crate) fn assistant_retry(&mut self, id: &str) -> Result<(), CmdError> {
+        if self.ai.assistant.asking(id).is_some() {
+            return Err(CmdError::Disabled("MailCraft's AI is still answering in this chat: wait for it, or stop it".into()));
+        }
+        let chat = self.assistant_chat(id)?;
+        if !chat.can_ask_again() {
+            return Err(CmdError::Disabled("there's nothing to ask again here: decide what it proposed, or write what you want next".into()));
+        }
+        if chat.turns.last().is_some_and(|t| t.stopped) {
+            chat.turns.pop();
+        }
+        chat.error = None;
+        self.assistant_changed(id);
+        self.ai.assistant.steps.remove(id);
+        self.assistant_ask(id)
     }
 
     /// Question `q` let go: its answer dropped as it comes, and the question stopped, so the

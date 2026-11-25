@@ -95,7 +95,10 @@ and `cargo xtask sizes` enforces them.
   thread of its own, at most four at once; `net/src/protocols/ai.rs` speaks the three wire
   formats, with the tools a model may call, and reads an answer whole or streamed as it's
   written (`ai/streamed.rs`: the server-sent events OpenAI's and Anthropic's formats stream, or
-  Ollama's JSON lines, its growth sent on as `AiDone::Part` every 80 ms at most).
+  Ollama's JSON lines, its growth sent on as `AiDone::Part` every 80 ms at most). A question
+  whose server was busy (429), failed on its side (5xx), or timed out or cut the connection is
+  asked once more after five seconds (`ai/again.rs`), unless some of its answer came; still
+  failing, it goes to the profile's fallback, then to the person (`assistant.retry`, Try again).
 - **Three formats cover the servers.** OpenAI's Chat Completions is spoken by OpenAI, xAI, Mistral,
   OpenRouter, Groq, DeepSeek, Gemini's compatible address and the local servers (Ollama, LM
   Studio, llama.cpp); Anthropic's Messages is the second. Ollama's own (`/api/chat`) is the
@@ -128,7 +131,8 @@ and `cargo xtask sizes` enforces them.
   event that repeats. A model asked about a chat must be allowed every account whose mail
   is in it (`AiPrefs::allows_all`), its fallbacks too. A chat that outgrows its profile's
   context (a token for every three bytes) loses what tools gave early on, then its oldest
-  turns. At most 24 steps for one thing the person says.
+  turns. At most 24 steps for one thing the person says. Stopped as it's written, what came of
+  an answer is kept (`ChatTurn::stopped`) until it's asked again.
 - **Scripts** (code mode, `session/ai/assistant/script/`): a model the person lets
   (`AiProfile::scripts`) gets `run_script`, a script in Rhai (MIT or Apache-2.0, through a fork
   pinned in `[patch.crates-io]`: `compact_str` in place of `smartstring`, and a limit on how deep

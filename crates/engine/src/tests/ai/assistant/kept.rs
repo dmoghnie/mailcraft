@@ -95,6 +95,7 @@ fn a_chat_cut_short_by_closing_says_so_when_read_again() {
         context: Vec::new(),
         context_text: String::new(),
         cut: false,
+        stopped: false,
         at: NOW,
     };
     let run = crate::ToolRun {

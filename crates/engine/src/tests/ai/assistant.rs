@@ -7,6 +7,7 @@ use mailcraft_model::{AiChat, AiRole, AiToolCall, MessageKey};
 
 const STORYBOARD: &str = "Storyboard review on Thursday";
 
+mod again;
 mod kept;
 mod pim_changes;
 mod script;

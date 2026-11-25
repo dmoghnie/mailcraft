@@ -341,3 +341,25 @@ fn a_script_waiting_for_its_question_says_so() {
     }
     assert!(has(&texts(&ctx, &mut a), "Asked the model"));
 }
+
+/// A question that failed says why, with Try again, which asks again; a stopped answer says
+/// it was stopped.
+#[test]
+fn a_failed_question_is_tried_again_from_the_pane() {
+    let (mut a, ctx) = ready("assistant-again");
+    a.run("assistant.pane", json!({"on": true}));
+    a.run("assistant.send", json!({"text": "What came in today?"}));
+    let chat = a.ui.assistant.chat.clone().expect("the pane shows the chat begun");
+    let q = a.session.ai.assistant.asking(&chat).expect("asked");
+    a.session.apply(MailEvent::Ai { done: AiDone::Part { id: q, text: "So far".into(), thinking: String::new() } });
+    a.run("assistant.stop", json!({"chat": chat}));
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "So far") && has(&t, "Stopped") && has(&t, "Try again"), "{t:?}");
+    click_named(&ctx, &mut a, "Try again");
+    frame(&ctx, &mut a, vec![]);
+    assert!(a.session.ai.assistant.asking(&chat).is_some(), "asked again");
+    let q = a.session.ai.assistant.asking(&chat).expect("asked");
+    a.session.apply(MailEvent::Ai { done: AiDone::Answered { id: q, answer: None, error: Some("the model's server: HTTP 503".into()) } });
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "Try again") && !has(&t, "So far"), "{t:?}");
+}

@@ -14,6 +14,7 @@ use serde_json::Value;
 use crate::http::{self, Request, Response, Url};
 use crate::{NetError, Result};
 
+mod again;
 mod anthropic;
 mod ollama;
 mod openai;
@@ -93,11 +94,13 @@ pub fn ask_stoppable(endpoint: &AiEndpoint, key: Option<&str>, chat: &AiChat, st
     let key = key.filter(|k| !k.trim().is_empty()).map(str::trim);
     let req = request(endpoint, key, chat, false)?;
     let url = Url::parse(&req.url)?;
-    let mut s = http::open_waiting(&url, THINKING)?;
-    stop.opened(&s)?;
-    let resp = stop.said(http::exchange(&mut s, &req, &url)).map_err(|e| keyless(e, key))?;
-    let answer = read_reply(endpoint.api, &resp, key)?;
-    Ok(AiAnswer { sent: bytes(req.body.len()), received: bytes(resp.body.len()), ..answer })
+    again::twice(stop, &|| false, || {
+        let mut s = http::open_waiting(&url, THINKING)?;
+        stop.opened(&s)?;
+        let resp = stop.said(http::exchange(&mut s, &req, &url)).map_err(|e| keyless(e, key))?;
+        let answer = read_reply(endpoint.api, &resp, key)?;
+        Ok(AiAnswer { sent: bytes(req.body.len()), received: bytes(resp.body.len()), ..answer })
+    })
 }
 
 /// Ask as [`ask`] does, the answer streamed: its text and its thinking go to `on` as they're
@@ -117,10 +120,20 @@ pub fn ask_streamed_stoppable(
     let key = key.filter(|k| !k.trim().is_empty()).map(str::trim);
     let req = request(endpoint, key, chat, true)?;
     let url = Url::parse(&req.url)?;
-    let mut s = http::open_waiting(&url, THINKING)?;
-    stop.opened(&s)?;
-    let answer = stop.said(read_stream(endpoint.api, &mut s, &req, &url, key, on))?;
-    Ok(AiAnswer { sent: bytes(req.body.len()), ..answer })
+    // Once some of the answer came (and was shown), it isn't asked again: it would come twice.
+    let came = std::cell::Cell::new(false);
+    let mut heard = |text: &str, thinking: &str| {
+        if !text.is_empty() || !thinking.is_empty() {
+            came.set(true);
+        }
+        on(text, thinking);
+    };
+    again::twice(stop, &|| came.get(), || {
+        let mut s = http::open_waiting(&url, THINKING)?;
+        stop.opened(&s)?;
+        let answer = stop.said(read_stream(endpoint.api, &mut s, &req, &url, key, &mut heard))?;
+        Ok(AiAnswer { sent: bytes(req.body.len()), ..answer })
+    })
 }
 
 /// Send `req` on `s` and read the streamed answer, in `api`'s format: its text and thinking to
@@ -240,7 +253,9 @@ fn refused(resp: &Response, key: Option<&str>) -> NetError {
         429 => "too many requests, or the account's credit or limit is used up".to_string(),
         s => format!("HTTP {s}"),
     };
-    if said.is_empty() { NetError::No(format!("the model's server: {what}")) } else { NetError::No(format!("the model's server: {what}: {said}")) }
+    let why = if said.is_empty() { format!("the model's server: {what}") } else { format!("the model's server: {what}: {said}") };
+    // Busy, or failing on its side: that may pass, and the question is asked again.
+    if resp.status == 429 || (500..600).contains(&resp.status) { NetError::Later(why) } else { NetError::No(why) }
 }
 
 /// Why a stream stopped, in the server's words when it gave them ([`quoted`]).

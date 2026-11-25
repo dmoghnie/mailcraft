@@ -121,12 +121,29 @@ fn a_refusal_says_why_without_the_key() {
     let e = ask(&endpoint(&server, AiApi::OpenAi), None, &chat()).unwrap_err().to_string();
     assert!(e.contains("no such model or address") && e.contains("try pulling it first"), "{e}");
     // Anthropic's, and one with nothing to say.
-    server.then("429 Too Many Requests", &json!({"type": "error", "error": {"type": "rate_limit_error", "message": "slow down"}}).to_string());
+    // Busy or failing, it's asked once more: still so, it says why.
+    for _ in 0..2 {
+        server.then("429 Too Many Requests", &json!({"type": "error", "error": {"type": "rate_limit_error", "message": "slow down"}}).to_string());
+    }
     let e = ask(&endpoint(&server, AiApi::Anthropic), Some(KEY), &chat()).unwrap_err().to_string();
     assert!(e.contains("too many requests") && e.contains("slow down"), "{e}");
-    server.then("500 Internal Server Error", "<html>oops</html>");
+    for _ in 0..2 {
+        server.then("500 Internal Server Error", "<html>oops</html>");
+    }
     let e = ask(&endpoint(&server, AiApi::Anthropic), Some(KEY), &chat()).unwrap_err().to_string();
     assert!(e.contains("HTTP 500") && !e.contains("html"), "{e}");
+}
+
+/// A server busy for a moment answers when asked once more; one that refused is asked once.
+#[test]
+fn a_busy_server_is_asked_once_more_and_answers() {
+    let server = ModelServer::start();
+    server.then("503 Service Unavailable", r#"{"error":"overloaded"}"#);
+    let a = ask(&endpoint(&server, AiApi::OpenAi), None, &chat()).unwrap();
+    assert_eq!((a.text.as_str(), server.seen().len()), ("You said: hello", 2));
+    server.then("404 Not Found", r#"{"error":"no such model"}"#);
+    assert!(ask(&endpoint(&server, AiApi::OpenAi), None, &chat()).is_err());
+    assert_eq!(server.seen().len(), 3, "a refusal isn't asked again");
 }
 
 /// However a server words it, the key it quotes back never shows, whole or in part.

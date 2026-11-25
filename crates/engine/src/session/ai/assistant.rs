@@ -100,6 +100,15 @@ impl Chat {
         }
     }
 
+    /// Whether its model can be asked again as it is (Try again): it owes the chat an answer
+    /// (what the person said, or what the tools gave, came last, or an answer stopped as it
+    /// came, which the new one takes the place of), and nothing waits on the person or on a
+    /// download.
+    pub fn can_ask_again(&self) -> bool {
+        let owed = self.turns.last().is_some_and(|t| t.turn.role == AiRole::User || t.stopped);
+        owed && self.proposals().is_empty() && !self.runs.iter().any(|r| r.state == RunState::Waiting)
+    }
+
     /// Whether it waits on the person: a change proposed, not decided yet.
     pub fn waits_on_person(&self) -> bool {
         !self.proposals().is_empty()
@@ -145,6 +154,9 @@ pub struct ChatTurn {
     /// Its answer was cut short at the longest answer its profile asks for.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub cut: bool,
+    /// The person stopped it as it was written: what came of it.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub stopped: bool,
     #[serde(default)]
     pub at: i64,
 }

@@ -71,14 +71,18 @@ fn a_kept_key_goes_to_the_model_and_a_missing_one_is_said() {
 /// back once a wait ends, however it ends.
 #[test]
 fn past_the_most_waiting_a_question_is_answered_at_once() {
-    // A server that takes the questions and never answers, until its connections are dropped.
+    // A server that takes the questions and never answers, until its connections are dropped;
+    // after that, it drops each one as it comes.
     let silent = TcpListener::bind("127.0.0.1:0").unwrap();
     let url = format!("http://127.0.0.1:{}/v1", silent.local_addr().unwrap().port());
     let held: Arc<Mutex<Vec<std::net::TcpStream>>> = Arc::default();
-    let holding = held.clone();
+    let holds = Arc::new(std::sync::atomic::AtomicBool::new(true));
+    let (holding, still) = (held.clone(), holds.clone());
     std::thread::spawn(move || {
         for c in silent.incoming().flatten() {
-            holding.lock().unwrap().push(c);
+            if still.load(Ordering::Acquire) {
+                holding.lock().unwrap().push(c);
+            }
         }
     });
     let mut p = Pool::new(crate::fake::store("ai-most"), Arc::new(MemoryCredentials::default()));
@@ -89,8 +93,10 @@ fn past_the_most_waiting_a_question_is_answered_at_once() {
     let seen = until(&p, "the one too many", |e| matches!(e, Event::Ai { done: AiDone::Answered { id, .. } } if *id == most + 1));
     assert!(answer_to(&seen, most + 1).is_some_and(|a| a.is_err_and(|e| e.contains("already waiting"))), "{seen:?}");
     assert!((1..=most).all(|id| answer_to(&seen, id).is_none()), "the others still wait: {seen:?}");
-    // Their connections closed: each wait ends with an error, and gives its place back.
+    // Their connections closed: each wait ends with an error, and gives its place back (a cut
+    // connection is asked once more, and that one is cut at once).
     crate::waiting::eventually("every question to reach the server", || held.lock().unwrap().len() == ASKING_MOST);
+    holds.store(false, Ordering::Release);
     held.lock().unwrap().clear();
     let seen = events_until(&p, "the waits to end", |s| (1..=most).all(|id| answer_to(s, id).is_some()));
     assert!((1..=most).all(|id| answer_to(&seen, id).is_some_and(|a| a.is_err())), "{seen:?}");
