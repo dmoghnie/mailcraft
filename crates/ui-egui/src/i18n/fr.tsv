@@ -2227,6 +2227,9 @@ count	occurrences	occurrences
 	Its tools couldn't be listed: {error}	Ses outils n'ont pas pu être listés : {error}
 	Tools: {count}	Outils : {count}
 	List again	Lister à nouveau
+	Sign in…	Se connecter…
+	Signed in	Connecté
+	Finish signing in in your browser	Terminez la connexion dans votre navigateur
 	Asked the model	A interrogé le modèle
 	Looked for tools	A cherché des outils
 	MCP tool	Outil MCP

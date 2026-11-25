@@ -2223,6 +2223,9 @@ count	occurrences	回
 	Its tools couldn't be listed: {error}	ツールを一覧表示できませんでした: {error}
 	Tools: {count}	ツール: {count}
 	List again	再度一覧表示
+	Sign in…	サインイン…
+	Signed in	サインイン済み
+	Finish signing in in your browser	ブラウザーでサインインを完了してください
 	Asked the model	モデルに質問しました
 	Looked for tools	ツールを探しました
 	MCP tool	MCP ツール

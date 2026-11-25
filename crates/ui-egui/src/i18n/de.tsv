@@ -2227,6 +2227,9 @@ count	occurrences	Terminen
 	Its tools couldn't be listed: {error}	Seine Werkzeuge konnten nicht aufgelistet werden: {error}
 	Tools: {count}	Werkzeuge: {count}
 	List again	Erneut auflisten
+	Sign in…	Anmelden…
+	Signed in	Angemeldet
+	Finish signing in in your browser	Schließen Sie die Anmeldung im Browser ab
 	Asked the model	Das Modell gefragt
 	Looked for tools	Nach Werkzeugen gesucht
 	MCP tool	MCP-Werkzeug

@@ -34,6 +34,13 @@ pub struct Provider {
     pub scope: String,
     pub client_id: String,
     pub client_secret: Option<String>,
+    /// The resource its tokens are for (RFC 8707): an MCP server's address, sent with each
+    /// request so a token is good there alone. None for mail.
+    pub resource: Option<String>,
+    /// The authorization server's name in its metadata (RFC 8414's `issuer`), which the `iss` a
+    /// redirect brings must match (RFC 9207); and whether it said it always sends one.
+    pub issuer: Option<String>,
+    pub iss_always: bool,
 }
 
 fn setting(name: &str, built_in: Option<&'static str>) -> Option<String> {
@@ -51,6 +58,9 @@ pub fn provider(id: &str) -> Option<Provider> {
             scope: "https://mail.google.com/".into(),
             client_id: setting("MAILCRAFT_GOOGLE_CLIENT_ID", option_env!("MAILCRAFT_GOOGLE_CLIENT_ID"))?,
             client_secret: setting("MAILCRAFT_GOOGLE_CLIENT_SECRET", option_env!("MAILCRAFT_GOOGLE_CLIENT_SECRET")),
+            resource: None,
+            issuer: None,
+            iss_always: false,
         }),
         "microsoft" => Some(Provider {
             id: "microsoft".into(),
@@ -60,6 +70,9 @@ pub fn provider(id: &str) -> Option<Provider> {
             scope: "https://outlook.office.com/IMAP.AccessAsUser.All https://outlook.office.com/SMTP.Send offline_access".into(),
             client_id: setting("MAILCRAFT_MICROSOFT_CLIENT_ID", option_env!("MAILCRAFT_MICROSOFT_CLIENT_ID"))?,
             client_secret: None,
+            resource: None,
+            issuer: None,
+            iss_always: false,
         }),
         other => test_provider(other),
     }
@@ -186,8 +199,12 @@ fn token_request(p: &Provider, mut fields: Vec<(&str, String)>, extra_scope: &st
     fields.push(("client_id", p.client_id.clone()));
     // The permissions wanted, each time: without them a personal Microsoft account's token
     // covered reading (IMAP) but not sending (SMTP refused it, 535 5.7.3). Google takes none here.
-    if p.id != "google" {
-        fields.push(("scope", format!("{}{extra_scope}", p.scope)));
+    let scope = format!("{}{extra_scope}", p.scope);
+    if p.id != "google" && !scope.is_empty() {
+        fields.push(("scope", scope));
+    }
+    if let Some(r) = &p.resource {
+        fields.push(("resource", r.clone()));
     }
     if let Some(s) = &p.client_secret {
         fields.push(("client_secret", s.clone()));
@@ -274,6 +291,17 @@ pub fn authorize(p: &Provider, login_hint: &str, open: &mut dyn FnMut(&str) -> s
     authorize_with(p, login_hint, open, timeout, REQUEST_LINE_WAIT)
 }
 
+/// Run the browser sign-in with a provider `register` makes once the redirect's address is
+/// known: an app registered there and then, for that address (an MCP server's authorization
+/// server, RFC 7591). The provider made, and the tokens.
+pub fn authorize_registering(
+    register: &mut dyn FnMut(&str) -> Result<Provider>,
+    open: &mut dyn FnMut(&str) -> std::result::Result<(), String>,
+    timeout: Duration,
+) -> Result<(Provider, Tokens)> {
+    sign_in_with(register, "", open, timeout, REQUEST_LINE_WAIT)
+}
+
 /// How long one connection to the redirect listener has to send its request line. A browser
 /// sends it at once; one that sends nothing (a speculative connection) is let go after this,
 /// so the redirect waiting behind it isn't held up for long.
@@ -337,17 +365,37 @@ fn authorize_with(
     timeout: Duration,
     line_wait: Duration,
 ) -> Result<Tokens> {
+    sign_in_with(&mut |_| Ok(p.clone()), login_hint, open, timeout, line_wait).map(|(_, t)| t)
+}
+
+/// [`authorize_with`], its provider made by `register` for the redirect's address.
+fn sign_in_with(
+    register: &mut dyn FnMut(&str) -> Result<Provider>,
+    login_hint: &str,
+    open: &mut dyn FnMut(&str) -> std::result::Result<(), String>,
+    timeout: Duration,
+    line_wait: Duration,
+) -> Result<(Provider, Tokens)> {
     let listener = TcpListener::bind("127.0.0.1:0")?;
     let redirect = format!("http://127.0.0.1:{}/", listener.local_addr()?.port());
+    let made = register(&redirect)?;
+    let p = &made;
     let state = b64url(&random(16)?);
     let (verifier, challenge) = pkce()?;
+    let joined = if p.auth_url.contains('?') { '&' } else { '?' };
     let mut url = format!(
-        "{}?response_type=code&client_id={}&redirect_uri={}&scope={}&state={state}&code_challenge={challenge}&code_challenge_method=S256",
+        "{}{joined}response_type=code&client_id={}&redirect_uri={}&state={state}&code_challenge={challenge}&code_challenge_method=S256",
         p.auth_url,
         pct(&p.client_id),
         pct(&redirect),
-        pct(&format!("{}{}", p.scope, identity_scope(p)))
     );
+    let scope = format!("{}{}", p.scope, identity_scope(p));
+    if !scope.is_empty() {
+        url.push_str(&format!("&scope={}", pct(&scope)));
+    }
+    if let Some(r) = &p.resource {
+        url.push_str(&format!("&resource={}", pct(r)));
+    }
     if !login_hint.is_empty() {
         url.push_str(&format!("&login_hint={}", pct(login_hint)));
     }
@@ -385,6 +433,18 @@ fn authorize_with(
             let _ = (&sock).write_all(b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
             continue;
         }
+        // The answer must come from the server asked (RFC 9207): one from another is a mix-up,
+        // and nothing it says is acted on or shown.
+        if let Some(issuer) = &p.issuer {
+            let wrong = match get("iss") {
+                Some(iss) => iss != *issuer,
+                None => p.iss_always,
+            };
+            if wrong {
+                let _ = (&sock).write_all(b"HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
+                return Err(NetError::Auth(format!("the sign-in answer didn't come from {}'s sign-in server", p.name)));
+            }
+        }
         let (status, page) = match (get("code"), get("error")) {
             (Some(_), _) => ("200 OK", "You're signed in to MailCraft. You can close this window."),
             _ => ("400 Bad Request", "MailCraft wasn't allowed to sign in. You can close this window and try again."),
@@ -402,11 +462,12 @@ fn authorize_with(
             (None, e) => return Err(NetError::Auth(format!("{} sign-in was cancelled ({})", p.name, e.unwrap_or_default()))),
         }
     };
-    token_request(
+    let tokens = token_request(
         p,
         vec![("grant_type", "authorization_code".into()), ("code", code), ("redirect_uri", redirect), ("code_verifier", verifier)],
         identity_scope(p),
-    )
+    )?;
+    Ok((made, tokens))
 }
 
 /// The SASL XOAUTH2 initial response (base64 of `user=…^Aauth=Bearer …^A^A`).
@@ -430,6 +491,9 @@ pub(crate) mod tests {
             scope: "mail".into(),
             client_id: "mailcraft-test".into(),
             client_secret: None,
+            resource: None,
+            issuer: None,
+            iss_always: false,
         }
     }
 

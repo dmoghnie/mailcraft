@@ -2240,6 +2240,9 @@ count	occurrences	wystąpieniach
 	Its tools couldn't be listed: {error}	Nie udało się pobrać listy jego narzędzi: {error}
 	Tools: {count}	Narzędzia: {count}
 	List again	Pobierz listę ponownie
+	Sign in…	Zaloguj się…
+	Signed in	Zalogowano
+	Finish signing in in your browser	Dokończ logowanie w przeglądarce
 	Asked the model	Zapytał model
 	Looked for tools	Szukano narzędzi
 	MCP tool	Narzędzie MCP

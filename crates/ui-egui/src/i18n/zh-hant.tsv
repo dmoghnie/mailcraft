@@ -2226,6 +2226,9 @@ count	occurrences	次
 	Its tools couldn't be listed: {error}	無法列出它的工具：{error}
 	Tools: {count}	工具：{count}
 	List again	重新列出
+	Sign in…	登入…
+	Signed in	已登入
+	Finish signing in in your browser	請在瀏覽器中完成登入
 	Asked the model	詢問了模型
 	Looked for tools	尋找了工具
 	MCP tool	MCP 工具

@@ -182,12 +182,22 @@ fn server(s: &Session, t: &Tokens, ui: &mut Ui, first: bool, m: &McpServer, acts
     let known = s.ai.mcp_tools.as_ref().and_then(|k| k.get(&m.id));
     let mut lines = vec![match &m.target {
         McpTarget::Program { command, .. } => tf!("A program on this computer: {command}", command = command),
-        McpTarget::Web { url } => tf!("At {server}", server = mailcraft_engine::ai_server(url)),
+        McpTarget::Web { url, .. } => tf!("At {server}", server = mailcraft_engine::ai_server(url)),
     }];
     if !m.local() {
         lines.push(tl!("On the web: what MailCraft's AI sends it leaves this computer").to_string());
     }
     let listing = known.is_some_and(|k| k.listing);
+    let (web, signed) = match &m.target {
+        McpTarget::Web { oauth, .. } => (true, oauth.is_some()),
+        McpTarget::Program { .. } => (false, false),
+    };
+    let signing = known.is_some_and(|k| k.signing);
+    if signing {
+        lines.push(tl!("Finish signing in in your browser").to_string());
+    } else if signed {
+        lines.push(tl!("Signed in").to_string());
+    }
     match known {
         Some(k) if k.listing => lines.push(tl!("Listing its tools…").to_string()),
         Some(ServerTools { error: Some(e), .. }) => lines.push(tf!("Its tools couldn't be listed: {error}", error = e)),
@@ -207,6 +217,10 @@ fn server(s: &Session, t: &Tokens, ui: &mut Ui, first: bool, m: &McpServer, acts
         }
         if button(ui, &m.name, tl!("List again"), m.on && !listing).clicked() {
             acts.push(Action::Run("mcpServer.refresh", json!({"id": m.id})));
+        }
+        // A server on the web that asks for a sign-in: in the browser, with the person's account.
+        if web && button(ui, &m.name, if signed { tl!("Sign in again…") } else { tl!("Sign in…") }, !signing).clicked() {
+            acts.push(Action::Run("mcpServer.signIn", json!({"id": m.id})));
         }
         let mut on = m.on;
         if widgets::switch(ui, t, &mut on, &m.name).changed() {

@@ -1,7 +1,8 @@
 //! MCP servers the person adds: checked as they're saved, listed once on, their tools kept
-//! across sessions, closed and forgotten with their key; and never an outside agent's to add.
+//! across sessions, closed and forgotten with their key; signed in to, the sign-in kept while
+//! the address stays; and never an outside agent's to add, turn on or sign in to.
 
-use mailcraft_model::{AiWork, Event, Job, McpDone, McpTarget, McpTool, McpWork};
+use mailcraft_model::{AiWork, Event, Job, McpDone, McpOAuth, McpTarget, McpTool, McpWork};
 use serde_json::{Value, json};
 
 use super::*;
@@ -85,5 +86,44 @@ fn an_agent_never_adds_or_turns_on_a_server() {
     s.run("mcpServer.save", &json!({"name": "notes", "command": "notes-mcp"})).unwrap();
     assert_eq!(run(&mut s, "mcpServer.turn", json!({"id": "m1", "on": true}))["result"]["isError"], true);
     assert!(!s.prefs.ai.mcp[0].on);
+    s.run("mcpServer.save", &json!({"name": "web", "url": "https://mcp.example/mcp"})).unwrap();
+    s.take_jobs();
+    assert_eq!(run(&mut s, "mcpServer.signIn", json!({"id": "m2"}))["result"]["isError"], true);
+    assert!(mcp_jobs(&mut s).is_empty(), "no sign-in begun");
     assert_eq!(run(&mut s, "mcpServer.list", json!({}))["result"]["isError"], false);
+}
+
+/// A server on the web is signed in to: the sign-in's work names its address and the key the
+/// sign-in is kept under; once signed in, it's listed with that key, and saving it again at the
+/// same address keeps the sign-in, which another address, or a key given, replaces. A program
+/// isn't signed in to, and a failed sign-in says why.
+#[test]
+fn a_server_on_the_web_is_signed_in_to() {
+    let mut s = sample_session("mcp-servers-sign-in");
+    let id =
+        s.run("mcpServer.save", &json!({"name": "notes", "url": "https://mcp.example/mcp", "on": true})).unwrap()["id"].as_str().unwrap().to_string();
+    s.take_jobs();
+    s.run("mcpServer.signIn", &json!({"id": id})).unwrap();
+    assert_eq!(mcp_jobs(&mut s), [McpWork::SignIn { server: id.clone(), url: "https://mcp.example/mcp".into(), key: format!("mcp-{id}") }]);
+    assert!(s.mcp_tools()[&id].signing);
+    let how = McpOAuth {
+        issuer: "https://auth.example".into(),
+        token_url: "https://auth.example/token".into(),
+        client_id: "c-1".into(),
+        resource: "https://mcp.example/mcp".into(),
+        scope: "notes.read".into(),
+    };
+    s.apply(Event::Mcp { done: McpDone::SignedIn { server: id.clone(), oauth: Some(how.clone()), error: None } });
+    assert!(!s.mcp_tools()[&id].signing && s.prefs.ai.mcp[0].has_key);
+    let signed = McpTarget::Web { url: "https://mcp.example/mcp".into(), oauth: Some(how.clone()) };
+    let list = McpWork::List { server: id.clone(), target: signed.clone(), key: Some(format!("mcp-{id}")) };
+    assert!(mcp_jobs(&mut s).contains(&list), "listed with the sign-in");
+    s.run("mcpServer.save", &json!({"id": id, "name": "notes", "url": "https://mcp.example/mcp"})).unwrap();
+    assert_eq!(s.prefs.ai.mcp[0].target, signed, "the same address keeps its sign-in");
+    s.run("mcpServer.save", &json!({"id": id, "name": "notes", "url": "https://mcp.example/v2"})).unwrap();
+    assert!(matches!(&s.prefs.ai.mcp[0].target, McpTarget::Web { oauth: None, .. }) && !s.prefs.ai.mcp[0].has_key, "another address forgets it");
+    s.apply(Event::Mcp { done: McpDone::SignedIn { server: id.clone(), oauth: None, error: Some("the sign-in wasn't finished in time".into()) } });
+    assert_eq!(s.mcp_tools()[&id].error.as_deref(), Some("the sign-in wasn't finished in time"));
+    let program = s.run("mcpServer.save", &json!({"name": "files", "command": "files-mcp"})).unwrap()["id"].as_str().unwrap().to_string();
+    assert!(s.run("mcpServer.signIn", &json!({"id": program})).is_err());
 }

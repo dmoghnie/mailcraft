@@ -2227,6 +2227,9 @@ count	occurrences	előfordulás
 	Its tools couldn't be listed: {error}	Az eszközeit nem sikerült listázni: {error}
 	Tools: {count}	Eszközök: {count}
 	List again	Újra listázás
+	Sign in…	Bejelentkezés…
+	Signed in	Bejelentkezve
+	Finish signing in in your browser	Fejezze be a bejelentkezést a böngészőben
 	Asked the model	Megkérdezte a modellt
 	Looked for tools	Eszközöket keresett
 	MCP tool	MCP-eszköz

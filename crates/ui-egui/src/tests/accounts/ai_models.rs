@@ -4,7 +4,7 @@
 
 use super::*;
 use crate::dialogs::ServerForm;
-use mailcraft_engine::model::{AiAnswer, AiApi, AiDone, McpDone, McpTarget, McpTool, Secret};
+use mailcraft_engine::model::{AiAnswer, AiApi, AiDone, McpDone, McpOAuth, McpTarget, McpTool, Secret};
 use mailcraft_engine::{AiReach, AiTest};
 
 const KEY: &str = "sk-ui-test-0123";
@@ -192,4 +192,30 @@ fn an_mcp_server_is_added_turned_off_and_removed_on_options() {
     frame(&ctx, &mut a, vec![]);
     click_named(&ctx, &mut a, "notes: Remove");
     assert!(a.session.prefs.ai.mcp.is_empty(), "removed");
+}
+
+/// A server on the web has Sign in…: it begins the sign-in, and the row says to finish it in
+/// the browser; signed in, it says so and offers to sign in again. A program has none.
+#[test]
+fn an_mcp_server_on_the_web_is_signed_in_to_on_options() {
+    let _tall = crate::tests::windows::layout::Dressed::new(TALL, "");
+    let (mut a, ctx) = options("ai-options-mcp-sign-in");
+    a.run("ai.saveProfile", json!({"name": "Ollama", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small"}));
+    a.run("mcpServer.save", json!({"name": "files", "command": "files-mcp"}));
+    a.run("mcpServer.save", json!({"name": "notes", "url": "https://mcp.example/mcp"}));
+    frame(&ctx, &mut a, vec![]);
+    let texts = drawn_strings(&ctx, &mut a, TALL);
+    assert_eq!(texts.iter().filter(|t| t.as_str() == "Sign in…").count(), 1, "the server on the web alone: {texts:?}");
+    assert!(!has(&texts, "Signed in"), "{texts:?}");
+    a.session.take_jobs();
+    click_named(&ctx, &mut a, "notes: Sign in…");
+    let id = a.session.prefs.ai.mcp[1].id.clone();
+    assert!(a.session.mcp_tools().get(&id).is_some_and(|k| k.signing), "the sign-in began");
+    frame(&ctx, &mut a, vec![]);
+    assert!(has(&drawn_strings(&ctx, &mut a, TALL), "Finish signing in in your browser"));
+    let how = McpOAuth { issuer: "https://auth.example".into(), resource: "https://mcp.example/mcp".into(), ..McpOAuth::default() };
+    a.session.apply(MailEvent::Mcp { done: McpDone::SignedIn { server: id, oauth: Some(how), error: None } });
+    frame(&ctx, &mut a, vec![]);
+    let texts = drawn_strings(&ctx, &mut a, TALL);
+    assert!(has(&texts, "Signed in") && has(&texts, "Sign in again…"), "{texts:?}");
 }

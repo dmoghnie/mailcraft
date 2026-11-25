@@ -2226,6 +2226,9 @@ count	occurrences	회
 	Its tools couldn't be listed: {error}	도구 목록을 가져올 수 없음: {error}
 	Tools: {count}	도구: {count}
 	List again	다시 가져오기
+	Sign in…	로그인…
+	Signed in	로그인됨
+	Finish signing in in your browser	브라우저에서 로그인을 완료하세요
 	Asked the model	모델에 질문함
 	Looked for tools	도구를 찾음
 	MCP tool	MCP 도구

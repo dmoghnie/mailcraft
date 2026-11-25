@@ -2227,6 +2227,9 @@ count	occurrences	ocorrências
 	Its tools couldn't be listed: {error}	Não foi possível listar as ferramentas dele: {error}
 	Tools: {count}	Ferramentas: {count}
 	List again	Listar de novo
+	Sign in…	Entrar…
+	Signed in	Conectado
+	Finish signing in in your browser	Conclua a entrada no seu navegador
 	Asked the model	Perguntou ao modelo
 	Looked for tools	Procurou ferramentas
 	MCP tool	Ferramenta MCP

@@ -19,8 +19,13 @@ use serde_json::{Value, json};
 use crate::http::{self, Request, Url};
 use crate::{NetError, Result};
 
+mod sign_in;
 #[cfg(test)]
 mod tests;
+
+#[doc(hidden)]
+pub use sign_in::read_sign_in;
+pub use sign_in::{Challenge, Kept, challenge, resource_of, sign_in, token};
 
 /// The protocol versions MailCraft speaks, newest first: a server's choice among them is kept.
 const VERSIONS: [&str; 3] = ["2025-06-18", "2025-03-26", "2024-11-05"];
@@ -99,7 +104,7 @@ impl McpConn {
                 let env = key_env.as_deref().filter(|e| !e.is_empty()).zip(key);
                 Way::Program(Program::start(command, args, env)?)
             }
-            McpTarget::Web { url } => Way::Web(Web { url: address(url)?, token: key.map(str::to_string), session: None, version: None }),
+            McpTarget::Web { url, .. } => Way::Web(Web { url: address(url)?, token: key.map(str::to_string), session: None, version: None }),
         };
         let mut c = McpConn { way, next: 0, tools_changed: false };
         let hello = json!({

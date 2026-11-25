@@ -2226,6 +2226,9 @@ count	occurrences	ripetizioni
 	Its tools couldn't be listed: {error}	Non è stato possibile elencare i suoi strumenti: {error}
 	Tools: {count}	Strumenti: {count}
 	List again	Elenca di nuovo
+	Sign in…	Accedi…
+	Signed in	Accesso eseguito
+	Finish signing in in your browser	Completa l'accesso nel browser
 	Asked the model	Ha chiesto al modello
 	Looked for tools	Ha cercato strumenti
 	MCP tool	Strumento MCP

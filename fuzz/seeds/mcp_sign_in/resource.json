@@ -1,0 +1,1 @@
+{"resource":"https://mcp.example/mcp","authorization_servers":["https://auth.example"],"scopes_supported":["notes.read","notes.write"]}

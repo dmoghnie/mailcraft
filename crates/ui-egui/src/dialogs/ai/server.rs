@@ -43,7 +43,7 @@ impl ServerForm {
                 f.args = args.join("\n");
                 f.key_env = key_env.clone().unwrap_or_default();
             }
-            McpTarget::Web { url } => {
+            McpTarget::Web { url, .. } => {
                 f.web = true;
                 f.url = url.clone();
             }

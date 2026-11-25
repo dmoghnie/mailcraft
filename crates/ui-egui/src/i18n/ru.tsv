@@ -2240,6 +2240,9 @@ count	occurrences	повторений
 	Its tools couldn't be listed: {error}	Не удалось получить список его инструментов: {error}
 	Tools: {count}	Инструменты: {count}
 	List again	Получить список снова
+	Sign in…	Войти…
+	Signed in	Вход выполнен
+	Finish signing in in your browser	Завершите вход в браузере
 	Asked the model	Спросил модель
 	Looked for tools	Поиск инструментов
 	MCP tool	Инструмент MCP

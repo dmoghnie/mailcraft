@@ -26,7 +26,7 @@ pub use compact::*;
 pub use eta::Eta;
 pub use import::*;
 pub use keys::{HeldKey, Revocation};
-pub use mcp::{McpDone, McpTarget, McpTool, McpWork};
+pub use mcp::{McpDone, McpOAuth, McpTarget, McpTool, McpWork};
 pub use op::{FollowUpDay, Op};
 pub use progress::Work;
 pub use status::{FailureKind, LOCAL_CERTIFICATE, REMOTE_CERTIFICATE, SignInFailure, SyncStatus, UntrustedCertificate};

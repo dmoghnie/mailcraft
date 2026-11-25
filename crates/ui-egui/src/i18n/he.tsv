@@ -2222,6 +2222,9 @@ count	occurrences	פעמים
 	Its tools couldn't be listed: {error}	לא ניתן היה למנות את הכלים שלו: {error}
 	Tools: {count}	כלים: {count}
 	List again	מנה שוב
+	Sign in…	היכנס…
+	Signed in	מחובר
+	Finish signing in in your browser	השלם את הכניסה בדפדפן
 	Asked the model	שאל את המודל
 	Looked for tools	חיפש כלים
 	MCP tool	כלי MCP

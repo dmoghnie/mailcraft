@@ -2222,6 +2222,9 @@ count	occurrences	keer
 	Its tools couldn't be listed: {error}	Zijn hulpmiddelen konden niet worden opgehaald: {error}
 	Tools: {count}	Hulpmiddelen: {count}
 	List again	Opnieuw ophalen
+	Sign in…	Aanmelden…
+	Signed in	Aangemeld
+	Finish signing in in your browser	Rond het aanmelden af in je browser
 	Asked the model	Het model gevraagd
 	Looked for tools	Hulpmiddelen gezocht
 	MCP tool	MCP-hulpmiddel

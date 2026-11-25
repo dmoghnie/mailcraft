@@ -2227,6 +2227,9 @@ count	occurrences	repeticiones
 	Its tools couldn't be listed: {error}	No se pudieron listar sus herramientas: {error}
 	Tools: {count}	Herramientas: {count}
 	List again	Listar de nuevo
+	Sign in…	Iniciar sesión…
+	Signed in	Sesión iniciada
+	Finish signing in in your browser	Termina de iniciar sesión en tu navegador
 	Asked the model	Preguntó al modelo
 	Looked for tools	Buscó herramientas
 	MCP tool	Herramienta MCP

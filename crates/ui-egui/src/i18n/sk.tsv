@@ -2241,6 +2241,9 @@ count	occurrences	opakovaní
 	Its tools couldn't be listed: {error}	Zoznam jeho nástrojov sa nepodarilo načítať: {error}
 	Tools: {count}	Nástroje: {count}
 	List again	Načítať znova
+	Sign in…	Prihlásiť sa…
+	Signed in	Prihlásený
+	Finish signing in in your browser	Dokončite prihlásenie v prehliadači
 	Asked the model	Opýtal sa modelu
 	Looked for tools	Hľadal nástroje
 	MCP tool	Nástroj MCP

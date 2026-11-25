@@ -2222,6 +2222,9 @@ count	occurrences	مرات
 	Its tools couldn't be listed: {error}	تعذّر سرد أدواته: {error}
 	Tools: {count}	الأدوات: {count}
 	List again	السرد مجددًا
+	Sign in…	تسجيل الدخول…
+	Signed in	تم تسجيل الدخول
+	Finish signing in in your browser	أكمل تسجيل الدخول في متصفحك
 	Asked the model	سأل النموذج
 	Looked for tools	بحث عن أدوات
 	MCP tool	أداة MCP

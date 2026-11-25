@@ -117,12 +117,20 @@ and `cargo xtask sizes` enforces them.
   to this computer). `Job::Mcp` lists a server's tools, calls one or closes its connection;
   `net/src/worker/mcp.rs` keeps one connection for each server (a program left running between
   calls, ended as its connection goes), does at most four pieces of work at once, and reads a
-  server's key from the keychain. Written by hand, as the model formats are: the `rmcp` crate
-  is async on tokio. The engine keeps the servers (`AiPrefs::mcp`, `session/ai/servers.rs`) and
+  server's key from the keychain. A server on the web that asks for a sign-in is signed in to
+  by `mcp/sign_in.rs` (MCP's authorization): its 401's challenge names its metadata (RFC
+  9728), which names its authorization server, whose metadata (RFC 8414) must name itself and
+  take PKCE's S256; MailCraft registers there for its redirect (RFC 7591, no secret of its
+  own) and signs in through `oauth.rs`, the tokens asked for the server alone (`resource`,
+  RFC 8707) and the redirect's `iss` checked (RFC 9207). The keychain keeps the tokens under the
+  server's key; the server's settings keep how to renew them (`McpOAuth`), and the pool renews
+  the access token as it runs out, keeping the refresh token it turns over to. Written by
+  hand, as the model formats are: the `rmcp` crate is async on tokio. The engine keeps the servers (`AiPrefs::mcp`, `session/ai/servers.rs`) and
   what each listed (`mcp-tools.json`, read when first wanted), so tools are found without
   starting every server; `mcpServer.*` adds, changes, turns on and off, lists again and removes
-  them. Adding or changing a server, or turning one on, starts a program: `mcp::PERSON_ONLY`
-  keeps those commands from every outside agent, even one let to act. A script calls them
+  them, and `mcpServer.signIn` signs in to one. Adding or changing a server, or turning one on,
+  starts a program, and signing in uses the person's own account: `mcp::PERSON_ONLY` keeps
+  those commands from every outside agent, even one let to act. A script calls them
   (`script/mcp.rs`): `find_tools` searches what was listed, and `mcp(server, tool, args)` calls a
   tool that says it changes nothing (`readOnlyHint`), the script waiting for its answer as for
   a message (`Wait::Mcp`); any other is proposed, as a script's changes are, and called once

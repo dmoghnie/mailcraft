@@ -193,6 +193,7 @@ fn browser_mcp(work: McpWork) -> Option<McpDone> {
     match work {
         McpWork::List { server, .. } => Some(McpDone::Listed { server, tools: Vec::new(), error: Some(BROWSER_AI.into()) }),
         McpWork::Call { id, .. } => Some(McpDone::Called { id, result: None, error: Some(BROWSER_AI.into()) }),
+        McpWork::SignIn { server, .. } => Some(McpDone::SignedIn { server, oauth: None, error: Some(BROWSER_AI.into()) }),
         McpWork::Close { .. } => None,
     }
 }

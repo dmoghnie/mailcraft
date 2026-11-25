@@ -2227,6 +2227,9 @@ count	occurrences	kez
 	Its tools couldn't be listed: {error}	Araçları listelenemedi: {error}
 	Tools: {count}	Araçlar: {count}
 	List again	Yeniden listele
+	Sign in…	Oturum aç…
+	Signed in	Oturum açıldı
+	Finish signing in in your browser	Oturum açmayı tarayıcınızda tamamlayın
 	Asked the model	Modele sordu
 	Looked for tools	Araç aradı
 	MCP tool	MCP aracı

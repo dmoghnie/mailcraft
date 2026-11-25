@@ -51,7 +51,7 @@ impl McpServer {
     pub fn local(&self) -> bool {
         match &self.target {
             McpTarget::Program { .. } => true,
-            McpTarget::Web { url } => local_url(url),
+            McpTarget::Web { url, .. } => local_url(url),
         }
     }
 
@@ -72,6 +72,9 @@ pub struct ServerTools {
     /// Being listed now.
     #[serde(skip)]
     pub listing: bool,
+    /// Being signed in to now, in the browser.
+    #[serde(skip)]
+    pub signing: bool,
 }
 
 /// Whether `name` is one a server may be called by.
@@ -133,7 +136,7 @@ impl Session {
         let sent = serde_json::to_vec(&args).map_or(0, |a| a.len());
         let place = match &server.target {
             McpTarget::Program { .. } => "this computer".to_string(),
-            McpTarget::Web { url } => server_of(url),
+            McpTarget::Web { url, .. } => server_of(url),
         };
         let line = self.ai_record(AiLogEntry {
             at: self.clock.now,
@@ -165,7 +168,7 @@ impl Session {
                 match error {
                     // What was listed before stays known, said to be old.
                     Some(e) => known.error = Some(e),
-                    None => *known = ServerTools { tools, error: None, listing: false },
+                    None => *known = ServerTools { tools, error: None, listing: false, signing: known.signing },
                 }
                 self.mcp_tools_kept();
             }
@@ -178,6 +181,30 @@ impl Session {
                 let came = result.ok_or_else(|| error.unwrap_or_else(|| "no answer came".into()));
                 self.script_mcp_came(id, came);
             }
+            McpDone::SignedIn { server, oauth, error } => self.mcp_signed_in(&server, oauth, error),
+        }
+    }
+
+    /// Signed in to server `id` (how, from now on), or not (why): its tools are listed with
+    /// the sign-in when it's on.
+    fn mcp_signed_in(&mut self, id: &str, how: Option<mailcraft_model::McpOAuth>, error: Option<String>) {
+        let Some(m) = self.prefs.ai.mcp.iter_mut().find(|m| m.id == id) else { return };
+        let signed = match (&mut m.target, how) {
+            (McpTarget::Web { oauth, .. }, Some(how)) => {
+                *oauth = Some(how);
+                m.has_key = true;
+                true
+            }
+            _ => false,
+        };
+        let on = m.on;
+        let known = self.mcp_tools_mut().entry(id.to_string()).or_default();
+        known.signing = false;
+        if error.is_some() {
+            known.error = error;
+        }
+        if signed && on {
+            self.mcp_list(id);
         }
     }
 }
@@ -202,6 +229,17 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
             Ok(json!({"id": id, "on": on}))
         })
         .params(r#"{"id": string, "on": bool} (the person's alone: it starts a program)"#),
+        CommandSpec::new("mcpServer.signIn", "Sign in to an MCP server on the web, in the browser", WHERE, |s, v| {
+            let id = server_id(s, v)?;
+            let server = s.prefs.ai.mcp.iter().find(|m| m.id == id).cloned();
+            let Some((McpTarget::Web { url, .. }, key)) = server.map(|m| (m.target.clone(), m.key_name())) else {
+                return Err(CmdError::Failed("only a server on the web is signed in to".into()));
+            };
+            s.mcp_tools_mut().entry(id.clone()).or_default().signing = true;
+            s.jobs.push(Job::Mcp { work: McpWork::SignIn { server: id.clone(), url, key } });
+            Ok(json!({"signingIn": id}))
+        })
+        .params(r#"{"id": string} (the person's alone: they sign in with their own account)"#),
         CommandSpec::new("mcpServer.refresh", "List an MCP server's tools again", WHERE, |s, v| {
             let id = server_id(s, v)?;
             if !s.prefs.ai.mcp.iter().any(|m| m.id == id && m.on) {
@@ -267,10 +305,17 @@ fn save(s: &mut Session, v: &Value) -> CmdResult {
     if s.prefs.ai.mcp.iter().any(|m| m.name == name && m.id != id) {
         return Err(CmdError::Params(format!("a server named {name} is added already")));
     }
-    let target = target_of(v)?;
+    let mut target = target_of(v)?;
     let key = p::str(v, "key").map(str::trim);
     if key.is_some_and(|k| k.len() > KEY_MOST || k.chars().any(char::is_control)) {
         return Err(CmdError::Params(format!("`key` is longer than {KEY_MOST} bytes, or holds control characters")));
+    }
+    // A sign-in stays with the address it was for, unless a key is given in its place.
+    if let (McpTarget::Web { url, oauth }, Some(McpTarget::Web { url: was, oauth: signed })) = (&mut target, old.as_ref().map(|o| &o.target))
+        && *url == *was
+        && key.is_none()
+    {
+        oauth.clone_from(signed);
     }
     // A key stays with where it was given for: another program or address forgets it unless
     // one is given.
@@ -320,7 +365,7 @@ fn target_of(v: &Value) -> Result<McpTarget, CmdError> {
             };
             Ok(McpTarget::Program { command, args, key_env })
         }
-        (false, true) => Ok(McpTarget::Web { url: address(v)? }),
+        (false, true) => Ok(McpTarget::Web { url: address(v)?, oauth: None }),
         _ => Err(CmdError::Params("give a program to start (`command`) or a web address (`url`), one of them".into())),
     }
 }

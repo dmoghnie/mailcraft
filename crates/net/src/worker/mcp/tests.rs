@@ -5,7 +5,7 @@ use mailcraft_model::McpTool;
 use serde_json::json;
 
 fn web(url: &str) -> McpTarget {
-    McpTarget::Web { url: url.into() }
+    McpTarget::Web { url: url.into(), oauth: None }
 }
 
 /// What call `id` gave, or why it failed.
@@ -67,4 +67,48 @@ fn a_program_that_cant_be_started_says_so() {
         _ => None,
     });
     assert!(error.as_deref().is_some_and(|e| e.starts_with("the program couldn't be started")), "{error:?}");
+}
+
+/// Signing in through the pool opens the page through the UI and keeps the sign-in in the
+/// keychain; the server is then reached with its token, and once that runs out, a new one is
+/// got and kept (the refresh token turned over).
+#[test]
+fn a_server_signed_in_to_is_reached_with_its_token() {
+    let server = McpServer::start_signed(false);
+    let creds = Arc::new(MemoryCredentials::default());
+    let mut p = Pool::new(crate::fake::store("mcp-signed"), creds.clone());
+    p.submit(Job::Mcp { work: McpWork::SignIn { server: "m1".into(), url: server.url.clone(), key: "mcp-m1".into() } });
+    let mut how = None;
+    events_until(&p, "the sign-in", |seen| {
+        for e in seen {
+            match e {
+                // The browser: the page the UI is told to open, followed.
+                Event::OpenUrl { url } if how.is_none() => {
+                    let url = url.clone();
+                    how = Some(None);
+                    std::thread::spawn(move || crate::http::get(&url, 10_000));
+                }
+                Event::Mcp { done: McpDone::SignedIn { oauth, error, .. } } => {
+                    assert_eq!(error, &None);
+                    how = Some(oauth.clone());
+                }
+                _ => {}
+            }
+        }
+        matches!(how, Some(Some(_)))
+    });
+    let how = how.flatten();
+    let kept = creds.get_key("mcp-m1").and_then(|k| crate::mcp::Kept::read(&k)).expect("kept");
+    assert_eq!(kept.access, "a-1");
+    creds.set_key("mcp-m1", &crate::mcp::Kept { expires: 0, ..kept }.text()).unwrap();
+    let target = McpTarget::Web { url: server.url.clone(), oauth: how };
+    p.submit(Job::Mcp { work: McpWork::List { server: "m1".into(), target, key: Some("mcp-m1".into()) } });
+    let seen = events_until(&p, "the tools", |s| s.iter().any(|e| matches!(e, Event::Mcp { done: McpDone::Listed { .. } })));
+    let listed = seen.iter().find_map(|e| match e {
+        Event::Mcp { done: McpDone::Listed { tools, error, .. } } => Some((tools.len(), error.clone())),
+        _ => None,
+    });
+    assert_eq!(listed, Some((2, None)));
+    let now = creds.get_key("mcp-m1").and_then(|k| crate::mcp::Kept::read(&k)).expect("kept");
+    assert_eq!((now.access.as_str(), now.refresh.as_deref()), ("a-2", Some("r-2")));
 }

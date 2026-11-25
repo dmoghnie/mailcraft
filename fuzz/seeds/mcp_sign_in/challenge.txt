@@ -1,0 +1,1 @@
+Bearer error="invalid_token", resource_metadata="https://mcp.example/.well-known/oauth-protected-resource/mcp", scope="notes.read notes.write"

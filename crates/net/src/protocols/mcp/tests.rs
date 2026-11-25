@@ -5,7 +5,7 @@ use super::*;
 use crate::fakes::fake_mcp::{McpServer, SESSION};
 
 fn web(url: &str) -> McpTarget {
-    McpTarget::Web { url: url.into() }
+    McpTarget::Web { url: url.into(), oauth: None }
 }
 
 /// Agreed, a server's tools are listed over their pages, one with a name the protocol doesn't
