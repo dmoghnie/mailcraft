@@ -109,7 +109,7 @@ fn answered(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, i: usize,
     // A change put off is proposed again, with the others, in a card of its own.
     for call in &turn.turn.calls {
         if let Some(run) = chat.run(&call.id).filter(|r| r.state != RunState::PutOff) {
-            card(ui, t, &chat.id, run, acts);
+            card(ui, t, chat, run, acts);
             if run.tool == SCRIPT {
                 script_parts(ui, t, chat, &call.id, call.input.get("script").and_then(|v| v.as_str()).unwrap_or_default(), acts);
             }
@@ -119,6 +119,8 @@ fn answered(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, i: usize,
 
 /// The tool that runs a script the model wrote.
 const SCRIPT: &str = "run_script";
+/// A script's question to the model.
+const ASK: &str = "ask";
 
 /// A script's own, under its card: a card for each change it proposed, to decide on; and,
 /// folded, its code and a card for each read it made.
@@ -126,14 +128,14 @@ fn script_parts(ui: &mut Ui, t: &Tokens, chat: &Chat, call: &str, code: &str, ac
     let parts: Vec<&ToolRun> = chat.runs.iter().filter(|r| r.part_of.as_deref() == Some(call)).collect();
     ui.indent(("assistant-script", &chat.id, call), |ui| {
         for change in parts.iter().filter(|r| !r.input.is_null()) {
-            card(ui, t, &chat.id, change, acts);
+            card(ui, t, chat, change, acts);
         }
         egui::CollapsingHeader::new(RichText::new(tl!("The script")).small().color(t.dim)).id_salt(("assistant-script-code", &chat.id, call)).show(
             ui,
             |ui| {
                 ui.add(egui::Label::new(RichText::new(code).monospace().small().color(t.dim)).wrap().selectable(true));
                 for read in parts.iter().filter(|r| r.input.is_null()) {
-                    card(ui, t, &chat.id, read, acts);
+                    card(ui, t, chat, read, acts);
                 }
             },
         );
@@ -141,12 +143,12 @@ fn script_parts(ui: &mut Ui, t: &Tokens, chat: &Chat, call: &str, code: &str, ac
 }
 
 /// A tool the model called: what it did, or the change it proposes and whether it's made.
-fn card(ui: &mut Ui, t: &Tokens, chat: &str, run: &ToolRun, acts: &mut Vec<Action>) {
+fn card(ui: &mut Ui, t: &Tokens, chat: &Chat, run: &ToolRun, acts: &mut Vec<Action>) {
     let proposed = run.state == RunState::Proposed;
     let (icon, color, state) = match run.state {
         RunState::Ran | RunState::PutOff => (tool_icon(&run.tool), t.dim, None),
         RunState::Failed => (Icon::Warning, t.warn, Some(tl!("Couldn't be done"))),
-        RunState::Waiting => (Icon::Clock, t.dim, Some(tl!("Downloading the message…"))),
+        RunState::Waiting => (Icon::Clock, t.dim, Some(waiting_for(chat, run))),
         RunState::Proposed => (tool_icon(&run.tool), t.accent, Some(tl!("Needs your approval"))),
         RunState::Done => (Icon::Done, t.ok, Some(tl!("Done"))),
         RunState::Declined => (Icon::Close, t.faint, Some(tl!("Declined"))),
@@ -173,17 +175,29 @@ fn card(ui: &mut Ui, t: &Tokens, chat: &str, run: &ToolRun, acts: &mut Vec<Actio
         if run.state == RunState::Failed && !run.result.is_empty() {
             ui.add(egui::Label::new(RichText::new(widgets::shorten(&run.result, 200)).small().color(t.faint)).wrap());
         }
+        // What the model answered a script.
+        if run.tool == ASK && run.state == RunState::Ran && !run.result.is_empty() {
+            ui.add(egui::Label::new(RichText::new(widgets::shorten(&run.result, 200)).small().color(t.dim)).wrap());
+        }
         if proposed {
             ui.horizontal(|ui| {
                 if widgets::primary_button(ui, tl!("Approve"), t, true).clicked() {
-                    acts.push(Action::Run("assistant.decide", json!({"chat": chat, "call": run.call, "approve": true})));
+                    acts.push(Action::Run("assistant.decide", json!({"chat": chat.id, "call": run.call, "approve": true})));
                 }
                 if ui.button(tl!("Decline")).clicked() {
-                    acts.push(Action::Run("assistant.decide", json!({"chat": chat, "call": run.call, "approve": false})));
+                    acts.push(Action::Run("assistant.decide", json!({"chat": chat.id, "call": run.call, "approve": false})));
                 }
             });
         }
     });
+}
+
+/// What a run waiting waits for: the answer to a question, its own or its script's, or a
+/// message to download.
+fn waiting_for(chat: &Chat, run: &ToolRun) -> &'static str {
+    let asking = |r: &ToolRun| r.tool == ASK && r.state == RunState::Waiting;
+    let script_asks = run.tool == SCRIPT && chat.runs.iter().any(|r| r.part_of.as_deref() == Some(run.call.as_str()) && asking(r));
+    if asking(run) || script_asks { tl!("Waiting for the answer…") } else { tl!("Downloading the message…") }
 }
 
 /// What a tool is called on its card.
@@ -209,6 +223,7 @@ fn tool_title(tool: &str) -> &str {
         "change_event" | "change_person" | "change_task" | "change_note" => tl!("Edit"),
         "delete_items" => tl!("Delete"),
         SCRIPT => tl!("Ran a script"),
+        ASK => tl!("Asked the model"),
         other => other,
     }
 }

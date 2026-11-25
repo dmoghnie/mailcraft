@@ -5,14 +5,14 @@ use super::waiting::online;
 use super::*;
 
 /// The model asked may run scripts.
-fn scripts_on(s: &mut Session) {
+pub(super) fn scripts_on(s: &mut Session) {
     let p = s.prefs.ai.profiles.first().unwrap().clone();
     let v = json!({"id": p.id, "name": p.name, "api": "openAi", "url": p.endpoint.url, "model": p.endpoint.model, "scripts": true});
     s.run("ai.saveProfile", &v).unwrap();
 }
 
 /// What the model was given back for its last calls.
-fn results(chat: &AiChat) -> Vec<mailcraft_model::AiToolResult> {
+pub(super) fn results(chat: &AiChat) -> Vec<mailcraft_model::AiToolResult> {
     chat.turns.last().unwrap().results.clone()
 }
 

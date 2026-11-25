@@ -197,6 +197,11 @@ impl Session {
             self.ai_answer(q);
             return;
         }
+        if let Some(at) = self.ai.assistant.script_asks.remove(&q) {
+            let came = self.ai_answer(q).unwrap_or_else(|| Err("no answer came".into())).map(|a| a.text);
+            self.script_resume(&at, script::Came::Answer(came));
+            return;
+        }
         let Some(id) = self.ai.assistant.asking.remove(&q) else { return };
         let Some(answer) = self.ai_answer(q) else { return };
         let Ok(mut chat) = self.take_chat(&id) else { return };

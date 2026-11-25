@@ -165,7 +165,13 @@ impl Runner {
         let r = replay.clone();
         engine.register_fn("ask", move |q: &str| r.borrow_mut().call(Call { name: "ask".into(), input: json!({"question": q}) }));
         let r = replay.clone();
-        engine.register_fn("ask", move |q: &str, text: &str| {
+        // About any value: a string as it is, `()` (a field a map hasn't got) as none, data as JSON.
+        engine.register_fn("ask", move |q: &str, about: Dynamic| {
+            let text = match about.clone().into_string() {
+                Ok(s) => s,
+                Err(_) if about.is_unit() => String::new(),
+                Err(_) => to_json(&about).to_string(),
+            };
             r.borrow_mut().call(Call { name: "ask".into(), input: json!({"question": q, "text": text}) })
         });
         engine.register_fn("now", move || now);

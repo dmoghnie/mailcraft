@@ -2189,6 +2189,8 @@ count	occurrences	회
 	Longest answer, in tokens	가장 긴 답변(토큰)
 	Takes in at once, in tokens	한 번에 받는 양(토큰)
 	Ran a script	스크립트를 실행함
+	Asked the model	모델에 질문함
+	Waiting for the answer…	답변을 기다리는 중…
 	The script	스크립트
 	Let it write and run scripts	스크립트 작성 및 실행 허용
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	스크립트는 메일, 일정, 연락처, 작업, 메모를 여러 단계가 아닌 한 단계로 찾아 읽습니다. MailCraft 안에서 실행되며 파일이나 네트워크를 쓰지 않고, 요청하는 변경은 승인을 기다립니다.

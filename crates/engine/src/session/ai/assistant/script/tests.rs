@@ -143,6 +143,19 @@ fn the_example_the_model_is_shown_runs() {
     assert_eq!(run(EXAMPLE, &log), Ran::Done { printed: "Mon 09:00: Invoice\nMove 1 message to Archive\n".into(), value: json!(1) });
 }
 
+/// `ask` takes its text as any value: a string, data (as JSON), or `()` (a field a map
+/// hasn't got) as none.
+#[test]
+fn ask_takes_any_value_as_its_text() {
+    let asked = |about: &str| match run(&format!(r#"ask("Urgent?", {about})"#), &[]) {
+        Ran::Needs(c) => c.input["text"].clone(),
+        other => panic!("{other:?}"),
+    };
+    assert_eq!(asked(r#""Due Friday""#), json!("Due Friday"));
+    assert_eq!(asked("#{subject: \"Invoice\"}"), json!(r#"{"subject":"Invoice"}"#));
+    assert_eq!(asked("#{}.preview"), json!(""));
+}
+
 #[test]
 fn what_it_printed_before_it_failed_comes_with_why() {
     let why = failed(run(r#"print("got here"); throw "no more""#, &[]));

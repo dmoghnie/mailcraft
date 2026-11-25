@@ -2204,6 +2204,8 @@ count	occurrences	opakovaní
 	Longest answer, in tokens	Najdlhšia odpoveď, v tokenoch
 	Takes in at once, in tokens	Prijme naraz, v tokenoch
 	Ran a script	Spustil skript
+	Asked the model	Opýtal sa modelu
+	Waiting for the answer…	Čaká sa na odpoveď…
 	The script	Skript
 	Let it write and run scripts	Povoliť písať a spúšťať skripty
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Skript nájde a prečíta poštu, udalosti, kontakty, úlohy a poznámky v jednom kroku namiesto mnohých. Beží v MailCrafte, bez súborov a siete, a každá zmena, o ktorú žiada, čaká na vaše schválenie.

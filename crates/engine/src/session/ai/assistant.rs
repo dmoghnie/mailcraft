@@ -236,8 +236,10 @@ pub struct Assistant {
     steps: HashMap<String, u32>,
     /// Questions whose chat stopped waiting: their answers are let go as they come.
     dropped: HashSet<u64>,
-    /// The scripts waiting for a message to download, by chat and call.
+    /// The scripts waiting for a message to download or an answer, by chat and call.
     scripts: HashMap<(String, String), script::Paused>,
+    /// The questions scripts asked, by question: the chat and call of each.
+    script_asks: HashMap<u64, (String, String)>,
 }
 
 impl Assistant {
@@ -256,9 +258,9 @@ impl Assistant {
         self.asking.iter().find(|(_, c)| *c == id).map(|(q, _)| *q)
     }
 
-    /// Whether question `q` is a chat's (asked or let go).
+    /// Whether question `q` is a chat's or its script's (asked or let go).
     pub(crate) fn owns(&self, q: u64) -> bool {
-        self.asking.contains_key(&q) || self.dropped.contains(&q)
+        self.asking.contains_key(&q) || self.dropped.contains(&q) || self.script_asks.contains_key(&q)
     }
 
     /// Whether question `q` was let go: its chat stopped or deleted.

@@ -2203,6 +2203,8 @@ count	occurrences	повторений
 	Longest answer, in tokens	Самый длинный ответ, в токенах
 	Takes in at once, in tokens	Вмещает за раз, в токенах
 	Ran a script	Запустил скрипт
+	Asked the model	Спросил модель
+	Waiting for the answer…	Ожидание ответа…
 	The script	Скрипт
 	Let it write and run scripts	Разрешить писать и запускать скрипты
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Скрипт находит и читает почту, события, контакты, задачи и заметки за один шаг вместо многих. Он работает внутри MailCraft, без файлов и сети, а любое изменение, которое он запрашивает, ждёт вашего одобрения.

@@ -318,3 +318,26 @@ fn a_change_a_script_proposes_is_approved_on_its_card() {
     assert!(!a.session.list.iter().any(|x| x.key == m.key), "approved: moved");
     assert!(has(&texts(&ctx, &mut a), "Done"));
 }
+
+/// A script waiting for the answer to its question says so on its card; its question unfolds
+/// under it.
+#[test]
+fn a_script_waiting_for_its_question_says_so() {
+    let (mut a, ctx) = ready("assistant-script-asks");
+    let id = a.session.prefs.ai.profiles[0].id.clone();
+    a.run(
+        "ai.saveProfile",
+        json!({"id": id, "name": "Local", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small", "scripts": true}),
+    );
+    click_named(&ctx, &mut a, "Ask AI");
+    click_named(&ctx, &mut a, "What needs my attention today?");
+    let chat = a.ui.assistant.chat.clone().expect("a chat begun");
+    answers(&mut a, &chat, "", &[("run_script", json!({"script": r#"ask("Is anything urgent?")"#}))]);
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "Ran a script") && has(&t, "Waiting for the answer…") && !has(&t, "Downloading the message…"), "{t:?}");
+    click_named(&ctx, &mut a, "The script");
+    for _ in 0..20 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    assert!(has(&texts(&ctx, &mut a), "Asked the model"));
+}

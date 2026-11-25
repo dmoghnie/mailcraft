@@ -143,8 +143,11 @@ and `cargo xtask sizes` enforces them.
   calls for is proposed (at most 20), the script told so: the run keeps what it was called with
   (`ToolRun::input`), kept with the chat, to make it from once approved after the script
   ended (a script that fails withdraws them), and the model is told what became of each with
-  what the script came to. The model's call ids never hold a `#`; the script's calls are
-  `{script}#{n}`.
+  what the script came to. `ask(question, text)` (`script/asking.rs`) asks the chat's model a
+  question of its own, without tools or the rest of the chat, its text cut to what the model
+  takes in, recorded as `assistant script`; at most 20 a script. The script waits for the
+  answer as for a download, and a chat stopped or deleted lets the question go. The model's
+  call ids never hold a `#`; the script's calls are `{script}#{n}`.
 - **Chats stay on this computer**: `assistant.json` lists them, each in `assistant-<id>.json`
   (read when first wanted, its file removed when it's deleted); never in the record or the log.
 - **The pane** (`ui-egui/src/panes/assistant/`) shows the chat from the session, never a copy:

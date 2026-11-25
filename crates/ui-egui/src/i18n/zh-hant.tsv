@@ -2189,6 +2189,8 @@ count	occurrences	次
 	Longest answer, in tokens	最長回答（token 數）
 	Takes in at once, in tokens	一次能接收的量（token 數）
 	Ran a script	執行了指令碼
+	Asked the model	詢問了模型
+	Waiting for the answer…	正在等待回答…
 	The script	指令碼
 	Let it write and run scripts	允許編寫並執行指令碼
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	指令碼一步就能尋找並讀取郵件、行程、聯絡人、工作和筆記，不必分成許多步。它在 MailCraft 內執行，不使用檔案或網路，它要求的任何變更都會等待你的核准。

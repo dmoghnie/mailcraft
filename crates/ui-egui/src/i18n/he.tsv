@@ -2185,6 +2185,8 @@ count	occurrences	פעמים
 	Longest answer, in tokens	התשובה הארוכה ביותר, בטוקנים
 	Takes in at once, in tokens	קולט בבת אחת, בטוקנים
 	Ran a script	הריץ סקריפט
+	Asked the model	שאל את המודל
+	Waiting for the answer…	ממתין לתשובה…
 	The script	הסקריפט
 	Let it write and run scripts	לאפשר לו לכתוב ולהריץ סקריפטים
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	סקריפט מוצא וקורא דואר, אירועים, אנשי קשר, משימות והערות בצעד אחד במקום רבים. הוא רץ בתוך MailCraft, בלי קבצים או רשת, וכל שינוי שהוא מבקש ממתין לאישורכם.

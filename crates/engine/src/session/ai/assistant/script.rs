@@ -8,6 +8,7 @@
 //! runs again from its start with what its calls were answered so far ([`run`]). A model runs
 //! scripts only when the person let it (File › Options › AI).
 
+mod asking;
 mod run;
 #[cfg(test)]
 mod tests;
@@ -16,6 +17,7 @@ mod values;
 use mailcraft_model::{AiTool, AiToolCall, MessageKey};
 use serde_json::{Value, json};
 
+pub(super) use self::asking::ASK;
 use self::run::{Answer, CALLS_MOST, Call, OPS_ALL, RHAI, Ran, Runner};
 use super::context::cut;
 use super::exchange::run_of;
@@ -54,7 +56,7 @@ ids.len()"#;
 /// The tool, as the model is told it.
 fn description() -> String {
     format!(
-        "Run a script, in Rhai, that calls the tools as functions, to do in one step what would take many calls. Each tool takes ONE map, written #{{key: value}}, or nothing: find_messages(#{{query: \"is:unread\", limit: 50}}), move_messages(#{{ids: ids, folder: \"archive\"}}); read_message(id) takes an id. {RHAI} The tools give data (maps and arrays) rather than text, for example:\n{EXAMPLE}\nread_message gives a message with its text. Messages, events, people, tasks and notes have the ids the tools take; dates are Unix seconds, with `when` as the person reads them; now() is the time now. What it prints, and the value it ends with, come back to you. A tool that fails throws an error (try/catch). A tool that changes (move_messages, add_task…) proposes the change and gives #{{proposed: what it does}}: nothing changes until the person approves it, after the script ended, and you're told what they decided. At most 100 calls and 20 changes; no files, network or modules."
+        "Run a script, in Rhai, that calls the tools as functions, to do in one step what would take many calls. Each tool takes ONE map, written #{{key: value}}, or nothing: find_messages(#{{query: \"is:unread\", limit: 50}}), move_messages(#{{ids: ids, folder: \"archive\"}}); read_message(id) takes an id. {RHAI} The tools give data (maps and arrays) rather than text, for example:\n{EXAMPLE}\nread_message gives a message with its text. Messages, events, people, tasks and notes have the ids the tools take; dates are Unix seconds, with `when` as the person reads them; now() is the time now. What it prints, and the value it ends with, come back to you. ask(question) or ask(question, text) asks the language model a question, about the text when given, and gives its answer as a string: for what code can't judge (does this message ask for a quote?); at most 20, each taking the model's time. A tool that fails throws an error (try/catch). A tool that changes (move_messages, add_task…) proposes the change and gives #{{proposed: what it does}}: nothing changes until the person approves it, after the script ended, and you're told what they decided. At most 100 calls and 20 changes; no files, network or modules."
     )
 }
 
@@ -80,11 +82,28 @@ struct Script {
     ops: u64,
 }
 
-/// A script waiting for a message to download: the call that reads it.
+/// What a script waits for.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(super) enum Wait {
+    /// A message to download.
+    Message(MessageKey),
+    /// The answer to question `q`, which it asked.
+    Answer(u64),
+}
+
+/// What came for a script waiting.
+pub(super) enum Came {
+    /// The message it waits for (or why it couldn't be downloaded).
+    Body { failed: Option<String> },
+    /// The answer to its question (or why none came).
+    Answer(Result<String, String>),
+}
+
+/// A script waiting: the call that waits, and for what.
 pub(crate) struct Paused {
     script: Script,
     waits: Call,
-    key: MessageKey,
+    on: Wait,
 }
 
 /// What a script's card says it does.
@@ -152,21 +171,24 @@ impl Session {
             };
             match self.script_call(chat, profile, &script, &call) {
                 Ok(answer) => script.log.push((call, answer)),
-                Err(key) => {
+                Err(on) => {
                     let at = (script.chat.clone(), script.call.id.clone());
-                    self.ai.assistant.scripts.insert(at, Paused { script, waits: call, key });
+                    self.ai.assistant.scripts.insert(at, Paused { script, waits: call, on });
                     return Outcome::Scripting { what };
                 }
             }
         }
     }
 
-    /// Make a script's call (its next): what it was answered, or the message it waits for. Its
-    /// run shows under the script's card, and holds what it found, as the model's own do; a
-    /// change proposed holds what it was called with, to be made from once approved.
-    fn script_call(&mut self, chat: &mut Chat, profile: &AiProfile, script: &Script, call: &Call) -> Result<Answer, MessageKey> {
+    /// Make a script's call (its next): what it was answered, or what it waits for. Its run
+    /// shows under the script's card, and holds what it found, as the model's own do; a change
+    /// proposed holds what it was called with, to be made from once approved.
+    fn script_call(&mut self, chat: &mut Chat, profile: &AiProfile, script: &Script, call: &Call) -> Result<Answer, Wait> {
         let id = format!("{}#{}", script.call.id, script.log.len().saturating_add(1));
         let made = AiToolCall { id, name: call.name.clone(), input: call.input.clone() };
+        if call.name == ASK {
+            return self.script_ask(chat, profile, script, made);
+        }
         let proposed = chat.runs.iter().filter(|r| r.part_of.as_deref() == Some(script.call.id.as_str()) && !r.input.is_null()).count();
         let outcome = if !script_tools().contains(&call.name) {
             Outcome::failed(&call.name, format!("a script can't call `{}`", call.name.chars().take(64).collect::<String>()))
@@ -178,7 +200,7 @@ impl Session {
         let (answer, input) = match &outcome {
             Outcome::Ran { data, .. } => (Ok(Answer::Gave(data.clone())), Value::Null),
             Outcome::Failed { result, .. } => (Ok(Answer::Failed(result.clone())), Value::Null),
-            Outcome::Waiting { key, .. } => (Err(key.clone()), Value::Null),
+            Outcome::Waiting { key, .. } => (Err(Wait::Message(key.clone())), Value::Null),
             Outcome::Proposed { what, .. } => (Ok(Answer::Gave(json!({"proposed": what}))), call.input.clone()),
             Outcome::Scripting { .. } => (Ok(Answer::Failed("a script can't run a script".into())), Value::Null),
         };
@@ -192,56 +214,94 @@ impl Session {
 
     /// A message came, or couldn't: the scripts waiting for it go on.
     pub(super) fn script_body(&mut self, key: &MessageKey, failed: Option<&str>) {
-        let waiting: Vec<(String, String)> = self.ai.assistant.scripts.iter().filter(|(_, p)| &p.key == key).map(|(at, _)| at.clone()).collect();
+        let on = Wait::Message(key.clone());
+        let waiting: Vec<(String, String)> = self.ai.assistant.scripts.iter().filter(|(_, p)| p.on == on).map(|(at, _)| at.clone()).collect();
         for at in waiting {
-            let Some(Paused { mut script, waits, .. }) = self.ai.assistant.scripts.remove(&at) else { continue };
-            let Ok(mut chat) = self.take_chat(&script.chat) else { continue };
-            // Stopped meanwhile: let go.
-            if !chat.run(&script.call.id).is_some_and(|r| r.state == RunState::Waiting) {
-                self.put_chat(chat);
-                continue;
-            }
-            let outcome = match self.assistant_profile(&chat) {
-                Err(e) => {
-                    withdraw(&mut chat, &script.call.id);
-                    Outcome::failed(&what_of(&script.call.input), said(&e))
-                }
-                Ok(profile) => {
-                    let answer = match failed {
-                        Some(e) => Answer::Failed(format!("the message couldn't be downloaded: {e}")),
-                        None => self
-                            .script_call(&mut chat, &profile, &script, &waits)
-                            .unwrap_or_else(|_| Answer::Failed("the message came, but couldn't be read".into())),
-                    };
-                    if let Answer::Failed(why) = &answer
-                        && let Some(r) = chat.run_mut(&format!("{}#{}", script.call.id, script.log.len().saturating_add(1)))
-                    {
-                        r.state = RunState::Failed;
-                        r.result = why.clone();
-                    }
-                    script.log.push((waits, answer));
-                    self.script_go(&mut chat, &profile, script)
-                }
-            };
-            let call = at.1;
-            if !matches!(outcome, Outcome::Scripting { .. })
-                && let Some(made) = chat.open_calls().into_iter().find(|c| c.id == call)
-                && let Some(r) = chat.run_mut(&call)
-            {
-                *r = run_of(&made, outcome);
-            }
-            let id = chat.id.clone();
-            self.put_chat(chat);
-            self.assistant_go_on(&id);
+            self.script_resume(&at, Came::Body { failed: failed.map(str::to_string) });
         }
     }
 
-    /// Chat `chat`'s calls were settled: its scripts waiting stop, and so do their reads.
+    /// What script `at` (its chat and call) waited for came: it goes on from there, and its chat
+    /// with it once it ends.
+    pub(super) fn script_resume(&mut self, at: &(String, String), came: Came) {
+        let Some(Paused { mut script, waits, .. }) = self.ai.assistant.scripts.remove(at) else { return };
+        let Ok(mut chat) = self.take_chat(&script.chat) else { return };
+        // Stopped meanwhile: let go.
+        if !chat.run(&script.call.id).is_some_and(|r| r.state == RunState::Waiting) {
+            self.put_chat(chat);
+            return;
+        }
+        let part = format!("{}#{}", script.call.id, script.log.len().saturating_add(1));
+        let outcome = match self.assistant_profile(&chat) {
+            Err(e) => {
+                withdraw(&mut chat, &script.call.id);
+                Outcome::failed(&what_of(&script.call.input), said(&e))
+            }
+            Ok(profile) => {
+                let answer = match came {
+                    Came::Body { failed: Some(e) } => Answer::Failed(format!("the message couldn't be downloaded: {e}")),
+                    Came::Body { failed: None } => self
+                        .script_call(&mut chat, &profile, &script, &waits)
+                        .unwrap_or_else(|_| Answer::Failed("the message came, but couldn't be read".into())),
+                    Came::Answer(Ok(text)) => {
+                        if let Some(r) = chat.run_mut(&part) {
+                            r.state = RunState::Ran;
+                            r.result = cut(text.trim(), VALUE_MOST);
+                        }
+                        Answer::Gave(Value::String(text.trim().to_string()))
+                    }
+                    Came::Answer(Err(e)) => Answer::Failed(format!("the model couldn't answer: {e}")),
+                };
+                if let Answer::Failed(why) = &answer
+                    && let Some(r) = chat.run_mut(&part)
+                {
+                    r.state = RunState::Failed;
+                    r.result = why.clone();
+                }
+                script.log.push((waits, answer));
+                self.script_go(&mut chat, &profile, script)
+            }
+        };
+        if !matches!(outcome, Outcome::Scripting { .. })
+            && let Some(made) = chat.open_calls().into_iter().find(|c| c.id == at.1)
+            && let Some(r) = chat.run_mut(&at.1)
+        {
+            *r = run_of(&made, outcome);
+        }
+        let id = chat.id.clone();
+        self.put_chat(chat);
+        self.assistant_go_on(&id);
+    }
+
+    /// Chat `chat`'s calls were settled: its scripts waiting stop, and so do their reads and
+    /// questions.
     pub(super) fn scripts_stopped(&mut self, chat: &mut Chat) {
-        self.ai.assistant.scripts.retain(|(c, _), _| *c != chat.id);
+        self.scripts_let_go(&chat.id);
         for r in chat.runs.iter_mut().filter(|r| r.part_of.is_some() && r.state == RunState::Waiting) {
             r.state = RunState::Failed;
-            r.result = "stopped before the message came".into();
+            r.result = if r.tool == ASK { "stopped before the answer came" } else { "stopped before the message came" }.into();
+        }
+    }
+
+    /// Chat `id`'s scripts waiting are let go, and the questions they asked with them: their
+    /// answers are dropped as they come.
+    pub(super) fn scripts_let_go(&mut self, id: &str) {
+        let mine = |at: &(String, String)| at.0 == id;
+        let asked: Vec<u64> = self
+            .ai
+            .assistant
+            .scripts
+            .iter()
+            .filter(|(at, _)| mine(at))
+            .filter_map(|(_, p)| match p.on {
+                Wait::Answer(q) => Some(q),
+                Wait::Message(_) => None,
+            })
+            .collect();
+        self.ai.assistant.scripts.retain(|at, _| !mine(at));
+        for q in asked {
+            self.ai.assistant.script_asks.remove(&q);
+            self.assistant_let_go(q);
         }
     }
 }

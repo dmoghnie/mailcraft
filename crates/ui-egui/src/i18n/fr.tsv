@@ -2190,6 +2190,8 @@ count	occurrences	occurrences
 	Longest answer, in tokens	Réponse la plus longue, en jetons
 	Takes in at once, in tokens	Prend en une fois, en jetons
 	Ran a script	A exécuté un script
+	Asked the model	A interrogé le modèle
+	Waiting for the answer…	En attente de la réponse…
 	The script	Le script
 	Let it write and run scripts	Le laisser écrire et exécuter des scripts
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Un script trouve et lit les messages, les événements, les contacts, les tâches et les notes en une seule étape au lieu de plusieurs. Il s'exécute dans MailCraft, sans fichiers ni réseau, et toute modification qu'il demande attend votre approbation.

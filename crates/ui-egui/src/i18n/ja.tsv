@@ -2186,6 +2186,8 @@ count	occurrences	回
 	Longest answer, in tokens	最長の回答 (トークン数)
 	Takes in at once, in tokens	一度に受け取れる量 (トークン数)
 	Ran a script	スクリプトを実行しました
+	Asked the model	モデルに質問しました
+	Waiting for the answer…	回答を待っています…
 	The script	スクリプト
 	Let it write and run scripts	スクリプトの作成と実行を許可
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	スクリプトは、メール、予定、連絡先、タスク、メモを何度にも分けず一度で検索して読みます。MailCraft の中で動き、ファイルやネットワークは使わず、求める変更はあなたの承認を待ちます。

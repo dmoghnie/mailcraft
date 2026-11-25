@@ -2190,6 +2190,8 @@ count	occurrences	kez
 	Longest answer, in tokens	En uzun yanıt, token olarak
 	Takes in at once, in tokens	Bir seferde alabildiği, token olarak
 	Ran a script	Bir betik çalıştırdı
+	Asked the model	Modele sordu
+	Waiting for the answer…	Yanıt bekleniyor…
 	The script	Betik
 	Let it write and run scripts	Betik yazıp çalıştırmasına izin ver
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Bir betik postaları, etkinlikleri, kişileri, görevleri ve notları birçok adım yerine tek adımda bulur ve okur. MailCraft'ın içinde çalışır, dosya ya da ağ kullanmaz ve istediği her değişiklik onayınızı bekler.

@@ -18,8 +18,11 @@ const CUT_SHORT: &str = "MailCraft closed before the answer came: send again to 
 /// What a read says, read again, when MailCraft closed before its message was downloaded.
 const NOT_READ: &str = "MailCraft closed before the message came";
 
-/// What a script says, read again, when MailCraft closed while it waited for a message.
+/// What a script says, read again, when MailCraft closed while it waited.
 const NOT_ENDED: &str = "MailCraft closed before the script ended";
+
+/// What a script's question says, read again, when MailCraft closed before its answer came.
+const NOT_ANSWERED: &str = "MailCraft closed before the answer came";
 
 /// `chat` as the last run left it, read again: nothing is on its way now, so the answer or the
 /// message it waited for says it never came, and the person sends again to go on.
@@ -31,7 +34,11 @@ fn left_off(chat: Chat) -> Chat {
         .into_iter()
         .map(|r| match r.state {
             RunState::Waiting => {
-                let result = if r.tool == script::RUN_SCRIPT { NOT_ENDED } else { NOT_READ };
+                let result = match r.tool.as_str() {
+                    script::RUN_SCRIPT => NOT_ENDED,
+                    script::ASK => NOT_ANSWERED,
+                    _ => NOT_READ,
+                };
                 ToolRun { state: RunState::Failed, result: result.into(), ..r }
             }
             _ => r,
@@ -176,6 +183,7 @@ impl Session {
         for q in asked {
             self.assistant_let_go(q);
         }
+        self.scripts_let_go(id);
         if let Some(store) = &self.store {
             // Its copy set aside as damaged too: it holds mail as well.
             for doc in [chat_doc(id), format!("{}.bad", chat_doc(id))] {

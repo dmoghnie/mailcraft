@@ -2186,6 +2186,8 @@ count	occurrences	次
 	Longest answer, in tokens	最长回答（token 数）
 	Takes in at once, in tokens	一次能接收的量（token 数）
 	Ran a script	运行了脚本
+	Asked the model	询问了模型
+	Waiting for the answer…	正在等待回答…
 	The script	脚本
 	Let it write and run scripts	允许编写并运行脚本
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	脚本一步就能查找并读取邮件、日程、联系人、任务和笔记，而不必分很多步。它在 MailCraft 内运行，不使用文件或网络，它要求的任何更改都会等待你的批准。

@@ -10,6 +10,7 @@ const STORYBOARD: &str = "Storyboard review on Thursday";
 mod kept;
 mod pim_changes;
 mod script;
+mod script_asks;
 mod waiting;
 
 /// A sample session whose mail may go to a model on this computer, which is the one asked.
