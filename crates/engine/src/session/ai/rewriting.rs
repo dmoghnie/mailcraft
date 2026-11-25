@@ -125,7 +125,7 @@ impl Session {
         let (id, account) = (c.id, c.account.clone());
         let own = own_text(&c.body, &c.styles).trim().to_string();
         let (to, subject, source, forward) = (c.to.clone(), c.subject.clone(), c.source.clone(), c.mode == Some(mailcraft_mime::ReplyMode::Forward));
-        let profile = self.prefs.ai.route(AiTask::Chat, Some(&account)).map_err(CmdError::Disabled)?.id.clone();
+        let profile = self.ai_route(AiTask::Chat, Some(&account)).map_err(CmdError::Disabled)?.id.clone();
         let follow_up = how == RewriteHow::FollowUp;
         let words = if follow_up { FOLLOW_UP } else { words };
         let (system, question) = if how == RewriteHow::FromWords || follow_up {

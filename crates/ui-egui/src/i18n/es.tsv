@@ -2315,3 +2315,9 @@ count	occurrences	repeticiones
 	Its own	La del modelo
 	Thinking	Razonamiento
 	Not every model takes these: Test shows whether it does.	No todos los modelos los aceptan: «Probar» muestra si lo hace.
+	Tokens a month, at most	Tokens al mes, como máximo
+	No limit	Sin límite
+	As its server counts them. Past them, the model it falls back to is asked instead.	Según los cuenta su servidor. Pasado ese número, se pregunta en su lugar al modelo de respaldo.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	Ha usado sus {budget} tokens este mes: las preguntas van al modelo de respaldo
+	{used} of {budget} tokens used this month	{used} de {budget} tokens usados este mes
+	{used} tokens used this month	{used} tokens usados este mes

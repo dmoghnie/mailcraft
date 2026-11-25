@@ -2,7 +2,7 @@
 //! each kind of work, and how far each account's mail may go. Kept with the other settings; a
 //! profile's key is in the keychain, never here.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::net::IpAddr;
 
 use mailcraft_model::{AiEffort, AiEndpoint};
@@ -70,6 +70,10 @@ pub struct AiProfile {
     /// How much it thinks before it answers; none: as the model does.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub effort: Option<AiEffort>,
+    /// The most tokens it may use in a calendar month, its questions' and answers'; none: no
+    /// limit. Past it, the model it falls back to is asked instead.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub budget: Option<u64>,
     /// The assistant may run scripts it writes with it (code mode): off until the person turns
     /// it on.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
@@ -167,12 +171,13 @@ impl AiPrefs {
         if accounts.is_empty() { self.allows(profile, None) } else { accounts.iter().all(|a| self.allows(profile, Some(a))) }
     }
 
-    /// `from`, or the first along its fallbacks allowed mail of every one of `accounts`.
-    pub fn allowed_for_all<'a>(&'a self, from: &'a AiProfile, accounts: &[String]) -> Option<&'a AiProfile> {
+    /// `from`, or the first along its fallbacks allowed mail of every one of `accounts`, past
+    /// those in `spent` (that have used their budget).
+    pub fn allowed_for_all<'a>(&'a self, from: &'a AiProfile, accounts: &[String], spent: &BTreeSet<String>) -> Option<&'a AiProfile> {
         let mut seen: Vec<&str> = Vec::new();
         let mut at = Some(from);
         while let Some(p) = at.filter(|p| !seen.contains(&p.id.as_str())) {
-            if self.allows_all(p, accounts) {
+            if self.allows_all(p, accounts) && !spent.contains(&p.id) {
                 return Some(p);
             }
             seen.push(&p.id);
@@ -182,23 +187,30 @@ impl AiPrefs {
     }
 
     /// The profile `task` goes to for mail of `account`: the one named for it, or the first,
-    /// or else along their fallbacks the first that's allowed. Why none, when none is.
-    pub fn route(&self, task: AiTask, account: Option<&str>) -> Result<&AiProfile, String> {
+    /// or else along their fallbacks the first that's allowed and not in `spent` (that have used
+    /// their budget). Why none, when none is.
+    pub fn route(&self, task: AiTask, account: Option<&str>, spent: &BTreeSet<String>) -> Result<&AiProfile, String> {
         if self.reach(account).is_none() {
             return Err("MailCraft's AI is off for this account: File › Options › AI lets its mail go to a model".into());
         }
         let first = self.uses.get(&task).and_then(|id| self.profile(id)).or_else(|| self.profiles.first());
         let Some(first) = first else { return Err("no model is set up: add one in File › Options › AI".into()) };
-        self.allowed_from(first, account)
-            .ok_or_else(|| format!("{} isn't on this computer or its network, and this mail goes only to a model that is", first.name))
+        self.allowed_from(first, account, spent).ok_or_else(|| {
+            if spent.contains(&first.id) {
+                format!("{} has used its monthly budget, and no model it falls back to may have this mail", first.name)
+            } else {
+                format!("{} isn't on this computer or its network, and this mail goes only to a model that is", first.name)
+            }
+        })
     }
 
-    /// `from`, or the first allowed along its fallbacks (each profile tried once).
-    pub fn allowed_from<'a>(&'a self, from: &'a AiProfile, account: Option<&str>) -> Option<&'a AiProfile> {
+    /// `from`, or the first allowed along its fallbacks (each profile tried once), past those in
+    /// `spent`.
+    pub fn allowed_from<'a>(&'a self, from: &'a AiProfile, account: Option<&str>, spent: &BTreeSet<String>) -> Option<&'a AiProfile> {
         let mut seen: Vec<&str> = Vec::new();
         let mut at = Some(from);
         while let Some(p) = at.filter(|p| !seen.contains(&p.id.as_str())) {
-            if self.allows(p, account) {
+            if self.allows(p, account) && !spent.contains(&p.id) {
                 return Some(p);
             }
             seen.push(&p.id);

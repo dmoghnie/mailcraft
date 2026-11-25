@@ -651,6 +651,7 @@ impl Session {
         if let Some(store) = s.store.clone() {
             s.templates = writing::KeptTemplates::load(&store);
             s.load_ai_log();
+            s.load_ai_usage();
             match store.load_doc(RULES_DOC) {
                 Ok(r) => s.rules = r,
                 Err(e) => {
@@ -744,6 +745,7 @@ impl Session {
     /// saved first, so a question is on it before it goes.
     pub fn take_jobs(&mut self) -> Vec<Job> {
         self.save_ai_log();
+        self.save_ai_usage();
         self.save_chats();
         std::mem::take(&mut self.jobs)
     }

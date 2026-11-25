@@ -2310,3 +2310,9 @@ count	occurrences	keer
 	Its own	Die van het model
 	Thinking	Nadenken
 	Not every model takes these: Test shows whether it does.	Niet elk model neemt deze aan: Testen laat zien of het dat doet.
+	Tokens a month, at most	Tokens per maand, hoogstens
+	No limit	Geen grens
+	As its server counts them. Past them, the model it falls back to is asked instead.	Zoals de server ze telt. Daarboven wordt in plaats daarvan het terugvalmodel gevraagd.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	Het heeft deze maand zijn {budget} tokens gebruikt: vragen gaan naar het terugvalmodel
+	{used} of {budget} tokens used this month	{used} van {budget} tokens gebruikt deze maand
+	{used} tokens used this month	{used} tokens gebruikt deze maand

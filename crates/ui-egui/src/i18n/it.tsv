@@ -2314,3 +2314,9 @@ count	occurrences	ripetizioni
 	Its own	Quella del modello
 	Thinking	Ragionamento
 	Not every model takes these: Test shows whether it does.	Non tutti i modelli li accettano: «Prova» mostra se questo lo fa.
+	Tokens a month, at most	Token al mese, al massimo
+	No limit	Nessun limite
+	As its server counts them. Past them, the model it falls back to is asked instead.	Come li conta il suo server. Oltre, viene interpellato al suo posto il modello di riserva.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	Ha usato i suoi {budget} token questo mese: le domande vanno al modello di riserva
+	{used} of {budget} tokens used this month	{used} token su {budget} usati questo mese
+	{used} tokens used this month	{used} token usati questo mese

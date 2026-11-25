@@ -2310,3 +2310,9 @@ count	occurrences	مرات
 	Its own	الافتراضي للنموذج
 	Thinking	التفكير
 	Not every model takes these: Test shows whether it does.	لا تقبل كل النماذج هذه الإعدادات: يُظهر «اختبره» ما إذا كان النموذج يقبلها.
+	Tokens a month, at most	الحد الأقصى من الرموز في الشهر
+	No limit	بلا حد
+	As its server counts them. Past them, the model it falls back to is asked instead.	كما يعدّها خادمه. بعد تجاوزها، يُسأل النموذج الاحتياطي بدلاً منه.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	استهلك {budget} رمزًا هذا الشهر: تذهب الأسئلة إلى النموذج الاحتياطي
+	{used} of {budget} tokens used this month	استُخدم {used} من {budget} رمز هذا الشهر
+	{used} tokens used this month	استُخدم {used} رمز هذا الشهر

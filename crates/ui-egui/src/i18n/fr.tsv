@@ -2315,3 +2315,9 @@ count	occurrences	occurrences
 	Its own	Celle du modèle
 	Thinking	Réflexion
 	Not every model takes these: Test shows whether it does.	Tous les modèles ne les acceptent pas : « Tester » montre si celui-ci le fait.
+	Tokens a month, at most	Jetons par mois, au plus
+	No limit	Sans limite
+	As its server counts them. Past them, the model it falls back to is asked instead.	Comptés par son serveur. Au-delà, c’est le modèle de repli qui est interrogé.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	Il a utilisé ses {budget} jetons ce mois-ci : les questions vont au modèle de repli
+	{used} of {budget} tokens used this month	{used} jetons sur {budget} utilisés ce mois-ci
+	{used} tokens used this month	{used} jetons utilisés ce mois-ci

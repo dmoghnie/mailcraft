@@ -2314,3 +2314,9 @@ count	occurrences	次
 	Its own	模型預設
 	Thinking	思考
 	Not every model takes these: Test shows whether it does.	並非每個模型都接受這些設定：按「測試」即可知道。
+	Tokens a month, at most	每月最多權杖數
+	No limit	不限
+	As its server counts them. Past them, the model it falls back to is asked instead.	依其伺服器的計數。超出後，改為詢問備用模型。
+	It has used its {budget} tokens this month: questions go to the model it falls back to	本月已用完 {budget} 個權杖：問題會轉給備用模型
+	{used} of {budget} tokens used this month	本月已用 {used} / {budget} 個權杖
+	{used} tokens used this month	本月已用 {used} 個權杖

@@ -2311,3 +2311,9 @@ count	occurrences	回
 	Its own	モデルの既定
 	Thinking	思考
 	Not every model takes these: Test shows whether it does.	これらを受け付けないモデルもあります。受け付けるかどうかは「テスト」でわかります。
+	Tokens a month, at most	1か月あたりのトークン上限
+	No limit	上限なし
+	As its server counts them. Past them, the model it falls back to is asked instead.	サーバーが数えたとおりに数えます。超えると、代わりに予備のモデルに尋ねます。
+	It has used its {budget} tokens this month: questions go to the model it falls back to	今月の {budget} トークンを使い切りました。質問は予備のモデルに送られます
+	{used} of {budget} tokens used this month	今月は {budget} トークン中 {used} を使用
+	{used} tokens used this month	今月は {used} トークンを使用

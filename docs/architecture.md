@@ -142,6 +142,12 @@ and `cargo xtask sizes` enforces them.
 - **The record.** Each question is recorded before it goes (`ai-log.json`, saved as the jobs are
   taken): when, what for, which profile and server, whose mail, and its sizes; never what it
   said. The newest 500 are kept.
+- **A model's settings and budget.** A profile's temperature and how much it thinks go with each
+  question, told each server in its own words (`net/src/protocols/ai/`). Its monthly budget is
+  in tokens, as its server counts them, or a token for every three bytes where it doesn't
+  (`session/ai/budget.rs`, `ai-usage.json`); a profile that has used it is passed over in
+  routing (`AiPrefs::route` takes the ones spent) for its fallback, and the assistant's chat
+  that names it is refused.
 - **Keys stay out of errors.** What a server says is quoted with the key blanked out, before it's
   cut short; an error of the network layer that quotes a server's words (a status line it
   couldn't read) and holds the key, or the start of it, says less instead.

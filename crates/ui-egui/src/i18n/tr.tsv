@@ -2315,3 +2315,9 @@ count	occurrences	kez
 	Its own	Modelin kendi
 	Thinking	Düşünme
 	Not every model takes these: Test shows whether it does.	Her model bunları kabul etmez: “Test et” kabul edip etmediğini gösterir.
+	Tokens a month, at most	Ayda en fazla token
+	No limit	Sınırsız
+	As its server counts them. Past them, the model it falls back to is asked instead.	Sunucusunun saydığı gibi. Aşıldığında onun yerine yedek modele sorulur.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	Bu ay {budget} tokenını kullandı: sorular yedek modele gider
+	{used} of {budget} tokens used this month	Bu ay {budget} tokendan {used} kullanıldı
+	{used} tokens used this month	Bu ay {used} token kullanıldı

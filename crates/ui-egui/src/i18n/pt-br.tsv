@@ -2315,3 +2315,9 @@ count	occurrences	ocorrências
 	Its own	A do modelo
 	Thinking	Raciocínio
 	Not every model takes these: Test shows whether it does.	Nem todo modelo aceita estas configurações: “Testar” mostra se ele aceita.
+	Tokens a month, at most	Tokens por mês, no máximo
+	No limit	Sem limite
+	As its server counts them. Past them, the model it falls back to is asked instead.	Conforme o servidor os conta. Passado esse limite, o modelo reserva é consultado no lugar dele.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	Usou seus {budget} tokens este mês: as perguntas vão para o modelo reserva
+	{used} of {budget} tokens used this month	{used} de {budget} tokens usados este mês
+	{used} tokens used this month	{used} tokens usados este mês

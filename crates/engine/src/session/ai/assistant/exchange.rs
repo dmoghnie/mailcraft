@@ -42,11 +42,23 @@ impl Session {
         };
         if let Some(id) = &chat.profile {
             let p = ai.profile(id).ok_or_else(|| CmdError::Params(format!("no model profile {id}")))?;
+            if self.ai_over_budget(p) {
+                let why =
+                    format!("{} has used its monthly budget: choose another model for this chat, or raise its budget in File › Options › AI", p.name);
+                return Err(CmdError::Disabled(why));
+            }
             return if ai.allows_all(p, &chat.accounts) { Ok(p.clone()) } else { Err(off(p)) };
         }
         let first = ai.uses.get(&AiTask::Chat).and_then(|id| ai.profile(id)).or_else(|| ai.profiles.first());
         let first = first.ok_or_else(|| CmdError::Disabled("no model is set up: add one in File › Options › AI".into()))?;
-        ai.allowed_for_all(first, &chat.accounts).cloned().ok_or_else(|| off(first))
+        let spent = self.ai_spent();
+        ai.allowed_for_all(first, &chat.accounts, &spent).cloned().ok_or_else(|| {
+            if spent.contains(&first.id) {
+                CmdError::Disabled(format!("{} has used its monthly budget, and no model it falls back to may have this chat's mail", first.name))
+            } else {
+                off(first)
+            }
+        })
     }
 
     /// What the model is told: who it is, and the accounts it may read. Never the time, which

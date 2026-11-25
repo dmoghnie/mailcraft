@@ -2329,3 +2329,9 @@ count	occurrences	opakovaní
 	Its own	Podľa modelu
 	Thinking	Premýšľanie
 	Not every model takes these: Test shows whether it does.	Nie každý model ich prijíma: „Otestovať“ ukáže, či ich prijíma.
+	Tokens a month, at most	Tokenov za mesiac, najviac
+	No limit	Bez obmedzenia
+	As its server counts them. Past them, the model it falls back to is asked instead.	Tak, ako ich počíta jeho server. Nad tento počet sa namiesto neho pýta záložný model.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	Tento mesiac minul svojich {budget} tokenov: otázky idú záložnému modelu
+	{used} of {budget} tokens used this month	Tento mesiac použitých {used} z {budget} tokenov
+	{used} tokens used this month	Tento mesiac použitých {used} tokenov

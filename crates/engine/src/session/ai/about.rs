@@ -103,7 +103,7 @@ impl Session {
 
     /// Ask `q` about message `key`, for `kind`: what was written of it before is replaced.
     fn about_ask(&mut self, key: &MessageKey, kind: AboutKind, q: Question) -> Result<(), CmdError> {
-        let profile = self.prefs.ai.route(AiTask::Chat, Some(&key.account)).map_err(CmdError::Disabled)?.id.clone();
+        let profile = self.ai_route(AiTask::Chat, Some(&key.account)).map_err(CmdError::Disabled)?.id.clone();
         let id = self.ai_ask(AiTask::Chat, Some(&key.account), kind.purpose(), AiChat::ask(&q.system, &q.text, q.tokens), true)?;
         let written = AboutMessage { profile, messages: q.messages, left_out: q.left_out, ..AboutMessage::default() };
         self.ai.about.keep(key.clone(), kind, written, id);

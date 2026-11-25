@@ -38,6 +38,8 @@ pub struct AiModelForm {
     pub temperature: String,
     /// How much it thinks; none: as the model does.
     pub effort: Option<AiEffort>,
+    /// The most tokens it may use in a month, as typed (empty: no limit).
+    pub budget: String,
     /// The profile asked instead when this one fails.
     pub fallback: Option<String>,
     /// The assistant may run scripts it writes with it.
@@ -59,6 +61,7 @@ impl AiModelForm {
             context: if p.context > 0 { p.context.to_string() } else { String::new() },
             temperature: p.temperature.map(|t| (f64::from(t) / 100.0).to_string()).unwrap_or_default(),
             effort: p.effort,
+            budget: p.budget.map(|b| b.to_string()).unwrap_or_default(),
             fallback: p.fallback.clone(),
             scripts: p.scripts,
             ..AiModelForm::default()
@@ -97,6 +100,12 @@ impl AiModelForm {
             None => json!(temperature),
         };
         p["effort"] = json!(self.effort.map_or("default", AiEffort::code));
+        let budget = self.budget.trim();
+        p["budget"] = match budget.parse::<u64>() {
+            _ if budget.is_empty() => serde_json::Value::Null,
+            Ok(b) => json!(b),
+            Err(_) => json!(budget),
+        };
         let key = self.key.0.trim();
         if !key.is_empty() {
             p["key"] = json!(key);
@@ -202,6 +211,11 @@ fn tuning(ui: &mut Ui, f: &mut AiModelForm, t: &Tokens) {
         });
     });
     let note = tl!("Not every model takes these: Test shows whether it does.");
+    ui.add(egui::Label::new(RichText::new(note).color(t.faint).small()).wrap());
+    ui.add_space(6.0);
+    ui.label(RichText::new(tl!("Tokens a month, at most")).color(t.text));
+    ui.add(egui::TextEdit::singleline(&mut f.budget).hint_text(tl!("No limit")).desired_width(120.0));
+    let note = tl!("As its server counts them. Past them, the model it falls back to is asked instead.");
     ui.add(egui::Label::new(RichText::new(note).color(t.faint).small()).wrap());
 }
 

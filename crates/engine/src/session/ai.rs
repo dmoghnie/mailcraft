@@ -6,6 +6,7 @@
 mod about;
 mod asking;
 mod assistant;
+mod budget;
 mod commands;
 mod rewriting;
 mod servers;

@@ -6,6 +6,7 @@ use crate::{AI_LOG_KEPT, AiProfile, AiTest};
 use mailcraft_model::{AiAnswer, AiApi, AiDone, AiEndpoint, AiWork};
 
 mod assistant;
+mod budget;
 mod rewriting;
 mod servers;
 mod summary;
@@ -143,6 +144,9 @@ fn a_profile_is_checked_before_it_is_kept() {
         with("temperature", json!(-0.1)),
         with("temperature", json!("warm")),
         with("effort", json!("extreme")),
+        with("budget", json!(0)),
+        with("budget", json!(-5)),
+        with("budget", json!("lots")),
     ] {
         assert!(s.run("ai.saveProfile", &bad).is_err(), "{bad}");
     }

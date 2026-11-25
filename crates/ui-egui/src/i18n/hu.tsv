@@ -2315,3 +2315,9 @@ count	occurrences	előfordulás
 	Its own	A modellé
 	Thinking	Gondolkodás
 	Not every model takes these: Test shows whether it does.	Nem minden modell fogadja el ezeket: a Kipróbálás megmutatja, hogy ez elfogadja-e.
+	Tokens a month, at most	Tokenek havonta, legfeljebb
+	No limit	Nincs korlát
+	As its server counts them. Past them, the model it falls back to is asked instead.	Ahogy a kiszolgálója számolja őket. Ezen túl helyette a tartalékmodell kap kérdést.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	Ebben a hónapban elhasználta a(z) {budget} tokenjét: a kérdések a tartalékmodellhez kerülnek
+	{used} of {budget} tokens used this month	Ebben a hónapban {used} / {budget} token elhasználva
+	{used} tokens used this month	Ebben a hónapban {used} token elhasználva

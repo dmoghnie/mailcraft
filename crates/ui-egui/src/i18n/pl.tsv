@@ -2328,3 +2328,9 @@ count	occurrences	wystąpieniach
 	Its own	Domyślne modelu
 	Thinking	Myślenie
 	Not every model takes these: Test shows whether it does.	Nie każdy model je przyjmuje: „Testuj” pokaże, czy ten przyjmuje.
+	Tokens a month, at most	Tokenów miesięcznie, najwyżej
+	No limit	Bez limitu
+	As its server counts them. Past them, the model it falls back to is asked instead.	Liczone tak, jak liczy je jego serwer. Po ich przekroczeniu pytany jest zamiast niego model zapasowy.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	Wykorzystał w tym miesiącu swoje {budget} tokenów: pytania trafiają do modelu zapasowego
+	{used} of {budget} tokens used this month	Wykorzystano {used} z {budget} tokenów w tym miesiącu
+	{used} tokens used this month	Wykorzystano {used} tokenów w tym miesiącu

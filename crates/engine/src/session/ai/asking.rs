@@ -101,6 +101,9 @@ pub struct AiState {
     /// let go whose answers are still on their way, to drop.
     pub(super) rewrite: Option<super::Rewrite>,
     pub(super) rewrite_dropped: HashSet<u64>,
+    /// What each profile used this month (`budget.rs`), and whether it changed since saved.
+    pub(super) usage: super::budget::AiUsage,
+    pub(super) usage_changed: bool,
 }
 
 impl AiState {
@@ -171,7 +174,7 @@ impl Session {
     /// `purpose`; the answer is taken with [`Session::ai_answer`] by the id returned. Streamed,
     /// what came of it so far is [`AiState::part`] while it waits.
     pub(crate) fn ai_ask(&mut self, task: AiTask, account: Option<&str>, purpose: &str, chat: AiChat, stream: bool) -> Result<u64, CmdError> {
-        let profile = self.prefs.ai.route(task, account).map_err(CmdError::Disabled)?.clone();
+        let profile = self.ai_route(task, account).map_err(CmdError::Disabled)?.clone();
         Ok(self.ai_ask_profile(&profile, account.into_iter().map(str::to_string).collect(), purpose, chat, stream))
     }
 
@@ -258,6 +261,9 @@ impl Session {
                 };
                 let received = result.as_ref().map_or(0, |a| a.received);
                 self.ai_settle(w.logged, if result.is_ok() { "answered" } else { "failed" }, received);
+                if let Ok(a) = &result {
+                    self.ai_count(&w.profile, w.chat.size(), a);
+                }
                 // A chat stopped or deleted is let go: its mail goes to no other model.
                 if result.is_err()
                     && !self.ai.assistant.let_go(id)
@@ -304,11 +310,13 @@ impl Session {
     /// first allowed and not asked yet (each looked at once, however they loop).
     fn ai_fallback(&self, id: u64, w: &Waiting) -> Option<(AiProfile, AiChat)> {
         let ai = &self.prefs.ai;
+        let spent = self.ai_spent();
         let mut seen: Vec<&str> = vec![w.profile.as_str()];
         let mut at = ai.profile(&w.profile).and_then(|p| p.fallback.as_deref()).and_then(|id| ai.profile(id));
         while let Some(p) = at.filter(|p| !seen.contains(&p.id.as_str())) {
             if !w.tried.contains(&p.id)
                 && ai.allows_all(p, &w.accounts)
+                && !spent.contains(&p.id)
                 && let Some(chat) = self.chat_for(id, w, p)
             {
                 return Some((p.clone(), chat));

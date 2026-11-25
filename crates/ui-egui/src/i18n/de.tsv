@@ -2315,3 +2315,9 @@ count	occurrences	Terminen
 	Its own	Wie das Modell
 	Thinking	Nachdenken
 	Not every model takes these: Test shows whether it does.	Nicht jedes Modell nimmt diese an: „Testen“ zeigt, ob es das tut.
+	Tokens a month, at most	Höchstens Tokens im Monat
+	No limit	Ohne Grenze
+	As its server counts them. Past them, the model it falls back to is asked instead.	So, wie sein Server sie zählt. Darüber hinaus wird stattdessen das Ersatzmodell gefragt.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	Es hat diesen Monat seine {budget} Tokens verbraucht: Fragen gehen an das Ersatzmodell
+	{used} of {budget} tokens used this month	{used} von {budget} Tokens diesen Monat verbraucht
+	{used} tokens used this month	{used} Tokens diesen Monat verbraucht

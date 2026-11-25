@@ -2328,3 +2328,9 @@ count	occurrences	повторений
 	Its own	Как у модели
 	Thinking	Размышление
 	Not every model takes these: Test shows whether it does.	Не каждая модель их принимает: «Проверить» покажет, принимает ли эта.
+	Tokens a month, at most	Токенов в месяц, не больше
+	No limit	Без ограничения
+	As its server counts them. Past them, the model it falls back to is asked instead.	Как их считает его сервер. Сверх этого вместо него спрашивается запасная модель.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	В этом месяце израсходованы все {budget} токенов: вопросы идут запасной модели
+	{used} of {budget} tokens used this month	Использовано {used} из {budget} токенов в этом месяце
+	{used} tokens used this month	Использовано {used} токенов в этом месяце

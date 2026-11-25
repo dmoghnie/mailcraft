@@ -2311,3 +2311,9 @@ count	occurrences	次
 	Its own	模型默认
 	Thinking	思考
 	Not every model takes these: Test shows whether it does.	并非每个模型都接受这些设置：点“测试”即可知道。
+	Tokens a month, at most	每月最多令牌数
+	No limit	不限
+	As its server counts them. Past them, the model it falls back to is asked instead.	按其服务器的计数。超出后，改为询问备用模型。
+	It has used its {budget} tokens this month: questions go to the model it falls back to	本月已用完 {budget} 个令牌：问题会转给备用模型
+	{used} of {budget} tokens used this month	本月已用 {used} / {budget} 个令牌
+	{used} tokens used this month	本月已用 {used} 个令牌

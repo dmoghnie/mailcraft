@@ -77,6 +77,15 @@ fn profile(s: &Session, t: &Tokens, ui: &mut Ui, p: &AiProfile, acts: &mut Vec<A
     } else {
         tl!("At a cloud provider: mail you let go to it leaves this computer").to_string()
     });
+    let used = s.ai_used(&p.id);
+    match p.budget {
+        Some(b) if s.ai_over_budget(p) => {
+            lines.push(tf!("It has used its {budget} tokens this month: questions go to the model it falls back to", budget = b))
+        }
+        Some(b) => lines.push(tf!("{used} of {budget} tokens used this month", used = used, budget = b)),
+        None if used > 0 => lines.push(tf!("{used} tokens used this month", used = used)),
+        None => {}
+    }
     if let Some(e) = s.ai.key_errors.get(&p.id) {
         lines.push(tf!("Its key couldn't be kept: {error}", error = e));
     } else if p.has_key {

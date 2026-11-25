@@ -2310,3 +2310,9 @@ count	occurrences	פעמים
 	Its own	של המודל
 	Thinking	חשיבה
 	Not every model takes these: Test shows whether it does.	לא כל מודל מקבל אותם: „לבדוק” מראה אם הוא מקבל.
+	Tokens a month, at most	טוקנים בחודש, לכל היותר
+	No limit	ללא הגבלה
+	As its server counts them. Past them, the model it falls back to is asked instead.	כפי שהשרת שלו סופר אותם. מעבר לכך, נשאל במקומו המודל החלופי.
+	It has used its {budget} tokens this month: questions go to the model it falls back to	הוא ניצל החודש את {budget} הטוקנים שלו: השאלות עוברות למודל החלופי
+	{used} of {budget} tokens used this month	נוצלו החודש {used} מתוך {budget} טוקנים
+	{used} tokens used this month	נוצלו החודש {used} טוקנים
