@@ -119,6 +119,20 @@ fn a_rule_that_cant_be_run_is_not_proposed() {
     assert!(s.rule_proposal().is_none());
 }
 
+/// Found showing it: a model that thought till its longest answer and wrote nothing was said as
+/// "EOF while parsing a value". It's said as cut short, and how to give it room.
+#[test]
+fn an_answer_cut_short_is_said_as_that() {
+    let mut s = ready("ai-rule-words-cut");
+    s.run("rules.fromWords", &json!({"words": WORDS})).unwrap();
+    let (id, ..) = asked(&mut s).pop().expect("a question");
+    let a = AiAnswer { text: String::new(), cut: true, sent: 10, received: 20, ..AiAnswer::default() };
+    s.apply(Event::Ai { done: AiDone::Answered { id, answer: Some(a), error: None } });
+    let p = s.run("rules.proposed", &json!({})).unwrap()["proposal"].clone();
+    let error = p["error"].as_str().unwrap_or_default();
+    assert!(p["rule"].is_null() && error.contains("cut short at the longest answer") && !error.contains("EOF"), "{p}");
+}
+
 /// Nothing goes without words, to an account there isn't, or when the account's mail may not
 /// go to a model.
 #[test]

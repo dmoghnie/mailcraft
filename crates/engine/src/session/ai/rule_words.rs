@@ -16,6 +16,7 @@ use crate::{CmdError, CommandSpec, Session, p};
 
 const WHERE: &str = "Home › Rules";
 /// What the record of what went where says its questions were for.
+const CUT: &str = "the answer was cut short at the longest answer set for this model, before the rule was written: raise it in the model's settings";
 const PURPOSE: &str = "writing a rule";
 /// The most of the person's words taken.
 const WORDS_MOST: usize = 1_000;
@@ -97,7 +98,9 @@ impl Session {
     pub(crate) fn rule_words_came(&mut self, id: u64, profile: &str, result: &Result<AiAnswer, String>) -> bool {
         let Some(account) = self.ai.rule_words.as_ref().filter(|r| r.asking == Some(id)).map(|r| r.account.clone()) else { return false };
         let made = match result {
-            Ok(a) => self.rule_said(&a.text, &account),
+            // A model that thinks first can spend the longest answer on its thinking and write
+            // nothing: said as that, not as JSON that ends too soon.
+            Ok(a) => self.rule_said(&a.text, &account).map_err(|e| if a.cut { CUT.to_string() } else { e }),
             Err(e) => Err(e.clone()),
         };
         if let Some(r) = self.ai.rule_words.as_mut() {
