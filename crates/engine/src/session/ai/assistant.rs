@@ -20,6 +20,7 @@ use mailcraft_model::{AiRole, AiToolCall, AiTurn};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+mod automations;
 mod changes;
 mod commands;
 mod context;
@@ -34,6 +35,7 @@ mod script;
 mod tools;
 mod window;
 
+pub use automations::{Automation, AutomationReport, AutomationRun, AutomationWhen, Automations, ReportSaid};
 pub use commands::QUOTE_MOST as CONTEXT_QUOTE_MOST;
 pub(crate) use commands::commands as assistant_commands;
 pub use context::{CONTEXT_AT_FIRST, ContextItem, ITEMS_MOST as CONTEXT_ITEMS_MOST};
@@ -290,6 +292,8 @@ pub struct Assistant {
     /// How many tokens each chat's question was estimated at as it was sent, by question: set
     /// beside the server's count when the answer comes ([`Chat::counted`]).
     estimates: HashMap<u64, u64>,
+    /// The automations, and what's to be told of their runs ([`automations`]).
+    automations: automations::Automations,
 }
 
 impl Assistant {
@@ -301,6 +305,11 @@ impl Assistant {
     /// The scripts kept, once read ([`Session::assistant_scripts`] reads them).
     pub fn kept_scripts(&self) -> &[KeptScript] {
         self.kept.as_deref().unwrap_or_default()
+    }
+
+    /// The automations, once read (the window's tick reads them).
+    pub fn automations(&self) -> &[Automation] {
+        self.automations.list()
     }
 
     /// Chat `id`, if it's been read ([`Session::assistant_shown`] reads it).

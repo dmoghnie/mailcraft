@@ -2568,3 +2568,26 @@ count	occurrences	előfordulás
 	Their times can't be had: {why}	Az idejük nem érhető el: {why}
 	You	Te
 	{free} of {all} free	{all} közül {free} szabad
+	Change an automation	Automatizálás módosítása
+	Add an automation	Automatizálás hozzáadása
+	What to do	Mit tegyen
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	A saját szavaiddal, ahogy a MailCraft MI-jét kérnéd. A saját eszközeivel dolgozik, és az általa kért változtatás a jóváhagyásodra vár
+	When	Mikor
+	Each day at	Minden nap ekkor:
+	As mail arrives in the Inbox	Amikor levél érkezik a Beérkezett üzenetek mappába
+	Matching	Egyezés
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	Ahogy a keresőmezőbe írnád. Üres: minden levél, amelyet a Beérkezett üzenetek szabályai ott hagynak
+	Any account	Bármely fiók
+	On: it runs by itself	Be: magától fut
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	Feladatok, amelyeket a MailCraft MI-je magától végez el: minden nap egy adott időpontban, vagy amikor levél érkezik. Mindegyik a saját csevegésében fut, ahol az általa kért változtatás a jóváhagyásodra vár
+	Automations	Automatizálások
+	A job in your words, and when it's done	Egy feladat a saját szavaiddal, és hogy mikor történjen
+	Each day at {time}	Minden nap ekkor: {time}
+	At {time} on {days}	{days}, {time}
+	As mail matching {query} arrives in the Inbox	Amikor a(z) {query} keresésnek megfelelő levél érkezik a Beérkezett üzenetek mappába
+	Couldn't run {when}: {why}	Nem futhatott le ({when}): {why}
+	Last ran {when}	Utoljára futott: {when}
+	Open its chat	A csevegésének megnyitása
+	{name} ran	{name} lefutott
+	It proposes changes for you to approve, in MailCraft's AI.	Változtatásokat javasol, amelyek a MailCraft MI-jében várnak a jóváhagyásodra.
+	It couldn't run: {why}	Nem futhatott le: {why}

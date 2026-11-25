@@ -355,3 +355,66 @@ fn a_known_server_fills_in_the_model() {
         assert!(has(&texts, said), "{name}: {said}");
     }
 }
+
+/// Services that keep the notifications shown: each one's title and text.
+#[derive(Default, Clone)]
+struct Shown(std::sync::Arc<std::sync::Mutex<Vec<(String, String)>>>);
+
+impl crate::Services for Shown {
+    stub_services!();
+    fn notify_about(&mut self, title: &str, body: &str, _opens: Option<mailcraft_engine::model::MessageKey>) {
+        self.0.lock().unwrap().push((title.to_string(), body.to_string()));
+    }
+}
+
+/// Automations, once there's a model: one added from its dialog and listed with when it runs;
+/// run now, its chat shown in MailCraft's AI's pane, and its answer told in a notification as
+/// the run ends, once; changed from its dialog as it was saved, and its chat opened again.
+#[test]
+fn an_automation_is_added_run_now_and_told_of() {
+    let _tall = crate::tests::windows::layout::Dressed::new(TALL, "");
+    let (mut a, ctx) = options("ai-options-automations");
+    let shown = Shown::default();
+    a.services = Box::new(shown.clone());
+    assert!(!has(&drawn_strings(&ctx, &mut a, TALL), "Add an automation"), "no model yet");
+    a.session.run("ai.saveProfile", &json!({"name": "Local", "api": "openAi", "url": "http://localhost:11434/v1/", "model": "llama3.2"})).unwrap();
+    a.session.run("ai.allow", &json!({"account": "sample", "reach": "local"})).unwrap();
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "Automations: Add…");
+    let Some(Dialog::Automation(f)) = a.ui.dialog.as_mut() else { panic!("the automation's dialog: {:?}", a.ui.dialog) };
+    f.name = "Morning digest".into();
+    f.job = "A digest of what needs me".into();
+    (f.at, f.days) = (7 * 60 + 30, 0x1f);
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "Save");
+    assert!(a.ui.dialog.is_none(), "saved: {:?}", a.ui.dialog);
+    let texts = drawn_strings(&ctx, &mut a, TALL);
+    let when = format!("At {} on Mon, Tue, Wed, Thu, Fri", crate::dialogs::time_shown(&a.session, 7 * 60 + 30));
+    for line in ["Morning digest", when.as_str()] {
+        assert!(has(&texts, line), "{line}: {texts:?}");
+    }
+
+    click_named(&ctx, &mut a, "Morning digest: Run now");
+    assert!(a.ui.backstage.is_none() && a.session.prefs.assistant_pane.shown, "its chat shown");
+    let chat = a.ui.assistant.chat.clone().expect("its chat");
+    let answer = AiAnswer { text: "Nothing needs you this morning.".into(), ..AiAnswer::default() };
+    a.session.apply(MailEvent::Ai { done: AiDone::Answered { id: waiting(&a), answer: Some(answer), error: None } });
+    frame(&ctx, &mut a, vec![]);
+    frame(&ctx, &mut a, vec![]);
+    let told = [("Morning digest ran".to_string(), "Nothing needs you this morning.".to_string())];
+    assert_eq!(*shown.0.lock().unwrap(), told, "told once");
+
+    a.ui.backstage = Some(crate::backstage::Backstage::new(crate::backstage::Page::Options));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    assert!(has(&drawn_strings(&ctx, &mut a, TALL), "Last ran "), "its last run said");
+    click_named(&ctx, &mut a, "Morning digest: Change…");
+    let Some(Dialog::Automation(f)) = a.ui.dialog.as_ref() else { panic!("the automation's dialog: {:?}", a.ui.dialog) };
+    assert_eq!((f.was.as_deref(), f.at, f.days, f.daily), (Some("Morning digest"), 7 * 60 + 30, 0x1f, true));
+    a.ui.dialog = None;
+    a.ui.assistant.chat = None;
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "Morning digest: Open its chat");
+    assert_eq!((a.ui.assistant.chat.as_deref(), a.ui.backstage.is_none()), (Some(chat.as_str()), true));
+}

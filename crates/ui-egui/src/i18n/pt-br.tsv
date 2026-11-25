@@ -2568,3 +2568,26 @@ count	occurrences	ocorrências
 	Their times can't be had: {why}	Os horários deles não estão disponíveis: {why}
 	You	Você
 	{free} of {all} free	{free} de {all} livres
+	Change an automation	Alterar uma automação
+	Add an automation	Adicionar uma automação
+	What to do	O que fazer
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	Com suas palavras, como você pediria à IA do MailCraft. Ela trabalha com suas ferramentas, e uma alteração que ela pedir aguarda sua aprovação
+	When	Quando
+	Each day at	Todo dia às
+	As mail arrives in the Inbox	Quando chega e-mail na Caixa de entrada
+	Matching	Correspondendo a
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	Como se digita na caixa de pesquisa. Vazio: todo o e-mail que as regras da Caixa de entrada deixam lá
+	Any account	Qualquer conta
+	On: it runs by itself	Ativada: ela é executada sozinha
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	Tarefas que a IA do MailCraft faz sozinha: todo dia em um horário, ou quando chega e-mail. Cada uma é executada em uma conversa própria, onde uma alteração que ela pedir aguarda sua aprovação
+	Automations	Automações
+	A job in your words, and when it's done	Uma tarefa com suas palavras, e quando fazê-la
+	Each day at {time}	Todo dia às {time}
+	At {time} on {days}	{days} às {time}
+	As mail matching {query} arrives in the Inbox	Quando chega na Caixa de entrada e-mail correspondente a {query}
+	Couldn't run {when}: {why}	Não pôde ser executada {when}: {why}
+	Last ran {when}	Última execução: {when}
+	Open its chat	Abrir a conversa dela
+	{name} ran	{name} foi executada
+	It proposes changes for you to approve, in MailCraft's AI.	Ela propõe alterações para você aprovar, na IA do MailCraft.
+	It couldn't run: {why}	Não pôde ser executada: {why}

@@ -2568,3 +2568,26 @@ count	occurrences	Terminen
 	Their times can't be had: {why}	Ihre Zeiten sind nicht verfügbar: {why}
 	You	Sie
 	{free} of {all} free	{free} von {all} frei
+	Change an automation	Automatisierung ändern
+	Add an automation	Automatisierung hinzufügen
+	What to do	Was zu tun ist
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	In Ihren Worten, so wie Sie die KI von MailCraft fragen würden. Sie arbeitet mit ihren Werkzeugen, und eine Änderung, die sie verlangt, wartet auf Ihre Zustimmung
+	When	Wann
+	Each day at	Jeden Tag um
+	As mail arrives in the Inbox	Wenn E-Mails im Posteingang eintreffen
+	Matching	Passend zu
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	So wie im Suchfeld eingegeben. Leer: alle E-Mails, die die Regeln des Posteingangs dort lassen
+	Any account	Beliebiges Konto
+	On: it runs by itself	Ein: Sie läuft von selbst
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	Aufgaben, die die KI von MailCraft von selbst erledigt: jeden Tag zu einer Uhrzeit oder wenn E-Mails eintreffen. Jede läuft in einem eigenen Chat, in dem eine Änderung, die sie verlangt, auf Ihre Zustimmung wartet
+	Automations	Automatisierungen
+	A job in your words, and when it's done	Eine Aufgabe in Ihren Worten, und wann sie erledigt wird
+	Each day at {time}	Jeden Tag um {time}
+	At {time} on {days}	{days} um {time}
+	As mail matching {query} arrives in the Inbox	Wenn E-Mails, die zu {query} passen, im Posteingang eintreffen
+	Couldn't run {when}: {why}	{when} nicht ausgeführt: {why}
+	Last ran {when}	Zuletzt ausgeführt: {when}
+	Open its chat	Zugehörigen Chat öffnen
+	{name} ran	{name} wurde ausgeführt
+	It proposes changes for you to approve, in MailCraft's AI.	Sie schlägt Änderungen vor, die in der KI von MailCraft auf Ihre Zustimmung warten.
+	It couldn't run: {why}	Sie konnte nicht ausgeführt werden: {why}

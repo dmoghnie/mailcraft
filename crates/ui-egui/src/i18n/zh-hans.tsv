@@ -2564,3 +2564,26 @@ count	occurrences	次
 	Their times can't be had: {why}	无法获得他们的时间: {why}
 	You	你
 	{free} of {all} free	{all} 人中 {free} 人空闲
+	Change an automation	更改自动化
+	Add an automation	添加自动化
+	What to do	要做什么
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	用你自己的话，像你会对 MailCraft 的 AI 提出的那样。它用自己的工具来做，它要求的更改会等待你的批准
+	When	何时
+	Each day at	每天的
+	As mail arrives in the Inbox	收件箱收到邮件时
+	Matching	匹配
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	按在搜索框中输入的方式。留空：收件箱规则留在那里的所有邮件
+	Any account	任何帐户
+	On: it runs by itself	开启：它会自动运行
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	MailCraft 的 AI 自动完成的工作：每天在某个时间，或在收到邮件时。每个都在自己的对话中运行，它要求的更改会在那里等待你的批准
+	Automations	自动化
+	A job in your words, and when it's done	用你自己的话写的工作，以及何时做
+	Each day at {time}	每天 {time}
+	At {time} on {days}	{days} {time}
+	As mail matching {query} arrives in the Inbox	收件箱收到匹配 {query} 的邮件时
+	Couldn't run {when}: {why}	{when} 未能运行：{why}
+	Last ran {when}	上次运行：{when}
+	Open its chat	打开它的对话
+	{name} ran	{name} 已运行
+	It proposes changes for you to approve, in MailCraft's AI.	它提出了等待你批准的更改，请在 MailCraft 的 AI 中查看。
+	It couldn't run: {why}	未能运行：{why}

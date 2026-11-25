@@ -232,6 +232,12 @@ impl MailApp {
             // Something said to MailCraft's AI (from its box, a script or an agent): that chat
             // is the one its pane shows.
             Ok(v) if id == "assistant.send" => self.ui.assistant.chat = v.get("chat").and_then(Value::as_str).map(str::to_string),
+            // An automation run now (File › Options › AI): its chat shown as it goes.
+            Ok(v) if id == "automation.run" => {
+                if let Some(chat) = v.get("chat").and_then(Value::as_str) {
+                    self.open_chat(chat.to_string());
+                }
+            }
             Ok(_) => {}
             // Not from an account that can't send: said over the message, as why it didn't go.
             Err(CmdError::Disabled(_))

@@ -2568,3 +2568,26 @@ count	occurrences	kez
 	Their times can't be had: {why}	Zamanlarına ulaşılamıyor: {why}
 	You	Siz
 	{free} of {all} free	{all} kişiden {free} kişi boş
+	Change an automation	Otomasyonu değiştir
+	Add an automation	Otomasyon ekle
+	What to do	Yapılacak iş
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	MailCraft yapay zekâsından isteyeceğiniz gibi, kendi sözlerinizle. Kendi araçlarıyla çalışır ve istediği bir değişiklik onayınızı bekler
+	When	Ne zaman
+	Each day at	Her gün saat
+	As mail arrives in the Inbox	Gelen Kutusu'na posta geldiğinde
+	Matching	Eşleşen
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	Arama kutusuna yazıldığı gibi. Boş: Gelen Kutusu kurallarının orada bıraktığı tüm postalar
+	Any account	Herhangi bir hesap
+	On: it runs by itself	Açık: kendiliğinden çalışır
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	MailCraft yapay zekâsının kendiliğinden yaptığı işler: her gün belirli bir saatte ya da posta geldiğinde. Her biri kendi sohbetinde çalışır; istediği bir değişiklik orada onayınızı bekler
+	Automations	Otomasyonlar
+	A job in your words, and when it's done	Kendi sözlerinizle bir iş ve ne zaman yapılacağı
+	Each day at {time}	Her gün saat {time}
+	At {time} on {days}	{days}, saat {time}
+	As mail matching {query} arrives in the Inbox	{query} ile eşleşen posta Gelen Kutusu'na geldiğinde
+	Couldn't run {when}: {why}	{when} çalıştırılamadı: {why}
+	Last ran {when}	Son çalışma: {when}
+	Open its chat	Sohbetini aç
+	{name} ran	{name} çalıştı
+	It proposes changes for you to approve, in MailCraft's AI.	MailCraft yapay zekâsında onayınızı bekleyen değişiklikler öneriyor.
+	It couldn't run: {why}	Çalıştırılamadı: {why}

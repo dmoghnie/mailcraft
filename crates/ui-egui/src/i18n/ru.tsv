@@ -2581,3 +2581,26 @@ count	occurrences	повторений
 	Their times can't be had: {why}	Их время недоступно: {why}
 	You	Вы
 	{free} of {all} free	Свободны: {free} из {all}
+	Change an automation	Изменить автоматизацию
+	Add an automation	Добавить автоматизацию
+	What to do	Что сделать
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	Своими словами, как вы попросили бы ИИ MailCraft. Он работает своими инструментами, а изменение, которого он требует, ждёт вашего одобрения
+	When	Когда
+	Each day at	Каждый день в
+	As mail arrives in the Inbox	Когда во Входящие приходит почта
+	Matching	Совпадающая с
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	Как в поле поиска. Пусто: вся почта, которую там оставляют правила папки «Входящие»
+	Any account	Любая учётная запись
+	On: it runs by itself	Включена: выполняется сама
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	Задачи, которые ИИ MailCraft выполняет сам: каждый день в заданное время или когда приходит почта. Каждая выполняется в собственном чате, где изменение, которого она требует, ждёт вашего одобрения
+	Automations	Автоматизации
+	A job in your words, and when it's done	Задача вашими словами и когда её выполнять
+	Each day at {time}	Каждый день в {time}
+	At {time} on {days}	{days} в {time}
+	As mail matching {query} arrives in the Inbox	Когда во Входящие приходит почта, совпадающая с {query}
+	Couldn't run {when}: {why}	Не удалось выполнить {when}: {why}
+	Last ran {when}	Последний запуск: {when}
+	Open its chat	Открыть её чат
+	{name} ran	{name}: выполнено
+	It proposes changes for you to approve, in MailCraft's AI.	Она предлагает изменения на ваше одобрение в ИИ MailCraft.
+	It couldn't run: {why}	Не удалось выполнить: {why}

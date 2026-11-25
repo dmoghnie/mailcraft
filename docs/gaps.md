@@ -345,10 +345,14 @@ Test builds update themselves ([how test builds update](updates.md)). These part
   rules. A meeting with guests it neither changes nor cancels, and an event it adds invites no
   one: guests would have to be told. On its cards, what a change does and why a step failed are
   in English whatever the interface language. It isn't in the browser or on the phones.
+  Automations run only while MailCraft is open: one whose time passed more than four hours
+  before MailCraft started again waits for its next day.
 - **Workaround:** Ask it to write a message to the guests, and make the other changes by hand.
+  **Run now** runs an automation that was missed.
 - **Cause:** Each kind of item needs tools of its own, each change a proposal checked again when
   approved, and a change guests are told of needs a message the person sees first. A card's
-  words are written by the engine, as the CLI and agents read them.
+  words are written by the engine, as the CLI and agents read them. The desktop app has no
+  service of its own that runs while it's closed.
 
 ### 29. Chats with MailCraft's AI: kept as plain files
 

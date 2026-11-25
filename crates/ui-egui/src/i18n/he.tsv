@@ -2563,3 +2563,26 @@ count	occurrences	פעמים
 	Their times can't be had: {why}	אי אפשר לקבל את הזמנים שלהם: {why}
 	You	את/ה
 	{free} of {all} free	{free} מתוך {all} פנויים
+	Change an automation	שינוי אוטומציה
+	Add an automation	הוספת אוטומציה
+	What to do	מה לעשות
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	במילים שלך, כפי שהיית מבקש מה-AI של MailCraft. הוא עובד עם הכלים שלו, ושינוי שהוא מבקש ממתין לאישורך
+	When	מתי
+	Each day at	בכל יום בשעה
+	As mail arrives in the Inbox	כשדואר מגיע לדואר הנכנס
+	Matching	תואם ל
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	כפי שמקלידים בתיבת החיפוש. ריק: כל הדואר שהכללים של הדואר הנכנס משאירים בו
+	Any account	כל חשבון
+	On: it runs by itself	פעיל: רץ מעצמו
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	משימות שה-AI של MailCraft עושה מעצמו: בכל יום בשעה מסוימת, או כשדואר מגיע. כל אחת רצה בשיחה משלה, שבה שינוי שהיא מבקשת ממתין לאישורך
+	Automations	אוטומציות
+	A job in your words, and when it's done	משימה במילים שלך, ומתי לבצע אותה
+	Each day at {time}	בכל יום בשעה {time}
+	At {time} on {days}	בימים {days} בשעה {time}
+	As mail matching {query} arrives in the Inbox	כשדואר התואם ל-{query} מגיע לדואר הנכנס
+	Couldn't run {when}: {why}	לא ניתן היה להריץ ב-{when}: {why}
+	Last ran {when}	רץ לאחרונה: {when}
+	Open its chat	פתיחת השיחה שלה
+	{name} ran	{name} רצה
+	It proposes changes for you to approve, in MailCraft's AI.	היא מציעה שינויים לאישורך, ב-AI של MailCraft.
+	It couldn't run: {why}	לא ניתן היה להריץ אותה: {why}

@@ -185,7 +185,7 @@ fn profile(s: &Session, t: &Tokens, ui: &mut Ui, p: &AiProfile, acts: &mut Vec<A
 
 /// One of a model's or a script's buttons, named to a screen reader with whose it is first
 /// (`Ollama: Test`): each row has the same ones.
-fn button(ui: &mut Ui, whose: &str, label: &str, enabled: bool) -> egui::Response {
+pub(super) fn button(ui: &mut Ui, whose: &str, label: &str, enabled: bool) -> egui::Response {
     let resp = ui.add_enabled(enabled, egui::Button::new(label));
     widgets::named(ui, &resp, &format!("{whose}: {label}"), enabled, None);
     resp

@@ -25,6 +25,31 @@ pub(crate) struct AgentFound {
 }
 
 impl Session {
+    /// What of `msgs` `query` matches, as the search box reads it (all of them when it's empty):
+    /// what a message's summary doesn't settle is read from its text, when that's downloaded.
+    pub(crate) fn arrived_matching(&mut self, query: &str, msgs: &[Summary]) -> Vec<Summary> {
+        if query.trim().is_empty() {
+            return msgs.to_vec();
+        }
+        let q = self.query_of(query);
+        let mut matched = Vec::new();
+        for m in msgs {
+            let st = SummaryText::for_query(m, &q);
+            let yes = match q.eval(&Doc { summary: m, summary_text: &st, awaiting: false, files: None, text: &matching::Unindexed }) {
+                Tri::Yes => true,
+                Tri::No => false,
+                Tri::Unknown => self
+                    .body_raw(&m.key)
+                    .and_then(|raw| mailcraft_mime::parse(&raw))
+                    .is_some_and(|p| q.matches(&Doc { summary: m, summary_text: &st, awaiting: false, files: None, text: &WholeText::new(&p.text) })),
+            };
+            if yes {
+                matched.push(m.clone());
+            }
+        }
+        matched
+    }
+
     /// Search `folders` (account, path) for `query`, as the search box does.
     pub(crate) fn agent_search_in(&mut self, query: &str, folders: &[(String, String)]) -> AgentFound {
         let q = self.query_of(query);

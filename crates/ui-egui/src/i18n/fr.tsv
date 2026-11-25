@@ -2568,3 +2568,26 @@ count	occurrences	occurrences
 	Their times can't be had: {why}	Leurs disponibilités sont introuvables : {why}
 	You	Vous
 	{free} of {all} free	{free} sur {all} libres
+	Change an automation	Modifier une automatisation
+	Add an automation	Ajouter une automatisation
+	What to do	Ce qu'il faut faire
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	Avec vos mots, comme vous le demanderiez à l'IA de MailCraft. Elle travaille avec ses outils, et une modification qu'elle demande attend votre accord
+	When	Quand
+	Each day at	Chaque jour à
+	As mail arrives in the Inbox	Quand du courrier arrive dans la Boîte de réception
+	Matching	Correspondant à
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	Comme dans la zone de recherche. Vide : tout le courrier que les règles de la Boîte de réception y laissent
+	Any account	N'importe quel compte
+	On: it runs by itself	Activée : elle s'exécute d'elle-même
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	Des tâches que l'IA de MailCraft fait d'elle-même : chaque jour à une heure donnée, ou quand du courrier arrive. Chacune s'exécute dans une discussion à part, où une modification qu'elle demande attend votre accord
+	Automations	Automatisations
+	A job in your words, and when it's done	Une tâche avec vos mots, et quand la faire
+	Each day at {time}	Chaque jour à {time}
+	At {time} on {days}	Les {days} à {time}
+	As mail matching {query} arrives in the Inbox	Quand du courrier correspondant à {query} arrive dans la Boîte de réception
+	Couldn't run {when}: {why}	Échec de l'exécution {when} : {why}
+	Last ran {when}	Dernière exécution : {when}
+	Open its chat	Ouvrir sa discussion
+	{name} ran	{name} s'est exécutée
+	It proposes changes for you to approve, in MailCraft's AI.	Elle propose des modifications à approuver, dans l'IA de MailCraft.
+	It couldn't run: {why}	Elle n'a pas pu s'exécuter : {why}

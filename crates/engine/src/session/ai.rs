@@ -26,8 +26,9 @@ pub(crate) use assistant::assistant_commands;
 #[doc(hidden)]
 pub use assistant::run_script_against;
 pub use assistant::{
-    ASSISTANT_LINK, ASSISTANT_WIDTH, Assistant, AssistantPane, CONTEXT_AT_FIRST, CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, Chat, ChatHead, ChatTurn,
-    ContextItem, KeptScript, RunState, STEPS_MOST, ScriptParam, ToolRun, assistant_message_link,
+    ASSISTANT_LINK, ASSISTANT_WIDTH, Assistant, AssistantPane, Automation, AutomationReport, AutomationRun, AutomationWhen, Automations,
+    CONTEXT_AT_FIRST, CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, Chat, ChatHead, ChatTurn, ContextItem, KeptScript, ReportSaid, RunState, STEPS_MOST,
+    ScriptParam, ToolRun, assistant_message_link,
 };
 pub(crate) use commands::commands as ai_commands;
 pub(crate) use digest::commands as digest_commands;

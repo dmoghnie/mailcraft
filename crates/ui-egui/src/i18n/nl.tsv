@@ -2563,3 +2563,26 @@ count	occurrences	keer
 	Their times can't be had: {why}	Hun tijden zijn niet beschikbaar: {why}
 	You	Jij
 	{free} of {all} free	{free} van {all} vrij
+	Change an automation	Automatisering wijzigen
+	Add an automation	Automatisering toevoegen
+	What to do	Wat te doen
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	In je eigen woorden, zoals je het de AI van MailCraft zou vragen. Die werkt met zijn hulpmiddelen, en een wijziging die hij vraagt wacht op je goedkeuring
+	When	Wanneer
+	Each day at	Elke dag om
+	As mail arrives in the Inbox	Als er mail in Postvak IN binnenkomt
+	Matching	Die overeenkomt met
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	Zoals in het zoekvak getypt. Leeg: alle mail die de regels van Postvak IN daar laten
+	Any account	Elk account
+	On: it runs by itself	Aan: ze draait vanzelf
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	Taken die de AI van MailCraft vanzelf doet: elke dag op een tijd, of als er mail binnenkomt. Elke taak draait in een eigen chat, waar een wijziging die erom vraagt op je goedkeuring wacht
+	Automations	Automatiseringen
+	A job in your words, and when it's done	Een taak in je eigen woorden, en wanneer die gebeurt
+	Each day at {time}	Elke dag om {time}
+	At {time} on {days}	{days} om {time}
+	As mail matching {query} arrives in the Inbox	Als er mail die overeenkomt met {query} in Postvak IN binnenkomt
+	Couldn't run {when}: {why}	Kon {when} niet draaien: {why}
+	Last ran {when}	Laatst gedraaid: {when}
+	Open its chat	De chat ervan openen
+	{name} ran	{name} is gedraaid
+	It proposes changes for you to approve, in MailCraft's AI.	Ze stelt wijzigingen voor die je goedkeurt in de AI van MailCraft.
+	It couldn't run: {why}	Ze kon niet draaien: {why}

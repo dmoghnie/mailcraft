@@ -2563,3 +2563,26 @@ count	occurrences	مرات
 	Their times can't be had: {why}	تعذّر الحصول على أوقاتهم: {why}
 	You	أنت
 	{free} of {all} free	{free} من {all} متفرغون
+	Change an automation	تغيير أتمتة
+	Add an automation	إضافة أتمتة
+	What to do	ما يجب فعله
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	بكلماتك، كما تطلبه من ذكاء MailCraft الاصطناعي. يعمل بأدواته، وأي تغيير يطلبه ينتظر موافقتك
+	When	متى
+	Each day at	كل يوم في
+	As mail arrives in the Inbox	عند وصول بريد إلى علبة الوارد
+	Matching	مطابق لـ
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	كما يُكتب في مربع البحث. فارغ: كل البريد الذي تتركه قواعد علبة الوارد فيها
+	Any account	أي حساب
+	On: it runs by itself	مُفعّلة: تعمل من تلقاء نفسها
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	مهام يؤديها ذكاء MailCraft الاصطناعي من تلقاء نفسه: كل يوم في وقت محدد، أو عند وصول بريد. تعمل كل منها في محادثة خاصة بها، حيث ينتظر أي تغيير تطلبه موافقتك
+	Automations	الأتمتة
+	A job in your words, and when it's done	مهمة بكلماتك، ومتى تُنفَّذ
+	Each day at {time}	كل يوم في {time}
+	At {time} on {days}	{days} في {time}
+	As mail matching {query} arrives in the Inbox	عند وصول بريد مطابق لـ {query} إلى علبة الوارد
+	Couldn't run {when}: {why}	تعذّر التشغيل {when}: {why}
+	Last ran {when}	آخر تشغيل: {when}
+	Open its chat	فتح محادثتها
+	{name} ran	تم تشغيل {name}
+	It proposes changes for you to approve, in MailCraft's AI.	تقترح تغييرات تنتظر موافقتك في ذكاء MailCraft الاصطناعي.
+	It couldn't run: {why}	تعذّر تشغيلها: {why}

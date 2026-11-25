@@ -11,10 +11,12 @@ const WHERE: &str = "AI assistant";
 /// The longest selected part pointed at, in bytes.
 pub const QUOTE_MOST: usize = 64 << 10;
 
-/// The assistant's commands, and its kept scripts' (`script.*`).
+/// The assistant's commands, its kept scripts' (`script.*`) and its automations'
+/// (`automation.*`).
 pub(crate) fn commands() -> Vec<CommandSpec> {
     let mut all = chats();
     all.extend(script::script_commands());
+    all.extend(super::automations::commands());
     all
 }
 

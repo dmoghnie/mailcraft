@@ -2582,3 +2582,26 @@ count	occurrences	opakovaní
 	Their times can't be had: {why}	Ich časy nie sú k dispozícii: {why}
 	You	Vy
 	{free} of {all} free	Voľní: {free} z {all}
+	Change an automation	Zmeniť automatizáciu
+	Add an automation	Pridať automatizáciu
+	What to do	Čo urobiť
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	Vlastnými slovami, ako by ste o to požiadali AI MailCraftu. Pracuje so svojimi nástrojmi a zmena, o ktorú žiada, čaká na vaše schválenie
+	When	Kedy
+	Each day at	Každý deň o
+	As mail arrives in the Inbox	Keď do Doručenej pošty príde pošta
+	Matching	Zodpovedajúca
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	Tak, ako sa píše do poľa vyhľadávania. Prázdne: všetka pošta, ktorú tam nechajú pravidlá Doručenej pošty
+	Any account	Ľubovoľný účet
+	On: it runs by itself	Zapnutá: spúšťa sa sama
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	Úlohy, ktoré AI MailCraftu robí sama: každý deň v danom čase alebo keď príde pošta. Každá beží vo vlastnej konverzácii, kde zmena, o ktorú žiada, čaká na vaše schválenie
+	Automations	Automatizácie
+	A job in your words, and when it's done	Úloha vašimi slovami a kedy sa má vykonať
+	Each day at {time}	Každý deň o {time}
+	At {time} on {days}	{days} o {time}
+	As mail matching {query} arrives in the Inbox	Keď do Doručenej pošty príde pošta zodpovedajúca {query}
+	Couldn't run {when}: {why}	Nepodarilo sa spustiť {when}: {why}
+	Last ran {when}	Naposledy spustená: {when}
+	Open its chat	Otvoriť jej konverzáciu
+	{name} ran	{name} sa spustila
+	It proposes changes for you to approve, in MailCraft's AI.	Navrhuje zmeny na schválenie v AI MailCraftu.
+	It couldn't run: {why}	Nepodarilo sa ju spustiť: {why}

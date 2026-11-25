@@ -7,6 +7,7 @@ const APP_RGB: [u8; 3] = [theme::APP_COLOR.r(), theme::APP_COLOR.g(), theme::APP
 
 mod agents;
 mod ai;
+mod automations;
 mod calendar;
 mod general;
 mod inbox;
@@ -34,6 +35,7 @@ pub(super) fn options(s: &Session, st: &UiState, ui: &mut Ui, acts: &mut Vec<Act
     ai::models(s, &t, ui, acts);
     ai::accounts(s, &t, ui, acts);
     ai::scripts(s, &t, ui, acts);
+    automations::automations(s, &t, ui, acts);
     ai::servers(s, &t, ui, acts);
     ai::record(s, &t, ui);
     agents::agents(s, &t, ui, acts);

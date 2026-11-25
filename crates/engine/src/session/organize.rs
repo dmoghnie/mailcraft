@@ -174,6 +174,7 @@ impl Session {
         self.sweeps_due();
         self.no_answer_due();
         self.digest_due();
+        self.automations_due();
         // The sender check follows contacts saved, accounts and the directory (cheap when not).
         self.keep_senders_when(false);
         self.held_invitations_due();

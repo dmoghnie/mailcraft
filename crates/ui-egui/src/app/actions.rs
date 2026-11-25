@@ -156,6 +156,8 @@ pub enum Action {
     /// Try the script being written in its dialog with `script.run`'s params (it only reads):
     /// what it gave is shown there, and nothing is saved.
     TryScript(Value),
+    /// Show a chat with MailCraft's AI in its pane (an automation's), the File page put away.
+    OpenChat(String),
     /// Bring the main window to the front (after acting from a message window).
     FocusMain,
     /// Open the File page at a page.
@@ -257,6 +259,11 @@ impl MailApp {
         if self.session.take_digest_ready() {
             self.notify_mail(ctx, tl!("Your digest is ready"), tl!("Open MailCraft to read it."), Vec::new(), None, false);
         }
+        // The runs of automations that ended (File › Options › AI, Automations).
+        for r in self.session.take_automation_reports() {
+            let body = self.automation_said(&r);
+            self.notify_mail(ctx, &tf!("{name} ran", name = r.name), &body, Vec::new(), None, false);
+        }
         let unread = self.session.inbox_unread();
         let view = match self.session.module {
             Module::Mail => view_title(&self.session),
@@ -319,6 +326,7 @@ impl MailApp {
             Action::GuestsFromBook => self.guests_from_book(),
             Action::Submit(id, p) => self.submit(id, p),
             Action::TryScript(p) => self.try_script(&p),
+            Action::OpenChat(chat) => self.open_chat(chat),
             Action::Open(k) => self.run("list.open", json!({"key": k.to_id()})),
             Action::Dialog(d) => self.ui.dialog = Some(d),
             Action::FocusSearch => self.ui.focus_search = true,
@@ -478,11 +486,38 @@ impl MailApp {
         }
     }
 
+    /// Chat `chat` shown in MailCraft's AI's pane, the pane shown, the File page put away.
+    pub(super) fn open_chat(&mut self, chat: String) {
+        self.ui.assistant.chat = Some(chat);
+        self.ui.backstage = None;
+        if !self.session.prefs.assistant_pane.shown {
+            self.run("assistant.pane", json!({"on": true}));
+        }
+    }
+
     /// The script being written, run as it is now, and what it gave shown in its dialog.
     fn try_script(&mut self, p: &Value) {
         let ran = self.session.run("script.run", p).map_err(|e| e.to_string().trim_start_matches("bad parameters: ").to_string());
         if let Some(Dialog::Script(f)) = self.ui.dialog.as_mut() {
             f.take_tried(ran);
+        }
+    }
+
+    /// What a notification says of an automation's run: the start of its answer, unless its chat
+    /// holds mail of an account kept online only (issue #4: the system keeps its notifications).
+    fn automation_said(&self, r: &mailcraft_engine::AutomationReport) -> String {
+        use mailcraft_engine::ReportSaid;
+        let s = &self.session;
+        let private = r
+            .chat
+            .as_deref()
+            .and_then(|c| s.ai.assistant.chat(c))
+            .is_some_and(|c| c.accounts.iter().any(|a| s.account(a).is_some_and(|a| a.config.keeps_online())));
+        match &r.said {
+            ReportSaid::Answered(text) if !private && !text.is_empty() => text.clone(),
+            ReportSaid::Answered(_) => tl!("Open MailCraft to read it.").to_string(),
+            ReportSaid::Proposes(_) => tl!("It proposes changes for you to approve, in MailCraft's AI.").to_string(),
+            ReportSaid::Failed(why) => tf!("It couldn't run: {why}", why = why),
         }
     }
 

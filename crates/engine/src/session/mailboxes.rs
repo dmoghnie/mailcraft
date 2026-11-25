@@ -334,7 +334,9 @@ impl Session {
         let cutoff = self.clock.now.saturating_sub(86_400);
         // What's left in the Inbox is read for whether it needs the person, when they asked.
         if role == Some(FolderRole::Inbox) {
-            let left = arrived.iter().filter(|m| m.when() >= cutoff && !quiet.contains(&m.key)).cloned().collect();
+            let left: Vec<Summary> = arrived.iter().filter(|m| m.when() >= cutoff && !quiet.contains(&m.key)).cloned().collect();
+            // The automations it sets off run, each in a chat of its own.
+            self.automations_arrived(&left);
             self.needs_me_arrived(left);
         }
         // With the Focused Inbox on, Other's mail comes in quietly unless asked for (issue #199):

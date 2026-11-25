@@ -2564,3 +2564,26 @@ count	occurrences	回
 	Their times can't be had: {why}	空き時間を取得できません: {why}
 	You	あなた
 	{free} of {all} free	{all} 人中 {free} 人が空き
+	Change an automation	自動化を変更
+	Add an automation	自動化を追加
+	What to do	すること
+	In your words, as you'd ask MailCraft's AI. It works with its tools, and a change it calls for waits for your approval	MailCraft の AI に頼むときと同じように、あなたの言葉で書いてください。AI はツールを使って作業し、求める変更はあなたの承認を待ちます
+	When	タイミング
+	Each day at	毎日
+	As mail arrives in the Inbox	受信トレイにメールが届いたとき
+	Matching	一致する条件
+	As typed in the search box. Nothing: all the mail the Inbox's rules leave there	検索ボックスに入力するとおりに。空欄: 受信トレイのルールがそこに残すすべてのメール
+	Any account	任意のアカウント
+	On: it runs by itself	オン: 自動で実行します
+	Jobs MailCraft's AI does by itself: each day at a time, or as mail arrives. Each runs in a chat of its own, where a change it calls for waits for your approval	MailCraft の AI が自動で行う作業です。毎日決まった時刻に、またはメールが届いたときに実行します。それぞれ専用のチャットで実行され、求める変更はそこであなたの承認を待ちます
+	Automations	自動化
+	A job in your words, and when it's done	あなたの言葉で書いた作業と、その実行タイミング
+	Each day at {time}	毎日 {time}
+	At {time} on {days}	{days} の {time}
+	As mail matching {query} arrives in the Inbox	{query} に一致するメールが受信トレイに届いたとき
+	Couldn't run {when}: {why}	{when} に実行できませんでした: {why}
+	Last ran {when}	前回の実行: {when}
+	Open its chat	チャットを開く
+	{name} ran	{name} を実行しました
+	It proposes changes for you to approve, in MailCraft's AI.	承認を待つ変更を MailCraft の AI で提案しています。
+	It couldn't run: {why}	実行できませんでした: {why}
