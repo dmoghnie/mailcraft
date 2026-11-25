@@ -273,3 +273,31 @@ fn an_mcp_server_on_the_web_is_signed_in_to_on_options() {
     let texts = drawn_strings(&ctx, &mut a, TALL);
     assert!(has(&texts, "Signed in") && has(&texts, "Sign in again…"), "{texts:?}");
 }
+
+/// Fill in for: each server known fills in its name, format and address; one on this computer
+/// is said to be, a cloud provider's said to take the mail let go to it away.
+#[test]
+fn a_known_server_fills_in_the_model() {
+    let _tall = crate::tests::windows::layout::Dressed::new(TALL, "");
+    let (mut a, ctx) = options("ai-options-known");
+    click_named(&ctx, &mut a, "Add…");
+    frame(&ctx, &mut a, vec![]);
+    let filled = |a: &MailApp| match &a.ui.dialog {
+        Some(Dialog::AiModel(f)) => (f.name.clone(), f.api, f.url.clone()),
+        other => panic!("the model's dialog: {other:?}"),
+    };
+    for (name, api, url, local) in [
+        ("llama.cpp", AiApi::OpenAi, "http://localhost:8080/v1", true),
+        ("Google Gemini", AiApi::OpenAi, "https://generativelanguage.googleapis.com/v1beta/openai", false),
+        ("xAI", AiApi::OpenAi, "https://api.x.ai/v1", false),
+        ("Mistral", AiApi::OpenAi, "https://api.mistral.ai/v1", false),
+        ("OpenRouter", AiApi::OpenAi, "https://openrouter.ai/api/v1", false),
+    ] {
+        click_named(&ctx, &mut a, name);
+        assert_eq!(filled(&a), (name.to_string(), api, url.to_string()));
+        frame(&ctx, &mut a, vec![]);
+        let texts = drawn_strings(&ctx, &mut a, TALL);
+        let said = if local { "On this computer or its network" } else { "At a cloud provider: mail you let go to it leaves this computer" };
+        assert!(has(&texts, said), "{name}: {said}");
+    }
+}

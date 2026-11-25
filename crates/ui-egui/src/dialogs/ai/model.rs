@@ -6,13 +6,19 @@ use mailcraft_engine::model::{AiApi, AiEffort, Secret};
 
 use super::*;
 
-/// Servers whose address and format are known, to fill in: two that run on this computer, two
-/// cloud providers. Their names are their own, in every language.
-const KNOWN: [(&str, AiApi, &str); 4] = [
+/// Servers whose address and format are known, to fill in: three that run on this computer (at
+/// their own ports), then cloud providers, at the address where each speaks its own format or
+/// OpenAI's. Their names are their own, in every language.
+const KNOWN: [(&str, AiApi, &str); 9] = [
     ("Ollama", AiApi::Ollama, "http://localhost:11434"),
     ("LM Studio", AiApi::OpenAi, "http://localhost:1234/v1"),
+    ("llama.cpp", AiApi::OpenAi, "http://localhost:8080/v1"),
     ("OpenAI", AiApi::OpenAi, "https://api.openai.com/v1"),
     ("Anthropic", AiApi::Anthropic, "https://api.anthropic.com/v1"),
+    ("Google Gemini", AiApi::OpenAi, "https://generativelanguage.googleapis.com/v1beta/openai"),
+    ("xAI", AiApi::OpenAi, "https://api.x.ai/v1"),
+    ("Mistral", AiApi::OpenAi, "https://api.mistral.ai/v1"),
+    ("OpenRouter", AiApi::OpenAi, "https://openrouter.ai/api/v1"),
 ];
 
 /// What the dialog holds while it's open.

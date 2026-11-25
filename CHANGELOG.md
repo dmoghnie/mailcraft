@@ -77,6 +77,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - **Draft replies**, beside each account in File › Options › AI: mail that Needs me marks gets a reply written by MailCraft's AI in your style, kept in Drafts for you to check and send, never sent by it (`ai.autoDrafts`).
 - **Write a reply for me**, in Rewrite with AI over a reply: MailCraft's AI answers the message with nothing typed, in your style, leaving gaps in brackets for what only you know (`compose.rewrite` with `reply`).
 - **Propose meeting times**, in Rewrite with AI: MailCraft's AI proposes times for a meeting from your free time in your work hours over the next week, around everything in your calendars (`compose.rewrite` with `times`).
+- **Add a model** fills in llama.cpp, Google Gemini, xAI, Mistral and OpenRouter as well as Ollama, LM Studio, OpenAI and Anthropic.
 
 ### Changed
 
