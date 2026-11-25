@@ -2199,6 +2199,11 @@ count	occurrences	keer
 	What it takes	Wat het krijgt
 	One a line: its name, then what it is. The script reads each from params, as params.days	Eén per regel: de naam, dan wat het is. Het script leest elk uit params, zoals params.days
 	Code, in Rhai	Code, in Rhai
+	Try it with	Proberen met
+	One a line: the name of one it takes, then its value	Eén per regel: de naam van iets dat het neemt, dan de waarde
+	Try	Proberen
+	Trying it only reads: nothing is changed, and no model is asked	Proberen leest alleen: er verandert niets en er wordt geen model gevraagd
+	Its value: {value}	De waarde: {value}
 	On: MailCraft's AI can run it	Aan: de AI van MailCraft kan het uitvoeren
 	Change an MCP server	Een MCP-server wijzigen
 	Add an MCP server	Een MCP-server toevoegen

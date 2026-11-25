@@ -2217,6 +2217,11 @@ count	occurrences	повторений
 	What it takes	Что принимает
 	One a line: its name, then what it is. The script reads each from params, as params.days	По одному в строке: имя, затем что это. Скрипт читает каждое из params, например params.days
 	Code, in Rhai	Код на Rhai
+	Try it with	Попробовать с
+	One a line: the name of one it takes, then its value	По одному в строке: имя того, что он принимает, затем значение
+	Try	Попробовать
+	Trying it only reads: nothing is changed, and no model is asked	Пробный запуск только читает: ничего не меняется, и ни одна модель не спрашивается
+	Its value: {value}	Значение: {value}
 	On: MailCraft's AI can run it	Включён: ИИ MailCraft может его запускать
 	Change an MCP server	Изменить сервер MCP
 	Add an MCP server	Добавить сервер MCP

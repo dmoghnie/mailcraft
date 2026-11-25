@@ -2203,6 +2203,11 @@ count	occurrences	次
 	What it takes	它接收什麼
 	One a line: its name, then what it is. The script reads each from params, as params.days	每行一個：名稱，然後說明它是什麼。指令碼從 params 讀取每一項，例如 params.days
 	Code, in Rhai	程式碼（Rhai）
+	Try it with	試執行時使用
+	One a line: the name of one it takes, then its value	每行一個：它接受的某一項的名稱，然後是值
+	Try	試執行
+	Trying it only reads: nothing is changed, and no model is asked	試執行只讀取：不會變更任何內容，也不會詢問任何模型
+	Its value: {value}	它的值：{value}
 	On: MailCraft's AI can run it	開啟：MailCraft 的 AI 可以執行它
 	Change an MCP server	變更 MCP 伺服器
 	Add an MCP server	新增 MCP 伺服器

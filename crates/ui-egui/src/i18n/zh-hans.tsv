@@ -2200,6 +2200,11 @@ count	occurrences	次
 	What it takes	它接收什么
 	One a line: its name, then what it is. The script reads each from params, as params.days	每行一个：名称，然后说明它是什么。脚本从 params 读取每一项，例如 params.days
 	Code, in Rhai	代码（Rhai）
+	Try it with	试运行时使用
+	One a line: the name of one it takes, then its value	每行一个：它接受的某一项的名称，然后是值
+	Try	试运行
+	Trying it only reads: nothing is changed, and no model is asked	试运行只读取：不会更改任何内容，也不会询问任何模型
+	Its value: {value}	它的值：{value}
 	On: MailCraft's AI can run it	开启：MailCraft 的 AI 可以运行它
 	Change an MCP server	更改 MCP 服务器
 	Add an MCP server	添加 MCP 服务器

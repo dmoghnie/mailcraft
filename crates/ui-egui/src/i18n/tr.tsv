@@ -2204,6 +2204,11 @@ count	occurrences	kez
 	What it takes	Ne alır
 	One a line: its name, then what it is. The script reads each from params, as params.days	Her satıra bir tane: adı, ardından ne olduğu. Betik her birini params içinden okur, örneğin params.days
 	Code, in Rhai	Kod (Rhai)
+	Try it with	Şununla dene
+	One a line: the name of one it takes, then its value	Her satıra bir tane: aldığı şeylerden birinin adı, ardından değeri
+	Try	Dene
+	Trying it only reads: nothing is changed, and no model is asked	Denemek yalnızca okur: hiçbir şey değişmez ve hiçbir modele sorulmaz
+	Its value: {value}	Değeri: {value}
 	On: MailCraft's AI can run it	Açık: MailCraft yapay zekâsı onu çalıştırabilir
 	Change an MCP server	MCP sunucusunu değiştir
 	Add an MCP server	MCP sunucusu ekle

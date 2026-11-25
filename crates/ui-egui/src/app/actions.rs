@@ -153,6 +153,9 @@ pub enum Action {
     OpenUrl(String),
     /// Run a command for the open dialog: it closes on success and shows the error otherwise.
     Submit(&'static str, Value),
+    /// Try the script being written in its dialog with `script.run`'s params (it only reads):
+    /// what it gave is shown there, and nothing is saved.
+    TryScript(Value),
     /// Bring the main window to the front (after acting from a message window).
     FocusMain,
     /// Open the File page at a page.
@@ -315,6 +318,7 @@ impl MailApp {
             Action::CheckGuestNames(again) => self.check_guest_names(again),
             Action::GuestsFromBook => self.guests_from_book(),
             Action::Submit(id, p) => self.submit(id, p),
+            Action::TryScript(p) => self.try_script(&p),
             Action::Open(k) => self.run("list.open", json!({"key": k.to_id()})),
             Action::Dialog(d) => self.ui.dialog = Some(d),
             Action::FocusSearch => self.ui.focus_search = true,
@@ -471,6 +475,14 @@ impl MailApp {
                     self.ui.scroll_to_focus = true;
                 }
             }
+        }
+    }
+
+    /// The script being written, run as it is now, and what it gave shown in its dialog.
+    fn try_script(&mut self, p: &Value) {
+        let ran = self.session.run("script.run", p).map_err(|e| e.to_string().trim_start_matches("bad parameters: ").to_string());
+        if let Some(Dialog::Script(f)) = self.ui.dialog.as_mut() {
+            f.take_tried(ran);
         }
     }
 

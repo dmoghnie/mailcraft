@@ -2204,6 +2204,11 @@ count	occurrences	előfordulás
 	What it takes	Mit kap
 	One a line: its name, then what it is. The script reads each from params, as params.days	Soronként egy: a neve, majd hogy mi az. A szkript mindegyiket a params-ból olvassa, például params.days
 	Code, in Rhai	Kód, Rhai nyelven
+	Try it with	Kipróbálás ezzel
+	One a line: the name of one it takes, then its value	Soronként egy: annak a neve, amit vár, majd az értéke
+	Try	Kipróbálás
+	Trying it only reads: nothing is changed, and no model is asked	A kipróbálás csak olvas: semmi sem változik, és egy modellt sem kérdez
+	Its value: {value}	Az értéke: {value}
 	On: MailCraft's AI can run it	Be: a MailCraft MI-je futtathatja
 	Change an MCP server	MCP-kiszolgáló módosítása
 	Add an MCP server	MCP-kiszolgáló hozzáadása

@@ -1,7 +1,8 @@
-//! A script run for the CLI (`script.run`): a kept script by its name, or code of its own, run
-//! at once against what's on this computer. It reads every account, whatever MailCraft's AI may
-//! read. It only reads: there's no card to approve a change on, so a change it calls for fails,
-//! as a question to a model does; a message not downloaded yet is fetched, for the next run.
+//! A script run on its own (`script.run`), for the CLI, an AI agent or the script dialog's Try:
+//! a kept script by its name, or code of its own, run at once against what's on this computer.
+//! It reads every account, whatever MailCraft's AI may read. It only reads: there's no card to
+//! approve a change on, so a change it calls for fails, as a question to a model does; a message
+//! not downloaded yet is fetched, for the next run.
 
 use mailcraft_model::AiToolCall;
 use serde_json::{Value, json};
@@ -21,7 +22,7 @@ fn agent() -> AiProfile {
 /// `script.run`.
 pub(super) fn command() -> CommandSpec {
     CommandSpec::new("script.run", "Run a script MailCraft's AI keeps, or one of your own, to read", WHERE, run).params(
-        r#"{"name"?: string (a kept script that's on), "params"?: object (what it takes), "code"?: string (Rhai, as run_script takes: a script of your own, in place of a name)} → {"value", "printed"}: it only reads"#,
+        r#"{"name"?: string (a kept script that's on), "params"?: object (what it takes: a kept script's, or code of your own's constant params), "code"?: string (Rhai, as run_script takes: a script of your own, in place of a name)} → {"value", "printed"}: it only reads"#,
     )
 }
 
@@ -35,7 +36,8 @@ fn run(s: &mut Session, v: &Value) -> CmdResult {
             let params = v.get("params").filter(|p| p.is_object()).cloned().unwrap_or_else(|| json!({}));
             (format!("{name}(params)"), Some(params))
         }
-        (None, Some(code)) => (code.to_string(), None),
+        // Its params too, as the script dialog's Try runs what's being written.
+        (None, Some(code)) => (code.to_string(), v.get("params").filter(|p| p.is_object()).cloned()),
         _ => return Err(CmdError::Params("give `name`, a kept script, or `code`, a script of your own".into())),
     };
     let library = kept::library(s.kept_loaded());
@@ -65,17 +67,19 @@ impl Session {
     fn agent_call(&mut self, chat: &mut Chat, reader: &AiProfile, n: usize, call: &Call) -> Answer {
         let name: String = call.name.chars().take(64).collect();
         if call.name == ASK {
-            return Answer::Failed("a script run for an agent has no model of MailCraft's to ask".into());
+            return Answer::Failed("a script run on its own, outside a chat with MailCraft's AI, has no model to ask".into());
         }
         if call.name == super::mcp::MCP || call.name == super::mcp::FIND_TOOLS {
-            return Answer::Failed("a script run for an agent calls no MCP server: MailCraft's own AI's scripts do, as the person set it up".into());
+            return Answer::Failed(
+                "a script run on its own calls no MCP server: MailCraft's own AI's scripts do, in a chat, as the person set it up".into(),
+            );
         }
         if !script_tools().contains(&call.name) {
             return Answer::Failed(format!("a script can't call `{name}`"));
         }
         if !reads(&call.name) {
             return Answer::Failed(format!(
-                "`{name}` changes something, and a script run for an agent only reads: MailCraft's AI proposes changes, for the person to approve"
+                "`{name}` changes something, and a script run on its own only reads: MailCraft's AI proposes changes in a chat, for the person to approve"
             ));
         }
         let made = AiToolCall { id: format!("agent#{n}"), name: call.name.clone(), input: call.input.clone() };
@@ -83,7 +87,7 @@ impl Session {
             Outcome::Ran { data, .. } => Answer::Gave(data),
             Outcome::Failed { result, .. } => Answer::Failed(result),
             Outcome::Waiting { .. } => Answer::Failed("the message is being downloaded: run the script again in a moment".into()),
-            Outcome::Proposed { .. } | Outcome::Scripting { .. } => Answer::Failed("a script run for an agent only reads".into()),
+            Outcome::Proposed { .. } | Outcome::Scripting { .. } => Answer::Failed("a script run on its own only reads".into()),
         }
     }
 }

@@ -2217,6 +2217,11 @@ count	occurrences	wystąpieniach
 	What it takes	Co przyjmuje
 	One a line: its name, then what it is. The script reads each from params, as params.days	Po jednym w wierszu: nazwa, a potem czym jest. Skrypt odczytuje każdy z params, np. params.days
 	Code, in Rhai	Kod, w Rhai
+	Try it with	Wypróbuj z
+	One a line: the name of one it takes, then its value	Po jednym w wierszu: nazwa jednego z tego, co przyjmuje, a potem jego wartość
+	Try	Wypróbuj
+	Trying it only reads: nothing is changed, and no model is asked	Wypróbowanie tylko odczytuje: nic się nie zmienia i żaden model nie jest pytany
+	Its value: {value}	Wartość: {value}
 	On: MailCraft's AI can run it	Włączony: AI MailCraft może go uruchomić
 	Change an MCP server	Zmień serwer MCP
 	Add an MCP server	Dodaj serwer MCP

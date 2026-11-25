@@ -3,7 +3,7 @@
 //! shown; and each model's buttons named by the model, to a screen reader.
 
 use super::*;
-use crate::dialogs::ServerForm;
+use crate::dialogs::{ScriptForm, ServerForm};
 use mailcraft_engine::model::{AiAnswer, AiApi, AiDone, AiEffort, McpDone, McpOAuth, McpTarget, McpTool, Secret};
 use mailcraft_engine::{AiReach, AiTest};
 
@@ -206,6 +206,60 @@ fn kept_scripts_are_turned_off_changed_and_deleted_on_options() {
     click_named(&ctx, &mut a, "the_day: Delete");
     let names: Vec<serde_json::Value> = kept(&mut a).iter().map(|k| k["name"].clone()).collect();
     assert_eq!(names, ["waiting_on_me", "waiting_on_them", "person_history", "tidy"]);
+}
+
+/// The script dialog colours its Rhai as it's written, and Try runs the code as it is, with the
+/// values given for what it takes: what it printed and its value shown, or why it failed, and
+/// nothing saved.
+#[test]
+fn a_script_is_coloured_and_tried_in_its_dialog() {
+    let _tall = crate::tests::windows::layout::Dressed::new(TALL, "");
+    let (mut a, ctx) = options("ai-options-try");
+    let kept = |a: &mut MailApp| a.session.run("script.list", &json!({})).unwrap()["scripts"].clone();
+    let before = kept(&mut a);
+    let code = "let n = params.days; // given\nprint(\"got \" + n);\nn * 2";
+    let form = ScriptForm {
+        name: "doubled".into(),
+        about: "Twice the days".into(),
+        params: "days: how many".into(),
+        code: code.into(),
+        try_with: "days: 7".into(),
+        ..ScriptForm::default()
+    };
+    a.ui.dialog = Some(Dialog::Script(Box::new(form)));
+    frame(&ctx, &mut a, vec![]);
+    let out = crate::tests::sized_frame(&ctx, &mut a, TALL, vec![]);
+    let job = out
+        .shapes
+        .iter()
+        .find_map(|c| match &c.shape {
+            egui::Shape::Text(t) if t.galley.job.text == code => Some(t.galley.job.clone()),
+            _ => None,
+        })
+        .expect("the code drawn");
+    let colour_of = |word: &str| {
+        let at = job.text.find(word).unwrap();
+        job.sections.iter().find(|s| s.byte_range.contains(&egui::epaint::text::ByteIndex(at))).map(|s| s.format.color)
+    };
+    let t = a.ui.tokens;
+    assert_eq!(colour_of("let"), Some(t.accent));
+    assert_eq!(colour_of("// given"), Some(t.faint));
+    assert_eq!(colour_of("\"got \""), Some(t.ok));
+    assert_eq!(colour_of("params"), Some(t.text));
+
+    click_named(&ctx, &mut a, "Try");
+    let Some(Dialog::Script(f)) = a.ui.dialog.as_mut() else { panic!("still open: {:?}", a.ui.dialog) };
+    assert_eq!(f.tried, Some(Ok("got 7\nIts value: 14".to_string())));
+    f.code = "let x = ;".into();
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "Try");
+    let Some(Dialog::Script(f)) = a.ui.dialog.as_ref() else { panic!("still open: {:?}", a.ui.dialog) };
+    let why = match &f.tried {
+        Some(Err(why)) => why.clone(),
+        other => panic!("why it failed: {other:?}"),
+    };
+    assert!(has(&drawn_strings(&ctx, &mut a, TALL), &why), "said: {why}");
+    assert_eq!(kept(&mut a), before, "nothing saved");
 }
 
 /// MCP servers, once there's a model: one added from its dialog (a program, its key kept out of

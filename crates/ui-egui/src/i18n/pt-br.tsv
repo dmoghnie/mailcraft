@@ -2204,6 +2204,11 @@ count	occurrences	ocorrências
 	What it takes	O que recebe
 	One a line: its name, then what it is. The script reads each from params, as params.days	Um por linha: o nome, depois o que é. O script lê cada um de params, como params.days
 	Code, in Rhai	Código, em Rhai
+	Try it with	Testar com
+	One a line: the name of one it takes, then its value	Um por linha: o nome de um que ele recebe, depois o valor
+	Try	Experimentar
+	Trying it only reads: nothing is changed, and no model is asked	Experimentar só lê: nada é alterado e nenhum modelo é consultado
+	Its value: {value}	O valor: {value}
 	On: MailCraft's AI can run it	Ativado: a IA do MailCraft pode executá-lo
 	Change an MCP server	Alterar um servidor MCP
 	Add an MCP server	Adicionar um servidor MCP

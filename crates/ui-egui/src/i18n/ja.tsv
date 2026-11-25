@@ -2200,6 +2200,11 @@ count	occurrences	回
 	What it takes	受け取るもの
 	One a line: its name, then what it is. The script reads each from params, as params.days	1 行に 1 つ: 名前、続けてその内容。スクリプトは params.days のように params から読み取ります
 	Code, in Rhai	コード (Rhai)
+	Try it with	試す値
+	One a line: the name of one it takes, then its value	1 行に 1 つ: 受け取るものの名前、続けてその値
+	Try	試す
+	Trying it only reads: nothing is changed, and no model is asked	試すときは読み取るだけです: 何も変更されず、モデルにも問い合わせません
+	Its value: {value}	値: {value}
 	On: MailCraft's AI can run it	オン: MailCraft の AI が実行できます
 	Change an MCP server	MCP サーバーを変更
 	Add an MCP server	MCP サーバーを追加

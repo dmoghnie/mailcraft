@@ -2218,6 +2218,11 @@ count	occurrences	opakovaní
 	What it takes	Čo prijíma
 	One a line: its name, then what it is. The script reads each from params, as params.days	Jedno na riadok: názov, potom čo to je. Skript číta každé z params, napríklad params.days
 	Code, in Rhai	Kód, v Rhai
+	Try it with	Vyskúšať s
+	One a line: the name of one it takes, then its value	Jedno na riadok: názov niečoho, čo berie, potom jeho hodnota
+	Try	Vyskúšať
+	Trying it only reads: nothing is changed, and no model is asked	Vyskúšanie iba číta: nič sa nezmení a žiadny model sa nepýta
+	Its value: {value}	Jeho hodnota: {value}
 	On: MailCraft's AI can run it	Zapnutý: AI MailCraftu ho môže spustiť
 	Change an MCP server	Zmeniť server MCP
 	Add an MCP server	Pridať server MCP

@@ -2199,6 +2199,11 @@ count	occurrences	مرات
 	What it takes	ما يأخذه
 	One a line: its name, then what it is. The script reads each from params, as params.days	واحد في كل سطر: اسمه، ثم ما هو. يقرأ النص البرمجي كلًّا منها من params، مثل params.days
 	Code, in Rhai	الشيفرة، بلغة Rhai
+	Try it with	جرّبه مع
+	One a line: the name of one it takes, then its value	واحد في كل سطر: اسم أحد ما يأخذه، ثم قيمته
+	Try	تجربة
+	Trying it only reads: nothing is changed, and no model is asked	التجربة تقرأ فقط: لا يتغير شيء، ولا يُسأل أي نموذج
+	Its value: {value}	قيمته: {value}
 	On: MailCraft's AI can run it	مُفعّل: يمكن لذكاء MailCraft الاصطناعي تشغيله
 	Change an MCP server	تغيير خادم MCP
 	Add an MCP server	إضافة خادم MCP

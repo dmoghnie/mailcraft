@@ -2199,6 +2199,11 @@ count	occurrences	פעמים
 	What it takes	מה הוא מקבל
 	One a line: its name, then what it is. The script reads each from params, as params.days	אחד בכל שורה: שמו, ואחריו מה הוא. הסקריפט קורא כל אחד מ-params, כמו params.days
 	Code, in Rhai	קוד, ב-Rhai
+	Try it with	לנסות עם
+	One a line: the name of one it takes, then its value	אחד בכל שורה: שם של אחד מהדברים שהוא מקבל, ואחריו ערכו
+	Try	לנסות
+	Trying it only reads: nothing is changed, and no model is asked	ניסיון רק קורא: שום דבר לא משתנה, ואף מודל לא נשאל
+	Its value: {value}	הערך שלו: {value}
 	On: MailCraft's AI can run it	פעיל: ה-AI של MailCraft יכול להריץ אותו
 	Change an MCP server	שינוי שרת MCP
 	Add an MCP server	הוספת שרת MCP

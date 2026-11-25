@@ -153,8 +153,8 @@ fn mailcrafts_own_scripts_run() {
 }
 
 /// The CLI runs a kept script or code of its own at once (`script.run`), to read: it reads every
-/// account, whatever MailCraft's AI may read; a change it calls for fails, as a question to a
-/// model does; one turned off isn't run.
+/// account, whatever MailCraft's AI may read; code of its own takes params, as a kept script
+/// does; a change it calls for fails, as a question to a model does; one turned off isn't run.
 #[test]
 fn script_run_runs_a_script_that_only_reads() {
     let mut s = ready("kept-scripts-agent");
@@ -164,6 +164,9 @@ fn script_run_runs_a_script_that_only_reads() {
     assert!(v["value"].as_str().is_some_and(|t| t.contains(STORYBOARD)), "{v}");
     let v = s.run("script.run", &json!({"code": r#"print("found"); subject_of(#{about: "storyboard"})"#})).unwrap();
     assert!(v["value"].as_str().is_some_and(|t| t.contains(STORYBOARD)) && v["printed"].as_str().is_some_and(|p| p.contains("found")), "{v}");
+    // Code of its own takes params too, as the script dialog's Try runs what's being written.
+    let v = s.run("script.run", &json!({"code": "print(params.about); params.days * 2", "params": {"about": "x", "days": 7}})).unwrap();
+    assert_eq!((&v["value"], v["printed"].as_str().map(str::trim)), (&json!(14), Some("x")), "{v}");
     for (code, why) in [(r#"move_messages(#{ids: ["m1"], folder: "archive"})"#, "only reads"), (r#"ask("Which?", "text")"#, "no model")] {
         let e = s.run("script.run", &json!({"code": code})).unwrap_err().to_string();
         assert!(e.contains(why), "{e}");
