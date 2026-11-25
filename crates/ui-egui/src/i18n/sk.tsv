@@ -369,11 +369,11 @@
 	Your name	Vaše meno
 	categorize {category}	zaradiť do kategórie {category}
 	folder	priečinok
-	from “{text}”	je od „{text}“
+	is from “{text}”	je od „{text}“
 	in your browser: no password stored	v prehliadači: heslo sa neukladá
 	mentions “{text}”	spomína „{text}“
 	move to {folder}	presunúť do priečinka {folder}
-	subject has “{text}”	predmet obsahuje „{text}“
+	has “{text}” in its subject	predmet obsahuje „{text}“
 	you@example.com	vy@example.com
 	{app} couldn't open it: {error}	Aplikácia {app} ho nedokázala otvoriť: {error}
 	{a} and {b}	{a} a {b}
@@ -748,7 +748,7 @@
 	is list mail	je pošta z mailing listu
 	mark read	označiť ako prečítané
 	pin	pripnúť
-	to “{text}”	je pre „{text}“
+	is sent to “{text}”	je pre „{text}“
 	Add a place	Pridajte miesto
 	Add at least one name in To, Cc or Bcc before sending.	Pred odoslaním pridajte aspoň jedno meno do poľa Komu, Kópia alebo Skrytá kópia.
 	Edit link	Upraviť odkaz

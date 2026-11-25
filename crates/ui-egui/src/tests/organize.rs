@@ -525,12 +525,12 @@ fn the_rules_dialog_describes_finds_and_switches() {
     let texts: Vec<String> = rules_drawn(&ctx, &mut a, "").into_iter().map(|(t, _)| t).collect();
     let rows: Vec<&String> = texts.iter().filter(|t| t.starts_with("Rule ")).collect();
     assert_eq!(rows.len(), 8, "{texts:?}");
-    assert_eq!(rows[3], "Rule 3If it from “s3@” or subject has “report”: move to Projects › Short film, flag");
-    assert_eq!(rows[0], "Rule 0If it from “s0@” and subject has “report”: move to Projects › p0, flag");
+    assert_eq!(rows[3], "Rule 3If it is from “s3@” or has “report” in its subject: move to Projects › Short film, flag");
+    assert_eq!(rows[0], "Rule 0If it is from “s0@” and has “report” in its subject: move to Projects › p0, flag");
     let texts: Vec<String> = rules_drawn(&ctx, &mut a, "SHORT film").into_iter().map(|(t, _)| t).collect();
     assert_eq!(
         texts.iter().filter(|t| t.starts_with("Rule ")).collect::<Vec<_>>(),
-        ["Rule 3If it from “s3@” or subject has “report”: move to Projects › Short film, flag"]
+        ["Rule 3If it is from “s3@” or has “report” in its subject: move to Projects › Short film, flag"]
     );
     let texts: Vec<String> = rules_drawn(&ctx, &mut a, "rule 7").into_iter().map(|(t, _)| t).collect();
     assert_eq!(texts.iter().filter(|t| t.starts_with("Rule ")).count(), 1);
@@ -585,12 +585,16 @@ fn a_rule_the_editor_cant_show_is_said_and_kept() {
     let (mut a, _) = app("rules-said");
     let ctx = egui::Context::default();
     frame(&ctx, &mut a, vec![]);
-    a.session.rules = vec![rule, starts, asks];
+    // Mail to someone, said as "If it is sent to".
+    let sent =
+        Rule { name: "Sent".into(), filter: Condition::all(vec![Condition::To { value: "ana@".into(), op: TextOp::Contains }]), ..rule.clone() };
+    a.session.rules = vec![rule, starts, asks, sent];
     let texts: Vec<String> = rules_drawn(&ctx, &mut a, "").into_iter().map(|(t, _)| t).collect();
-    let said = "If it from “printshop” and (subject has “receipt” or subject has “invoice”) and not (is list mail): flag";
+    let said = "If it is from “printshop” and (has “receipt” in its subject or has “invoice” in its subject) and not (is list mail): flag";
     assert!(texts.iter().any(|t| *t == format!("Receipts{said}")), "{texts:?}");
     assert!(texts.iter().any(|t| t == "RepliesIf it has a subject that starts with “Re:”: flag"), "{texts:?}");
     assert!(texts.iter().any(|t| t == "ContractsIf it gets a yes from MailCraft's AI to “Is it a contract?”: flag"), "{texts:?}");
+    assert!(texts.iter().any(|t| t == "SentIf it is sent to “ana@”: flag"), "{texts:?}");
     a.ui.dialog = Some(Dialog::EditRule(Box::new(RuleForm::from_rule(0, &a.session.rules[0]))));
     // A frame for the dialog to settle: a window is sized before it's drawn.
     frame(&ctx, &mut a, vec![]);

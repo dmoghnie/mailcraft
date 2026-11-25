@@ -369,11 +369,11 @@
 	Your name	名前
 	categorize {category}	{category} に分類する
 	folder	フォルダー
-	from “{text}”	差出人が「{text}」の
+	is from “{text}”	差出人が「{text}」の
 	in your browser: no password stored	ブラウザーで: パスワードは保存されません
 	mentions “{text}”	「{text}」を含む
 	move to {folder}	{folder} に移動する
-	subject has “{text}”	件名に「{text}」を含む
+	has “{text}” in its subject	件名に「{text}」を含む
 	you@example.com	you@example.com
 	{app} couldn't open it: {error}	{app} で開けませんでした: {error}
 	{a} and {b}	{a}、{b}
@@ -750,7 +750,7 @@ month	May	5月
 	is list mail	メーリング リストのメール
 	mark read	開封済みにする
 	pin	ピン留め
-	to “{text}”	宛先「{text}」
+	is sent to “{text}”	宛先「{text}」
 	Add a place	場所を追加
 	Add at least one name in To, Cc or Bcc before sending.	送信する前に、宛先、CC、BCC のいずれかに名前を 1 つ以上追加してください。
 	Edit link	リンクの編集

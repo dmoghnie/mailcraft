@@ -369,11 +369,11 @@
 	Your name	Neved
 	categorize {category}	kategória hozzárendelése: {category}
 	folder	mappa
-	from “{text}”	feladója „{text}”
+	is from “{text}”	feladója „{text}”
 	in your browser: no password stored	a böngésződben: az alkalmazás nem tárol jelszót
 	mentions “{text}”	tartalmazza ezt: „{text}”
 	move to {folder}	áthelyezés ide: {folder}
-	subject has “{text}”	a tárgya tartalmazza ezt: „{text}”
+	has “{text}” in its subject	a tárgya tartalmazza ezt: „{text}”
 	you@example.com	nev@example.com
 	{app} couldn't open it: {error}	A(z) {app} nem tudta megnyitni: {error}
 	{a} and {b}	{a} és {b}
@@ -748,7 +748,7 @@
 	is list mail	levelezőlistás üzenet
 	mark read	megjelölés olvasottként
 	pin	rögzítés
-	to “{text}”	címzettje „{text}”
+	is sent to “{text}”	címzettje „{text}”
 	Add a place	Hely megadása
 	Add at least one name in To, Cc or Bcc before sending.	Küldés előtt adj meg legalább egy címzettet a Címzett, a Másolat vagy a Titkos másolat mezőben.
 	Edit link	Hivatkozás szerkesztése

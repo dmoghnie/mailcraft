@@ -369,11 +369,11 @@
 	Your name	Twoje imię i nazwisko
 	categorize {category}	przypisz kategorię {category}
 	folder	folder
-	from “{text}”	od „{text}”
+	is from “{text}”	od „{text}”
 	in your browser: no password stored	w przeglądarce: hasło nie jest przechowywane
 	mentions “{text}”	wspomina „{text}”
 	move to {folder}	przenieś do {folder}
-	subject has “{text}”	temat zawiera „{text}”
+	has “{text}” in its subject	temat zawiera „{text}”
 	you@example.com	ty@example.com
 	{app} couldn't open it: {error}	{app} nie może tego otworzyć: {error}
 	{a} and {b}	{a} i {b}
@@ -747,7 +747,7 @@
 	is list mail	jest z listy dyskusyjnej
 	mark read	oznacz jako przeczytane
 	pin	przypnij
-	to “{text}”	do „{text}”
+	is sent to “{text}”	do „{text}”
 	Add a place	Dodaj miejsce
 	Add at least one name in To, Cc or Bcc before sending.	Przed wysłaniem dodaj co najmniej jedną nazwę w polu Do, DW lub UDW.
 	Edit link	Edytuj link

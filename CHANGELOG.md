@@ -119,6 +119,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 
 ### Fixed
 
+- A rule said in words, in the **Rules** dialog and its editor, reads in English as a sentence: "If it is from …", "is sent to …" and "has … in its subject", where it said "If it from …", "to …" and "subject has …".
 - MailCraft's AI proposes a change you ask for, where it often asked first in the chat whether to make it: approving its card is how you say yes.
 - A fault in MailCraft while it takes in what a server sent is stopped there: what came after it is still taken in, and the CLI goes on rather than ending.
 - A proposed new time you accepted says so on its message ("Proposal accepted: the meeting is at … now"), where it said the invitation was out of date, and a proposal you answer leaves the Inbox as an answered invitation does (#238).

@@ -369,11 +369,11 @@
 	Your name	Adınız
 	categorize {category}	{category} kategorisini ata
 	folder	klasör
-	from “{text}”	gönderen “{text}”
+	is from “{text}”	gönderen “{text}”
 	in your browser: no password stored	tarayıcınızda: parola saklanmaz
 	mentions “{text}”	“{text}” geçiyor
 	move to {folder}	{folder} klasörüne taşı
-	subject has “{text}”	konuda “{text}” var
+	has “{text}” in its subject	konuda “{text}” var
 	you@example.com	you@example.com
 	{app} couldn't open it: {error}	{app} bunu açamadı: {error}
 	{a} and {b}	{a} ve {b}
@@ -748,7 +748,7 @@
 	is list mail	liste postası
 	mark read	okundu yap
 	pin	sabitle
-	to “{text}”	alıcı “{text}”
+	is sent to “{text}”	alıcı “{text}”
 	Add a place	Yer ekleyin
 	Add at least one name in To, Cc or Bcc before sending.	Göndermeden önce Kime, Cc veya Bcc alanına en az bir ad ekleyin.
 	Edit link	Bağlantıyı düzenle

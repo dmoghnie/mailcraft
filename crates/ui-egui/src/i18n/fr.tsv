@@ -369,11 +369,11 @@
 	Your name	Votre nom
 	categorize {category}	classer dans {category}
 	folder	dossier
-	from “{text}”	a pour expéditeur « {text} »
+	is from “{text}”	a pour expéditeur « {text} »
 	in your browser: no password stored	dans votre navigateur : aucun mot de passe enregistré
 	mentions “{text}”	mentionne « {text} »
 	move to {folder}	déplacer vers {folder}
-	subject has “{text}”	a « {text} » dans l’objet
+	has “{text}” in its subject	a « {text} » dans l’objet
 	you@example.com	vous@exemple.com
 	{app} couldn't open it: {error}	{app} n’a pas pu l’ouvrir : {error}
 	{a} and {b}	{a} et {b}
@@ -748,7 +748,7 @@
 	is list mail	est un courrier de liste
 	mark read	marquer comme lu
 	pin	épingler
-	to “{text}”	à « {text} »
+	is sent to “{text}”	à « {text} »
 	Add a place	Ajouter un lieu
 	Add at least one name in To, Cc or Bcc before sending.	Ajoutez au moins un nom dans À, Cc ou Cci avant d'envoyer.
 	Edit link	Modifier le lien

@@ -369,11 +369,11 @@
 	Your name	你的姓名
 	categorize {category}	归类为 {category}
 	folder	文件夹
-	from “{text}”	来自“{text}”
+	is from “{text}”	来自“{text}”
 	in your browser: no password stored	在浏览器中: 不存储密码
 	mentions “{text}”	提到“{text}”
 	move to {folder}	移动到 {folder}
-	subject has “{text}”	主题含有“{text}”
+	has “{text}” in its subject	主题含有“{text}”
 	you@example.com	you@example.com
 	{app} couldn't open it: {error}	{app} 无法打开它: {error}
 	{a} and {b}	{a} 和 {b}
@@ -750,7 +750,7 @@ month	May	5月
 	is list mail	是邮件列表邮件
 	mark read	标记为已读
 	pin	固定
-	to “{text}”	发往“{text}”
+	is sent to “{text}”	发往“{text}”
 	Add a place	添加地点
 	Add at least one name in To, Cc or Bcc before sending.	发送前,请在“收件人”、“抄送”或“密件抄送”中至少添加一个名字。
 	Edit link	编辑链接

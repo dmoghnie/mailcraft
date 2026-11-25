@@ -369,11 +369,11 @@
 	Your name	您的姓名
 	categorize {category}	歸類為 {category}
 	folder	資料夾
-	from “{text}”	來自「{text}」
+	is from “{text}”	來自「{text}」
 	in your browser: no password stored	在瀏覽器中: 不儲存密碼
 	mentions “{text}”	提到「{text}」
 	move to {folder}	移到 {folder}
-	subject has “{text}”	主旨含有「{text}」
+	has “{text}” in its subject	主旨含有「{text}」
 	you@example.com	you@example.com
 	{app} couldn't open it: {error}	{app} 無法開啟它: {error}
 	{a} and {b}	{a} 和 {b}
@@ -747,7 +747,7 @@
 	is list mail	是郵寄清單郵件
 	mark read	標示為已讀
 	pin	釘選
-	to “{text}”	寄給「{text}」
+	is sent to “{text}”	寄給「{text}」
 	Add a place	新增地點
 	Add at least one name in To, Cc or Bcc before sending.	傳送前,請在「收件者」、「副本」或「密件副本」中至少新增一個名稱。
 	Edit link	編輯連結

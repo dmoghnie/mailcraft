@@ -369,11 +369,11 @@
 	Your name	Je naam
 	categorize {category}	categoriseren als {category}
 	folder	map
-	from “{text}”	van “{text}” is
+	is from “{text}”	van “{text}” is
 	in your browser: no password stored	in je browser: er wordt geen wachtwoord opgeslagen
 	mentions “{text}”	“{text}” vermeldt
 	move to {folder}	verplaatsen naar {folder}
-	subject has “{text}”	“{text}” in het onderwerp heeft
+	has “{text}” in its subject	“{text}” in het onderwerp heeft
 	you@example.com	jij@example.com
 	{app} couldn't open it: {error}	{app} kon het niet openen: {error}
 	{a} and {b}	{a} en {b}
@@ -747,7 +747,7 @@
 	is list mail	lijstmail is
 	mark read	als gelezen markeren
 	pin	vastmaken
-	to “{text}”	aan “{text}” gericht is
+	is sent to “{text}”	aan “{text}” gericht is
 	Add a place	Voeg een plaats toe
 	Add at least one name in To, Cc or Bcc before sending.	Voeg minstens één naam toe in Aan, CC of BCC voordat je verzendt.
 	Edit link	Koppeling bewerken

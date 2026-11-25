@@ -369,11 +369,11 @@
 	Your name	השם שלך
 	categorize {category}	סווג {category}
 	folder	תיקייה
-	from “{text}”	מאת „{text}”
+	is from “{text}”	מאת „{text}”
 	in your browser: no password stored	בדפדפן שלך: לא נשמרת סיסמה
 	mentions “{text}”	מזכיר „{text}”
 	move to {folder}	העבר אל {folder}
-	subject has “{text}”	בנושא יש „{text}”
+	has “{text}” in its subject	בנושא יש „{text}”
 	you@example.com	you@example.com
 	{app} couldn't open it: {error}	{app} לא הצליח לפתוח אותו: {error}
 	{a} and {b}	{a} ו-{b}
@@ -749,7 +749,7 @@ month	May	מאי
 	is list mail	הוא דואר רשימת תפוצה
 	mark read	סמן כנקרא
 	pin	הצמד
-	to “{text}”	אל „{text}”
+	is sent to “{text}”	אל „{text}”
 	Add a place	הוסף מקום
 	Add at least one name in To, Cc or Bcc before sending.	הוסף לפחות שם אחד בשדה 'אל', 'עותק' או 'עותק מוסתר' לפני השליחה.
 	Edit link	ערוך קישור

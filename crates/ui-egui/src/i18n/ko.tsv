@@ -369,11 +369,11 @@
 	Your name	이름
 	categorize {category}	{category} 범주로 분류
 	folder	폴더
-	from “{text}”	보낸 사람이 "{text}"인
+	is from “{text}”	보낸 사람이 "{text}"인
 	in your browser: no password stored	브라우저에서: 암호를 저장하지 않음
 	mentions “{text}”	"{text}"을(를) 포함하는
 	move to {folder}	{folder}(으)로 이동
-	subject has “{text}”	제목에 "{text}"이(가) 있는
+	has “{text}” in its subject	제목에 "{text}"이(가) 있는
 	you@example.com	you@example.com
 	{app} couldn't open it: {error}	{app}에서 열 수 없습니다: {error}
 	{a} and {b}	{a}, {b}
@@ -747,7 +747,7 @@
 	is list mail	메일링 리스트 메일임
 	mark read	읽음으로 표시
 	pin	고정
-	to “{text}”	받는 사람 “{text}”
+	is sent to “{text}”	받는 사람 “{text}”
 	Add a place	장소 추가
 	Add at least one name in To, Cc or Bcc before sending.	보내기 전에 받는 사람, 참조 또는 숨은 참조에 이름을 하나 이상 추가하세요.
 	Edit link	링크 편집

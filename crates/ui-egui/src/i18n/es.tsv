@@ -369,11 +369,11 @@
 	Your name	Tu nombre
 	categorize {category}	categorizar como {category}
 	folder	carpeta
-	from “{text}”	viene de «{text}»
+	is from “{text}”	viene de «{text}»
 	in your browser: no password stored	en tu navegador: no se guarda ninguna contraseña
 	mentions “{text}”	menciona «{text}»
 	move to {folder}	mover a {folder}
-	subject has “{text}”	tiene «{text}» en el asunto
+	has “{text}” in its subject	tiene «{text}» en el asunto
 	you@example.com	tu@ejemplo.com
 	{app} couldn't open it: {error}	{app} no pudo abrirlo: {error}
 	{a} and {b}	{a} y {b}
@@ -748,7 +748,7 @@
 	is list mail	es correo de una lista
 	mark read	marcar como leído
 	pin	anclar
-	to “{text}”	a «{text}»
+	is sent to “{text}”	a «{text}»
 	Add a place	Agregar un lugar
 	Add at least one name in To, Cc or Bcc before sending.	Agregue al menos un nombre en Para, CC o CCO antes de enviar.
 	Edit link	Editar vínculo

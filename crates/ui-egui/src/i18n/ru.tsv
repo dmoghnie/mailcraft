@@ -369,11 +369,11 @@
 	Your name	Ваше имя
 	categorize {category}	отнести к категории {category}
 	folder	папка
-	from “{text}”	пришло от «{text}»
+	is from “{text}”	пришло от «{text}»
 	in your browser: no password stored	в браузере: пароль не сохраняется
 	mentions “{text}”	упоминает «{text}»
 	move to {folder}	переместить в {folder}
-	subject has “{text}”	содержит «{text}» в теме
+	has “{text}” in its subject	содержит «{text}» в теме
 	you@example.com	vy@primer.ru
 	{app} couldn't open it: {error}	{app} не удалось открыть: {error}
 	{a} and {b}	{a} и {b}
@@ -747,7 +747,7 @@
 	is list mail	это рассылка
 	mark read	отметить как прочитанное
 	pin	закрепить
-	to “{text}”	кому «{text}»
+	is sent to “{text}”	кому «{text}»
 	Add a place	Добавить место
 	Add at least one name in To, Cc or Bcc before sending.	Перед отправкой добавьте хотя бы одно имя в поле «Кому», «Копия» или «СК».
 	Edit link	Изменить ссылку

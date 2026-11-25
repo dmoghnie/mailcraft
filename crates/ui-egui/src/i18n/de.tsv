@@ -369,11 +369,11 @@
 	Your name	Ihr Name
 	categorize {category}	als {category} kategorisieren
 	folder	Ordner
-	from “{text}”	von „{text}“ stammt
+	is from “{text}”	von „{text}“ stammt
 	in your browser: no password stored	im Browser: kein Kennwort gespeichert
 	mentions “{text}”	„{text}“ erwähnt
 	move to {folder}	nach {folder} verschieben
-	subject has “{text}”	„{text}“ im Betreff hat
+	has “{text}” in its subject	„{text}“ im Betreff hat
 	you@example.com	name@beispiel.de
 	{app} couldn't open it: {error}	{app} konnte sie nicht öffnen: {error}
 	{a} and {b}	{a} und {b}
@@ -748,7 +748,7 @@
 	is list mail	Listen-Mail ist
 	mark read	als gelesen markieren
 	pin	anheften
-	to “{text}”	an „{text}“
+	is sent to “{text}”	an „{text}“
 	Add a place	Ort hinzufügen
 	Add at least one name in To, Cc or Bcc before sending.	Fügen Sie vor dem Senden mindestens einen Namen in „An“, „Cc“ oder „Bcc“ hinzu.
 	Edit link	Link bearbeiten

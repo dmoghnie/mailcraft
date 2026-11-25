@@ -369,11 +369,11 @@
 	Your name	اسمك
 	categorize {category}	صنّفه {category}
 	folder	مجلد
-	from “{text}”	من «{text}»
+	is from “{text}”	من «{text}»
 	in your browser: no password stored	في متصفحك: لا تُحفظ كلمة المرور
 	mentions “{text}”	يذكر «{text}»
 	move to {folder}	انقله إلى {folder}
-	subject has “{text}”	الموضوع فيه «{text}»
+	has “{text}” in its subject	الموضوع فيه «{text}»
 	you@example.com	you@example.com
 	{app} couldn't open it: {error}	تعذّر على {app} فتحه: {error}
 	{a} and {b}	{a} و{b}
@@ -749,7 +749,7 @@ month	May	مايو
 	is list mail	بريد قائمة
 	mark read	وضع علامة مقروءة
 	pin	تثبيت
-	to “{text}”	إلى “{text}”
+	is sent to “{text}”	إلى “{text}”
 	Add a place	إضافة مكان
 	Add at least one name in To, Cc or Bcc before sending.	أضف اسماً واحداً على الأقل في إلى أو نسخة أو نسخة مخفية قبل الإرسال.
 	Edit link	تحرير الارتباط
