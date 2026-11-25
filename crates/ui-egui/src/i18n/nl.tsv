@@ -2329,3 +2329,14 @@ count	occurrences	keer
 	Your digest is ready	Uw overzicht is klaar
 	Close the digest	Overzicht sluiten
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Binnengekomen mail, gesorteerd door de AI van MailCraft, aan het begin van uw werktijd op werkdagen, en desgewenst ook aan het eind. De werktijd stelt u in onder Agenda
+	Find dates and tasks with AI	Datums en taken zoeken met AI
+	Found in this message	Gevonden in dit bericht
+	Close what was found	Gevonden items sluiten
+	Looking for dates and tasks…	Datums en taken zoeken…
+	Nothing could be found: {error}	Er kon niets worden gevonden: {error}
+	Nothing to act on was found.	Er is niets gevonden om op te reageren.
+	Add to calendar	Aan agenda toevoegen
+	Add to tasks	Aan taken toevoegen
+	Due {date}	Vervalt {date}
+	Amounts	Bedragen
+	Tracking numbers	Trackingnummers

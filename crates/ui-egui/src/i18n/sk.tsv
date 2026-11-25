@@ -2348,3 +2348,14 @@ count	occurrences	opakovaní
 	Your digest is ready	Váš prehľad je pripravený
 	Close the digest	Zavrieť prehľad
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Pošta, ktorá prišla, roztriedená AI MailCraftu na začiatku pracovného času v pracovné dni, a ak chcete, aj na jeho konci. Pracovný čas sa nastavuje v časti Kalendár
+	Find dates and tasks with AI	Nájsť dátumy a úlohy pomocou AI
+	Found in this message	Nájdené v tejto správe
+	Close what was found	Zavrieť nájdené
+	Looking for dates and tasks…	Hľadajú sa dátumy a úlohy…
+	Nothing could be found: {error}	Nepodarilo sa nič nájsť: {error}
+	Nothing to act on was found.	Nenašlo sa nič, čo treba urobiť.
+	Add to calendar	Pridať do kalendára
+	Add to tasks	Pridať do úloh
+	Due {date}	Termín {date}
+	Amounts	Sumy
+	Tracking numbers	Čísla zásielok

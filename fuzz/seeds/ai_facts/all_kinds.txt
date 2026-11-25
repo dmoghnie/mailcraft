@@ -1,0 +1,6 @@
+```json
+{"events": [{"title": "Review", "start": "2026-11-26T14:30", "end": "2026-11-26T15:30", "place": "Room 2"}, {"title": "Holiday", "start": "2026-12-24", "end": null, "place": ""}],
+ "tasks": [{"title": "Send the frames", "due": "2026-11-25"}],
+ "amounts": [{"what": "Invoice 42", "amount": "EUR 1,200", "due": null}],
+ "tracking": [{"carrier": "DHL", "number": "JD0123456789"}]}
+```

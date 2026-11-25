@@ -2333,3 +2333,14 @@ count	occurrences	次
 	Your digest is ready	你的摘要已準備好
 	Close the digest	關閉摘要
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	收到的郵件會在工作日的工作時間開始時（如果你選擇，結束時也會）由 MailCraft 的 AI 整理。工作時間在「行事曆」中設定
+	Find dates and tasks with AI	用 AI 尋找日期和工作
+	Found in this message	在此郵件中找到
+	Close what was found	關閉找到的內容
+	Looking for dates and tasks…	正在尋找日期和工作…
+	Nothing could be found: {error}	無法尋找：{error}
+	Nothing to act on was found.	沒有找到需要處理的內容。
+	Add to calendar	新增至行事曆
+	Add to tasks	新增至工作
+	Due {date}	到期 {date}
+	Amounts	金額
+	Tracking numbers	貨件追蹤號碼

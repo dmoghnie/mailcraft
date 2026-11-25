@@ -2334,3 +2334,14 @@ count	occurrences	Terminen
 	Your digest is ready	Ihre Übersicht ist fertig
 	Close the digest	Übersicht schließen
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Eingegangene E-Mails, von der KI von MailCraft sortiert, an Arbeitstagen zu Beginn Ihrer Arbeitszeit und auf Wunsch auch an deren Ende. Die Arbeitszeit wird unter Kalender festgelegt
+	Find dates and tasks with AI	Termine und Aufgaben mit KI finden
+	Found in this message	In dieser Nachricht gefunden
+	Close what was found	Gefundenes schließen
+	Looking for dates and tasks…	Termine und Aufgaben werden gesucht…
+	Nothing could be found: {error}	Es konnte nichts gefunden werden: {error}
+	Nothing to act on was found.	Es wurde nichts zu erledigen gefunden.
+	Add to calendar	Zum Kalender hinzufügen
+	Add to tasks	Zu Aufgaben hinzufügen
+	Due {date}	Fällig {date}
+	Amounts	Beträge
+	Tracking numbers	Sendungsnummern

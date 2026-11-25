@@ -2329,3 +2329,14 @@ count	occurrences	مرات
 	Your digest is ready	ملخصك جاهز
 	Close the digest	إغلاق الملخص اليومي
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	البريد الوارد، مرتبًا بواسطة ذكاء MailCraft الاصطناعي، في بداية ساعات عملك في أيام العمل، وفي نهايتها أيضًا إن اخترت. تُضبط ساعات العمل تحت التقويم
+	Find dates and tasks with AI	البحث عن التواريخ والمهام بالذكاء الاصطناعي
+	Found in this message	ما وُجد في هذه الرسالة
+	Close what was found	إغلاق ما وُجد
+	Looking for dates and tasks…	جارٍ البحث عن التواريخ والمهام…
+	Nothing could be found: {error}	تعذّر العثور على شيء: {error}
+	Nothing to act on was found.	لم يُعثر على شيء يتطلب إجراءً.
+	Add to calendar	إضافة إلى التقويم
+	Add to tasks	إضافة إلى المهام
+	Due {date}	الاستحقاق {date}
+	Amounts	المبالغ
+	Tracking numbers	أرقام التتبع

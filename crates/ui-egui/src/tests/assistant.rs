@@ -448,3 +448,46 @@ fn a_message_is_translated_from_more_actions() {
     frame(&ctx, &mut a, vec![]);
     assert!(a.session.about_message(&key, AboutKind::Translation).is_none(), "closed");
 }
+
+/// What's to act on in a message, found from its More actions: a card lists the dates, tasks,
+/// amounts and tracking numbers found; Add to calendar and Add to tasks open a New event and a
+/// New task filled in from them, nothing made until they're saved; Close lets it go.
+#[test]
+fn dates_and_tasks_are_found_from_more_actions() {
+    let (mut a, ctx) = ready("assistant-facts");
+    let key = a.session.list.iter().find(|m| m.subject == "Storyboard review on Thursday").map(|m| m.key.clone()).unwrap();
+    a.run("list.open", json!({"key": key.to_id()}));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    click_last(&ctx, &mut a, "More actions");
+    click_last(&ctx, &mut a, "Find dates and tasks with AI");
+    let id = a.session.about_message(&key, AboutKind::Facts).and_then(|w| w.asking).expect("asked for, on its way");
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "Found in this message") && has(&t, "Looking for dates and tasks…"), "{t:?}");
+    let text = r#"{"events": [{"title": "Storyboard review", "start": "2026-11-26T14:30", "end": "2026-11-26T15:30", "place": "Room 2"}],
+        "tasks": [{"title": "Send the revised frames", "due": "2026-11-25"}], "amounts": [], "tracking": [{"carrier": "DHL", "number": "JD0123456789"}]}"#;
+    let answer = AiAnswer { text: text.into(), ..AiAnswer::default() };
+    a.session.apply(MailEvent::Ai { done: AiDone::Answered { id, answer: Some(answer), error: None } });
+    let t = texts(&ctx, &mut a);
+    assert!(t.iter().any(|s| s.starts_with("Storyboard review · ") && s.ends_with(" · Room 2")) && has(&t, "DHL JD0123456789"), "{t:?}");
+    let tasks_before = a.session.pim.values().map(|p| p.tasks.len()).sum::<usize>();
+    click_last(&ctx, &mut a, "Add to calendar");
+    match &a.ui.dialog {
+        Some(Dialog::Event(f)) => {
+            assert_eq!((f.summary.as_str(), f.location.as_str(), f.date.as_str()), ("Storyboard review", "Room 2", "2026-11-26"))
+        }
+        _ => panic!("a New event"),
+    }
+    a.ui.dialog = None;
+    click_last(&ctx, &mut a, "Add to tasks");
+    match &a.ui.dialog {
+        Some(Dialog::Task(f)) => assert_eq!((f.title.as_str(), f.due.as_str()), ("Send the revised frames", "2026-11-25")),
+        _ => panic!("a New task"),
+    }
+    a.ui.dialog = None;
+    assert_eq!(a.session.pim.values().map(|p| p.tasks.len()).sum::<usize>(), tasks_before, "nothing made until it's saved");
+    click_last(&ctx, &mut a, "Close what was found");
+    frame(&ctx, &mut a, vec![]);
+    assert!(a.session.about_message(&key, AboutKind::Facts).is_none(), "let go");
+}

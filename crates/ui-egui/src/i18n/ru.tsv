@@ -2347,3 +2347,14 @@ count	occurrences	повторений
 	Your digest is ready	Ваша сводка готова
 	Close the digest	Закрыть сводку
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Пришедшая почта, разобранная ИИ MailCraft, в начале рабочего времени в рабочие дни, а по желанию и в конце. Рабочее время задаётся в разделе «Календарь»
+	Find dates and tasks with AI	Найти даты и задачи с помощью ИИ
+	Found in this message	Найдено в этом сообщении
+	Close what was found	Закрыть найденное
+	Looking for dates and tasks…	Поиск дат и задач…
+	Nothing could be found: {error}	Ничего не удалось найти: {error}
+	Nothing to act on was found.	Ничего, что требует действий, не найдено.
+	Add to calendar	Добавить в календарь
+	Add to tasks	Добавить в задачи
+	Due {date}	Срок {date}
+	Amounts	Суммы
+	Tracking numbers	Трек-номера

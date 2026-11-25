@@ -2347,3 +2347,14 @@ count	occurrences	wystąpieniach
 	Your digest is ready	Twój przegląd jest gotowy
 	Close the digest	Zamknij przegląd
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Poczta, która przyszła, uporządkowana przez AI MailCraft na początku godzin pracy w dni robocze, a jeśli chcesz, także na ich końcu. Godziny pracy ustawia się w sekcji Kalendarz
+	Find dates and tasks with AI	Znajdź daty i zadania z AI
+	Found in this message	Znalezione w tej wiadomości
+	Close what was found	Zamknij znalezione
+	Looking for dates and tasks…	Szukam dat i zadań…
+	Nothing could be found: {error}	Nie udało się nic znaleźć: {error}
+	Nothing to act on was found.	Nie znaleziono nic do zrobienia.
+	Add to calendar	Dodaj do kalendarza
+	Add to tasks	Dodaj do zadań
+	Due {date}	Termin {date}
+	Amounts	Kwoty
+	Tracking numbers	Numery przesyłek

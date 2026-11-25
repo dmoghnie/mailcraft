@@ -2329,3 +2329,14 @@ count	occurrences	פעמים
 	Your digest is ready	התקציר שלך מוכן
 	Close the digest	סגירת התקציר
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	הדואר שהגיע, ממוין על ידי הבינה המלאכותית של MailCraft, בתחילת שעות העבודה בימי עבודה, וגם בסופן אם תבחר. שעות העבודה נקבעות תחת לוח שנה
+	Find dates and tasks with AI	מציאת תאריכים ומשימות בעזרת AI
+	Found in this message	נמצא בהודעה זו
+	Close what was found	סגירת מה שנמצא
+	Looking for dates and tasks…	מחפש תאריכים ומשימות…
+	Nothing could be found: {error}	לא ניתן היה למצוא דבר: {error}
+	Nothing to act on was found.	לא נמצא דבר שדורש פעולה.
+	Add to calendar	הוספה ללוח השנה
+	Add to tasks	הוספה למשימות
+	Due {date}	תאריך יעד {date}
+	Amounts	סכומים
+	Tracking numbers	מספרי מעקב

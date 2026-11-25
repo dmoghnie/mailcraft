@@ -1,5 +1,6 @@
 //! What MailCraft's AI writes about a message for the reading pane: its conversation summed up
-//! (`summary.rs`), or the message translated (`translation.rs`). Each is one question to the
+//! (`summary.rs`), the message translated (`translation.rs`), or what's to act on in it found
+//! (`facts.rs`). Each is one question to the
 //! model chat work goes to ([`Session::ai_ask`]): only as far as the message's account lets its
 //! mail go, recorded by what it was for, and streamed, so what came so far shows while it's
 //! written. The newest are kept, by message and kind; an answer to one asked for again or closed
@@ -8,12 +9,15 @@
 use std::collections::HashMap;
 
 use mailcraft_model::{AiAnswer, AiChat, MessageKey};
+
+pub use facts::{FactAmount, FactEvent, FactTask, FactTracking, Facts, facts_from};
 use serde_json::{Value, json};
 
 use super::settings::AiTask;
 use super::{ai_server, assistant};
 use crate::{CmdError, CommandSpec, Session, p};
 
+mod facts;
 mod summary;
 #[cfg(test)]
 mod tests;
@@ -33,6 +37,8 @@ pub enum AboutKind {
     Summary,
     /// It translated.
     Translation,
+    /// Its dates, tasks, amounts and tracking numbers found.
+    Facts,
 }
 
 impl AboutKind {
@@ -41,6 +47,7 @@ impl AboutKind {
         match self {
             AboutKind::Summary => "summary",
             AboutKind::Translation => "translation",
+            AboutKind::Facts => "facts",
         }
     }
 }
@@ -179,5 +186,6 @@ fn showing(s: &mut Session, v: &Value, kind: AboutKind) -> crate::CmdResult {
 pub(crate) fn commands() -> Vec<CommandSpec> {
     let mut all = summary::commands();
     all.extend(translation::commands());
+    all.extend(facts::commands());
     all
 }

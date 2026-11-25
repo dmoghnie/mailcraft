@@ -146,6 +146,19 @@ pub struct EventForm {
     pub error: Option<String>,
 }
 
+impl EventForm {
+    /// A new event for what MailCraft's AI found in a message: its title, its start and end
+    /// (an hour long when it has none), a whole day or not, its place, and `description`.
+    pub fn found(s: &Session, title: &str, (start, end): (i64, Option<i64>), all_day: bool, place: &str, description: &str) -> EventForm {
+        let new = EventForm::new(s, Some(start));
+        let (end_date, end) = match end.filter(|e| *e > start) {
+            Some(e) => (local_date(e, s), local_time(e, s)),
+            None => (new.end_date.clone(), new.end.clone()),
+        };
+        EventForm { summary: title.to_string(), location: place.to_string(), description: description.to_string(), all_day, end_date, end, ..new }
+    }
+}
+
 fn local_date(t: i64, s: &Session) -> String {
     dates::day_string(s.clock.local_day(t))
 }

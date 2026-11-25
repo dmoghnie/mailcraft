@@ -2334,3 +2334,14 @@ count	occurrences	előfordulás
 	Your digest is ready	Elkészült az összefoglalód
 	Close the digest	Összefoglaló bezárása
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	A beérkezett levelek a MailCraft MI rendezésében, munkanapokon a munkaidő kezdetén, és ha választod, a végén is. A munkaidőt a Naptár alatt állíthatod be
+	Find dates and tasks with AI	Dátumok és feladatok keresése MI-vel
+	Found in this message	Ebben az üzenetben található
+	Close what was found	Találatok bezárása
+	Looking for dates and tasks…	Dátumok és feladatok keresése…
+	Nothing could be found: {error}	Nem sikerült semmit találni: {error}
+	Nothing to act on was found.	Nem található teendő.
+	Add to calendar	Hozzáadás a naptárhoz
+	Add to tasks	Hozzáadás a feladatokhoz
+	Due {date}	Határidő: {date}
+	Amounts	Összegek
+	Tracking numbers	Nyomkövetési számok

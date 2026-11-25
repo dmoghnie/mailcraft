@@ -15,7 +15,7 @@ mod servers;
 mod settings;
 
 pub(crate) use about::commands as about_commands;
-pub use about::{AboutKind, AboutMessage};
+pub use about::{AboutKind, AboutMessage, FactAmount, FactEvent, FactTask, FactTracking, Facts, facts_from};
 pub use asking::{AI_LOG_KEPT, AiLogEntry, AiState, AiTest, server_of as ai_server};
 pub(crate) use assistant::assistant_commands;
 #[doc(hidden)]

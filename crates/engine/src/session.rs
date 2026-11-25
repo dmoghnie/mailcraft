@@ -45,8 +45,8 @@ pub use ai::run_script_against;
 pub use ai::{
     AI_LOG_KEPT, ASSISTANT_LINK, ASSISTANT_WIDTH, AboutKind, AboutMessage, AiLogEntry, AiPrefs, AiProfile, AiReach, AiState, AiTask, AiTest,
     Assistant, AssistantPane, CONTEXT_AT_FIRST, CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, Chat, ChatHead, ChatTurn, ContextItem, Digest, DigestWhen,
-    KeptScript, McpServer, Rewrite, RewriteHow, RunState, STEPS_MOST, ScriptParam, ServerTools, ToolRun, ai_server, ai_url_is_local,
-    assistant_message_link,
+    FactAmount, FactEvent, FactTask, FactTracking, Facts, KeptScript, McpServer, Rewrite, RewriteHow, RunState, STEPS_MOST, ScriptParam, ServerTools,
+    ToolRun, ai_server, ai_url_is_local, assistant_message_link, facts_from,
 };
 pub(crate) use ai::{about_commands, ai_commands, assistant_commands, digest_commands, mcp_server_commands, needs_me_commands, rewriting_commands};
 use changing::Batch;

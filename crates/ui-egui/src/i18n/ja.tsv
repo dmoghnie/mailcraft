@@ -2330,3 +2330,14 @@ count	occurrences	回
 	Your digest is ready	ダイジェストができました
 	Close the digest	ダイジェストを閉じる
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	届いたメールを、勤務日の勤務時間の始めに（選べば終わりにも）MailCraft の AI が整理します。勤務時間は「予定表」で設定します
+	Find dates and tasks with AI	AI で日付とタスクを探す
+	Found in this message	このメッセージで見つかったもの
+	Close what was found	見つかったものを閉じる
+	Looking for dates and tasks…	日付とタスクを探しています…
+	Nothing could be found: {error}	何も見つけられませんでした: {error}
+	Nothing to act on was found.	対応が必要なものは見つかりませんでした。
+	Add to calendar	予定表に追加
+	Add to tasks	タスクに追加
+	Due {date}	期限 {date}
+	Amounts	金額
+	Tracking numbers	追跡番号

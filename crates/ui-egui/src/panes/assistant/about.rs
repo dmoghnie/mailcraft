@@ -1,5 +1,6 @@
 //! What MailCraft's AI wrote about the open message, in cards at the top of the reading pane:
-//! its conversation summed up (`mail.summarize`), the message translated (`mail.translate`).
+//! its conversation summed up (`mail.summarize`), the message translated (`mail.translate`),
+//! and what's to act on in it (`facts.rs`).
 //! Each shows what's written as it comes, the model that writes it, and Close; why there's
 //! none, and Try again. Its text is formatted as the assistant's answers are (links open as a
 //! message's do, pictures aren't fetched).
@@ -17,6 +18,7 @@ pub(crate) fn card(s: &Session, st: &mut UiState, ui: &mut Ui, key: &MessageKey,
     for kind in [AboutKind::Summary, AboutKind::Translation] {
         one(s, st, ui, key, kind, acts);
     }
+    super::facts::card(s, st, ui, key, acts);
 }
 
 /// What a card of `kind` says: its title, its Close, while it's written, why there's none, and
@@ -26,7 +28,8 @@ fn words(kind: AboutKind, error: &str) -> (&'static str, &'static str, &'static 
         AboutKind::Summary => {
             (tl!("Summary"), "Close the summary", tl!("Summarizing…"), tf!("It couldn't be summarized: {error}", error = error), "mail.summarize")
         }
-        AboutKind::Translation => (
+        // In a card of its own (`facts.rs`).
+        AboutKind::Translation | AboutKind::Facts => (
             tl!("Translation"),
             "Close the translation",
             tl!("Translating…"),

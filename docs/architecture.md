@@ -224,7 +224,11 @@ and `cargo xtask sizes` enforces them.
   (or works it out from the list, with the person's own replies), its newest messages while
   48 KB hold them. What's written is kept by message and kind (the newest 16), and one asked
   for again or closed drops the answer still on its way. The cards are
-  `ui-egui/src/panes/assistant/about.rs`, at the top of the reading pane.
+  `ui-egui/src/panes/assistant/about.rs`, at the top of the reading pane. What's to act on in
+  a message (`about/facts.rs`, `mail.facts`) is asked for as JSON; the answer is read as
+  hostile input (`facts_from`, fuzzed as `ai_facts`): dates checked, lists and texts capped.
+  Its card (`panes/assistant/facts.rs`) opens a New event or New task filled in from what was
+  found, so nothing is made until the person saves it.
 - **Rewriting** (`session/ai/rewriting.rs`, `compose.rewrite`, `compose.writeFrom`): only the
   person's own text of the message being written goes (`own_text`: above the quoted original's
   rule and the signature's `-- `), and, written from a few words, the message it answers. One

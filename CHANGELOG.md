@@ -71,6 +71,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - **A model's monthly budget**, in tokens, in its dialog: File › Options › AI shows what each model used this month, and once one has used its budget, questions go to the model it falls back to, or aren't asked.
 - **Needs me**: turned on in File › Options › AI, mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and tagged Needs me on its row when it asks something of you; replying takes the tag off, and so does Doesn't need me on the row's menu.
 - **Digest**, in Home's AI group: MailCraft's AI sorts the mail that came into the Inboxes over the last day into what needs an answer from you, what's waiting on others, what's worth a look and what can be ignored, shown over the Inbox; File › Options › AI can have it made each work-day morning (and evening), with a desktop notification when it's ready.
+- **Find dates and tasks with AI** in a message's More actions lists the meetings and dates, the things you're asked to do, the amounts and the tracking numbers MailCraft's AI found in it; Add to calendar and Add to tasks open a new event or task filled in from them (`mail.facts`).
 
 ### Changed
 

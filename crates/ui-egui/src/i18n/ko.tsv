@@ -2333,3 +2333,14 @@ count	occurrences	회
 	Your digest is ready	요약 보고가 준비되었습니다
 	Close the digest	요약 보고 닫기
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	도착한 메일을 근무일의 근무 시간 시작에(선택하면 끝에도) MailCraft의 AI가 정리합니다. 근무 시간은 일정에서 설정합니다
+	Find dates and tasks with AI	AI로 날짜와 할 일 찾기
+	Found in this message	이 메시지에서 찾은 항목
+	Close what was found	찾은 항목 닫기
+	Looking for dates and tasks…	날짜와 할 일을 찾는 중…
+	Nothing could be found: {error}	아무것도 찾지 못했습니다: {error}
+	Nothing to act on was found.	처리할 항목을 찾지 못했습니다.
+	Add to calendar	일정에 추가
+	Add to tasks	할 일에 추가
+	Due {date}	기한 {date}
+	Amounts	금액
+	Tracking numbers	운송장 번호

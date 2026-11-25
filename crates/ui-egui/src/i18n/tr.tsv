@@ -2334,3 +2334,14 @@ count	occurrences	kez
 	Your digest is ready	Özetiniz hazır
 	Close the digest	Özeti kapat
 	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Gelen postalar, iş günlerinde çalışma saatlerinizin başında, isterseniz sonunda da, MailCraft'ın yapay zekâsı tarafından sıralanır. Çalışma saatleri Takvim altında ayarlanır
+	Find dates and tasks with AI	Tarihleri ve görevleri yapay zekâyla bul
+	Found in this message	Bu iletide bulunanlar
+	Close what was found	Bulunanları kapat
+	Looking for dates and tasks…	Tarihler ve görevler aranıyor…
+	Nothing could be found: {error}	Hiçbir şey bulunamadı: {error}
+	Nothing to act on was found.	Yapılacak bir şey bulunamadı.
+	Add to calendar	Takvime ekle
+	Add to tasks	Görevlere ekle
+	Due {date}	Son tarih {date}
+	Amounts	Tutarlar
+	Tracking numbers	Takip numaraları
