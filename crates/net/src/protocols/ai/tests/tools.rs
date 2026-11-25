@@ -25,7 +25,7 @@ fn chat_with_tools() -> AiChat {
             description: "Search the mail".into(),
             schema: json!({"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}),
         }],
-        context: 0,
+        ..AiChat::default()
     }
 }
 
@@ -86,7 +86,7 @@ fn what_a_model_gave_broken_or_empty_goes_back_as_each_format_takes_it() {
         turns: vec![AiTurn::user("Find it"), said, back, AiTurn::assistant(""), AiTurn::user("Again?")],
         max_tokens: 512,
         tools: Vec::new(),
-        context: 0,
+        ..AiChat::default()
     };
     let server = ModelServer::start();
     ask(&endpoint(&server, AiApi::OpenAi), None, &chat).unwrap();

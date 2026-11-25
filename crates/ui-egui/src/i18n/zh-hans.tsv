@@ -2307,3 +2307,7 @@ count	occurrences	次
 	From a few words	根据几个词
 	It couldn't be rewritten: {error}	无法改写：{error}
 	Follow-up	跟进邮件
+	Temperature	温度
+	Its own	模型默认
+	Thinking	思考
+	Not every model takes these: Test shows whether it does.	并非每个模型都接受这些设置：点“测试”即可知道。

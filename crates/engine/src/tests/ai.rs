@@ -139,6 +139,10 @@ fn a_profile_is_checked_before_it_is_kept() {
         with("fallback", json!("p9")),
         with("key", json!("a\nb")),
         with("id", json!("p9")),
+        with("temperature", json!(2.5)),
+        with("temperature", json!(-0.1)),
+        with("temperature", json!("warm")),
+        with("effort", json!("extreme")),
     ] {
         assert!(s.run("ai.saveProfile", &bad).is_err(), "{bad}");
     }
@@ -390,4 +394,31 @@ fn a_question_says_what_its_model_takes_in() {
     s.take_jobs();
     ask(&mut s, "And now?").unwrap();
     assert_eq!(asked(&mut s)[0].3.context, crate::CONTEXT_AT_FIRST);
+}
+
+/// A profile's temperature and how much its model thinks go with every question asked of it;
+/// changed without them they stay, and set back they're no longer said.
+#[test]
+fn a_profiles_temperature_and_thinking_go_with_its_questions() {
+    let mut s = sample_session("ai-tuning");
+    s.run("ai.allow", &json!({"account": "sample", "reach": "local"})).unwrap();
+    let base = json!({"name": "Ollama", "api": "ollama", "url": "http://localhost:11434", "model": "qwen3"});
+    let tuned = json!({"name": "Ollama", "api": "ollama", "url": "http://localhost:11434", "model": "qwen3", "temperature": 0.7, "effort": "off"});
+    let p = s.run("ai.saveProfile", &tuned).unwrap()["id"].as_str().unwrap().to_string();
+    s.take_jobs();
+    ask(&mut s, "What's new?").unwrap();
+    let chat = asked(&mut s).pop().unwrap().3;
+    assert_eq!((chat.temperature, chat.effort), (Some(70), Some(mailcraft_model::AiEffort::Off)));
+    let mut changed = base.clone();
+    changed["id"] = json!(p);
+    s.run("ai.saveProfile", &changed).unwrap();
+    let kept = s.prefs.ai.profile(&p).map(|p| (p.temperature, p.effort));
+    assert_eq!(kept, Some((Some(70), Some(mailcraft_model::AiEffort::Off))), "kept when not given");
+    changed["temperature"] = Value::Null;
+    changed["effort"] = json!("default");
+    s.run("ai.saveProfile", &changed).unwrap();
+    s.take_jobs();
+    ask(&mut s, "And now?").unwrap();
+    let chat = asked(&mut s).pop().unwrap().3;
+    assert_eq!((chat.temperature, chat.effort), (None, None), "the model's own");
 }

@@ -190,7 +190,7 @@ impl Session {
         } else {
             system
         };
-        Ok(AiChat { system, turns, max_tokens: profile.max_tokens.max(1), tools, context: 0 })
+        Ok(AiChat { system, turns, max_tokens: profile.max_tokens.max(1), tools, ..AiChat::default() })
     }
 }
 

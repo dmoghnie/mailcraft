@@ -52,7 +52,14 @@ fn ollamas_tool_calls_and_results_go_by_the_tools_name() {
         AiToolResult { id: "c2".into(), content: "no such message".into(), error: true },
     ];
     let tools = vec![AiTool { name: "search_mail".into(), description: "Search the mail".into(), schema: json!({"type": "object"}) }];
-    let chat = AiChat { system: "Help.".into(), turns: vec![AiTurn::user("Find the invoice"), said, back], max_tokens: 512, tools, context: 8192 };
+    let chat = AiChat {
+        system: "Help.".into(),
+        turns: vec![AiTurn::user("Find the invoice"), said, back],
+        max_tokens: 512,
+        tools,
+        context: 8192,
+        ..AiChat::default()
+    };
     let calls = json!([
         {"function": {"name": "search_mail", "arguments": {"query": "receipt"}}},
         {"id": "x7", "function": {"name": "read_message", "arguments": {"id": "m1"}}},

@@ -26,6 +26,13 @@ pub(super) fn request(base: &str, endpoint: &AiEndpoint, key: Option<&str>, chat
             .collect();
         body["tools"] = Value::Array(tools);
     }
+    if let Some(t) = temperature(chat) {
+        body["temperature"] = t;
+    }
+    // Off is `none`, as OpenAI's newer models and Ollama's compatible address take it.
+    if let Some(e) = chat.effort {
+        body["reasoning_effort"] = json!(if e == AiEffort::Off { "none" } else { e.code() });
+    }
     let bearer = key.map(|k| format!("Bearer {k}"));
     let headers: Vec<(&str, &str)> = bearer.iter().map(|b| ("Authorization", b.as_str())).collect();
     post(format!("{base}/chat/completions"), &headers, &body)

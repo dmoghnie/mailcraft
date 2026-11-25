@@ -1,6 +1,6 @@
 //! The commands that set MailCraft's AI up (File › Options › AI) and show what it sent.
 
-use mailcraft_model::{AiApi, AiEndpoint, AiWork, Job, Secret};
+use mailcraft_model::{AiApi, AiEffort, AiEndpoint, AiWork, Job, Secret};
 use serde_json::{Value, json};
 
 use super::{AiProfile, AiReach, AiTask, settings::CHATS_DAYS_MOST, settings::local_url};
@@ -21,6 +21,8 @@ const CONTEXT_LEAST: u32 = 2048;
 const TEXT_MOST: usize = 200;
 /// The longest key, in bytes.
 pub(super) const KEY_MOST: usize = 4096;
+/// The highest temperature a profile may set, in hundredths (the most any server takes).
+const TEMPERATURE_MOST: u16 = 200;
 /// The longest question `ai.ask` sends, its instructions with it, in bytes.
 const QUESTION_MOST: usize = 1 << 20;
 
@@ -28,7 +30,7 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
     vec![
         CommandSpec::new("ai.settings", "Show MailCraft's AI settings", WHERE, |s, _| Ok(settings(s))),
         CommandSpec::new("ai.saveProfile", "Add or change a model MailCraft's AI may ask", WHERE, save_profile).params(
-            r#"{"id"?: string (none: a new profile), "name": string, "api": "openAi"|"anthropic"|"ollama" (Ollama's own, told what the model takes in), "url": string (the API address, up to its version: https://api.openai.com/v1; Ollama's own: http://localhost:11434), "model": string, "maxTokens"?: number, "context"?: number (what the model takes in at once, in tokens; 0: 32768, Ollama's own), "fallback"?: string (a profile asked instead when this one fails; "": none), "scripts"?: boolean (the assistant may run scripts it writes: code mode), "key"?: string (kept in the keychain; "": forgotten)}"#,
+            r#"{"id"?: string (none: a new profile), "name": string, "api": "openAi"|"anthropic"|"ollama" (Ollama's own, told what the model takes in), "url": string (the API address, up to its version: https://api.openai.com/v1; Ollama's own: http://localhost:11434), "model": string, "maxTokens"?: number, "context"?: number (what the model takes in at once, in tokens; 0: 32768, Ollama's own), "fallback"?: string (a profile asked instead when this one fails; "": none), "scripts"?: boolean (the assistant may run scripts it writes: code mode), "temperature"?: number|null (0 to 2; null: the model's own; not every model takes one), "effort"?: "default"|"off"|"low"|"medium"|"high" (how much it thinks before it answers; default: as the model does), "key"?: string (kept in the keychain; "": forgotten)}"#,
         ),
         CommandSpec::new("ai.removeProfile", "Remove a model and forget its key", WHERE, |s, v| {
             let id = p::req_str(v, "id")?.to_string();
@@ -177,7 +179,8 @@ fn save_profile(s: &mut Session, v: &Value) -> CmdResult {
     };
     let context = if context == u32::MAX { old.as_ref().map_or(0, |o| o.context) } else { context };
     let scripts = p::bool(v, "scripts").unwrap_or_else(|| old.as_ref().is_some_and(|o| o.scripts));
-    let profile = AiProfile { id: id.clone(), name, endpoint, has_key, max_tokens, context, fallback, scripts, agent: false };
+    let (temperature, effort) = tuning(v, old.as_ref())?;
+    let profile = AiProfile { id: id.clone(), name, endpoint, has_key, max_tokens, context, fallback, temperature, effort, scripts, agent: false };
     match key {
         Some(k) => s.jobs.push(Job::Ai { work: AiWork::SaveKey { name: id.clone(), key: (!k.is_empty()).then(|| Secret(k.to_string())) } }),
         None if moved => s.jobs.push(Job::Ai { work: AiWork::SaveKey { name: id.clone(), key: None } }),
@@ -190,6 +193,26 @@ fn save_profile(s: &mut Session, v: &Value) -> CmdResult {
         None => s.prefs.ai.profiles.push(profile),
     }
     Ok(json!({"id": id, "local": local}))
+}
+
+/// A profile's temperature and how much it thinks, as `v` sets them; one not given stays as
+/// `old` had it.
+fn tuning(v: &Value, old: Option<&AiProfile>) -> Result<(Option<u16>, Option<AiEffort>), CmdError> {
+    let temperature = match v.get("temperature") {
+        None => old.and_then(|o| o.temperature),
+        Some(Value::Null) => None,
+        Some(t) => {
+            // In hundredths, so the settings compare exactly: 0.7 is 70.
+            let hundredths = t.as_f64().filter(|t| (0.0..=f64::from(TEMPERATURE_MOST) / 100.0).contains(t)).map(|t| (t * 100.0).round() as u16);
+            Some(hundredths.ok_or_else(|| CmdError::Params(format!("`temperature` is a number from 0 to {}, or null", TEMPERATURE_MOST / 100)))?)
+        }
+    };
+    let effort = match p::str(v, "effort") {
+        None => old.and_then(|o| o.effort),
+        Some("default") => None,
+        Some(e) => Some(AiEffort::from_code(e).ok_or_else(|| CmdError::Params("`effort` is default, off, low, medium or high".into()))?),
+    };
+    Ok((temperature, effort))
 }
 
 /// The first `p<n>` no profile has.

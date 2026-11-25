@@ -21,6 +21,9 @@ pub(super) fn request(base: &str, endpoint: &AiEndpoint, key: Option<&str>, chat
     if chat.context > 0 {
         options["num_ctx"] = json!(chat.context);
     }
+    if let Some(t) = temperature(chat) {
+        options["temperature"] = t;
+    }
     // Longer than that, the question is to be refused rather than its start dropped (`truncate`)
     // or its middle (`shift`), and the answer to stop where the context ends.
     let mut body = json!({"model": endpoint.model, "messages": messages, "stream": stream, "options": options, "truncate": false, "shift": false});
@@ -31,6 +34,12 @@ pub(super) fn request(base: &str, endpoint: &AiEndpoint, key: Option<&str>, chat
             .map(|t| json!({"type": "function", "function": {"name": t.name, "description": t.description, "parameters": t.schema}}))
             .collect();
         body["tools"] = Value::Array(tools);
+    }
+    // Off is `false`; a level, for a model that has levels (one that hasn't thinks as it does).
+    match chat.effort {
+        Some(AiEffort::Off) => body["think"] = Value::Bool(false),
+        Some(e) => body["think"] = json!(e.code()),
+        None => {}
     }
     let bearer = key.map(|k| format!("Bearer {k}"));
     let headers: Vec<(&str, &str)> = bearer.iter().map(|b| ("Authorization", b.as_str())).collect();

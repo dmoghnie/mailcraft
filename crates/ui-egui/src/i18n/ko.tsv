@@ -2310,3 +2310,7 @@ count	occurrences	회
 	From a few words	몇 단어로
 	It couldn't be rewritten: {error}	다시 쓰지 못했습니다: {error}
 	Follow-up	후속 메일
+	Temperature	온도
+	Its own	모델 기본값
+	Thinking	사고
+	Not every model takes these: Test shows whether it does.	모든 모델이 이 설정을 받지는 않습니다. 받는지는 '테스트'로 알 수 있습니다.

@@ -189,7 +189,14 @@ impl Session {
     fn ai_send(&mut self, id: u64, mut w: Waiting, profile: &AiProfile) {
         // The server told what the model takes in (Ollama's own format) is told what the chat was
         // fitted into, so it neither cuts it short nor sets aside more than it needs.
-        let chat = AiChat { max_tokens: w.chat.max_tokens.min(profile.max_tokens.max(1)), context: profile.takes_in(), ..w.chat.clone() };
+        // Its temperature and how much it thinks are the profile's.
+        let chat = AiChat {
+            max_tokens: w.chat.max_tokens.min(profile.max_tokens.max(1)),
+            context: profile.takes_in(),
+            temperature: profile.temperature,
+            effort: profile.effort,
+            ..w.chat.clone()
+        };
         let size = chat.size();
         w.logged = self.ai_record(AiLogEntry {
             at: self.clock.now,

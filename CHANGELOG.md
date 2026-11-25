@@ -67,6 +67,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - **Translate with AI** in a message's More actions translates it into the interface's language, its subject and text, in a card at the top of the reading pane as it's written (`mail.translate`; its mail goes only where its account lets it).
 - **Rewrite with AI**, in the bar over a message being written, makes your text shorter, warmer or more formal, or fixes its spelling and grammar; **Write it from a few words** writes it from what you say it should say ("say yes, but Thursday"), in the language of the message it answers. What's written shows in a card over the text and goes in only with **Replace** (**Undo** takes it back); the quoted original and the signature stay (`compose.rewrite`, `compose.writeFrom`).
 - **Write a follow-up**, under the Inbox's No answer yet, has MailCraft's AI write the nudge too, once a model may have the account's mail: a short, polite follow-up in the language of your message, in its card over the reply until you put it in (`mail.noAnswerFollowUp` with `write`).
+- **A model's temperature and thinking**, in its dialog under File › Options › AI: a temperature, and how much a model that thinks before it answers does (off, low, medium or high), told each server in its own words; left alone, the model's own.
 
 ### Changed
 

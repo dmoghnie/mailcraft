@@ -2307,3 +2307,7 @@ count	occurrences	回
 	From a few words	数語から
 	It couldn't be rewritten: {error}	書き直せませんでした: {error}
 	Follow-up	フォローアップ
+	Temperature	温度
+	Its own	モデルの既定
+	Thinking	思考
+	Not every model takes these: Test shows whether it does.	これらを受け付けないモデルもあります。受け付けるかどうかは「テスト」でわかります。

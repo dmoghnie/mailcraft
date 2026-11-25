@@ -2306,3 +2306,7 @@ count	occurrences	مرات
 	From a few words	من بضع كلمات
 	It couldn't be rewritten: {error}	تعذّرت إعادة الكتابة: {error}
 	Follow-up	رسالة متابعة
+	Temperature	درجة الحرارة
+	Its own	الافتراضي للنموذج
+	Thinking	التفكير
+	Not every model takes these: Test shows whether it does.	لا تقبل كل النماذج هذه الإعدادات: يُظهر «اختبره» ما إذا كان النموذج يقبلها.

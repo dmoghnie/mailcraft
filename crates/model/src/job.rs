@@ -21,7 +21,7 @@ mod status;
 mod transfer;
 mod vacation;
 pub mod work;
-pub use ai::{AiAnswer, AiApi, AiChat, AiDone, AiEndpoint, AiRole, AiTool, AiToolCall, AiToolResult, AiTurn, AiWork};
+pub use ai::{AiAnswer, AiApi, AiChat, AiDone, AiEffort, AiEndpoint, AiRole, AiTool, AiToolCall, AiToolResult, AiTurn, AiWork};
 pub use compact::*;
 pub use eta::Eta;
 pub use import::*;

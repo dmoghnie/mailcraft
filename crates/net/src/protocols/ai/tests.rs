@@ -4,6 +4,7 @@ use crate::fakes::fake_ai::ModelServer;
 mod ollama;
 mod streaming;
 mod tools;
+mod tuning;
 use mailcraft_model::AiTurn;
 use serde_json::json;
 
@@ -19,7 +20,7 @@ fn chat() -> AiChat {
         turns: vec![AiTurn::user("Who wrote?"), AiTurn::assistant("Sam did."), AiTurn::user("hello")],
         max_tokens: 256,
         tools: Vec::new(),
-        context: 0,
+        ..AiChat::default()
     }
 }
 

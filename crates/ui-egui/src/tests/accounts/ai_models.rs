@@ -4,7 +4,7 @@
 
 use super::*;
 use crate::dialogs::ServerForm;
-use mailcraft_engine::model::{AiAnswer, AiApi, AiDone, McpDone, McpOAuth, McpTarget, McpTool, Secret};
+use mailcraft_engine::model::{AiAnswer, AiApi, AiDone, AiEffort, McpDone, McpOAuth, McpTarget, McpTool, Secret};
 use mailcraft_engine::{AiReach, AiTest};
 
 const KEY: &str = "sk-ui-test-0123";
@@ -62,6 +62,35 @@ fn a_model_is_added_on_options_its_key_kept_out_of_the_settings() {
     let texts = drawn_strings(&ctx, &mut a, TALL);
     assert!(has(&texts, "Its key couldn't be kept: there's no keychain to keep it in"), "{texts:?}");
     assert!(!a.session.prefs.ai.profiles[0].has_key);
+}
+
+/// The dialog's temperature (typed with a comma too) and thinking are kept with the model, shown
+/// again when it's changed; one that isn't a number keeps the dialog open, saying why.
+#[test]
+fn a_models_temperature_and_thinking_are_set_in_its_dialog() {
+    let _tall = crate::tests::windows::layout::Dressed::new(TALL, "");
+    let (mut a, ctx) = options("ai-options-tuning");
+    click_named(&ctx, &mut a, "Add…");
+    frame(&ctx, &mut a, vec![]);
+    let texts = drawn_strings(&ctx, &mut a, TALL);
+    assert!(has(&texts, "Temperature") && has(&texts, "Thinking"), "{texts:?}");
+    let Some(Dialog::AiModel(f)) = a.ui.dialog.as_mut() else { panic!("the model's dialog: {:?}", a.ui.dialog) };
+    (f.name, f.api, f.url, f.model) = ("Local".into(), AiApi::Ollama, "http://localhost:11434".into(), "qwen3".into());
+    f.temperature = "warm".into();
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "Save");
+    frame(&ctx, &mut a, vec![]);
+    let Some(Dialog::AiModel(f)) = a.ui.dialog.as_mut() else { panic!("still open: {:?}", a.ui.dialog) };
+    assert!(f.error.as_deref().is_some_and(|e| e.contains("temperature")), "{:?}", f.error);
+    f.temperature = "0,7".into();
+    f.effort = Some(AiEffort::High);
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "Save");
+    assert!(a.ui.dialog.is_none(), "saved: {:?}", a.ui.dialog);
+    let p = &a.session.prefs.ai.profiles[0];
+    assert_eq!((p.temperature, p.effort), (Some(70), Some(AiEffort::High)));
+    let again = crate::dialogs::AiModelForm::of(p);
+    assert_eq!((again.temperature.as_str(), again.effort), ("0.7", Some(AiEffort::High)));
 }
 
 #[test]

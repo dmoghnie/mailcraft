@@ -24,6 +24,16 @@ pub(super) fn request(base: &str, endpoint: &AiEndpoint, key: Option<&str>, chat
         let tools: Vec<Value> = chat.tools.iter().map(|t| json!({"name": t.name, "description": t.description, "input_schema": t.schema})).collect();
         body["tools"] = Value::Array(tools);
     }
+    // Its current models take no temperature: one set is for an older model that does.
+    if let Some(t) = temperature(chat) {
+        body["temperature"] = t;
+    }
+    // Off turns thinking off; a level is the effort the model puts into its answer.
+    match chat.effort {
+        Some(AiEffort::Off) => body["thinking"] = json!({"type": "disabled"}),
+        Some(e) => body["output_config"] = json!({"effort": e.code()}),
+        None => {}
+    }
     let headers: Vec<(&str, &str)> = key.map(|k| ("x-api-key", k)).into_iter().chain([("anthropic-version", VERSION)]).collect();
     post(format!("{base}/messages"), &headers, &body)
 }

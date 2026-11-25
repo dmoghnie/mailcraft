@@ -2,7 +2,7 @@
 //! format it speaks, the model, and its key, which goes to the keychain.
 
 use mailcraft_engine::AiProfile;
-use mailcraft_engine::model::{AiApi, Secret};
+use mailcraft_engine::model::{AiApi, AiEffort, Secret};
 
 use super::*;
 
@@ -34,6 +34,10 @@ pub struct AiModelForm {
     pub max_tokens: String,
     /// What the model takes in at once, in tokens, as typed (empty: as at first).
     pub context: String,
+    /// Its temperature, as typed (empty: the model's own).
+    pub temperature: String,
+    /// How much it thinks; none: as the model does.
+    pub effort: Option<AiEffort>,
     /// The profile asked instead when this one fails.
     pub fallback: Option<String>,
     /// The assistant may run scripts it writes with it.
@@ -53,6 +57,8 @@ impl AiModelForm {
             has_key: p.has_key,
             max_tokens: p.max_tokens.to_string(),
             context: if p.context > 0 { p.context.to_string() } else { String::new() },
+            temperature: p.temperature.map(|t| (f64::from(t) / 100.0).to_string()).unwrap_or_default(),
+            effort: p.effort,
             fallback: p.fallback.clone(),
             scripts: p.scripts,
             ..AiModelForm::default()
@@ -83,6 +89,14 @@ impl AiModelForm {
         } else if let Ok(n) = context.parse::<u64>() {
             p["context"] = json!(n);
         }
+        // One that isn't a number goes as typed, for the engine to say what it should be.
+        let temperature = self.temperature.trim().replace(',', ".");
+        p["temperature"] = match temperature.parse::<f64>().ok().filter(|t| t.is_finite()) {
+            _ if temperature.is_empty() => serde_json::Value::Null,
+            Some(t) => json!(t),
+            None => json!(temperature),
+        };
+        p["effort"] = json!(self.effort.map_or("default", AiEffort::code));
         let key = self.key.0.trim();
         if !key.is_empty() {
             p["key"] = json!(key);
@@ -140,6 +154,7 @@ pub(crate) fn draw(ui: &mut Ui, f: &mut AiModelForm, s: &Session, t: &Tokens, ac
     field(ui, tl!("Takes in at once, in tokens"));
     let at_first = mailcraft_engine::CONTEXT_AT_FIRST.to_string();
     ui.add(egui::TextEdit::singleline(&mut f.context).hint_text(at_first).desired_width(120.0));
+    tuning(ui, f, t);
     fallback(ui, f, s);
     ui.add_space(6.0);
     ui.checkbox(&mut f.scripts, tl!("Let it write and run scripts"));
@@ -170,6 +185,35 @@ pub(crate) fn draw(ui: &mut Ui, f: &mut AiModelForm, s: &Session, t: &Tokens, ac
         acts.push(Action::Submit("ai.saveProfile", f.params()));
     }
     !cancel
+}
+
+/// Its temperature and how much it thinks, each the model's own unless set.
+fn tuning(ui: &mut Ui, f: &mut AiModelForm, t: &Tokens) {
+    ui.add_space(6.0);
+    ui.horizontal(|ui| {
+        ui.label(RichText::new(tl!("Temperature")).color(t.text));
+        ui.add(egui::TextEdit::singleline(&mut f.temperature).hint_text(tl!("Its own")).desired_width(70.0));
+        ui.add_space(16.0);
+        ui.label(RichText::new(tl!("Thinking")).color(t.text));
+        egui::ComboBox::from_id_salt("ai-model-thinking").selected_text(thinking(f.effort)).show_ui(ui, |ui| {
+            for e in std::iter::once(None).chain(AiEffort::ALL.map(Some)) {
+                ui.selectable_value(&mut f.effort, e, thinking(e));
+            }
+        });
+    });
+    let note = tl!("Not every model takes these: Test shows whether it does.");
+    ui.add(egui::Label::new(RichText::new(note).color(t.faint).small()).wrap());
+}
+
+/// How much a model thinks, as the dialog names it.
+fn thinking(e: Option<AiEffort>) -> &'static str {
+    match e {
+        None => tl!("Its own"),
+        Some(AiEffort::Off) => tl!("Off"),
+        Some(AiEffort::Low) => tl!("Low"),
+        Some(AiEffort::Medium) => tl!("Medium"),
+        Some(AiEffort::High) => tl!("High"),
+    }
 }
 
 /// The model asked instead when this one fails: none, or another.

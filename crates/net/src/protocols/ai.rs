@@ -8,7 +8,7 @@ use std::net::{Shutdown, TcpStream};
 use std::sync::{Arc, Mutex, PoisonError};
 use std::time::Duration;
 
-use mailcraft_model::{AiAnswer, AiApi, AiChat, AiEndpoint};
+use mailcraft_model::{AiAnswer, AiApi, AiChat, AiEffort, AiEndpoint};
 use serde_json::Value;
 
 use crate::http::{self, Request, Response, Url};
@@ -234,6 +234,11 @@ fn address(url: &str) -> Result<String> {
 }
 
 /// A request posting `body` to `url` with `headers`, its answer at most [`MAX_ANSWER`].
+/// A chat's temperature, as the servers take it (0.7 for 70 hundredths), if it has one.
+fn temperature(chat: &AiChat) -> Option<Value> {
+    chat.temperature.map(|t| serde_json::json!(f64::from(t) / 100.0))
+}
+
 fn post(url: String, headers: &[(&str, &str)], body: &Value) -> Request {
     let req = Request::post(&url, "application/json", body.to_string().into_bytes(), MAX_ANSWER);
     headers.iter().fold(req, |r, (name, value)| r.header(name, value))

@@ -5,7 +5,7 @@
 use std::collections::BTreeMap;
 use std::net::IpAddr;
 
-use mailcraft_model::AiEndpoint;
+use mailcraft_model::{AiEffort, AiEndpoint};
 use serde::{Deserialize, Serialize};
 
 /// A kind of work a profile does; each AI feature names the one it needs.
@@ -64,6 +64,12 @@ pub struct AiProfile {
     /// computer, say).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fallback: Option<String>,
+    /// Its temperature, in hundredths (0 to 200); none: the model's own.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub temperature: Option<u16>,
+    /// How much it thinks before it answers; none: as the model does.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub effort: Option<AiEffort>,
     /// The assistant may run scripts it writes with it (code mode): off until the person turns
     /// it on.
     #[serde(skip_serializing_if = "std::ops::Not::not")]

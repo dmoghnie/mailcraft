@@ -25,6 +25,37 @@ pub enum AiApi {
     Ollama,
 }
 
+/// How much a model that thinks before it answers is asked to: each server is told in its own
+/// words (OpenAI's `reasoning_effort`, Anthropic's effort, Ollama's `think`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum AiEffort {
+    /// Not at all, where the model can answer without.
+    Off,
+    Low,
+    Medium,
+    High,
+}
+
+impl AiEffort {
+    /// Every one, least first.
+    pub const ALL: [AiEffort; 4] = [AiEffort::Off, AiEffort::Low, AiEffort::Medium, AiEffort::High];
+
+    /// Its name in the settings and the commands: `off`, `low`, `medium`, `high`.
+    pub fn code(self) -> &'static str {
+        match self {
+            AiEffort::Off => "off",
+            AiEffort::Low => "low",
+            AiEffort::Medium => "medium",
+            AiEffort::High => "high",
+        }
+    }
+
+    pub fn from_code(code: &str) -> Option<AiEffort> {
+        AiEffort::ALL.into_iter().find(|e| e.code() == code)
+    }
+}
+
 /// A model on a server: what a profile names.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -143,12 +174,18 @@ pub struct AiChat {
     /// format); 0: the server's own.
     #[serde(default)]
     pub context: u32,
+    /// Its temperature, in hundredths (0 to 200); none: the model's own.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub temperature: Option<u16>,
+    /// How much it thinks before it answers; none: as the model does.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effort: Option<AiEffort>,
 }
 
 impl AiChat {
     /// One question, with its instructions.
     pub fn ask(system: &str, question: &str, max_tokens: u32) -> AiChat {
-        AiChat { system: system.into(), turns: vec![AiTurn::user(question)], max_tokens, tools: Vec::new(), context: 0 }
+        AiChat { system: system.into(), turns: vec![AiTurn::user(question)], max_tokens, ..AiChat::default() }
     }
 
     /// Its bytes, as the record counts them: the instructions and every turn.
