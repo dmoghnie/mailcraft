@@ -151,3 +151,29 @@ fn mailcrafts_own_scripts_run() {
         assert!(!r.error && r.content.contains("It came to: "), "{name}: {}", r.content);
     }
 }
+
+/// An outside agent, or the CLI, runs a kept script or code of its own at once (`script.run`),
+/// let in only to read: it reads every account, as the agent's own commands do, whatever
+/// MailCraft's AI may read; a change it calls for fails, as a question to a model does; one
+/// turned off isn't run.
+#[test]
+fn an_agent_runs_a_script_that_only_reads() {
+    let mut s = ready("kept-scripts-agent");
+    s.run("ai.allow", &json!({"account": "sample", "reach": "off"})).unwrap();
+    save(&mut s, "subject_of", SUBJECT_OF).unwrap();
+    s.prefs.agents = true;
+    let run = json!({"id": "script.run", "params": {"name": "subject_of", "params": {"about": "storyboard"}}});
+    let m = json!({"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "run_command", "arguments": run}});
+    let a: Value = serde_json::from_str(&crate::mcp::answer(&mut s, &m.to_string()).unwrap()).unwrap();
+    assert_eq!(a["result"]["isError"], false, "{a}");
+    assert!(a["result"]["content"][0]["text"].as_str().is_some_and(|t| t.contains(STORYBOARD)), "{a}");
+    let v = s.run("script.run", &json!({"code": r#"print("found"); subject_of(#{about: "storyboard"})"#})).unwrap();
+    assert!(v["value"].as_str().is_some_and(|t| t.contains(STORYBOARD)) && v["printed"].as_str().is_some_and(|p| p.contains("found")), "{v}");
+    for (code, why) in [(r#"move_messages(#{ids: ["m1"], folder: "archive"})"#, "only reads"), (r#"ask("Which?", "text")"#, "no model")] {
+        let e = s.run("script.run", &json!({"code": code})).unwrap_err().to_string();
+        assert!(e.contains(why), "{e}");
+    }
+    s.run("script.turn", &json!({"name": "subject_of", "on": false})).unwrap();
+    assert!(s.run("script.run", &json!({"name": "subject_of"})).is_err(), "off");
+    assert!(s.run("script.run", &json!({"name": "today", "code": "1"})).is_err(), "a name or code, not both");
+}

@@ -89,6 +89,7 @@ pub const READS: &[&str] = &[
     "searchFolder.list",
     "searchFolder.open",
     "script.list",
+    "script.run",
     "task.list",
 ];
 

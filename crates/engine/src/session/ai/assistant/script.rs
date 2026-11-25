@@ -8,6 +8,7 @@
 //! runs again from its start with what its calls were answered so far ([`run`]). A model runs
 //! scripts only when the person let it (File › Options › AI).
 
+mod agents;
 mod asking;
 mod kept;
 mod run;

@@ -359,6 +359,7 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
             Ok(json!({"deleted": name}))
         })
         .params(r#"{"name": string}"#),
+        super::agents::command(),
     ]
 }
 

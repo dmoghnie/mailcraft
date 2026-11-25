@@ -68,6 +68,10 @@ pub struct AiProfile {
     /// it on.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub scripts: bool,
+    /// Not a model but an outside agent, whose script reads every account (`script.run`), as
+    /// the agent's own commands do: made in code alone, never read from the settings.
+    #[serde(skip)]
+    pub(crate) agent: bool,
 }
 
 impl AiProfile {
@@ -127,6 +131,9 @@ impl AiPrefs {
 
     /// Whether `profile` may be asked about mail of `account`.
     pub fn allows(&self, profile: &AiProfile, account: Option<&str>) -> bool {
+        if profile.agent {
+            return true;
+        }
         match self.reach(account) {
             Some(AiReach::Any) => true,
             Some(AiReach::Local) => profile.local(),

@@ -177,7 +177,7 @@ fn save_profile(s: &mut Session, v: &Value) -> CmdResult {
     };
     let context = if context == u32::MAX { old.as_ref().map_or(0, |o| o.context) } else { context };
     let scripts = p::bool(v, "scripts").unwrap_or_else(|| old.as_ref().is_some_and(|o| o.scripts));
-    let profile = AiProfile { id: id.clone(), name, endpoint, has_key, max_tokens, context, fallback, scripts };
+    let profile = AiProfile { id: id.clone(), name, endpoint, has_key, max_tokens, context, fallback, scripts, agent: false };
     match key {
         Some(k) => s.jobs.push(Job::Ai { work: AiWork::SaveKey { name: id.clone(), key: (!k.is_empty()).then(|| Secret(k.to_string())) } }),
         None if moved => s.jobs.push(Job::Ai { work: AiWork::SaveKey { name: id.clone(), key: None } }),
