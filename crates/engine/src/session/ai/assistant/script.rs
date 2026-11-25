@@ -16,7 +16,7 @@ mod values;
 use mailcraft_model::{AiTool, AiToolCall, MessageKey};
 use serde_json::{Value, json};
 
-use self::run::{Answer, CALLS_MOST, Call, OPS_ALL, Ran, Runner};
+use self::run::{Answer, CALLS_MOST, Call, OPS_ALL, RHAI, Ran, Runner};
 use super::context::cut;
 use super::exchange::run_of;
 use super::looking::said;
@@ -43,13 +43,26 @@ fn script_tools() -> Vec<String> {
     tools().into_iter().map(|t| t.name).collect()
 }
 
-const DESCRIPTION: &str = "Run a script, in Rhai (a small language like Rust and JavaScript), that calls the tools that find and read as functions, to do in one step what would take many calls. Each takes a map of what the tool takes, or nothing, and gives data (maps and arrays) rather than text: `let found = find_messages(#{query: \"is:unread\", limit: 50}); for m in found.messages { if m.from.email.ends_with(\"@acme.example\") { print(`${m.when}: ${m.subject}`); } }`. read_message(id) gives a message with its text. Messages, events, people, tasks and notes have the ids the tools take; dates are Unix seconds, with `when` as the person reads them; now() is the time now. What it prints, and the value it ends with, come back to you. A tool that fails throws an error (try/catch). A tool that changes (move_messages, add_task…) proposes the change and gives #{proposed: what it does}: nothing changes until the person approves it, after the script ended, and you're told what they decided. At most 100 calls and 20 changes; no files, network or modules.";
+/// The example the model is shown: it runs, as a test checks.
+pub(super) const EXAMPLE: &str = r#"let found = find_messages(#{query: "from:acme.example", limit: 50});
+let unread = found.messages.filter(|m| m.unread);
+for m in unread { print(`${m.when}: ${m.subject}`); }
+let ids = unread.map(|m| m.id);
+if ids.len() > 0 { print(move_messages(#{ids: ids, folder: "archive"}).proposed); }
+ids.len()"#;
+
+/// The tool, as the model is told it.
+fn description() -> String {
+    format!(
+        "Run a script, in Rhai, that calls the tools as functions, to do in one step what would take many calls. Each tool takes ONE map, written #{{key: value}}, or nothing: find_messages(#{{query: \"is:unread\", limit: 50}}), move_messages(#{{ids: ids, folder: \"archive\"}}); read_message(id) takes an id. {RHAI} The tools give data (maps and arrays) rather than text, for example:\n{EXAMPLE}\nread_message gives a message with its text. Messages, events, people, tasks and notes have the ids the tools take; dates are Unix seconds, with `when` as the person reads them; now() is the time now. What it prints, and the value it ends with, come back to you. A tool that fails throws an error (try/catch). A tool that changes (move_messages, add_task…) proposes the change and gives #{{proposed: what it does}}: nothing changes until the person approves it, after the script ended, and you're told what they decided. At most 100 calls and 20 changes; no files, network or modules."
+    )
+}
 
 /// `run_script`, as the model is told it.
 pub(super) fn tool() -> AiTool {
     AiTool {
         name: RUN_SCRIPT.into(),
-        description: DESCRIPTION.into(),
+        description: description(),
         schema: json!({"type": "object", "properties": {
             "script": {"type": "string", "description": "The script, in Rhai"},
             "what": {"type": "string", "description": "What it does, in a few words, for the person (\"Find who I haven't answered\")"}}, "required": ["script"]}),

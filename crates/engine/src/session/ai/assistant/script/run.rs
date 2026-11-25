@@ -12,6 +12,10 @@ use serde_json::{Value, json};
 
 use super::values::{to_json, to_script};
 
+/// Rhai as models get it wrong, writing it as Rust or Python: told with the tool, and again
+/// when a script doesn't compile.
+pub(crate) const RHAI: &str = "Rhai is neither Rust nor Python: it has no named arguments (find_messages(query: \"x\") doesn't compile), no iter(), collect(), :: or types. An array has map, filter, len, push and contains; for x in array { … } loops; let declares; `${x}` in backticks is a value in a string.";
+
 /// The most calls a script makes, in all.
 pub(crate) const CALLS_MOST: usize = 100;
 /// The most operations one run takes, and all of a script's runs together.
@@ -165,7 +169,7 @@ impl Runner {
             r.borrow_mut().call(Call { name: "ask".into(), input: json!({"question": q, "text": text}) })
         });
         engine.register_fn("now", move || now);
-        let ast = engine.compile(source).map_err(|e| format!("the script doesn't compile: {e}"))?;
+        let ast = engine.compile(source).map_err(|e| format!("the script doesn't compile: {e}. {RHAI}"))?;
         Ok(Runner { engine, ast, replay, printed, ops })
     }
 

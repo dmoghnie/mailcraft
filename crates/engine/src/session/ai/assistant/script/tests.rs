@@ -4,10 +4,11 @@
 use proptest::prelude::*;
 use serde_json::{Value, json};
 
+use super::EXAMPLE;
 use super::run::{Answer, CALLS_MOST, Call, OPS_ALL, PRINTED_MOST, Ran, Runner};
 use super::values::{to_json, to_script};
 
-const TOOLS: [&str; 2] = ["find_messages", "read_message"];
+const TOOLS: [&str; 3] = ["find_messages", "read_message", "move_messages"];
 
 fn runner(source: &str) -> Runner {
     Runner::new(source, &TOOLS, 1_791_979_200).unwrap()
@@ -117,6 +118,29 @@ fn what_a_script_may_not_use_is_not_there() {
     assert!(Runner::new(r#"import "x" as y;"#, &TOOLS, 0).is_err());
     assert!(Runner::new("print(nothing_declared)", &TOOLS, 0).is_err_and(|e| e.contains("nothing_declared")));
     assert!(matches!(run("timestamp()", &[]), Ran::Failed(_)));
+}
+
+/// A script written as Rust or Python is told how Rhai differs, with why it doesn't compile.
+#[test]
+fn a_script_that_doesnt_compile_is_told_how_rhai_differs() {
+    for source in [r#"move_messages(ids: ["m1"], folder: "archive")"#, "let ids = [1, 2].iter().map(|n| n).collect::<Vec<_>>();"] {
+        let why = Runner::new(source, &TOOLS, 0).err().unwrap_or_default();
+        assert!(why.contains("doesn't compile") && why.contains("no named arguments"), "{why}");
+    }
+}
+
+/// The example the model is shown runs: its finding, then its proposal, then its end.
+#[test]
+fn the_example_the_model_is_shown_runs() {
+    let found = json!({"messages": [
+        {"id": "m1", "unread": true, "when": "Mon 09:00", "subject": "Invoice"},
+        {"id": "m2", "unread": false, "when": "Sun 10:00", "subject": "Receipt"}], "total": 2});
+    let find = call("find_messages", json!({"query": "from:acme.example", "limit": 50}));
+    let mut log = vec![(find, Answer::Gave(found))];
+    let Ran::Needs(propose) = run(EXAMPLE, &log) else { panic!("{:?}", run(EXAMPLE, &log)) };
+    assert_eq!(propose, call("move_messages", json!({"ids": ["m1"], "folder": "archive"})));
+    log.push((propose, Answer::Gave(json!({"proposed": "Move 1 message to Archive"}))));
+    assert_eq!(run(EXAMPLE, &log), Ran::Done { printed: "Mon 09:00: Invoice\nMove 1 message to Archive\n".into(), value: json!(1) });
 }
 
 #[test]
