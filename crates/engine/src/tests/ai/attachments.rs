@@ -1,6 +1,7 @@
 //! What's in a file attached to a message, told by MailCraft's AI: a picture goes, as a picture,
-//! to the model chosen for pictures (else the one for questions); a text file's text to the chat
-//! model; each file's answer kept apart; a kind it can't read refused before anything is sent.
+//! to the model chosen for pictures (else the one for questions); a text file's, a PDF's and an
+//! Office file's text to the chat model; each file's answer kept apart; a kind it can't read
+//! refused before anything is sent.
 
 use super::*;
 use crate::AboutKind;
@@ -80,14 +81,27 @@ fn a_text_file_is_read_by_the_chat_model() {
     assert!(s.about_message(&k, AboutKind::Attachment(notes + 1)).is_none(), "each file its own");
 }
 
+/// A PDF's text, and a Word document's and a workbook's, go to the chat model as text.
+#[test]
+fn a_pdf_and_office_files_are_read_as_text() {
+    let mut s = ready("ai-attached-documents");
+    for (name, says) in [("festival-poster-proof.pdf", "FESTIVAL"), ("order-4471.docx", "4471"), ("order-4471.xlsx", "Sheet ")] {
+        let (_, index) = file(&mut s, PROOF, name);
+        s.run("mail.summarizeAttachment", &json!({"index": index})).unwrap();
+        let (_, _, _, chat) = asked(&mut s).pop().expect("a question");
+        let text = &chat.turns[0].text;
+        assert!(text.contains(name) && text.contains(says) && chat.turns[0].images.is_empty(), "{name}: {text}");
+    }
+}
+
 /// A kind of file it can't read, a file the message hasn't, and an account whose mail may not
 /// go: refused, nothing sent.
 #[test]
 fn what_cant_be_read_or_sent_is_refused() {
     let mut s = ready("ai-attached-refused");
-    let (_, sheet) = file(&mut s, PROOF, "order-4471.xlsx");
-    let e = s.run("mail.summarizeAttachment", &json!({"index": sheet})).unwrap_err();
-    assert!(matches!(e, CmdError::Disabled(ref m) if m.contains("can't read this kind of file")), "{e}");
+    assert!(!crate::ai_reads_file("application/zip", "frames.zip") && !crate::ai_reads_file("image/heic", "IMG_1.HEIC"));
+    assert!(crate::ai_reads_file("application/octet-stream", "Proof.PDF") && crate::ai_reads_file("", "deck.pptx"));
+    file(&mut s, PROOF, "order-4471.xlsx");
     assert!(matches!(s.run("mail.summarizeAttachment", &json!({"index": 99})), Err(CmdError::Params(_))));
     assert!(matches!(s.run("mail.summarizeAttachment", &json!({})), Err(CmdError::Params(_))), "no index");
     s.run("ai.allow", &json!({"account": "sample", "reach": "off"})).unwrap();

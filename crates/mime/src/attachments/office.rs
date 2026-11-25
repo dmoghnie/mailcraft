@@ -47,6 +47,40 @@ pub struct Run {
     pub italic: bool,
 }
 
+impl Preview {
+    /// What it says, as plain text: a document's paragraphs (a list's items marked) and its
+    /// tables' rows, cells between tabs; each sheet named before its rows; each slide numbered
+    /// before its paragraphs.
+    pub fn text(&self) -> String {
+        let row = |r: &Vec<String>| r.join("\t").trim_end().to_string();
+        let lines: Vec<String> = match self {
+            Preview::Document(blocks) => blocks
+                .iter()
+                .flat_map(|b| match b {
+                    Block::Paragraph { runs, list, .. } => {
+                        let t: String = runs.iter().map(|r| r.text.as_str()).collect();
+                        vec![if *list { format!("- {t}") } else { t }]
+                    }
+                    Block::Table(rows) => rows.iter().map(row).collect(),
+                })
+                .collect(),
+            Preview::Workbook(sheets) => sheets
+                .iter()
+                .flat_map(|(name, rows)| {
+                    let rows = rows.iter().map(row).filter(|l| !l.is_empty());
+                    std::iter::once(format!("Sheet {name}:")).chain(rows).collect::<Vec<_>>()
+                })
+                .collect(),
+            Preview::Slides(slides) => slides
+                .iter()
+                .enumerate()
+                .flat_map(|(i, paras)| std::iter::once(format!("Slide {}:", i + 1)).chain(paras.iter().cloned()).collect::<Vec<_>>())
+                .collect(),
+        };
+        lines.join("\n")
+    }
+}
+
 /// The kinds of Office file this previews.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Kind {

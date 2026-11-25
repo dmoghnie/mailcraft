@@ -9,6 +9,7 @@ workspace = { members = ["."] }
 # One binary per target, each kept out of `cargo test`, `cargo doc` and `cargo bench`.
 bin = [
     { name = "ai_facts", bench = false, test = false, doc = false, path = "fuzz_targets/ai_facts.rs" }, # what a language model found to act on in a message
+    { name = "file_text", bench = false, test = false, doc = false, path = "fuzz_targets/attachments/file_text.rs" }, # a PDF or an Office file read as text for MailCraft's AI
     { name = "ai_script", bench = false, test = false, doc = false, path = "fuzz_targets/ai_script.rs" }, # the scripts MailCraft's AI writes, run against made-up answers
     { name = "backup", bench = false, test = false, doc = false, path = "fuzz_targets/store/backup.rs" }, # a backup of what the browser keeps
     { name = "data_file", bench = false, test = false, doc = false, path = "fuzz_targets/store/data_file.rs" }, # an account's data file, measured and compressed again

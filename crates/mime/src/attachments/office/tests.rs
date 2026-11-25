@@ -72,6 +72,23 @@ fn a_workbook_and_slides() {
     assert_eq!(p, Preview::Slides(vec![vec!["Title".into(), "Point one\ntwo".into()], vec![]]));
 }
 
+/// What a preview says, as plain text for MailCraft's AI: a document's paragraphs and its
+/// tables' cells between tabs, a list's items marked; each sheet and slide named before its own.
+#[test]
+fn a_preview_as_text() {
+    let run = |t: &str| Run { text: t.into(), ..Run::default() };
+    let doc = Preview::Document(vec![
+        Block::Paragraph { runs: vec![run("Plan "), run("& budget")], heading: true, list: false },
+        Block::Paragraph { runs: vec![run("Print it")], heading: false, list: true },
+        Block::Table(vec![vec!["A1".into(), "B1".into()], vec!["A2".into(), String::new()]]),
+    ]);
+    assert_eq!(doc.text(), "Plan & budget\n- Print it\nA1\tB1\nA2");
+    let book = Preview::Workbook(vec![("Costs".into(), vec![vec!["Item".into(), "42".into()], vec![String::new()]])]);
+    assert_eq!(book.text(), "Sheet Costs:\nItem\t42");
+    let deck = Preview::Slides(vec![vec!["Title".into()], vec![], vec!["Point".into()]]);
+    assert_eq!(deck.text(), "Slide 1:\nTitle\nSlide 2:\nSlide 3:\nPoint");
+}
+
 /// Sheets and slides as the package lists them, each by its relationship to its part: a gap
 /// in the parts' numbers, or an order other than theirs. Read by number, sheet3 (after a
 /// missing sheet2) was never shown, and the first part took the first name.

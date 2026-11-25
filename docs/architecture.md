@@ -231,7 +231,10 @@ and `cargo xtask sizes` enforces them.
   found, so nothing is made until the person saves it. What's in a file
   (`about/attachment.rs`, `mail.summarizeAttachment`, kept by the file's index): a picture goes
   as one (`AiImage`, in each server's own format) to the model for pictures (`AiTask::Vision`,
-  else the one for questions), at most 5 MB; a text file's text to the chat model.
+  else the one for questions), at most 5 MB; a text file's text to the chat model, as a PDF's
+  (`mime::pdf_text`: hayro's interpreter with a device that keeps each glyph's text, words and
+  lines from where they're drawn; the standard fonts built in) and an Office file's (the
+  preview's, `office::Preview::text`). A scanned PDF has no text, and says so.
 - **Rewriting** (`session/ai/rewriting.rs`, `compose.rewrite`, `compose.writeFrom`): only the
   person's own text of the message being written goes (`own_text`: above the quoted original's
   rule and the signature's `-- `), and, written from a few words, the message it answers. One

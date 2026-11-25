@@ -24,6 +24,10 @@ serde = { workspace = true }
 flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
 # Finding MIME boundaries for search without parsing (and decoding) every part: wasm too.
 memchr = "2"
+# A PDF attachment's text, for MailCraft's AI: the interpreter the reading pane's PDF pictures
+# are drawn with (pure Rust, wasm too), its standard fonts built in so text in Helvetica and
+# the other fonts a PDF may leave out is read.
+hayro-interpret = { version = "0.9", default-features = false, features = ["embed-fonts"] }
 
 [features]
 # Outlook's RTF bodies for other crates' tests (`tnef_fixtures`).

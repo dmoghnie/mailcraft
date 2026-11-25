@@ -244,6 +244,16 @@ Test builds update themselves ([how test builds update](updates.md)). These part
 - **Cause:** Chats are written as JSON, as MailCraft's other settings files are; encrypting them
   needs a key kept in the system keychain for them, which isn't done yet.
 
+### 21. Scanned PDFs: not read by MailCraft's AI
+
+- **Impact:** **Summarize with AI** on a PDF that's pictures of its pages (a scan, a fax) says
+  the PDF has no text to read.
+- **Workaround:** Save a page as a picture and attach it to a message to yourself, or open the
+  PDF in an app that recognises text and send that.
+- **Cause:** A PDF's text is read from what its pages draw as text (`mime::pdf_text`). A scan's
+  pages would have to be drawn as pictures and sent to the model for pictures; the engine,
+  which builds for the browser and the phones too, has no PDF renderer, only the window has.
+
 ## Not planned
 
 These are outside MailCraft's control, or accepted as they are.

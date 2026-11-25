@@ -64,6 +64,7 @@ The fuzzer keeps what it finds in `corpus/` and `artifacts/`. Git ignores both f
 | `ical` | iCalendar, written and read back; WebDAV `multistatus` replies |
 | `vcard` | vCard, written and read back |
 | `ai_facts` | What a language model answered when asked what's to act on in a message: read without a crash, its lists capped |
+| `file_text` | A PDF, or a Word, Excel or PowerPoint file, read as text for MailCraft's AI: no crash, its text capped |
 | `ai_script` | A script MailCraft's AI wrote, its calls answered by made-up data: it ends, bounded, without a crash |
 | `backup` | A backup file of what the browser keeps: read, written and read back |
 | `http` | HTTP answers, whole and streamed; `Content-Range`; release data and `SHA256SUMS.txt`; a language model's reply, whole or streamed as events with its tool calls, whose errors never show its key |

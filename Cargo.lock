@@ -4372,6 +4372,7 @@ version = "0.42.0"
 dependencies = [
  "encodify",
  "flate2",
+ "hayro-interpret",
  "html2text",
  "html5ever",
  "mail-builder",
