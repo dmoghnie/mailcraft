@@ -268,8 +268,8 @@ and `cargo xtask sizes` enforces them.
   what the window opens (the event, the person's card, the task, the note). A name is looked up
   only among what the chat has found or seen, and names are kept in saved chats, so how one is
   made never changes.
-- **Not yet:** embeddings (for search), pictures, a monthly budget, the browser and the phones;
-  the assistant's tools for rules, and inviting people or telling them of a change.
+- **Not yet:** embeddings (for search), the browser and the phones; the assistant's tools for
+  rules, and inviting people or telling them of a change.
   A question waits up to five minutes for its answer to start.
 
 ## The session

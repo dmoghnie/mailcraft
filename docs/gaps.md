@@ -341,12 +341,14 @@ Test builds update themselves ([how test builds update](updates.md)). These part
 
 ### 28. MailCraft's AI assistant: what isn't done yet
 
-- **Impact:** The assistant works with mail alone: it can't look at or change the calendar,
-  people, tasks or rules. On its cards, what a change does and why a step failed are in English
-  whatever the interface language. It isn't in the browser or on the phones.
-- **Workaround:** Ask it to write a message, and make the other changes by hand.
+- **Impact:** The assistant finds and changes mail, events, people, tasks and notes, but not
+  rules. A meeting with guests it neither changes nor cancels, and an event it adds invites no
+  one: guests would have to be told. On its cards, what a change does and why a step failed are
+  in English whatever the interface language. It isn't in the browser or on the phones.
+- **Workaround:** Ask it to write a message to the guests, and make the other changes by hand.
 - **Cause:** Each kind of item needs tools of its own, each change a proposal checked again when
-  approved. A card's words are written by the engine, as the CLI and agents read them.
+  approved, and a change guests are told of needs a message the person sees first. A card's
+  words are written by the engine, as the CLI and agents read them.
 
 ### 29. Chats with MailCraft's AI: kept as plain files
 
