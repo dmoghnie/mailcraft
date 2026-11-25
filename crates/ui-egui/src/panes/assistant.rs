@@ -13,9 +13,9 @@ use crate::icons::{self, Icon};
 use crate::theme::{self, Tokens};
 use crate::{Action, UiState, widgets};
 
+pub(crate) mod about;
 mod composer;
 mod markdown;
-pub(crate) mod summary;
 #[cfg(test)]
 mod tests;
 mod turns;

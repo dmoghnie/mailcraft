@@ -96,7 +96,7 @@ pub struct AiState {
     /// The calls to MCP servers waiting, by call: the line of the record each is on.
     pub(super) mcp_calls: HashMap<u64, u64>,
     /// The conversations summed up (`summary.rs`).
-    pub(super) summaries: super::summary::Summaries,
+    pub(super) summaries: super::about::Summaries,
 }
 
 impl AiState {

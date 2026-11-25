@@ -3,13 +3,15 @@
 //! mail go to it; a test sends no mail; what went where is recorded (sizes, never content). The
 //! engine words each question and queues it as a [`mailcraft_model::Job::Ai`]; `net` asks.
 
+mod about;
 mod asking;
 mod assistant;
 mod commands;
 mod servers;
 mod settings;
-mod summary;
 
+pub(crate) use about::commands as summary_commands;
+pub use about::{SUMMARY_PURPOSE, ThreadSummary};
 pub use asking::{AI_LOG_KEPT, AiLogEntry, AiState, AiTest, server_of as ai_server};
 pub(crate) use assistant::assistant_commands;
 #[doc(hidden)]
@@ -22,5 +24,3 @@ pub(crate) use commands::commands as ai_commands;
 pub(crate) use servers::commands as mcp_server_commands;
 pub use servers::{McpServer, ServerTools};
 pub use settings::{AiPrefs, AiProfile, AiReach, AiTask, local_url as ai_url_is_local};
-pub(crate) use summary::commands as summary_commands;
-pub use summary::{SUMMARY_PURPOSE, ThreadSummary};

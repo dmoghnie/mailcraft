@@ -34,7 +34,7 @@ const SYSTEM: &str = "You sum up an email conversation for the person who receiv
 /// A conversation's summary, asked for or written.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct ThreadSummary {
-    /// Its question, while the answer is on its way (what came so far: [`super::AiState::part`]).
+    /// Its question, while the answer is on its way (what came so far: [`crate::AiState::part`]).
     pub asking: Option<u64>,
     pub text: String,
     /// Why there's none.
@@ -143,7 +143,7 @@ impl Session {
 
     /// Question `id`'s answer, from `profile`, if it's a summary's: kept with it, unless that
     /// summary was let go or asked for again since. Whether it was a summary's.
-    pub(super) fn summary_came(&mut self, id: u64, profile: &str, result: &Result<AiAnswer, String>) -> bool {
+    pub(crate) fn summary_came(&mut self, id: u64, profile: &str, result: &Result<AiAnswer, String>) -> bool {
         let Some(key) = self.ai.summaries.asks.remove(&id) else { return false };
         if let Some(s) = self.ai.summaries.by_key.get_mut(&key).filter(|s| s.asking == Some(id)) {
             s.asking = None;

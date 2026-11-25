@@ -190,7 +190,7 @@ fn message(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action
         let top = if pinned.is_some() { 12 } else { 18 };
         egui::Frame::new().inner_margin(Margin { left: 24, right: 24, top, bottom: 24 }).show(ui, |ui| {
             if let Some(cards) = &cards {
-                crate::panes::assistant::summary::card(s, st, ui, &r.key, acts);
+                crate::panes::assistant::about::card(s, st, ui, &r.key, acts);
                 conversation::cards(s, st, ui, &r, summary.as_ref(), cards, getting_ready, acts);
                 return;
             }
@@ -200,7 +200,7 @@ fn message(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action
             };
             let o = Open { r: &r, p, summary: summary.as_ref(), in_window, fold_from: None };
             if pinned.is_some() {
-                crate::panes::assistant::summary::card(s, st, ui, &r.key, acts);
+                crate::panes::assistant::about::card(s, st, ui, &r.key, acts);
                 let above = header::header(s, st, ui, &o, header::Part::Scrolled, acts) > 0.5;
                 message_text(s, st, ui, &o, shown_formatted(s, st, &r.key, p), above, acts);
                 return;
@@ -216,7 +216,7 @@ fn message(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action
             }
             if viewing.is_none() {
                 let _ = header::header(s, st, ui, &o, header::Part::All, acts);
-                crate::panes::assistant::summary::card(s, st, ui, &r.key, acts);
+                crate::panes::assistant::about::card(s, st, ui, &r.key, acts);
             }
 
             // An encrypted message not decrypted: nothing of it (its smime.p7m) is shown.
