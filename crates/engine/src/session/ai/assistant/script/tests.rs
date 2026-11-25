@@ -154,7 +154,7 @@ fn ask_takes_any_value_as_its_text() {
     };
     assert_eq!(asked(r#""Due Friday""#), json!("Due Friday"));
     assert_eq!(asked("#{subject: \"Invoice\"}"), json!(r#"{"subject":"Invoice"}"#));
-    assert_eq!(asked("#{}.preview"), json!(""));
+    assert_eq!(asked("()"), json!(""));
 }
 
 #[test]
@@ -210,6 +210,28 @@ fn a_replace_too_long_fails_before_its_string_is_built() {
 fn a_replace_within_the_limit_replaces() {
     let source = r#"let a = "a-b"; a.replace("-", "--"); let b = "ab"; b.replace("", "-"); let c = "a-b"; c.replace('-', "+"); [a, b, c]"#;
     assert_eq!(run(source, &[]), Ran::Done { printed: String::new(), value: json!(["a--b", "-a-b-", "a+b"]) });
+}
+
+/// trim and replace give the string they made, as models take them to, and still change the
+/// string they're called on, as Rhai's do.
+#[test]
+fn trim_and_replace_give_the_string_they_made() {
+    let source = r#"let s = "  YES "; let t = s.trim(); let a = "a-b"; let r = a.replace("-", "+");
+        [t, s, r, a, "a-b".replace('-', '+'), "a-b".replace("-", '+'), "a-b".replace('-', "+"), "".replace("", "x")]"#;
+    let made = json!(["YES", "YES", "a+b", "a+b", "a+b", "a+b", "a+b", ""]);
+    assert_eq!(run(source, &[]), Ran::Done { printed: String::new(), value: made });
+}
+
+/// A field a map hasn't got is an error that says so and how to look, where Rhai gives `()`,
+/// passed on without a word; a field written is there to read.
+#[test]
+fn a_field_a_map_hasnt_got_is_an_error_that_says_so() {
+    for (source, field) in [(r#"let m = #{subject: "Hi"}; m.snippet"#, "snippet"), ("[#{a: 1}].map(|m| m.b)", "b")] {
+        let why = failed(run(source, &[]));
+        assert!(why.contains(&format!("Property not found: {field}")) && why.contains("print(x) shows"), "{why}");
+    }
+    let source = r#"let m = #{a: 1}; m.b = 2; m["c"] = 3; [m.b, m.c, "d" in m]"#;
+    assert_eq!(run(source, &[]), Ran::Done { printed: String::new(), value: json!([2, 3, false]) });
 }
 
 proptest! {

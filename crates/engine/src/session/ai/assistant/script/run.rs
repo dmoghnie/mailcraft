@@ -145,7 +145,8 @@ impl Runner {
             .set_max_data_depth(DATA_DEPTH)
             .set_max_variables(VARIABLES_MOST)
             .set_max_functions(FUNCTIONS_MOST)
-            .set_strict_variables(true);
+            .set_strict_variables(true)
+            .set_fail_on_invalid_map_property(true);
         let out = printed.clone();
         engine.on_print(move |s| say(&out, s));
         let out = printed.clone();
@@ -166,7 +167,7 @@ impl Runner {
         let r = replay.clone();
         engine.register_fn("ask", move |q: &str| r.borrow_mut().call(Call { name: "ask".into(), input: json!({"question": q}) }));
         let r = replay.clone();
-        // About any value: a string as it is, `()` (a field a map hasn't got) as none, data as JSON.
+        // About any value: a string as it is, `()` as none, data as JSON.
         engine.register_fn("ask", move |q: &str, about: Dynamic| {
             let text = match about.clone().into_string() {
                 Ok(s) => s,
@@ -212,6 +213,10 @@ fn with_printed(why: String, printed: &str) -> String {
     if printed.trim().is_empty() { why } else { format!("{why}\nWhat it printed before:\n{}", printed.trim_end()) }
 }
 
+/// Said with a field a map hasn't got: Rhai would give `()`, passed on without a word (to `ask`
+/// as no text, compared as false), so it's an error, and the model is told how to look.
+const NO_FIELD: &str = "A field a map hasn't got can't be read: print(x) shows the fields of x, and \"name\" in x says whether it has one.";
+
 /// What a run that failed says, for the model.
 fn failed(e: &EvalAltResult, ops_left: u64) -> String {
     match e {
@@ -219,6 +224,9 @@ fn failed(e: &EvalAltResult, ops_left: u64) -> String {
             format!("stopped: the script's runs took more than {OPS_ALL} operations in all")
         }
         EvalAltResult::ErrorTooManyOperations(_) => format!("stopped: the script took more than {OPS_RUN} operations"),
+        e if matches!(e.unwrap_inner(), EvalAltResult::ErrorPropertyNotFound(..)) => {
+            format!("the script failed: {e}. {NO_FIELD}")
+        }
         e => format!("the script failed: {e}"),
     }
 }

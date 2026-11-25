@@ -45,6 +45,27 @@ fn a_script_finds_and_reads_in_one_step() {
     assert_eq!(parts, ["find_messages", "read_message"]);
 }
 
+/// The model is told the fields a message has, each of them and no others.
+#[test]
+fn the_model_is_told_the_fields_a_message_has() {
+    let mut s = ready("script-fields");
+    scripts_on(&mut s);
+    send(&mut s, None, "What does a message hold?");
+    let (q, asked) = question(&mut s);
+    let told = &asked.tools.iter().find(|t| t.name == "run_script").unwrap().description;
+    let listed = told.split("A message has ").nth(1).and_then(|t| t.split(':').next()).unwrap().replace(" and ", ", ");
+    let mut listed: Vec<&str> = listed.split(", ").collect();
+    listed.sort_unstable();
+    let script = r#"find_messages(#{query: "storyboard"}).messages[0].keys()"#;
+    calls(&mut s, q, "", &[("run_script", json!({"script": script}))]);
+    let (_, asked) = question(&mut s);
+    let r = &results(&asked)[0];
+    let came: Vec<String> = serde_json::from_str(r.content.split("It came to: ").nth(1).unwrap()).unwrap();
+    let mut has: Vec<&str> = came.iter().map(String::as_str).collect();
+    has.sort_unstable();
+    assert_eq!(listed, has);
+}
+
 /// A model the person didn't let run scripts isn't told of them, and one it calls anyway
 /// doesn't run.
 #[test]
