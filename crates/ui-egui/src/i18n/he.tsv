@@ -2286,3 +2286,8 @@ count	occurrences	פעמים
 	It couldn't be summarized: {error}	לא ניתן היה לסכם: {error}
 	Older messages left out for room: {count}	הודעות ישנות יותר שהושמטו מחוסר מקום: {count}
 	Summarize with AI	סיכום עם בינה מלאכותית
+	Translation	תרגום
+	Close the translation	סגירת התרגום
+	Translating…	מתרגם…
+	It couldn't be translated: {error}	לא ניתן היה לתרגם: {error}
+	Translate with AI	תרגום עם בינה מלאכותית

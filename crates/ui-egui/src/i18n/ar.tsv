@@ -2286,3 +2286,8 @@ count	occurrences	مرات
 	It couldn't be summarized: {error}	تعذّر التلخيص: {error}
 	Older messages left out for room: {count}	رسائل أقدم حُذفت لضيق المساحة: {count}
 	Summarize with AI	التلخيص بالذكاء الاصطناعي
+	Translation	الترجمة
+	Close the translation	إغلاق الترجمة
+	Translating…	جارٍ الترجمة…
+	It couldn't be translated: {error}	تعذّرت الترجمة: {error}
+	Translate with AI	الترجمة بالذكاء الاصطناعي

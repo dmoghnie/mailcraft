@@ -202,11 +202,13 @@ and `cargo xtask sizes` enforces them.
   (`egui_commonmark`) with each picture made a link, so nothing is fetched; its links open as a
   message's do. Text selected in a message is read as its runs are laid out, so its Ask AI
   button takes it a frame after it's pressed (`reading/text_selection/asking.rs`).
-- **Summaries** (`session/ai/about/summary.rs`, `mail.summarize`): a conversation as the reading pane
-  shows it (or worked out from the list, with the person's own replies), its newest messages
-  while 48 KB hold them, asked of the chat model as one streamed question with no tools, its
-  purpose `summary` in the record. The answer is kept by the message it was asked from (the
-  newest 16), and one asked again or let go drops the answer still on its way. Its card is
+- **About a message** (`session/ai/about.rs`): a conversation summed up (`about/summary.rs`,
+  `mail.summarize`) or a message translated (`about/translation.rs`, `mail.translate`), each
+  asked of the chat model as one streamed question with no tools, its purpose (`summary`,
+  `translation`) in the record. A summary takes the conversation as the reading pane shows it
+  (or works it out from the list, with the person's own replies), its newest messages while
+  48 KB hold them. What's written is kept by message and kind (the newest 16), and one asked
+  for again or closed drops the answer still on its way. The cards are
   `ui-egui/src/panes/assistant/about.rs`, at the top of the reading pane.
 - **Links** (`session/ai/assistant/links.rs`): the tools name each message by `m` and ten hex
   digits of its id's FNV-1a hash, since an id holds its folder's name (spaces and all) and a

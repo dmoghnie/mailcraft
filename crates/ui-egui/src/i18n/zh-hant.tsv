@@ -2290,3 +2290,8 @@ count	occurrences	次
 	It couldn't be summarized: {error}	無法摘要：{error}
 	Older messages left out for room: {count}	因篇幅省略的較早郵件：{count}
 	Summarize with AI	用 AI 摘要
+	Translation	翻譯
+	Close the translation	關閉翻譯
+	Translating…	正在翻譯…
+	It couldn't be translated: {error}	無法翻譯：{error}
+	Translate with AI	用 AI 翻譯

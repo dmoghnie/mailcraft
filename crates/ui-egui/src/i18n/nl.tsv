@@ -2286,3 +2286,8 @@ count	occurrences	keer
 	It couldn't be summarized: {error}	Kon niet worden samengevat: {error}
 	Older messages left out for room: {count}	Oudere berichten weggelaten wegens ruimte: {count}
 	Summarize with AI	Samenvatten met AI
+	Translation	Vertaling
+	Close the translation	De vertaling sluiten
+	Translating…	Bezig met vertalen…
+	It couldn't be translated: {error}	Kon niet worden vertaald: {error}
+	Translate with AI	Vertalen met AI

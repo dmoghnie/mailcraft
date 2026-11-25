@@ -2291,3 +2291,8 @@ count	occurrences	kez
 	It couldn't be summarized: {error}	Özetlenemedi: {error}
 	Older messages left out for room: {count}	Yer olmadığı için çıkarılan eski iletiler: {count}
 	Summarize with AI	Yapay zekâ ile özetle
+	Translation	Çeviri
+	Close the translation	Çeviriyi kapat
+	Translating…	Çevriliyor…
+	It couldn't be translated: {error}	Çevrilemedi: {error}
+	Translate with AI	Yapay zekâ ile çevir

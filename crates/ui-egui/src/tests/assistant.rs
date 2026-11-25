@@ -4,6 +4,7 @@
 //! is the test's: its answers are handed to the session.
 
 use super::*;
+use mailcraft_engine::AboutKind;
 use mailcraft_engine::model::{AiAnswer, AiDone, AiToolCall};
 
 /// The sample app with a model on this computer that the sample account's mail may go to.
@@ -409,7 +410,7 @@ fn a_conversation_is_summed_up_from_more_actions_and_closed() {
     }
     click_last(&ctx, &mut a, "More actions");
     click_last(&ctx, &mut a, "Summarize with AI");
-    let id = a.session.thread_summary(&key).and_then(|s| s.asking).expect("asked for, on its way");
+    let id = a.session.about_message(&key, AboutKind::Summary).and_then(|s| s.asking).expect("asked for, on its way");
     let t = texts(&ctx, &mut a);
     assert!(has(&t, "Summary") && has(&t, "Summarizing…") && has(&t, "small at localhost:11434"), "{t:?}");
     a.session.apply(MailEvent::Ai { done: AiDone::Part { id, text: "- Zoe wants scenes 4 to 7".into(), thinking: String::new() } });
@@ -420,6 +421,30 @@ fn a_conversation_is_summed_up_from_more_actions_and_closed() {
     assert!(has(&t, "Zoe wants scenes 4 to 7 on Thursday.") && !has(&t, "Summarizing…"), "{t:?}");
     click_last(&ctx, &mut a, "Close the summary");
     frame(&ctx, &mut a, vec![]);
-    assert!(a.session.thread_summary(&key).is_none(), "let go");
+    assert!(a.session.about_message(&key, AboutKind::Summary).is_none(), "let go");
     assert!(!has(&texts(&ctx, &mut a), "Zoe wants scenes 4 to 7 on Thursday."));
+}
+
+/// A message translated from its More actions: a card of its own at the top of the reading pane,
+/// what's written shown as it comes.
+#[test]
+fn a_message_is_translated_from_more_actions() {
+    let (mut a, ctx) = ready("assistant-translation");
+    let key = a.session.list.iter().find(|m| m.subject == "Storyboard review on Thursday").map(|m| m.key.clone()).unwrap();
+    a.run("list.open", json!({"key": key.to_id()}));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    click_last(&ctx, &mut a, "More actions");
+    click_last(&ctx, &mut a, "Translate with AI");
+    let id = a.session.about_message(&key, AboutKind::Translation).and_then(|w| w.asking).expect("asked for, on its way");
+    assert!(a.session.about_message(&key, AboutKind::Summary).is_none(), "a translation alone");
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "Translation") && has(&t, "Translating…"), "{t:?}");
+    let answer = AiAnswer { text: "Bonjour Riley, l'animatique est en bonne forme.".into(), ..AiAnswer::default() };
+    a.session.apply(MailEvent::Ai { done: AiDone::Answered { id, answer: Some(answer), error: None } });
+    assert!(has(&texts(&ctx, &mut a), "Bonjour Riley, l'animatique est en bonne forme."));
+    click_last(&ctx, &mut a, "Close the translation");
+    frame(&ctx, &mut a, vec![]);
+    assert!(a.session.about_message(&key, AboutKind::Translation).is_none(), "closed");
 }

@@ -48,7 +48,7 @@ fn a_conversation_is_summed_up_by_the_chat_model() {
     assert_eq!((done["text"].as_str(), done["writing"].as_bool()), (Some("- Zoe wants scenes 4 to 7 on Thursday."), Some(false)), "{done}");
     assert_eq!((done["messages"].as_u64(), done["model"]["name"].as_str()), (Some(2), Some("Local")));
     let logged = s.run("ai.log", &json!({})).unwrap().to_string();
-    assert!(logged.contains(crate::SUMMARY_PURPOSE), "{logged}");
+    assert!(logged.contains(crate::AboutKind::Summary.purpose()), "{logged}");
     assert_eq!(s.run("ai.answer", &json!({"id": id})).ok().map(|v| v["text"].is_null()), Some(true), "taken by the summary, not left over");
 }
 

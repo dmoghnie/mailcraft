@@ -2291,3 +2291,8 @@ count	occurrences	előfordulás
 	It couldn't be summarized: {error}	Nem sikerült összefoglalni: {error}
 	Older messages left out for room: {count}	Helyhiány miatt kihagyott régebbi üzenetek: {count}
 	Summarize with AI	Összefoglalás MI-vel
+	Translation	Fordítás
+	Close the translation	A fordítás bezárása
+	Translating…	Fordítás…
+	It couldn't be translated: {error}	Nem sikerült lefordítani: {error}
+	Translate with AI	Fordítás MI-vel

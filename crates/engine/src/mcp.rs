@@ -77,6 +77,7 @@ pub const READS: &[&str] = &[
     "list.prev",
     "mail.noAnswer",
     "mail.summary",
+    "mail.translation",
     "meetings.list",
     "message.read",
     "note.list",

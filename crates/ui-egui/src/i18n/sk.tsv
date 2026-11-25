@@ -2305,3 +2305,8 @@ count	occurrences	opakovaní
 	It couldn't be summarized: {error}	Nepodarilo sa zhrnúť: {error}
 	Older messages left out for room: {count}	Staršie správy vynechané pre nedostatok miesta: {count}
 	Summarize with AI	Zhrnúť pomocou AI
+	Translation	Preklad
+	Close the translation	Zavrieť preklad
+	Translating…	Prekladá sa…
+	It couldn't be translated: {error}	Nepodarilo sa preložiť: {error}
+	Translate with AI	Preložiť pomocou AI

@@ -2304,3 +2304,8 @@ count	occurrences	wystąpieniach
 	It couldn't be summarized: {error}	Nie udało się podsumować: {error}
 	Older messages left out for room: {count}	Starsze wiadomości pominięte z braku miejsca: {count}
 	Summarize with AI	Podsumuj za pomocą AI
+	Translation	Tłumaczenie
+	Close the translation	Zamknij tłumaczenie
+	Translating…	Tłumaczenie…
+	It couldn't be translated: {error}	Nie udało się przetłumaczyć: {error}
+	Translate with AI	Przetłumacz za pomocą AI

@@ -2291,3 +2291,8 @@ count	occurrences	occurrences
 	It couldn't be summarized: {error}	Impossible de résumer : {error}
 	Older messages left out for room: {count}	Messages plus anciens omis faute de place : {count}
 	Summarize with AI	Résumer avec l’IA
+	Translation	Traduction
+	Close the translation	Fermer la traduction
+	Translating…	Traduction en cours…
+	It couldn't be translated: {error}	Impossible de traduire : {error}
+	Translate with AI	Traduire avec l’IA

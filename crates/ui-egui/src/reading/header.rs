@@ -283,10 +283,14 @@ fn more_items(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut V
         ui.close();
     }
     plain_text_check(s, st, ui, &r.key, p, acts);
-    // Summed up by MailCraft's AI, once a model is set up (the account's setting decides if
-    // its mail may go to it: a notice says why not).
+    // Summed up or translated by MailCraft's AI, once a model is set up (the account's setting
+    // decides if its mail may go to it: a notice says why not).
     if !s.prefs.ai.profiles.is_empty() && ui.button(tl!("Summarize with AI")).clicked() {
         acts.push(Action::Run("mail.summarize", json!({"key": r.key.to_id(), "language": crate::i18n::current().code()})));
+        ui.close();
+    }
+    if !s.prefs.ai.profiles.is_empty() && ui.button(tl!("Translate with AI")).clicked() {
+        acts.push(Action::Run("mail.translate", json!({"key": r.key.to_id(), "language": crate::i18n::current().code()})));
         ui.close();
     }
 }

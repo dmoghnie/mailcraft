@@ -8,6 +8,7 @@ use mailcraft_model::{AiAnswer, AiApi, AiDone, AiEndpoint, AiWork};
 mod assistant;
 mod servers;
 mod summary;
+mod translation;
 
 const KEY: &str = "sk-secret-0123456789";
 

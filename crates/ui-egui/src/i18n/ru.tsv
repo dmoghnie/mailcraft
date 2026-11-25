@@ -2304,3 +2304,8 @@ count	occurrences	повторений
 	It couldn't be summarized: {error}	Не удалось составить сводку: {error}
 	Older messages left out for room: {count}	Более старые сообщения, пропущенные из-за нехватки места: {count}
 	Summarize with AI	Составить сводку с помощью ИИ
+	Translation	Перевод
+	Close the translation	Закрыть перевод
+	Translating…	Перевод…
+	It couldn't be translated: {error}	Не удалось перевести: {error}
+	Translate with AI	Перевести с помощью ИИ

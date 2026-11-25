@@ -2290,3 +2290,8 @@ count	occurrences	ripetizioni
 	It couldn't be summarized: {error}	Impossibile riassumere: {error}
 	Older messages left out for room: {count}	Messaggi meno recenti omessi per mancanza di spazio: {count}
 	Summarize with AI	Riassumi con l’IA
+	Translation	Traduzione
+	Close the translation	Chiudi la traduzione
+	Translating…	Traduzione in corso…
+	It couldn't be translated: {error}	Impossibile tradurre: {error}
+	Translate with AI	Traduci con l’IA

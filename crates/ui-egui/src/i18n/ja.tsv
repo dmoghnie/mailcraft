@@ -2287,3 +2287,8 @@ count	occurrences	回
 	It couldn't be summarized: {error}	要約できませんでした: {error}
 	Older messages left out for room: {count}	容量のため省いた古いメッセージ: {count}
 	Summarize with AI	AI で要約
+	Translation	翻訳
+	Close the translation	翻訳を閉じる
+	Translating…	翻訳しています…
+	It couldn't be translated: {error}	翻訳できませんでした: {error}
+	Translate with AI	AI で翻訳

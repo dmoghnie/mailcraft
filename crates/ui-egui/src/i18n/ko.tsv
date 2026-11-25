@@ -2290,3 +2290,8 @@ count	occurrences	회
 	It couldn't be summarized: {error}	요약하지 못했습니다: {error}
 	Older messages left out for room: {count}	공간이 부족해 뺀 이전 메시지: {count}
 	Summarize with AI	AI로 요약
+	Translation	번역
+	Close the translation	번역 닫기
+	Translating…	번역하는 중…
+	It couldn't be translated: {error}	번역하지 못했습니다: {error}
+	Translate with AI	AI로 번역

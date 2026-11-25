@@ -2287,3 +2287,8 @@ count	occurrences	次
 	It couldn't be summarized: {error}	无法总结：{error}
 	Older messages left out for room: {count}	因篇幅省略的较早邮件：{count}
 	Summarize with AI	用 AI 总结
+	Translation	翻译
+	Close the translation	关闭翻译
+	Translating…	正在翻译…
+	It couldn't be translated: {error}	无法翻译：{error}
+	Translate with AI	用 AI 翻译

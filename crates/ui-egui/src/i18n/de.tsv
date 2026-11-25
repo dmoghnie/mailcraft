@@ -2291,3 +2291,8 @@ count	occurrences	Terminen
 	It couldn't be summarized: {error}	Konnte nicht zusammengefasst werden: {error}
 	Older messages left out for room: {count}	Ältere Nachrichten aus Platzgründen weggelassen: {count}
 	Summarize with AI	Mit KI zusammenfassen
+	Translation	Übersetzung
+	Close the translation	Übersetzung schließen
+	Translating…	Wird übersetzt…
+	It couldn't be translated: {error}	Konnte nicht übersetzt werden: {error}
+	Translate with AI	Mit KI übersetzen
