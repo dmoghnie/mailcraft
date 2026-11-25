@@ -396,6 +396,9 @@ fn sender_warning_text(w: &serde_json::Value) -> String {
 }
 
 #[cfg(test)]
+mod real_code_mode;
+
+#[cfg(test)]
 mod real_meetings;
 
 #[cfg(test)]
