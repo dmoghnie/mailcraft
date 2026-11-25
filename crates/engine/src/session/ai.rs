@@ -7,6 +7,7 @@ mod about;
 mod asking;
 mod assistant;
 mod commands;
+mod rewriting;
 mod servers;
 mod settings;
 
@@ -21,6 +22,8 @@ pub use assistant::{
     ContextItem, KeptScript, RunState, STEPS_MOST, ScriptParam, ToolRun, assistant_message_link,
 };
 pub(crate) use commands::commands as ai_commands;
+pub(crate) use rewriting::commands as rewriting_commands;
+pub use rewriting::{Rewrite, RewriteHow};
 pub(crate) use servers::commands as mcp_server_commands;
 pub use servers::{McpServer, ServerTools};
 pub use settings::{AiPrefs, AiProfile, AiReach, AiTask, local_url as ai_url_is_local};

@@ -2292,3 +2292,17 @@ count	occurrences	回
 	Translating…	翻訳しています…
 	It couldn't be translated: {error}	翻訳できませんでした: {error}
 	Translate with AI	AI で翻訳
+	Rewrite with AI	AI で書き直す
+	Shorter	短く
+	Warmer	温かく
+	More formal	よりフォーマルに
+	Fix spelling and grammar	スペルと文法を直す
+	Write it from a few words…	数語から書く…
+	What should it say?	何を伝えますか？
+	Write	書く
+	Replace	置き換える
+	Put it in place of your text	自分の文章と置き換える
+	Close the rewrite	書き直しを閉じる
+	Rewriting…	書き直しています…
+	From a few words	数語から
+	It couldn't be rewritten: {error}	書き直せませんでした: {error}

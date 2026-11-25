@@ -226,6 +226,9 @@ pub struct UiState {
     /// The people suggested for the text in that box, kept while it and what they're made of
     /// stay the same.
     pub(crate) suggested: Option<reading::Suggested>,
+    /// The few words a message being written is to be written from by MailCraft's AI, while
+    /// they're asked for over its text: the message's id and what's typed.
+    pub(crate) rewrite_words: Option<(u64, String)>,
     /// Installed Craft apps (command, path), found at start-up.
     pub(crate) craft_apps: Vec<(&'static str, PathBuf)>,
     /// The interface language setting (`auto` or a language code).

@@ -2295,3 +2295,17 @@ count	occurrences	회
 	Translating…	번역하는 중…
 	It couldn't be translated: {error}	번역하지 못했습니다: {error}
 	Translate with AI	AI로 번역
+	Rewrite with AI	AI로 다시 쓰기
+	Shorter	더 짧게
+	Warmer	더 따뜻하게
+	More formal	더 격식 있게
+	Fix spelling and grammar	맞춤법과 문법 고치기
+	Write it from a few words…	몇 단어로 쓰기…
+	What should it say?	무슨 내용을 쓸까요?
+	Write	쓰기
+	Replace	바꾸기
+	Put it in place of your text	내 글 대신 넣기
+	Close the rewrite	다시 쓰기 닫기
+	Rewriting…	다시 쓰는 중…
+	From a few words	몇 단어로
+	It couldn't be rewritten: {error}	다시 쓰지 못했습니다: {error}

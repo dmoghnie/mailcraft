@@ -2291,3 +2291,17 @@ count	occurrences	مرات
 	Translating…	جارٍ الترجمة…
 	It couldn't be translated: {error}	تعذّرت الترجمة: {error}
 	Translate with AI	الترجمة بالذكاء الاصطناعي
+	Rewrite with AI	إعادة الكتابة بالذكاء الاصطناعي
+	Shorter	أقصر
+	Warmer	أكثر ودًّا
+	More formal	أكثر رسمية
+	Fix spelling and grammar	تصحيح الإملاء والقواعد
+	Write it from a few words…	الكتابة من بضع كلمات…
+	What should it say?	ماذا يجب أن تقول؟
+	Write	اكتب
+	Replace	استبدال
+	Put it in place of your text	ضعه مكان نصك
+	Close the rewrite	إغلاق إعادة الكتابة
+	Rewriting…	جارٍ إعادة الكتابة…
+	From a few words	من بضع كلمات
+	It couldn't be rewritten: {error}	تعذّرت إعادة الكتابة: {error}

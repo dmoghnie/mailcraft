@@ -11,6 +11,7 @@ mod addresses;
 mod alert;
 mod chips;
 mod options;
+mod rewriting;
 #[cfg(test)]
 mod tests;
 
@@ -131,6 +132,9 @@ pub(super) fn compose(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut
         also_being_written(ui, &t, s, acts);
     }
     let f = form(s, st, in_window);
+    // MailCraft's AI rewrites it, once a model is set up (the account's setting decides if its
+    // mail may go to it: a notice says why not).
+    let has_model = !s.prefs.ai.profiles.is_empty();
     // Out of the session while its form is drawn, so the original under a reply can be drawn
     // from the session as the reading pane draws a message; put back after.
     let Some(mut taken) = s.compose.take() else { return };
@@ -172,6 +176,9 @@ pub(super) fn compose(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut
                     if on_quote.is_none() {
                         rich_edit::ribbon(ui, &t, &mut ed, c, &bar, acts);
                     }
+                    if has_model {
+                        rewriting::menu(ui, &t, c, &mut st.rewrite_words, acts);
+                    }
                     options::shown(ui, &t, c, &f);
                 });
                 if f.formatting {
@@ -204,6 +211,7 @@ pub(super) fn compose(s: &mut Session, st: &mut UiState, ui: &mut Ui, acts: &mut
                 ui.painter().line_segment([sep.left_top(), sep.right_top()], egui::Stroke::new(1.0, t.border));
                 ui.add_space(8.0);
                 paste_picture(ui, c, acts);
+                rewriting::card(s, st, ui, c, acts);
                 egui::ScrollArea::vertical().auto_shrink(false).id_salt("compose-body").show(ui, |ui| {
                     // Replies start above the quoted text.
                     // A signature written as HTML code is drawn laid out, where its text stands.

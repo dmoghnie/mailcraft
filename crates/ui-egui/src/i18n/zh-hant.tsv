@@ -2295,3 +2295,17 @@ count	occurrences	次
 	Translating…	正在翻譯…
 	It couldn't be translated: {error}	無法翻譯：{error}
 	Translate with AI	用 AI 翻譯
+	Rewrite with AI	用 AI 改寫
+	Shorter	更簡短
+	Warmer	更親切
+	More formal	更正式
+	Fix spelling and grammar	修正拼字和文法
+	Write it from a few words…	根據幾個詞撰寫…
+	What should it say?	要寫些什麼？
+	Write	撰寫
+	Replace	取代
+	Put it in place of your text	放在你的文字位置
+	Close the rewrite	關閉改寫
+	Rewriting…	正在改寫…
+	From a few words	根據幾個詞
+	It couldn't be rewritten: {error}	無法改寫：{error}

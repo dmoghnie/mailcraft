@@ -58,6 +58,7 @@ pub const READS: &[&str] = &[
     "calendar.search",
     "category.list",
     "compose.list",
+    "compose.rewriting",
     "contact.list",
     "contact.searchDirectory",
     "contacts.suggest",

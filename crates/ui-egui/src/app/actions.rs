@@ -397,9 +397,9 @@ impl MailApp {
                 Err(mailcraft_engine::CmdError::Disabled(m)) => self.session.notice(m, true),
                 Err(_) => {}
             },
-            // A conversation summed up, a message translated: no model it may go to, said (one
-            // that fails on the way says why in its card).
-            "mail.summarize" | "mail.translate" => {
+            // A conversation summed up, a message translated or rewritten: no model it may go
+            // to, said (one that fails on the way says why in its card).
+            "mail.summarize" | "mail.translate" | "compose.rewrite" | "compose.writeFrom" => {
                 if let Err(mailcraft_engine::CmdError::Disabled(m)) = self.ran(id, &p) {
                     self.session.notice(m, true);
                 }

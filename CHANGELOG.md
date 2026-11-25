@@ -65,6 +65,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - **Keep chats** in **File › Options › AI** deletes chats with MailCraft's AI older than 7, 30, 90 or 365 days (`ai.keepChats`); removing an account deletes the chats that hold its mail.
 - **Summarize with AI** in a message's More actions sums up its conversation at the top of the reading pane, in the interface's language, as it's written: who wants what of you, what was decided, the dates and what's still open (`mail.summarize`; its mail goes only where its account lets it).
 - **Translate with AI** in a message's More actions translates it into the interface's language, its subject and text, in a card at the top of the reading pane as it's written (`mail.translate`; its mail goes only where its account lets it).
+- **Rewrite with AI**, in the bar over a message being written, makes your text shorter, warmer or more formal, or fixes its spelling and grammar; **Write it from a few words** writes it from what you say it should say ("say yes, but Thursday"), in the language of the message it answers. What's written shows in a card over the text and goes in only with **Replace** (**Undo** takes it back); the quoted original and the signature stay (`compose.rewrite`, `compose.writeFrom`).
 
 ### Changed
 

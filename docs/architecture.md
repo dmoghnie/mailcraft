@@ -210,6 +210,12 @@ and `cargo xtask sizes` enforces them.
   48 KB hold them. What's written is kept by message and kind (the newest 16), and one asked
   for again or closed drops the answer still on its way. The cards are
   `ui-egui/src/panes/assistant/about.rs`, at the top of the reading pane.
+- **Rewriting** (`session/ai/rewriting.rs`, `compose.rewrite`, `compose.writeFrom`): only the
+  person's own text of the message being written goes (`own_text`: above the quoted original's
+  rule and the signature's `-- `), and, written from a few words, the message it answers. One
+  rewrite at a time, for one message; it's a proposal until Replace splices it in place of the
+  own text (`rich::splice`, its look plain), and Undo puts the text back while it's still as it
+  was put in. The menu and the card are `ui-egui/src/reading/compose/rewriting.rs`.
 - **Links** (`session/ai/assistant/links.rs`): the tools name each message by `m` and ten hex
   digits of its id's FNV-1a hash, since an id holds its folder's name (spaces and all) and a
   Markdown link can't; events (`e`, `find_events`), people (`p`, `find_people`), tasks (`t`)

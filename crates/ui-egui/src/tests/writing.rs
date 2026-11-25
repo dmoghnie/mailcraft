@@ -10,6 +10,7 @@ mod fonts;
 mod form;
 mod names;
 mod quote;
+mod rewriting;
 mod sending;
 mod signatures;
 mod suggest;

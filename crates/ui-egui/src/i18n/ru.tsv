@@ -2309,3 +2309,17 @@ count	occurrences	повторений
 	Translating…	Перевод…
 	It couldn't be translated: {error}	Не удалось перевести: {error}
 	Translate with AI	Перевести с помощью ИИ
+	Rewrite with AI	Переписать с помощью ИИ
+	Shorter	Короче
+	Warmer	Теплее
+	More formal	Официальнее
+	Fix spelling and grammar	Исправить орфографию и грамматику
+	Write it from a few words…	Написать по нескольким словам…
+	What should it say?	Что в нём должно быть?
+	Write	Написать
+	Replace	Заменить
+	Put it in place of your text	Поставить вместо вашего текста
+	Close the rewrite	Закрыть переписанный текст
+	Rewriting…	Переписывается…
+	From a few words	По нескольким словам
+	It couldn't be rewritten: {error}	Не удалось переписать: {error}

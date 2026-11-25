@@ -268,7 +268,7 @@ fn pick_model(s: &Session, ui: &mut Ui, named: &Option<String>) -> Option<String
 }
 
 /// Where a model runs: on this computer or its network, or the cloud provider's server.
-fn where_it_is(p: &AiProfile) -> String {
+pub(crate) fn where_it_is(p: &AiProfile) -> String {
     let server = mailcraft_engine::ai_server(&p.endpoint.url);
     if p.local() { tf!("{model} at {server}", model = p.endpoint.model, server = server) } else { tf!("Cloud: {server}", server = server) }
 }

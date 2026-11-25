@@ -1,7 +1,7 @@
 //! MailCraft's AI as it runs: questions sent and waiting, a profile's test, and the record of
 //! what went where, which outlives a restart (its sizes, never its content).
 
-use std::collections::{BTreeMap, HashMap, VecDeque};
+use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
 
 use mailcraft_model::{AiAnswer, AiChat, AiDone, AiWork, Job};
 use serde::{Deserialize, Serialize};
@@ -97,6 +97,10 @@ pub struct AiState {
     pub(super) mcp_calls: HashMap<u64, u64>,
     /// What's written about messages: summaries, translations (`about.rs`).
     pub(super) about: super::about::About,
+    /// The rewrite of the message being written (`rewriting.rs`), and the questions of those
+    /// let go whose answers are still on their way, to drop.
+    pub(super) rewrite: Option<super::Rewrite>,
+    pub(super) rewrite_dropped: HashSet<u64>,
 }
 
 impl AiState {
@@ -262,7 +266,7 @@ impl Session {
                     self.ai.tests.insert(w.profile.clone(), test);
                     return;
                 }
-                if self.about_came(id, &w.profile, &result) {
+                if self.about_came(id, &w.profile, &result) || self.rewrite_came(id, &w.profile, &result) {
                     return;
                 }
                 if self.ai.answers.len() >= ANSWERS_KEPT

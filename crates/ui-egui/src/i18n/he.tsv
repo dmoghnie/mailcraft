@@ -2291,3 +2291,17 @@ count	occurrences	פעמים
 	Translating…	מתרגם…
 	It couldn't be translated: {error}	לא ניתן היה לתרגם: {error}
 	Translate with AI	תרגום עם בינה מלאכותית
+	Rewrite with AI	שכתוב עם בינה מלאכותית
+	Shorter	קצר יותר
+	Warmer	חם יותר
+	More formal	רשמי יותר
+	Fix spelling and grammar	תיקון איות ודקדוק
+	Write it from a few words…	כתיבה מכמה מילים…
+	What should it say?	מה צריך להיות כתוב?
+	Write	כתיבה
+	Replace	החלפה
+	Put it in place of your text	להציב במקום הטקסט שלך
+	Close the rewrite	סגירת השכתוב
+	Rewriting…	משכתב…
+	From a few words	מכמה מילים
+	It couldn't be rewritten: {error}	לא ניתן היה לשכתב: {error}

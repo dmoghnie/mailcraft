@@ -2296,3 +2296,17 @@ count	occurrences	előfordulás
 	Translating…	Fordítás…
 	It couldn't be translated: {error}	Nem sikerült lefordítani: {error}
 	Translate with AI	Fordítás MI-vel
+	Rewrite with AI	Átírás MI-vel
+	Shorter	Rövidebben
+	Warmer	Melegebben
+	More formal	Formálisabban
+	Fix spelling and grammar	Helyesírás és nyelvtan javítása
+	Write it from a few words…	Megírás néhány szóból…
+	What should it say?	Mi álljon benne?
+	Write	Megírás
+	Replace	Csere
+	Put it in place of your text	Beillesztés a szöveged helyére
+	Close the rewrite	Az átírás bezárása
+	Rewriting…	Átírás…
+	From a few words	Néhány szóból
+	It couldn't be rewritten: {error}	Nem sikerült átírni: {error}

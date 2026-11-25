@@ -56,7 +56,7 @@ const ANYWHERE: &[&str] = &["مرفق", "مرفقات", "מצורף", "מצור�
 
 /// The text the user wrote: what comes before the original of a reply or forward (its rule, an
 /// empty paragraph drawn as a line) and before the signature (its `-- ` line).
-pub(super) fn own_text<'a>(body: &'a str, styles: &rich::Styles) -> &'a str {
+pub(crate) fn own_text<'a>(body: &'a str, styles: &rich::Styles) -> &'a str {
     let mut end = 0;
     for (i, line) in body.split('\n').enumerate() {
         if styles.paras.get(i).is_some_and(|p| p.rule) || matches!(line.trim_end(), "--" | "-- ") {

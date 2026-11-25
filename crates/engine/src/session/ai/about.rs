@@ -127,7 +127,7 @@ impl Session {
 }
 
 /// `language`, a language code ("de", "pt-BR"), said for the model; none (or not a code): `or`.
-fn language_named(language: Option<&str>, or: &str) -> String {
+pub(super) fn language_named(language: Option<&str>, or: &str) -> String {
     language
         .map(str::trim)
         .filter(|l| !l.is_empty() && l.len() <= LANGUAGE_MOST && l.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_'))

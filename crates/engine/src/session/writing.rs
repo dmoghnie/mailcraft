@@ -20,6 +20,7 @@ mod undo_send;
 mod unsubscribe;
 pub use drafts::Drafted;
 pub(crate) use drafts::DraftedMemo;
+pub(crate) use forgotten::own_text;
 pub use quote::Quote;
 pub use reactions::Reactions;
 pub use sending::SendBlock;
