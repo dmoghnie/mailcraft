@@ -2,13 +2,16 @@
 //!
 //! The person points at messages, a part of one they selected, or a folder: each is written into
 //! the turn as it's sent, once (sent again unchanged later, a server's cache of what it read
-//! keeps working). A chat longer than its model's context loses, first, what tools gave back
-//! early on, then its oldest turns.
+//! keeps working). A chat longer than its model's context loses, first, what tools read early
+//! on (what they found still named), then its oldest turns, what those held said in a ledger
+//! (`ledger.rs`). How many tokens it is is estimated, and corrected by what the model's server
+//! counted of the chat's last question when the estimate was low.
 
 use std::fmt;
 
-use mailcraft_model::{AiChat, AiRole, AiToolResult, AiTurn, MessageKey};
+use mailcraft_model::{AiChat, AiRole, AiTool, AiToolResult, AiTurn, MessageKey};
 
+use super::ledger::{found_names, ledger};
 use super::links::message_name;
 use super::*;
 use crate::{CmdError, Session};
@@ -23,8 +26,16 @@ const QUOTE_CHARS: usize = 8000;
 pub const CONTEXT_AT_FIRST: u32 = 32_768;
 /// Room kept for the tools' descriptions and what a server adds, in tokens.
 const ROOM_KEPT: usize = 1024;
-/// What a tool's result early in a chat becomes when there's no room for it.
+/// What a read's result early in a chat becomes when there's no room for it (and it found
+/// nothing to name).
 const LEFT_OUT: &str = "[Left out for room: call the tool again if it's needed.]";
+/// What a server adds around each message, call and result (its role, a tool's name and id),
+/// in tokens.
+const PART_TOKENS: usize = 8;
+/// The room kept for the ledger of a chat's start left out, in tokens.
+const LEDGER_ROOM: usize = 1000;
+/// The most the estimate is raised by the server's count, in thousandths: three times.
+const SCALE_MOST: usize = 3000;
 /// The least a tool's result is cut to for room, in tokens: shorter, it would say too little.
 const RESULT_LEAST: usize = 200;
 
@@ -119,29 +130,37 @@ impl Session {
     pub(super) fn fitted(&self, chat: &Chat, profile: &AiProfile, system: String, tools: Vec<mailcraft_model::AiTool>) -> Result<AiChat, CmdError> {
         let context = usize::try_from(profile.takes_in()).unwrap_or(usize::MAX);
         let answer = usize::try_from(profile.max_tokens.max(1)).unwrap_or(usize::MAX);
-        let tool_room: usize = tools.iter().map(|t| tokens(t.description.len().saturating_add(t.schema.to_string().len()))).sum();
-        let room = context.saturating_sub(answer).saturating_sub(ROOM_KEPT).saturating_sub(tool_room).saturating_sub(tokens(system.len()));
+        let scale = scale(chat);
+        let est = |n: usize| n.saturating_mul(scale) / 1000;
+        let fixed = est(tools_tokens(&tools).saturating_add(tokens(system.len())));
+        let room = context.saturating_sub(answer).saturating_sub(ROOM_KEPT).saturating_sub(fixed);
         let when = |at| mailcraft_model::dates::full_time(at, &self.clock);
         let mut turns: Vec<AiTurn> = chat.turns.iter().map(|t| t.sent(&when)).collect();
-        let size = |turns: &[AiTurn]| turns.iter().map(|t| tokens(t.size())).sum::<usize>();
-        // What tools gave back, oldest first, but the last turn's.
+        let size = |turns: &[AiTurn]| est(turns.iter().map(turn_tokens).fold(0, usize::saturating_add));
+        // What tools read, oldest first, but the last turn's: what they found still named, and
+        // what a change came to kept.
         let last = turns.len().saturating_sub(1);
         let mut i = 0;
         while size(&turns) > room && i < last {
             if let Some(t) = turns.get_mut(i) {
-                for r in t.results.iter_mut().filter(|r| r.content.len() > LEFT_OUT.len()) {
-                    r.content = LEFT_OUT.into();
+                for r in &mut t.results {
+                    if let Some(note) = left_out(chat, r).filter(|n| r.content.len() > n.len()) {
+                        r.content = note;
+                    }
                 }
             }
             i += 1;
         }
         // The oldest turns go, never the person's latest words nor what came after them (the
-        // calls and their results belong together).
+        // calls and their results belong together), with room kept for what they held.
         let latest = turns.iter().rposition(|t| t.role == AiRole::User && !t.text.is_empty()).unwrap_or(0);
         let mut dropped = 0;
-        while size(&turns) > room && dropped < latest {
-            turns.remove(0);
-            dropped += 1;
+        if size(&turns) > room {
+            let fits = room.saturating_sub(est(LEDGER_ROOM));
+            while size(&turns) > fits && dropped < latest {
+                turns.remove(0);
+                dropped += 1;
+            }
         }
         if dropped > 0 {
             // A chat begins with the person: what came before them may answer a call now gone.
@@ -156,7 +175,7 @@ impl Session {
         // What the tools gave since (several messages read at once) is cut, each to a share of
         // the room the rest leaves, rather than the chat stopping.
         if size(&turns) > room {
-            turns = shortened(turns, room);
+            turns = shortened(turns, room.saturating_mul(1000) / scale);
         }
         if size(&turns) > room {
             return Err(CmdError::Failed(format!(
@@ -164,7 +183,13 @@ impl Session {
                 profile.name
             )));
         }
-        let system = if dropped > 0 { format!("{system}\n\nThe start of this chat was left out for room.") } else { system };
+        let system = if dropped > 0 {
+            // What's left of the room, in bytes as the estimate counts them.
+            let spare = room.saturating_sub(size(&turns)).saturating_mul(3000) / scale;
+            format!("{system}\n\n{}", ledger(chat, dropped, spare.min(LEDGER_ROOM.saturating_mul(3))))
+        } else {
+            system
+        };
         Ok(AiChat { system, turns, max_tokens: profile.max_tokens.max(1), tools, context: 0 })
     }
 }
@@ -174,7 +199,7 @@ impl Session {
 fn shortened(turns: Vec<AiTurn>, room: usize) -> Vec<AiTurn> {
     let results: usize = turns.iter().map(|t| t.results.len()).sum();
     let given = |t: &AiTurn| t.results.iter().map(|r| r.content.len()).sum::<usize>();
-    let rest: usize = turns.iter().map(|t| tokens(t.size().saturating_sub(given(t)))).sum();
+    let rest: usize = turns.iter().map(|t| turn_tokens(t).saturating_sub(given(t) / 3)).sum();
     let share = room.saturating_sub(rest).checked_div(results).unwrap_or(0);
     if share < RESULT_LEAST {
         return turns;
@@ -186,6 +211,48 @@ fn shortened(turns: Vec<AiTurn>, room: usize) -> Vec<AiTurn> {
         .into_iter()
         .map(|t| AiTurn { results: t.results.into_iter().map(|r| AiToolResult { content: cut(&r.content, chars), ..r }).collect(), ..t })
         .collect()
+}
+
+/// What a result of `chat`'s says when it's left out for room: what its read found, by name (the
+/// model can still link it, and needn't look again); none for a change's, whose outcome stays.
+fn left_out(chat: &Chat, r: &AiToolResult) -> Option<String> {
+    let run = chat.run(&r.id);
+    if run.is_some_and(|run| run.state != RunState::Ran) {
+        return None;
+    }
+    let names = run.map(found_names).unwrap_or_default();
+    Some(if names.is_empty() { LEFT_OUT.into() } else { format!("[Left out for room: it found {names}. Call the tool again for the rest.]") })
+}
+
+/// About how many tokens a turn is: its text, calls and results, and what a server adds around
+/// each.
+fn turn_tokens(t: &AiTurn) -> usize {
+    let parts = t.calls.len().saturating_add(t.results.len()).saturating_add(1);
+    tokens(t.size()).saturating_add(parts.saturating_mul(PART_TOKENS))
+}
+
+/// About how many tokens the tools' descriptions are.
+fn tools_tokens(tools: &[AiTool]) -> usize {
+    tools
+        .iter()
+        .map(|t| tokens(t.name.len().saturating_add(t.description.len()).saturating_add(t.schema.to_string().len())))
+        .fold(0, usize::saturating_add)
+}
+
+/// About how many tokens `chat` is, as it's sent: what its server's count is set beside.
+pub(super) fn estimate(chat: &AiChat) -> u64 {
+    let turns = chat.turns.iter().map(turn_tokens).fold(0, usize::saturating_add);
+    let all = tokens(chat.system.len()).saturating_add(tools_tokens(&chat.tools)).saturating_add(turns);
+    u64::try_from(all).unwrap_or(u64::MAX)
+}
+
+/// How much more of `chat` its model reads than estimated, in thousandths: what its server
+/// counted of the last question, against the estimate of it. Never less than the estimate (a
+/// server that reuses what it read before, as Ollama does, counts only what's new), at most
+/// [`SCALE_MOST`].
+fn scale(chat: &Chat) -> usize {
+    let Some(c) = chat.counted.filter(|c| c.estimated > 0) else { return 1000 };
+    usize::try_from(c.read.saturating_mul(1000) / c.estimated).unwrap_or(usize::MAX).clamp(1000, SCALE_MOST)
 }
 
 /// About how many tokens `bytes` of text are: a token for every three bytes (a little more than

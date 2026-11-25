@@ -25,6 +25,7 @@ mod commands;
 mod context;
 mod exchange;
 mod kept;
+mod ledger;
 mod links;
 mod looking;
 mod pim;
@@ -73,6 +74,10 @@ pub struct Chat {
     /// Why its last question got no answer, or why it stopped.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+    /// What its model's server counted of the last question it answered, beside the estimate:
+    /// the estimate is corrected by it when it was low.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub counted: Option<Counted>,
     /// A question of it was on its way to the model when it was kept: read again after
     /// MailCraft closed, it says the answer never came.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
@@ -143,6 +148,13 @@ impl Chat {
             self.accounts.push(account.to_string());
         }
     }
+}
+
+/// The tokens a server counted in a question it was sent, and MailCraft's estimate of them.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Counted {
+    pub estimated: u64,
+    pub read: u64,
 }
 
 /// A turn of a chat: what was said, as the model is sent it, and what the window shows with it.
@@ -267,6 +279,9 @@ pub struct Assistant {
     scripts: HashMap<(String, String), script::Paused>,
     /// The questions scripts asked, by question: the chat and call of each.
     script_asks: HashMap<u64, (String, String)>,
+    /// How many tokens each chat's question was estimated at as it was sent, by question: set
+    /// beside the server's count when the answer comes ([`Chat::counted`]).
+    estimates: HashMap<u64, u64>,
 }
 
 impl Assistant {

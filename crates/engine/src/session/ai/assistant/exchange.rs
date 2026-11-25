@@ -5,7 +5,7 @@
 
 use mailcraft_model::{AiChat, AiRole, AiToolCall, AiToolResult, AiTurn, AiWork, Job, MessageKey};
 
-use super::context::cut;
+use super::context::{cut, estimate};
 use super::looking::said;
 use super::tools::{Outcome, reads, tools_for};
 use super::*;
@@ -173,8 +173,10 @@ impl Session {
         self.put_chat(Chat { answer_due: asked.is_ok(), ..chat });
         match asked {
             Ok((p, c)) => {
+                let estimated = estimate(&c);
                 let q = self.ai_ask_profile(&p, accounts, PURPOSE, c, true);
                 self.ai.assistant.asking.insert(q, id.to_string());
+                self.ai.assistant.estimates.insert(q, estimated);
                 Ok(())
             }
             Err(e) => {
@@ -195,6 +197,7 @@ impl Session {
 
     /// Question `q`'s answer came: put in its chat, its calls made, and the chat goes on.
     pub(crate) fn assistant_heard(&mut self, q: u64) {
+        let estimated = self.ai.assistant.estimates.remove(&q);
         if self.ai.assistant.dropped.remove(&q) {
             self.ai_answer(q);
             return;
@@ -211,6 +214,9 @@ impl Session {
         match answer {
             Err(e) => chat.error = Some(e),
             Ok(a) => {
+                if let (Some(estimated), Some(read)) = (estimated, a.input_tokens) {
+                    chat.counted = Some(Counted { estimated, read });
+                }
                 let calls = own_ids(&chat, a.calls);
                 let turn = AiTurn { role: AiRole::Assistant, text: a.text, calls, results: Vec::new() };
                 let at = self.clock.now;
@@ -466,6 +472,7 @@ impl Session {
     /// model answers no more (its time, or its tokens) and its place is free at once.
     pub(super) fn assistant_let_go(&mut self, q: u64) {
         self.ai.assistant.asking.remove(&q);
+        self.ai.assistant.estimates.remove(&q);
         self.ai.assistant.dropped.insert(q);
         self.jobs.push(Job::Ai { work: AiWork::Cancel { id: q } });
     }

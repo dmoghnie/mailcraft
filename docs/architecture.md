@@ -130,9 +130,12 @@ and `cargo xtask sizes` enforces them.
   others is left to the calendar (but for its reminder, the person's own), as is the time of an
   event that repeats. A model asked about a chat must be allowed every account whose mail
   is in it (`AiPrefs::allows_all`), its fallbacks too. A chat that outgrows its profile's
-  context (a token for every three bytes) loses what tools gave early on, then its oldest
-  turns. At most 24 steps for one thing the person says. Stopped as it's written, what came of
-  an answer is kept (`ChatTurn::stopped`) until it's asked again.
+  context (a token for every three bytes and a few for each message, raised up to threefold
+  when the server counted more of the last question, `Chat::counted`) loses what tools read
+  early on, what they found still named, then its oldest turns, what those asked, found and
+  decided said in a ledger made from the chat (`ledger.rs`). At most 24 steps for one thing
+  the person says. Stopped as it's written, what came of an answer is kept
+  (`ChatTurn::stopped`) until it's asked again.
 - **Scripts** (code mode, `session/ai/assistant/script/`): a model the person lets
   (`AiProfile::scripts`) gets `run_script`, a script in Rhai (MIT or Apache-2.0, through a fork
   pinned in `[patch.crates-io]`: `compact_str` in place of `smartstring`, and a limit on how deep
