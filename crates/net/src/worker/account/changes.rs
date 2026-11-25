@@ -196,6 +196,7 @@ impl Worker {
             | Job::Pgp { .. }
             | Job::CheckUpdates
             | Job::Ai { .. }
+            | Job::Mcp { .. }
             | Job::StopSearch => {}
             Job::Start { .. }
             | Job::SmtpPassword { .. }

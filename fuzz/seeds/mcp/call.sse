@@ -1,0 +1,7 @@
+event: message
+data: {"jsonrpc":"2.0","id":"s1","method":"ping"}
+
+event: message
+data: {"jsonrpc":"2.0","id":3,
+data: "result":{"content":[{"type":"text","text":"hi"},{"type":"image","data":"x"},{"type":"resource_link","uri":"file:///a"}],"structuredContent":{"echo":{"text":"hi"}},"isError":false}}
+

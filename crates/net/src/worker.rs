@@ -192,6 +192,10 @@ pub struct Pool {
     asking: Arc<AtomicUsize>,
     /// What stops each, by its id.
     stops: Arc<Mutex<HashMap<u64, crate::ai::Stop>>>,
+    /// The MCP servers' connections, by server (`mcp.rs`).
+    mcp: Mutex<HashMap<String, Arc<Mutex<mcp::Slot>>>>,
+    /// The pieces of work for MCP servers being done now.
+    mcp_busy: Arc<AtomicUsize>,
 }
 
 use changes::{DraftOrder, keep_draft};
@@ -252,6 +256,8 @@ impl Pool {
             filing,
             asking: Arc::default(),
             stops: Arc::default(),
+            mcp: Mutex::default(),
+            mcp_busy: Arc::default(),
         }
     }
 
@@ -385,6 +391,7 @@ mod data_files;
 mod edits;
 mod indexing;
 mod keys;
+mod mcp;
 mod routing;
 
 /// The keychain entry of an account's calendar and contacts server's own password.

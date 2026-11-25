@@ -68,6 +68,7 @@ The fuzzer keeps what it finds in `corpus/` and `artifacts/`. Git ignores both f
 | `http` | HTTP answers, whole and streamed; `Content-Range`; release data and `SHA256SUMS.txt`; a language model's reply, whole or streamed as events with its tool calls, whose errors never show its key |
 | `imap` | A whole IMAP session, including a folder sync |
 | `jmap` | JMAP sign-in, sync, push events and URLs |
+| `mcp` | What an MCP server on the web sends MailCraft's AI, as JSON or events: its tools and a tool call's answer |
 | `ews` | Exchange Web Services answers: an Exchange mailbox's Inbox rules, read, written and read back; colleagues' free/busy times; which folders changed |
 | `search` | The query language, dates, the **Advanced** form, JMAP filters, modified UTF-7 |
 | `data_file` | A damaged account data file |

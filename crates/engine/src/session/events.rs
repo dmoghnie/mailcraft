@@ -217,6 +217,8 @@ impl Session {
             }
             Event::SignInChecked { id, failure } => self.sign_in_checked(id, failure.map(|f| *f)),
             Event::Ai { done } => self.ai_done(done),
+            // Nothing asks MCP servers yet.
+            Event::Mcp { .. } => {}
             Event::Releases { releases, error } => {
                 self.update = match error {
                     Some(e) => UpdateCheck::Failed(e),

@@ -9,6 +9,7 @@ pub(crate) mod fake_dav;
 pub(crate) mod fake_ews;
 pub(crate) mod fake_graph;
 pub(crate) mod fake_jmap;
+pub(crate) mod fake_mcp;
 mod http;
 pub(crate) mod measure;
 pub(crate) mod proxy;

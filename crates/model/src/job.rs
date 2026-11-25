@@ -14,6 +14,7 @@ mod compact;
 pub mod eta;
 mod import;
 mod keys;
+mod mcp;
 mod op;
 pub mod progress;
 mod status;
@@ -25,6 +26,7 @@ pub use compact::*;
 pub use eta::Eta;
 pub use import::*;
 pub use keys::{HeldKey, Revocation};
+pub use mcp::{McpDone, McpTarget, McpTool, McpWork};
 pub use op::{FollowUpDay, Op};
 pub use progress::Work;
 pub use status::{FailureKind, LOCAL_CERTIFICATE, REMOTE_CERTIFICATE, SignInFailure, SyncStatus, UntrustedCertificate};
@@ -188,6 +190,9 @@ pub enum Job {
     CheckUpdates,
     /// Ask a language model, or keep its key (MailCraft's own AI); answered by [`Event::Ai`].
     Ai { work: AiWork },
+    /// Work for an MCP server the person added, whose tools MailCraft's AI calls: its tools
+    /// listed, one called, its connection closed; answered by [`Event::Mcp`].
+    Mcp { work: McpWork },
     /// Ask the account's server which addresses its mail is sent from (issue #81: a JMAP
     /// server keeps them, as identities). Answered by [`Event::IdentitiesFound`].
     FindIdentities { account: String },
@@ -405,6 +410,7 @@ impl Job {
             | Job::SetSync { .. }
             | Job::CheckUpdates
             | Job::Ai { .. }
+            | Job::Mcp { .. }
             | Job::StopSearch
             | Job::CheckRevocation { .. }
             | Job::FindHeldKeys { .. } => "",
@@ -498,6 +504,10 @@ pub enum Event {
     /// What a language model answered, or a key kept ([`Job::Ai`]).
     Ai {
         done: AiDone,
+    },
+    /// What an MCP server did ([`Job::Mcp`]).
+    Mcp {
+        done: McpDone,
     },
     /// MailCraft's recent releases (newest first), or why they couldn't be had.
     Releases {

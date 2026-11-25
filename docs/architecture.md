@@ -110,6 +110,15 @@ and `cargo xtask sizes` enforces them.
   bring a second HTTP stack that bypasses MailCraft's certificate rules (`net/src/stream`), and a
   runtime the worker threads don't need. The three formats, tools and streaming are under a
   thousand lines over `net::http`.
+- **MCP servers** the person adds, whose tools MailCraft's AI calls, are reached by
+  `net/src/protocols/mcp.rs`: a program MailCraft starts (JSON-RPC over its input and output, a
+  message a line, each way on a thread of its own so a wait ends) or a server on the web
+  (Streamable HTTP: each message posted, its answer JSON or server-sent events; https, or http
+  to this computer). `Job::Mcp` lists a server's tools, calls one or closes its connection;
+  `net/src/worker/mcp.rs` keeps one connection for each server (a program left running between
+  calls, ended as its connection goes), does at most four pieces of work at once, and reads a
+  server's key from the keychain. Written by hand, as the model formats are: the `rmcp` crate
+  is async on tokio.
 - **The record.** Each question is recorded before it goes (`ai-log.json`, saved as the jobs are
   taken): when, what for, which profile and server, whose mail, and its sizes; never what it
   said. The newest 500 are kept.

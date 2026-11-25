@@ -6,6 +6,7 @@ pub mod answering;
 pub mod dav;
 pub mod imap;
 pub mod jmap;
+pub mod mcp;
 pub mod pop;
 pub mod sieve;
 pub mod smtp;

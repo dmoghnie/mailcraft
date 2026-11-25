@@ -1,7 +1,7 @@
 //! An account's jobs, run in turn by its runner ([`super::run`]).
 
 use mailcraft_engine::model::job::Vacation;
-use mailcraft_engine::model::{AiDone, AiWork, Flags, MessageKey};
+use mailcraft_engine::model::{AiDone, AiWork, Flags, McpDone, McpWork, MessageKey};
 
 use super::*;
 
@@ -143,6 +143,11 @@ pub(super) async fn job(sh: &Rcs, id: &str, j: Job) {
                 emit(sh, Event::Ai { done });
             }
         }
+        Job::Mcp { work } => {
+            if let Some(done) = browser_mcp(work) {
+                emit(sh, Event::Mcp { done });
+            }
+        }
         Job::Start { .. }
         | Job::SmtpPassword { .. }
         | Job::DavPassword { .. }
@@ -180,6 +185,15 @@ fn browser_ai(work: AiWork) -> Option<AiDone> {
         AiWork::Ask { id, .. } => Some(AiDone::Answered { id, answer: None, error: Some(BROWSER_AI.into()) }),
         AiWork::SaveKey { name, .. } => Some(AiDone::KeySaved { name, error: Some(BROWSER_AI.into()) }),
         AiWork::Cancel { .. } => None,
+    }
+}
+
+/// MCP servers are reached by the desktop app alone.
+fn browser_mcp(work: McpWork) -> Option<McpDone> {
+    match work {
+        McpWork::List { server, .. } => Some(McpDone::Listed { server, tools: Vec::new(), error: Some(BROWSER_AI.into()) }),
+        McpWork::Call { id, .. } => Some(McpDone::Called { id, result: None, error: Some(BROWSER_AI.into()) }),
+        McpWork::Close { .. } => None,
     }
 }
 
