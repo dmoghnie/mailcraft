@@ -2202,6 +2202,30 @@ count	occurrences	次
 	One a line: its name, then what it is. The script reads each from params, as params.days	每行一個：名稱，然後說明它是什麼。指令碼從 params 讀取每一項，例如 params.days
 	Code, in Rhai	程式碼（Rhai）
 	On: MailCraft's AI can run it	開啟：MailCraft 的 AI 可以執行它
+	Change an MCP server	變更 MCP 伺服器
+	Add an MCP server	新增 MCP 伺服器
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	小寫字母、數字、_ 和 -：MailCraft 的 AI 以這個名稱呼叫它
+	A program MailCraft starts on this computer	MailCraft 在這台電腦上啟動的程式
+	A server on the web	網路上的伺服器
+	https, or http to this computer alone. The key goes to it as a bearer token	https，或僅限到這台電腦的 http。金鑰以持有人權杖（bearer）傳送給它
+	Program	程式
+	What it's given, one a line	傳給它的引數，每行一個
+	Environment variable for the key	金鑰的環境變數
+	The program reads its key from it, if it takes one	程式需要金鑰時從這裡讀取
+	None needed for most servers on this computer	這台電腦上的大多數伺服器不需要
+	On: MailCraft's AI may use its tools	開啟：MailCraft 的 AI 可以使用它的工具
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	除非位址在這台電腦或其網路上，否則 MailCraft 的 AI 傳給它的內容會離開這台電腦
+	The program runs with your permissions: add only one you trust	程式以你的權限執行：只新增你信任的程式
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	其他程式和服務的工具（例如你的筆記或搜尋），供 MailCraft 的 AI 的指令碼使用。每個伺服器在你開啟前都是關閉的，並且只在帳戶允許的範圍內取得該帳戶的郵件
+	MCP servers	MCP 伺服器
+	A program on this computer, or a server on the web	這台電腦上的程式，或網路上的伺服器
+	A program on this computer: {command}	這台電腦上的程式：{command}
+	At {server}	位於 {server}
+	On the web: what MailCraft's AI sends it leaves this computer	在網路上：MailCraft 的 AI 傳給它的內容會離開這台電腦
+	Listing its tools…	正在列出它的工具…
+	Its tools couldn't be listed: {error}	無法列出它的工具：{error}
+	Tools: {count}	工具：{count}
+	List again	重新列出
 	Asked the model	詢問了模型
 	Waiting for the answer…	正在等待回答…
 	The script	指令碼

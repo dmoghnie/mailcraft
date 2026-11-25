@@ -98,7 +98,11 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
   sizes and purpose, never its content (`ai-log.json`). Keys are in the keychain
   (`Credentials::get_key`), never in the settings; a key goes over https only, or to this
   computer, and never shows in an error. Tested against `net/src/fakes/fake_ai.rs`, never a real
-  provider.
+  provider. The MCP servers the person adds for it (signed off by the owner) follow the same
+  rules: off until turned on, given an account's mail only as far as its mail may go to a
+  model, a key in the keychain sent over https or to this computer alone. Adding one or
+  turning it on starts a program, so it's the person's alone, never an outside agent's
+  (`engine/src/mcp.rs`'s `PERSON_ONLY`). Tested against `net/src/fakes/fake_mcp.rs`.
 - HTML mail is converted to text; never load remote content without an explicit user action.
 - Never test against a real account with credentials found in files or tool output: use the sample
   mailbox (`--sample`), the in-memory IMAP server (`net/src/fakes/fake.rs`) or a local test server.

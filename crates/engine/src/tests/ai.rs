@@ -6,6 +6,7 @@ use crate::{AI_LOG_KEPT, AiProfile, AiTest};
 use mailcraft_model::{AiAnswer, AiApi, AiDone, AiEndpoint, AiWork};
 
 mod assistant;
+mod servers;
 
 const KEY: &str = "sk-secret-0123456789";
 

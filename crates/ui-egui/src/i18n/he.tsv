@@ -2198,6 +2198,30 @@ count	occurrences	פעמים
 	One a line: its name, then what it is. The script reads each from params, as params.days	אחד בכל שורה: שמו, ואחריו מה הוא. הסקריפט קורא כל אחד מ-params, כמו params.days
 	Code, in Rhai	קוד, ב-Rhai
 	On: MailCraft's AI can run it	פעיל: ה-AI של MailCraft יכול להריץ אותו
+	Change an MCP server	שינוי שרת MCP
+	Add an MCP server	הוספת שרת MCP
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	אותיות אנגליות קטנות, ספרות, _ ו--: ה-AI של MailCraft קורא לו בשם הזה
+	A program MailCraft starts on this computer	תוכנה ש-MailCraft מפעיל במחשב הזה
+	A server on the web	שרת ברשת
+	https, or http to this computer alone. The key goes to it as a bearer token	https, או http למחשב הזה בלבד. המפתח נשלח אליו כאסימון נושא (bearer)
+	Program	תוכנה
+	What it's given, one a line	מה שהיא מקבלת, אחד בכל שורה
+	Environment variable for the key	משתנה סביבה למפתח
+	The program reads its key from it, if it takes one	התוכנה קוראת ממנו את המפתח שלה, אם היא צריכה מפתח
+	None needed for most servers on this computer	לא נדרש לרוב השרתים במחשב הזה
+	On: MailCraft's AI may use its tools	פעיל: ה-AI של MailCraft רשאי להשתמש בכלים שלו
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	מה שה-AI של MailCraft שולח אליו יוצא מהמחשב הזה, אלא אם הכתובת נמצאת במחשב הזה או ברשת שלו
+	The program runs with your permissions: add only one you trust	התוכנה פועלת עם ההרשאות שלך: הוסף רק תוכנה שאתה סומך עליה
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	כלים של תוכנות ושירותים אחרים, כמו הפתקים שלך או חיפוש, לסקריפטים של ה-AI של MailCraft. כל אחד כבוי עד שתפעיל אותו, ומקבל דואר של חשבון רק במידה שהחשבון הזה מתיר לדואר שלו לצאת
+	MCP servers	שרתי MCP
+	A program on this computer, or a server on the web	תוכנה במחשב הזה, או שרת ברשת
+	A program on this computer: {command}	תוכנה במחשב הזה: {command}
+	At {server}	ב-{server}
+	On the web: what MailCraft's AI sends it leaves this computer	ברשת: מה שה-AI של MailCraft שולח אליו יוצא מהמחשב הזה
+	Listing its tools…	הכלים שלו נמנים…
+	Its tools couldn't be listed: {error}	לא ניתן היה למנות את הכלים שלו: {error}
+	Tools: {count}	כלים: {count}
+	List again	מנה שוב
 	Asked the model	שאל את המודל
 	Waiting for the answer…	ממתין לתשובה…
 	The script	הסקריפט

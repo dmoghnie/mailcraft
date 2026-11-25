@@ -2199,6 +2199,30 @@ count	occurrences	回
 	One a line: its name, then what it is. The script reads each from params, as params.days	1 行に 1 つ: 名前、続けてその内容。スクリプトは params.days のように params から読み取ります
 	Code, in Rhai	コード (Rhai)
 	On: MailCraft's AI can run it	オン: MailCraft の AI が実行できます
+	Change an MCP server	MCP サーバーを変更
+	Add an MCP server	MCP サーバーを追加
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	英小文字、数字、_ と -: MailCraft の AI はこの名前で呼び出します
+	A program MailCraft starts on this computer	MailCraft がこのコンピューターで起動するプログラム
+	A server on the web	Web 上のサーバー
+	https, or http to this computer alone. The key goes to it as a bearer token	https、またはこのコンピューターへの http のみ。キーはベアラートークンとして送られます
+	Program	プログラム
+	What it's given, one a line	渡す引数 (1 行に 1 つ)
+	Environment variable for the key	キー用の環境変数
+	The program reads its key from it, if it takes one	プログラムが必要とする場合、キーをここから読み取ります
+	None needed for most servers on this computer	このコンピューター上のほとんどのサーバーには不要です
+	On: MailCraft's AI may use its tools	オン: MailCraft の AI がそのツールを使えます
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	MailCraft の AI が送る内容は、アドレスがこのコンピューターまたはそのネットワーク上にない限り、このコンピューターの外に出ます
+	The program runs with your permissions: add only one you trust	プログラムはあなたの権限で実行されます。信頼できるものだけを追加してください
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	メモや検索など、他のプログラムやサービスのツールを MailCraft の AI のスクリプトで使えるようにします。それぞれオンにするまでオフで、アカウントのメールはそのアカウントが許す範囲でのみ渡されます
+	MCP servers	MCP サーバー
+	A program on this computer, or a server on the web	このコンピューター上のプログラム、または Web 上のサーバー
+	A program on this computer: {command}	このコンピューター上のプログラム: {command}
+	At {server}	{server}
+	On the web: what MailCraft's AI sends it leaves this computer	Web 上: MailCraft の AI が送る内容はこのコンピューターの外に出ます
+	Listing its tools…	ツールを一覧表示しています…
+	Its tools couldn't be listed: {error}	ツールを一覧表示できませんでした: {error}
+	Tools: {count}	ツール: {count}
+	List again	再度一覧表示
 	Asked the model	モデルに質問しました
 	Waiting for the answer…	回答を待っています…
 	The script	スクリプト

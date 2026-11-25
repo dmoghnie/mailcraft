@@ -2203,6 +2203,30 @@ count	occurrences	kez
 	One a line: its name, then what it is. The script reads each from params, as params.days	Her satıra bir tane: adı, ardından ne olduğu. Betik her birini params içinden okur, örneğin params.days
 	Code, in Rhai	Kod (Rhai)
 	On: MailCraft's AI can run it	Açık: MailCraft yapay zekâsı onu çalıştırabilir
+	Change an MCP server	MCP sunucusunu değiştir
+	Add an MCP server	MCP sunucusu ekle
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	Küçük harfler, rakamlar, _ ve -: MailCraft yapay zekâsı onu bu adla çağırır
+	A program MailCraft starts on this computer	MailCraft'ın bu bilgisayarda başlattığı bir program
+	A server on the web	Web'de bir sunucu
+	https, or http to this computer alone. The key goes to it as a bearer token	https veya yalnızca bu bilgisayara http. Anahtar ona taşıyıcı (bearer) belirteç olarak gider
+	Program	Program
+	What it's given, one a line	Ona verilenler, her satıra bir tane
+	Environment variable for the key	Anahtar için ortam değişkeni
+	The program reads its key from it, if it takes one	Program, gerekiyorsa anahtarını buradan okur
+	None needed for most servers on this computer	Bu bilgisayardaki çoğu sunucu için gerekmez
+	On: MailCraft's AI may use its tools	Açık: MailCraft yapay zekâsı araçlarını kullanabilir
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	MailCraft yapay zekâsının ona gönderdikleri, adres bu bilgisayarda veya ağında değilse bu bilgisayardan çıkar
+	The program runs with your permissions: add only one you trust	Program sizin izinlerinizle çalışır: yalnızca güvendiğiniz birini ekleyin
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	Notlarınız veya bir arama gibi diğer programların ve hizmetlerin araçları, MailCraft yapay zekâsının betikleri için. Her biri siz açana kadar kapalıdır ve bir hesabın postasını yalnızca o hesabın izin verdiği ölçüde alır
+	MCP servers	MCP sunucuları
+	A program on this computer, or a server on the web	Bu bilgisayarda bir program veya web'de bir sunucu
+	A program on this computer: {command}	Bu bilgisayarda bir program: {command}
+	At {server}	{server} üzerinde
+	On the web: what MailCraft's AI sends it leaves this computer	Web'de: MailCraft yapay zekâsının ona gönderdikleri bu bilgisayardan çıkar
+	Listing its tools…	Araçları listeleniyor…
+	Its tools couldn't be listed: {error}	Araçları listelenemedi: {error}
+	Tools: {count}	Araçlar: {count}
+	List again	Yeniden listele
 	Asked the model	Modele sordu
 	Waiting for the answer…	Yanıt bekleniyor…
 	The script	Betik

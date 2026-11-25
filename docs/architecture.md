@@ -118,7 +118,11 @@ and `cargo xtask sizes` enforces them.
   `net/src/worker/mcp.rs` keeps one connection for each server (a program left running between
   calls, ended as its connection goes), does at most four pieces of work at once, and reads a
   server's key from the keychain. Written by hand, as the model formats are: the `rmcp` crate
-  is async on tokio.
+  is async on tokio. The engine keeps the servers (`AiPrefs::mcp`, `session/ai/servers.rs`) and
+  what each listed (`mcp-tools.json`, read when first wanted), so tools are found without
+  starting every server; `mcpServer.*` adds, changes, turns on and off, lists again and removes
+  them. Adding or changing a server, or turning one on, starts a program: `mcp::PERSON_ONLY`
+  keeps those commands from every outside agent, even one let to act.
 - **The record.** Each question is recorded before it goes (`ai-log.json`, saved as the jobs are
   taken): when, what for, which profile and server, whose mail, and its sizes; never what it
   said. The newest 500 are kept.

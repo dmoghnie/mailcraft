@@ -2203,6 +2203,30 @@ count	occurrences	repeticiones
 	One a line: its name, then what it is. The script reads each from params, as params.days	Uno por línea: su nombre y luego qué es. El script lee cada uno de params, como params.days
 	Code, in Rhai	Código, en Rhai
 	On: MailCraft's AI can run it	Activado: la IA de MailCraft puede ejecutarlo
+	Change an MCP server	Cambiar un servidor MCP
+	Add an MCP server	Añadir un servidor MCP
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	Letras minúsculas, dígitos, _ y -: la IA de MailCraft lo llama por este nombre
+	A program MailCraft starts on this computer	Un programa que MailCraft inicia en este equipo
+	A server on the web	Un servidor en la web
+	https, or http to this computer alone. The key goes to it as a bearer token	https, o http solo a este equipo. La clave se le envía como token de portador
+	Program	Programa
+	What it's given, one a line	Lo que recibe, uno por línea
+	Environment variable for the key	Variable de entorno para la clave
+	The program reads its key from it, if it takes one	El programa lee su clave de ella, si necesita una
+	None needed for most servers on this computer	No hace falta para la mayoría de los servidores en este equipo
+	On: MailCraft's AI may use its tools	Activado: la IA de MailCraft puede usar sus herramientas
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	Lo que la IA de MailCraft le envía sale de este equipo, salvo que la dirección esté en este equipo o en su red
+	The program runs with your permissions: add only one you trust	El programa se ejecuta con tus permisos: añade solo uno en el que confíes
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	Herramientas de otros programas y servicios, como tus notas o una búsqueda, para los scripts de la IA de MailCraft. Cada uno está desactivado hasta que lo actives, y recibe el correo de una cuenta solo hasta donde esa cuenta deja ir su correo
+	MCP servers	Servidores MCP
+	A program on this computer, or a server on the web	Un programa en este equipo o un servidor en la web
+	A program on this computer: {command}	Un programa en este equipo: {command}
+	At {server}	En {server}
+	On the web: what MailCraft's AI sends it leaves this computer	En la web: lo que la IA de MailCraft le envía sale de este equipo
+	Listing its tools…	Listando sus herramientas…
+	Its tools couldn't be listed: {error}	No se pudieron listar sus herramientas: {error}
+	Tools: {count}	Herramientas: {count}
+	List again	Listar de nuevo
 	Asked the model	Preguntó al modelo
 	Waiting for the answer…	Esperando la respuesta…
 	The script	El script

@@ -2199,6 +2199,30 @@ count	occurrences	次
 	One a line: its name, then what it is. The script reads each from params, as params.days	每行一个：名称，然后说明它是什么。脚本从 params 读取每一项，例如 params.days
 	Code, in Rhai	代码（Rhai）
 	On: MailCraft's AI can run it	开启：MailCraft 的 AI 可以运行它
+	Change an MCP server	更改 MCP 服务器
+	Add an MCP server	添加 MCP 服务器
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	小写字母、数字、_ 和 -：MailCraft 的 AI 用这个名称调用它
+	A program MailCraft starts on this computer	MailCraft 在这台电脑上启动的程序
+	A server on the web	网络上的服务器
+	https, or http to this computer alone. The key goes to it as a bearer token	https，或仅限到这台电脑的 http。密钥作为持有者令牌（bearer）发送给它
+	Program	程序
+	What it's given, one a line	传给它的参数，每行一个
+	Environment variable for the key	密钥的环境变量
+	The program reads its key from it, if it takes one	程序需要密钥时从这里读取
+	None needed for most servers on this computer	这台电脑上的大多数服务器不需要
+	On: MailCraft's AI may use its tools	开启：MailCraft 的 AI 可以使用它的工具
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	除非地址在这台电脑或其网络上，否则 MailCraft 的 AI 发给它的内容会离开这台电脑
+	The program runs with your permissions: add only one you trust	程序以你的权限运行：只添加你信任的程序
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	其他程序和服务的工具（例如你的笔记或搜索），供 MailCraft 的 AI 的脚本使用。每个服务器在你开启前都是关闭的，并且只在账户允许的范围内获得该账户的邮件
+	MCP servers	MCP 服务器
+	A program on this computer, or a server on the web	这台电脑上的程序，或网络上的服务器
+	A program on this computer: {command}	这台电脑上的程序：{command}
+	At {server}	位于 {server}
+	On the web: what MailCraft's AI sends it leaves this computer	在网络上：MailCraft 的 AI 发给它的内容会离开这台电脑
+	Listing its tools…	正在列出它的工具…
+	Its tools couldn't be listed: {error}	无法列出它的工具：{error}
+	Tools: {count}	工具：{count}
+	List again	重新列出
 	Asked the model	询问了模型
 	Waiting for the answer…	正在等待回答…
 	The script	脚本

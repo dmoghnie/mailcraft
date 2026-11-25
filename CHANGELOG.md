@@ -61,6 +61,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - An outside agent, or `mailcraft-cli`, runs a script MailCraft's AI keeps, or one of its own, with `script.run`: it reads every account, as the agent's other commands do, and changes nothing.
 - MailCraft's AI asks once more by itself when a model's server was busy, failed or didn't answer in time, unless some of its answer had come; a chat whose question failed, or that was stopped, has **Try again**, and an answer stopped as it came keeps what came of it.
 - A chat with MailCraft's AI too long for its model keeps what its start held when it's left out: what the person asked, what was found (still linked) and how each change was decided; how much a chat is, is estimated again from what the model's server counted.
+- **File › Options › AI** adds MCP servers for MailCraft's AI: a program MailCraft starts on this computer, or a server on the web (https, or http to this computer), each key kept in the keychain. Each is off until you turn it on; its tools are then listed and kept, and listed again when you ask (`mcpServer.*`). Only you add a server or turn one on, as that starts a program: an outside agent can't, even one let to act.
 - **Keep chats** in **File › Options › AI** deletes chats with MailCraft's AI older than 7, 30, 90 or 365 days (`ai.keepChats`); removing an account deletes the chats that hold its mail.
 
 ### Changed

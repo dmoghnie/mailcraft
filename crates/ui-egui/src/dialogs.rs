@@ -32,7 +32,7 @@ mod writing;
 pub use accounts::*;
 use accounts::{addresses, dav, trust};
 pub use addresses::AddressForm;
-pub use ai::{AiModelForm, ScriptForm};
+pub use ai::{AiModelForm, ScriptForm, ServerForm};
 pub use archiving::{ArchiveForm, AutoArchiveForm, FolderArchiveForm, FolderMode};
 pub use backup::RestoreForm;
 pub use dav::DavForm;
@@ -258,6 +258,7 @@ pub enum Dialog {
     AiModel(Box<AiModelForm>),
     /// File › Options › AI: a script MailCraft's AI keeps, added or changed.
     Script(Box<ScriptForm>),
+    Server(Box<ServerForm>),
     /// File › Info › Clean up old items: old mail archived to a data file (issue #179).
     Archive(Box<ArchiveForm>),
     /// File › Options › Data files › AutoArchive settings (issue #180).
@@ -577,6 +578,7 @@ impl Dialog {
             Dialog::Dav(f) => f.error = Some(e),
             Dialog::AiModel(f) => f.error = Some(e),
             Dialog::Script(f) => f.error = Some(e),
+            Dialog::Server(f) => f.error = Some(e),
             Dialog::Address(f) => f.error = Some(e),
             Dialog::SelectNames(f) if f.purpose != NamesFor::Message => f.error = Some(e),
             Dialog::OpenSharedCalendar { error, .. } | Dialog::SubscribeCalendar { error, .. } | Dialog::AddSharedMailbox { error, .. } => {
@@ -767,6 +769,7 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         Dialog::Dav(f) => dav::draw(ui, f, t, acts),
         Dialog::AiModel(f) => ai::draw_model(ui, f, s, t, acts),
         Dialog::Script(f) => ai::draw_script(ui, f, t, acts),
+        Dialog::Server(f) => ai::draw_server(ui, f, t, acts),
         Dialog::Address(f) => addresses::draw(ui, f, s, t, acts),
         Dialog::Backup(..) | Dialog::Restore(..) => backup::draw(ui, d, t, acts),
         Dialog::Archive(..) | Dialog::AutoArchive(..) | Dialog::AutoArchiveDue => archiving::draw(ui, d, s, t, acts),

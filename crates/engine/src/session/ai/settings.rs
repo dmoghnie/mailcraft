@@ -108,6 +108,9 @@ pub struct AiPrefs {
     /// changed), with the mail they hold; 0: kept until the person deletes them.
     #[serde(skip_serializing_if = "is_zero")]
     pub chats_days: u32,
+    /// The MCP servers whose tools its scripts may call (`servers.rs`).
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub mcp: Vec<super::McpServer>,
 }
 
 impl AiPrefs {
@@ -127,6 +130,17 @@ impl AiPrefs {
             None => AiReach::Any,
         };
         Some(if self.local_only { AiReach::Local } else { reach })
+    }
+
+    /// Whether what MailCraft's AI holds of `account`'s mail (none: no mail) may go to MCP
+    /// server `server`: one on this computer or its network wherever mail may go to a model,
+    /// one elsewhere only where it may go to any.
+    pub fn allows_server(&self, server: &super::McpServer, account: Option<&str>) -> bool {
+        match self.reach(account) {
+            Some(AiReach::Any) => true,
+            Some(AiReach::Local) => server.local(),
+            None => false,
+        }
     }
 
     /// Whether `profile` may be asked about mail of `account`.

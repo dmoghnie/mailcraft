@@ -489,9 +489,11 @@ impl MailApp {
         let t = self.ui.tokens;
         self.ui.panes.clear();
         if self.ui.backstage.is_some() {
-            // Options lists the scripts MailCraft's AI keeps, read the first time.
+            // Options lists the scripts MailCraft's AI keeps and the MCP servers' tools, read the
+            // first time.
             if self.ui.backstage.as_ref().is_some_and(|b| b.page == backstage::Page::Options) {
                 self.session.assistant_scripts();
+                self.session.mcp_tools();
             }
             backstage::show(&self.session, &mut self.ui, ui, acts);
             self.ui.backstage_typing = ui.ctx().text_edit_focused();

@@ -2216,6 +2216,30 @@ count	occurrences	повторений
 	One a line: its name, then what it is. The script reads each from params, as params.days	По одному в строке: имя, затем что это. Скрипт читает каждое из params, например params.days
 	Code, in Rhai	Код на Rhai
 	On: MailCraft's AI can run it	Включён: ИИ MailCraft может его запускать
+	Change an MCP server	Изменить сервер MCP
+	Add an MCP server	Добавить сервер MCP
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	Строчные латинские буквы, цифры, _ и -: ИИ MailCraft вызывает его по этому имени
+	A program MailCraft starts on this computer	Программа, которую MailCraft запускает на этом компьютере
+	A server on the web	Сервер в интернете
+	https, or http to this computer alone. The key goes to it as a bearer token	https или http только к этому компьютеру. Ключ передаётся ему как bearer-токен
+	Program	Программа
+	What it's given, one a line	Что она получает, по одному в строке
+	Environment variable for the key	Переменная окружения для ключа
+	The program reads its key from it, if it takes one	Программа читает из неё свой ключ, если он ей нужен
+	None needed for most servers on this computer	Для большинства серверов на этом компьютере не нужен
+	On: MailCraft's AI may use its tools	Включён: ИИ MailCraft может пользоваться его инструментами
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	То, что ИИ MailCraft ему отправляет, покидает этот компьютер, если только адрес не на этом компьютере или в его сети
+	The program runs with your permissions: add only one you trust	Программа работает с вашими правами: добавляйте только ту, которой доверяете
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	Инструменты других программ и сервисов, например ваших заметок или поиска, для скриптов ИИ MailCraft. Каждый выключен, пока вы его не включите, и получает почту учётной записи лишь настолько, насколько эта учётная запись это разрешает
+	MCP servers	Серверы MCP
+	A program on this computer, or a server on the web	Программа на этом компьютере или сервер в интернете
+	A program on this computer: {command}	Программа на этом компьютере: {command}
+	At {server}	На {server}
+	On the web: what MailCraft's AI sends it leaves this computer	В интернете: то, что ИИ MailCraft ему отправляет, покидает этот компьютер
+	Listing its tools…	Получение списка его инструментов…
+	Its tools couldn't be listed: {error}	Не удалось получить список его инструментов: {error}
+	Tools: {count}	Инструменты: {count}
+	List again	Получить список снова
 	Asked the model	Спросил модель
 	Waiting for the answer…	Ожидание ответа…
 	The script	Скрипт

@@ -1,11 +1,11 @@
 //! Options' AI cards: the models MailCraft's own AI may ask, how far each account's mail may go
-//! to them, the scripts it keeps, and the record of what went where. Nothing is sent until a model is added and an
+//! to them, the scripts it keeps, the MCP servers its scripts use, and the record of what went where. Nothing is sent until a model is added and an
 //! account's mail let go to it.
 
 use super::*;
-use crate::dialogs::{AiModelForm, ScriptForm};
-use mailcraft_engine::model::dates;
-use mailcraft_engine::{AiProfile, AiReach, AiTask, AiTest, KeptScript};
+use crate::dialogs::{AiModelForm, ScriptForm, ServerForm};
+use mailcraft_engine::model::{McpTarget, dates};
+use mailcraft_engine::{AiProfile, AiReach, AiTask, AiTest, KeptScript, McpServer, ServerTools};
 
 /// The newest questions the record shows.
 const RECORD_SHOWN: usize = 20;
@@ -149,6 +149,68 @@ fn kept_script(t: &Tokens, ui: &mut Ui, first: bool, k: &KeptScript, acts: &mut 
         let mut on = !k.off;
         if widgets::switch(ui, t, &mut on, &k.name).changed() {
             acts.push(Action::Run("script.turn", json!({"name": k.name, "on": on})));
+        }
+    });
+}
+
+/// The MCP servers MailCraft's AI may use, once there's a model: each turned on or off,
+/// changed, listed again or removed; and one added.
+pub(super) fn servers(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
+    if s.prefs.ai.profiles.is_empty() {
+        return;
+    }
+    let about = tl!(
+        "Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go"
+    );
+    let servers = &s.prefs.ai.mcp;
+    card(ui, t, tl!("MCP servers"), Some(about), |ui| {
+        for (i, m) in servers.iter().enumerate() {
+            server(s, t, ui, i == 0, m, acts);
+        }
+        let more = tl!("A program on this computer, or a server on the web");
+        setting(ui, t, servers.is_empty(), tl!("Add an MCP server"), Some(more), |ui| {
+            if ui.button(tl!("Add…")).clicked() {
+                acts.push(Action::Dialog(Dialog::Server(Box::new(ServerForm::new()))));
+            }
+        });
+    });
+}
+
+/// A server: its name; where it is, and what's known of its tools; its buttons, and the switch
+/// that turns it on.
+fn server(s: &Session, t: &Tokens, ui: &mut Ui, first: bool, m: &McpServer, acts: &mut Vec<Action>) {
+    let known = s.ai.mcp_tools.as_ref().and_then(|k| k.get(&m.id));
+    let mut lines = vec![match &m.target {
+        McpTarget::Program { command, .. } => tf!("A program on this computer: {command}", command = command),
+        McpTarget::Web { url } => tf!("At {server}", server = mailcraft_engine::ai_server(url)),
+    }];
+    if !m.local() {
+        lines.push(tl!("On the web: what MailCraft's AI sends it leaves this computer").to_string());
+    }
+    let listing = known.is_some_and(|k| k.listing);
+    match known {
+        Some(k) if k.listing => lines.push(tl!("Listing its tools…").to_string()),
+        Some(ServerTools { error: Some(e), .. }) => lines.push(tf!("Its tools couldn't be listed: {error}", error = e)),
+        Some(k) if m.on => lines.push(tf!("Tools: {count}", count = k.tools.len())),
+        _ => {}
+    }
+    if let Some(e) = s.ai.key_errors.get(&m.key_name()) {
+        lines.push(tf!("Its key couldn't be kept: {error}", error = e));
+    }
+    let about = lines.join("\n");
+    setting(ui, t, first, &m.name, Some(&about), |ui| {
+        if button(ui, &m.name, tl!("Remove"), true).clicked() {
+            acts.push(Action::Run("mcpServer.remove", json!({"id": m.id})));
+        }
+        if button(ui, &m.name, tl!("Change…"), true).clicked() {
+            acts.push(Action::Dialog(Dialog::Server(Box::new(ServerForm::of(m)))));
+        }
+        if button(ui, &m.name, tl!("List again"), m.on && !listing).clicked() {
+            acts.push(Action::Run("mcpServer.refresh", json!({"id": m.id})));
+        }
+        let mut on = m.on;
+        if widgets::switch(ui, t, &mut on, &m.name).changed() {
+            acts.push(Action::Run("mcpServer.turn", json!({"id": m.id, "on": on})));
         }
     });
 }

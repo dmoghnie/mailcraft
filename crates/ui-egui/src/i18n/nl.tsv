@@ -2198,6 +2198,30 @@ count	occurrences	keer
 	One a line: its name, then what it is. The script reads each from params, as params.days	Eén per regel: de naam, dan wat het is. Het script leest elk uit params, zoals params.days
 	Code, in Rhai	Code, in Rhai
 	On: MailCraft's AI can run it	Aan: de AI van MailCraft kan het uitvoeren
+	Change an MCP server	Een MCP-server wijzigen
+	Add an MCP server	Een MCP-server toevoegen
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	Kleine letters, cijfers, _ en -: de AI van MailCraft roept hem met deze naam aan
+	A program MailCraft starts on this computer	Een programma dat MailCraft op deze computer start
+	A server on the web	Een server op het web
+	https, or http to this computer alone. The key goes to it as a bearer token	https, of http alleen naar deze computer. De sleutel gaat als bearer-token naar hem toe
+	Program	Programma
+	What it's given, one a line	Wat het krijgt, één per regel
+	Environment variable for the key	Omgevingsvariabele voor de sleutel
+	The program reads its key from it, if it takes one	Het programma leest er zijn sleutel uit, als het er een nodig heeft
+	None needed for most servers on this computer	Niet nodig voor de meeste servers op deze computer
+	On: MailCraft's AI may use its tools	Aan: de AI van MailCraft mag zijn hulpmiddelen gebruiken
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	Wat de AI van MailCraft hem stuurt verlaat deze computer, tenzij het adres op deze computer of zijn netwerk is
+	The program runs with your permissions: add only one you trust	Het programma draait met jouw rechten: voeg alleen een programma toe dat je vertrouwt
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	Hulpmiddelen van andere programma's en diensten, zoals je notities of een zoekfunctie, voor de scripts van de AI van MailCraft. Elk staat uit tot je hem aanzet, en krijgt de mail van een account alleen voor zover dat account zijn mail laat gaan
+	MCP servers	MCP-servers
+	A program on this computer, or a server on the web	Een programma op deze computer, of een server op het web
+	A program on this computer: {command}	Een programma op deze computer: {command}
+	At {server}	Op {server}
+	On the web: what MailCraft's AI sends it leaves this computer	Op het web: wat de AI van MailCraft hem stuurt verlaat deze computer
+	Listing its tools…	Zijn hulpmiddelen worden opgehaald…
+	Its tools couldn't be listed: {error}	Zijn hulpmiddelen konden niet worden opgehaald: {error}
+	Tools: {count}	Hulpmiddelen: {count}
+	List again	Opnieuw ophalen
 	Asked the model	Het model gevraagd
 	Waiting for the answer…	Wacht op het antwoord…
 	The script	Het script

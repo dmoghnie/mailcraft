@@ -32,6 +32,7 @@ pub(super) fn options(s: &Session, st: &UiState, ui: &mut Ui, acts: &mut Vec<Act
     ai::models(s, &t, ui, acts);
     ai::accounts(s, &t, ui, acts);
     ai::scripts(s, &t, ui, acts);
+    ai::servers(s, &t, ui, acts);
     ai::record(s, &t, ui);
 }
 

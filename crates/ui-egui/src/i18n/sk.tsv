@@ -2217,6 +2217,30 @@ count	occurrences	opakovaní
 	One a line: its name, then what it is. The script reads each from params, as params.days	Jedno na riadok: názov, potom čo to je. Skript číta každé z params, napríklad params.days
 	Code, in Rhai	Kód, v Rhai
 	On: MailCraft's AI can run it	Zapnutý: AI MailCraftu ho môže spustiť
+	Change an MCP server	Zmeniť server MCP
+	Add an MCP server	Pridať server MCP
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	Malé písmená, číslice, _ a -: AI MailCraftu ho volá týmto názvom
+	A program MailCraft starts on this computer	Program, ktorý MailCraft spúšťa na tomto počítači
+	A server on the web	Server na webe
+	https, or http to this computer alone. The key goes to it as a bearer token	https, alebo http iba k tomuto počítaču. Kľúč mu ide ako token bearer
+	Program	Program
+	What it's given, one a line	Čo dostáva, jedno na riadok
+	Environment variable for the key	Premenná prostredia pre kľúč
+	The program reads its key from it, if it takes one	Program z nej číta svoj kľúč, ak nejaký potrebuje
+	None needed for most servers on this computer	Pre väčšinu serverov na tomto počítači netreba
+	On: MailCraft's AI may use its tools	Zapnutý: AI MailCraftu môže používať jeho nástroje
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	Čo mu AI MailCraftu pošle, opustí tento počítač, ak adresa nie je na tomto počítači alebo v jeho sieti
+	The program runs with your permissions: add only one you trust	Program beží s vašimi oprávneniami: pridajte iba taký, ktorému dôverujete
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	Nástroje iných programov a služieb, napríklad vašich poznámok alebo vyhľadávania, pre skripty AI MailCraftu. Každý je vypnutý, kým ho nezapnete, a poštu účtu dostane iba do tej miery, do akej to daný účet dovoľuje
+	MCP servers	Servery MCP
+	A program on this computer, or a server on the web	Program na tomto počítači alebo server na webe
+	A program on this computer: {command}	Program na tomto počítači: {command}
+	At {server}	Na {server}
+	On the web: what MailCraft's AI sends it leaves this computer	Na webe: čo mu AI MailCraftu pošle, opustí tento počítač
+	Listing its tools…	Načítava sa zoznam jeho nástrojov…
+	Its tools couldn't be listed: {error}	Zoznam jeho nástrojov sa nepodarilo načítať: {error}
+	Tools: {count}	Nástroje: {count}
+	List again	Načítať znova
 	Asked the model	Opýtal sa modelu
 	Waiting for the answer…	Čaká sa na odpoveď…
 	The script	Skript

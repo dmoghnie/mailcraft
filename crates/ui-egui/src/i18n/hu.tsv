@@ -2203,6 +2203,30 @@ count	occurrences	előfordulás
 	One a line: its name, then what it is. The script reads each from params, as params.days	Soronként egy: a neve, majd hogy mi az. A szkript mindegyiket a params-ból olvassa, például params.days
 	Code, in Rhai	Kód, Rhai nyelven
 	On: MailCraft's AI can run it	Be: a MailCraft MI-je futtathatja
+	Change an MCP server	MCP-kiszolgáló módosítása
+	Add an MCP server	MCP-kiszolgáló hozzáadása
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	Kisbetűk, számjegyek, _ és -: a MailCraft MI-je ezen a néven hívja
+	A program MailCraft starts on this computer	Egy program, amelyet a MailCraft ezen a számítógépen indít el
+	A server on the web	Egy kiszolgáló a weben
+	https, or http to this computer alone. The key goes to it as a bearer token	https, vagy http csak ehhez a számítógéphez. A kulcs bearer tokenként jut el hozzá
+	Program	Program
+	What it's given, one a line	Amit kap, soronként egy
+	Environment variable for the key	Környezeti változó a kulcshoz
+	The program reads its key from it, if it takes one	A program ebből olvassa a kulcsát, ha kell neki
+	None needed for most servers on this computer	A legtöbb, ezen a számítógépen futó kiszolgálóhoz nem kell
+	On: MailCraft's AI may use its tools	Be: a MailCraft MI-je használhatja az eszközeit
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	Amit a MailCraft MI-je küld neki, elhagyja ezt a számítógépet, hacsak a cím nem ezen a számítógépen vagy a hálózatán van
+	The program runs with your permissions: add only one you trust	A program az Ön jogosultságaival fut: csak olyat adjon hozzá, amelyben megbízik
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	Más programok és szolgáltatások eszközei, például a jegyzetei vagy egy keresés, a MailCraft MI-jének szkriptjei számára. Mindegyik ki van kapcsolva, amíg be nem kapcsolja, és egy fiók leveleit csak annyira kapja meg, amennyire az a fiók engedi a leveleit
+	MCP servers	MCP-kiszolgálók
+	A program on this computer, or a server on the web	Egy program ezen a számítógépen, vagy egy kiszolgáló a weben
+	A program on this computer: {command}	Egy program ezen a számítógépen: {command}
+	At {server}	Itt: {server}
+	On the web: what MailCraft's AI sends it leaves this computer	A weben: amit a MailCraft MI-je küld neki, elhagyja ezt a számítógépet
+	Listing its tools…	Eszközeinek listázása…
+	Its tools couldn't be listed: {error}	Az eszközeit nem sikerült listázni: {error}
+	Tools: {count}	Eszközök: {count}
+	List again	Újra listázás
 	Asked the model	Megkérdezte a modellt
 	Waiting for the answer…	Várakozás a válaszra…
 	The script	A szkript

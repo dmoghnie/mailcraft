@@ -20,7 +20,7 @@ const CONTEXT_LEAST: u32 = 2048;
 /// The longest name, model and address, in characters.
 const TEXT_MOST: usize = 200;
 /// The longest key, in bytes.
-const KEY_MOST: usize = 4096;
+pub(super) const KEY_MOST: usize = 4096;
 /// The longest question `ai.ask` sends, its instructions with it, in bytes.
 const QUESTION_MOST: usize = 1 << 20;
 
@@ -101,7 +101,7 @@ fn settings(s: &Session) -> Value {
 }
 
 /// `k`'s text trimmed, at most [`TEXT_MOST`] characters, and not empty.
-fn text(v: &Value, k: &str) -> Result<String, CmdError> {
+pub(super) fn text(v: &Value, k: &str) -> Result<String, CmdError> {
     let t = p::req_str(v, k)?.trim();
     if t.is_empty() {
         return Err(CmdError::Params(format!("`{k}` is empty")));
@@ -114,7 +114,7 @@ fn text(v: &Value, k: &str) -> Result<String, CmdError> {
 
 /// A server's API address: https, or plain http to this computer alone (as the network layer
 /// takes it).
-fn address(v: &Value) -> Result<String, CmdError> {
+pub(super) fn address(v: &Value) -> Result<String, CmdError> {
     let url = text(v, "url")?;
     let lower = url.to_ascii_lowercase();
     let host = lower.split_once("://").map(|(_, r)| r.split(['/', '?', '#']).next().unwrap_or_default()).unwrap_or_default();

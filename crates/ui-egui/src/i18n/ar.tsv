@@ -2198,6 +2198,30 @@ count	occurrences	مرات
 	One a line: its name, then what it is. The script reads each from params, as params.days	واحد في كل سطر: اسمه، ثم ما هو. يقرأ النص البرمجي كلًّا منها من params، مثل params.days
 	Code, in Rhai	الشيفرة، بلغة Rhai
 	On: MailCraft's AI can run it	مُفعّل: يمكن لذكاء MailCraft الاصطناعي تشغيله
+	Change an MCP server	تغيير خادم MCP
+	Add an MCP server	إضافة خادم MCP
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	أحرف إنجليزية صغيرة وأرقام و_ و-: يستدعيه ذكاء MailCraft الاصطناعي بهذا الاسم
+	A program MailCraft starts on this computer	برنامج يشغّله MailCraft على هذا الكمبيوتر
+	A server on the web	خادم على الويب
+	https, or http to this computer alone. The key goes to it as a bearer token	https، أو http إلى هذا الكمبيوتر فقط. يُرسل إليه المفتاح كرمز حامل (bearer)
+	Program	البرنامج
+	What it's given, one a line	ما يُعطى له، واحد في كل سطر
+	Environment variable for the key	متغير البيئة للمفتاح
+	The program reads its key from it, if it takes one	يقرأ البرنامج مفتاحه منه، إن كان يحتاج إلى مفتاح
+	None needed for most servers on this computer	غير مطلوب لمعظم الخوادم على هذا الكمبيوتر
+	On: MailCraft's AI may use its tools	مُفعّل: يمكن لذكاء MailCraft الاصطناعي استخدام أدواته
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	ما يرسله إليه ذكاء MailCraft الاصطناعي يغادر هذا الكمبيوتر، ما لم يكن العنوان على هذا الكمبيوتر أو شبكته
+	The program runs with your permissions: add only one you trust	يعمل البرنامج بصلاحياتك: لا تُضف إلا برنامجًا تثق به
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	أدوات برامج وخدمات أخرى، مثل ملاحظاتك أو بحث ما، لنصوص ذكاء MailCraft الاصطناعي البرمجية. كلٌّ منها متوقف حتى تشغّله، ولا يحصل على بريد حساب إلا بالقدر الذي يسمح به ذلك الحساب لبريده
+	MCP servers	خوادم MCP
+	A program on this computer, or a server on the web	برنامج على هذا الكمبيوتر، أو خادم على الويب
+	A program on this computer: {command}	برنامج على هذا الكمبيوتر: {command}
+	At {server}	على {server}
+	On the web: what MailCraft's AI sends it leaves this computer	على الويب: ما يرسله إليه ذكاء MailCraft الاصطناعي يغادر هذا الكمبيوتر
+	Listing its tools…	جارٍ سرد أدواته…
+	Its tools couldn't be listed: {error}	تعذّر سرد أدواته: {error}
+	Tools: {count}	الأدوات: {count}
+	List again	السرد مجددًا
 	Asked the model	سأل النموذج
 	Waiting for the answer…	في انتظار الإجابة…
 	The script	النص البرمجي

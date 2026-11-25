@@ -2203,6 +2203,30 @@ count	occurrences	Terminen
 	One a line: its name, then what it is. The script reads each from params, as params.days	Eins pro Zeile: sein Name, dann was es ist. Das Skript liest jedes aus params, etwa params.days
 	Code, in Rhai	Code, in Rhai
 	On: MailCraft's AI can run it	Ein: Die KI von MailCraft kann es ausführen
+	Change an MCP server	MCP-Server ändern
+	Add an MCP server	MCP-Server hinzufügen
+	Lower-case letters, digits, _ and -: MailCraft's AI calls it by this name	Kleinbuchstaben, Ziffern, _ und -: Die KI von MailCraft ruft ihn unter diesem Namen auf
+	A program MailCraft starts on this computer	Ein Programm, das MailCraft auf diesem Computer startet
+	A server on the web	Ein Server im Web
+	https, or http to this computer alone. The key goes to it as a bearer token	https, oder http nur zu diesem Computer. Der Schlüssel geht als Bearer-Token an ihn
+	Program	Programm
+	What it's given, one a line	Was es erhält, eins pro Zeile
+	Environment variable for the key	Umgebungsvariable für den Schlüssel
+	The program reads its key from it, if it takes one	Das Programm liest seinen Schlüssel daraus, falls es einen braucht
+	None needed for most servers on this computer	Für die meisten Server auf diesem Computer nicht nötig
+	On: MailCraft's AI may use its tools	Ein: Die KI von MailCraft darf seine Werkzeuge nutzen
+	What MailCraft's AI sends it leaves this computer, unless the address is on this computer or its network	Was die KI von MailCraft ihm sendet, verlässt diesen Computer, es sei denn, die Adresse liegt auf diesem Computer oder in seinem Netzwerk
+	The program runs with your permissions: add only one you trust	Das Programm läuft mit Ihren Berechtigungen: Fügen Sie nur eines hinzu, dem Sie vertrauen
+	Tools of other programs and services, such as your notes or a search, for MailCraft's AI's scripts. Each is off until you turn it on, and gets an account's mail only as far as that account lets its mail go	Werkzeuge anderer Programme und Dienste, etwa Ihrer Notizen oder einer Suche, für die Skripte der KI von MailCraft. Jeder ist aus, bis Sie ihn einschalten, und erhält die E-Mails eines Kontos nur so weit, wie dieses Konto sie gehen lässt
+	MCP servers	MCP-Server
+	A program on this computer, or a server on the web	Ein Programm auf diesem Computer oder ein Server im Web
+	A program on this computer: {command}	Ein Programm auf diesem Computer: {command}
+	At {server}	Bei {server}
+	On the web: what MailCraft's AI sends it leaves this computer	Im Web: Was die KI von MailCraft ihm sendet, verlässt diesen Computer
+	Listing its tools…	Seine Werkzeuge werden aufgelistet…
+	Its tools couldn't be listed: {error}	Seine Werkzeuge konnten nicht aufgelistet werden: {error}
+	Tools: {count}	Werkzeuge: {count}
+	List again	Erneut auflisten
 	Asked the model	Das Modell gefragt
 	Waiting for the answer…	Wartet auf die Antwort…
 	The script	Das Skript

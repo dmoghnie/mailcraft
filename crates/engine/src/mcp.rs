@@ -93,12 +93,20 @@ pub const READS: &[&str] = &[
     "task.list",
 ];
 
+/// The commands an agent never runs, even let to act: adding or changing an MCP server, or
+/// turning one on, starts a program on this computer, the person's to choose alone.
+pub const PERSON_ONLY: &[&str] = &["mcpServer.save", "mcpServer.turn"];
+
+/// Why a command isn't run for any agent.
+pub const PERSON_ONLY_SAID: &str =
+    "Only the person using MailCraft adds an MCP server or turns one on (File › Options › AI): it starts a program on their computer";
+
 /// Why a command isn't run for an agent that may only read.
 pub const READ_ONLY_SAID: &str = "MailCraft lets AI agents only read and search: this command sends, answers, deletes, moves or changes something. Ask the user to turn on File › Options › Safety › Let AI agents send, delete and change settings";
 
 /// Whether an agent may run command `id` now.
 pub fn may_run(s: &Session, id: &str) -> bool {
-    s.prefs.agents_act || READS.contains(&id)
+    !PERSON_ONLY.contains(&id) && (s.prefs.agents_act || READS.contains(&id))
 }
 
 /// What the agent is told about MailCraft as it connects.
@@ -210,6 +218,9 @@ fn call(s: &mut impl Runner, params: &Value) -> Result<Value, String> {
         }
         "run_command" => {
             let id = args.get("id").and_then(Value::as_str).ok_or("`id` (string) is required")?;
+            if PERSON_ONLY.contains(&id) {
+                return Ok(text(PERSON_ONLY_SAID, true));
+            }
             if !may_run(s.session(), id) {
                 return Ok(text(READ_ONLY_SAID, true));
             }
@@ -234,7 +245,9 @@ fn list(s: &Session, filter: &str) -> Value {
                 if !c.shortcut.is_empty() {
                     v["shortcut"] = json!(c.shortcut);
                 }
-                if !may_run(s, c.id) {
+                if PERSON_ONLY.contains(&c.id) {
+                    v["disabled"] = json!("only the person adds an MCP server or turns one on");
+                } else if !may_run(s, c.id) {
                     v["disabled"] = json!("agents may only read and search");
                 } else if let Some(why) = (c.enabled)(s) {
                     v["disabled"] = json!(why);

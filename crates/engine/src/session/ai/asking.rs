@@ -91,6 +91,8 @@ pub struct AiState {
     parts: HashMap<u64, (String, String)>,
     /// The assistant's chats.
     pub assistant: super::Assistant,
+    /// What each MCP server's tools are known to be, by server, once read (`servers.rs`).
+    pub mcp_tools: Option<BTreeMap<String, super::ServerTools>>,
 }
 
 impl AiState {

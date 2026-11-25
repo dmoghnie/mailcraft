@@ -3,7 +3,8 @@
 //! shown; and each model's buttons named by the model, to a screen reader.
 
 use super::*;
-use mailcraft_engine::model::{AiAnswer, AiApi, AiDone, Secret};
+use crate::dialogs::ServerForm;
+use mailcraft_engine::model::{AiAnswer, AiApi, AiDone, McpDone, McpTarget, McpTool, Secret};
 use mailcraft_engine::{AiReach, AiTest};
 
 const KEY: &str = "sk-ui-test-0123";
@@ -151,4 +152,44 @@ fn kept_scripts_are_turned_off_changed_and_deleted_on_options() {
     click_named(&ctx, &mut a, "the_day: Delete");
     let names: Vec<serde_json::Value> = kept(&mut a).iter().map(|k| k["name"].clone()).collect();
     assert_eq!(names, ["waiting_on_me", "waiting_on_them", "person_history", "tidy"]);
+}
+
+/// MCP servers, once there's a model: one added from its dialog (a program, its key kept out of
+/// the dialog's `Debug` and the settings), its tools counted once listed, turned off by its
+/// switch and removed, each button named by its server.
+#[test]
+fn an_mcp_server_is_added_turned_off_and_removed_on_options() {
+    let _tall = crate::tests::windows::layout::Dressed::new(TALL, "");
+    let (mut a, ctx) = options("ai-options-mcp");
+    assert!(!has(&drawn_strings(&ctx, &mut a, TALL), "MCP servers"), "no model yet: no servers");
+    a.run("ai.saveProfile", json!({"name": "Ollama", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small"}));
+    frame(&ctx, &mut a, vec![]);
+    assert!(has(&drawn_strings(&ctx, &mut a, TALL), "Add an MCP server"));
+    a.ui.dialog = Some(Dialog::Server(Box::new(ServerForm::new())));
+    frame(&ctx, &mut a, vec![]);
+    let Some(Dialog::Server(f)) = a.ui.dialog.as_mut() else { panic!("the server's dialog: {:?}", a.ui.dialog) };
+    (f.name, f.command, f.key_env, f.key) = ("notes".into(), "notes-mcp".into(), "NOTES_KEY".into(), Secret(KEY.into()));
+    assert!(!format!("{f:?}").contains(KEY), "the key out of the dialog's Debug");
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "Save");
+    assert!(a.ui.dialog.is_none(), "saved: {:?}", a.ui.dialog);
+    let saved = a.session.prefs.ai.mcp.first().expect("added").clone();
+    assert!(saved.on && saved.has_key, "{saved:?}");
+    assert!(matches!(&saved.target, McpTarget::Program { key_env: Some(e), .. } if e == "NOTES_KEY"), "{saved:?}");
+    assert!(!serde_json::to_string(&a.session.prefs).unwrap().contains(KEY), "the key out of the settings");
+    let tool = McpTool { name: "find_note".into(), read_only: true, ..McpTool::default() };
+    a.session.apply(MailEvent::Mcp { done: McpDone::Listed { server: saved.id.clone(), tools: vec![tool], error: None } });
+    frame(&ctx, &mut a, vec![]);
+    let texts = drawn_strings(&ctx, &mut a, TALL);
+    assert!(["MCP servers", "notes", "A program on this computer: notes-mcp", "Tools: 1"].iter().all(|w| has(&texts, w)), "{texts:?}");
+    let switch = crate::tests::named(&ctx, &mut a, TALL)
+        .into_iter()
+        .find(|n| n.role == egui::accesskit::Role::CheckBox && n.label.as_deref() == Some("notes"))
+        .and_then(|n| n.centre())
+        .expect("the server's switch");
+    crate::tests::click(&ctx, &mut a, switch);
+    assert!(!a.session.prefs.ai.mcp[0].on, "turned off");
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "notes: Remove");
+    assert!(a.session.prefs.ai.mcp.is_empty(), "removed");
 }
