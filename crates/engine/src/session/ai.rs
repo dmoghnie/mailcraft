@@ -8,6 +8,7 @@ mod assistant;
 mod commands;
 mod servers;
 mod settings;
+mod summary;
 
 pub use asking::{AI_LOG_KEPT, AiLogEntry, AiState, AiTest, server_of as ai_server};
 pub(crate) use assistant::assistant_commands;
@@ -21,3 +22,5 @@ pub(crate) use commands::commands as ai_commands;
 pub(crate) use servers::commands as mcp_server_commands;
 pub use servers::{McpServer, ServerTools};
 pub use settings::{AiPrefs, AiProfile, AiReach, AiTask, local_url as ai_url_is_local};
+pub(crate) use summary::commands as summary_commands;
+pub use summary::{SUMMARY_PURPOSE, ThreadSummary};

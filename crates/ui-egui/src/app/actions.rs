@@ -397,6 +397,13 @@ impl MailApp {
                 Err(mailcraft_engine::CmdError::Disabled(m)) => self.session.notice(m, true),
                 Err(_) => {}
             },
+            // A conversation summed up: no model it may go to, said (a summary that fails on
+            // the way says why in its card).
+            "mail.summarize" => {
+                if let Err(mailcraft_engine::CmdError::Disabled(m)) = self.ran(id, &p) {
+                    self.session.notice(m, true);
+                }
+            }
             // A message's source in its window, brought to the front (asked for again while open).
             "message.source" => match self.session.run(id, &p) {
                 Ok(v) => self.ui.raise_source = v.get("key").and_then(Value::as_str).and_then(MessageKey::from_id),

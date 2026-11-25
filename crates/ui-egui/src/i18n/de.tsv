@@ -2285,3 +2285,9 @@ count	occurrences	Terminen
 	What needs my attention today?	Was braucht heute meine Aufmerksamkeit?
 	Write a message	Nachricht schreiben
 	Write a reply to this message	Schreibe eine Antwort auf diese Nachricht
+	Summary	Zusammenfassung
+	Close the summary	Zusammenfassung schließen
+	Summarizing…	Wird zusammengefasst…
+	It couldn't be summarized: {error}	Konnte nicht zusammengefasst werden: {error}
+	Older messages left out for room: {count}	Ältere Nachrichten aus Platzgründen weggelassen: {count}
+	Summarize with AI	Mit KI zusammenfassen

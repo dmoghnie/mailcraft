@@ -2281,3 +2281,9 @@ count	occurrences	次
 	What needs my attention today?	今天有什么需要我处理的？
 	Write a message	写一封邮件
 	Write a reply to this message	给这封邮件写一封回复
+	Summary	摘要
+	Close the summary	关闭摘要
+	Summarizing…	正在总结…
+	It couldn't be summarized: {error}	无法总结：{error}
+	Older messages left out for room: {count}	因篇幅省略的较早邮件：{count}
+	Summarize with AI	用 AI 总结

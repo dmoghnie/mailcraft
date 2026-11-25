@@ -2281,3 +2281,9 @@ count	occurrences	回
 	What needs my attention today?	今日対応が必要なものは？
 	Write a message	メッセージを作成
 	Write a reply to this message	このメッセージへの返信を書いて
+	Summary	要約
+	Close the summary	要約を閉じる
+	Summarizing…	要約しています…
+	It couldn't be summarized: {error}	要約できませんでした: {error}
+	Older messages left out for room: {count}	容量のため省いた古いメッセージ: {count}
+	Summarize with AI	AI で要約

@@ -141,6 +141,7 @@ pub fn registry() -> Registry {
     all.extend(crate::session::ai_commands());
     all.extend(crate::session::assistant_commands());
     all.extend(crate::session::mcp_server_commands());
+    all.extend(crate::session::summary_commands());
     Registry::new(all)
 }
 

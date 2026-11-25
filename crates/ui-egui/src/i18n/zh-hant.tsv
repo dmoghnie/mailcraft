@@ -2284,3 +2284,9 @@ count	occurrences	次
 	What needs my attention today?	今天有什麼需要我處理的？
 	Write a message	撰寫郵件
 	Write a reply to this message	替這封郵件寫一封回覆
+	Summary	摘要
+	Close the summary	關閉摘要
+	Summarizing…	正在摘要…
+	It couldn't be summarized: {error}	無法摘要：{error}
+	Older messages left out for room: {count}	因篇幅省略的較早郵件：{count}
+	Summarize with AI	用 AI 摘要

@@ -95,6 +95,8 @@ pub struct AiState {
     pub mcp_tools: Option<BTreeMap<String, super::ServerTools>>,
     /// The calls to MCP servers waiting, by call: the line of the record each is on.
     pub(super) mcp_calls: HashMap<u64, u64>,
+    /// The conversations summed up (`summary.rs`).
+    pub(super) summaries: super::summary::Summaries,
 }
 
 impl AiState {
@@ -258,6 +260,9 @@ impl Session {
                         Err(e) => AiTest::Failed { error: e.clone() },
                     };
                     self.ai.tests.insert(w.profile.clone(), test);
+                    return;
+                }
+                if self.summary_came(id, &w.profile, &result) {
                     return;
                 }
                 if self.ai.answers.len() >= ANSWERS_KEPT

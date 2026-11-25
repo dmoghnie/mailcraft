@@ -2285,3 +2285,9 @@ count	occurrences	occurrences
 	What needs my attention today?	Qu’est-ce qui demande mon attention aujourd’hui ?
 	Write a message	Écrire un message
 	Write a reply to this message	Écris une réponse à ce message
+	Summary	Résumé
+	Close the summary	Fermer le résumé
+	Summarizing…	Résumé en cours…
+	It couldn't be summarized: {error}	Impossible de résumer : {error}
+	Older messages left out for room: {count}	Messages plus anciens omis faute de place : {count}
+	Summarize with AI	Résumer avec l’IA

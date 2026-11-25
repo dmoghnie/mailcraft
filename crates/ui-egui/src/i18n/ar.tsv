@@ -2280,3 +2280,9 @@ count	occurrences	مرات
 	What needs my attention today?	ما الذي يحتاج إلى انتباهي اليوم؟
 	Write a message	كتابة رسالة
 	Write a reply to this message	اكتب ردًا على هذه الرسالة
+	Summary	ملخص
+	Close the summary	إغلاق الملخص
+	Summarizing…	جارٍ التلخيص…
+	It couldn't be summarized: {error}	تعذّر التلخيص: {error}
+	Older messages left out for room: {count}	رسائل أقدم حُذفت لضيق المساحة: {count}
+	Summarize with AI	التلخيص بالذكاء الاصطناعي

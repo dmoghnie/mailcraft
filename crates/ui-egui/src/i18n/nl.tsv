@@ -2280,3 +2280,9 @@ count	occurrences	keer
 	What needs my attention today?	Wat heeft vandaag mijn aandacht nodig?
 	Write a message	Een bericht schrijven
 	Write a reply to this message	Schrijf een antwoord op dit bericht
+	Summary	Samenvatting
+	Close the summary	De samenvatting sluiten
+	Summarizing…	Bezig met samenvatten…
+	It couldn't be summarized: {error}	Kon niet worden samengevat: {error}
+	Older messages left out for room: {count}	Oudere berichten weggelaten wegens ruimte: {count}
+	Summarize with AI	Samenvatten met AI

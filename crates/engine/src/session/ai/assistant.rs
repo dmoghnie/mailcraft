@@ -37,6 +37,7 @@ mod window;
 pub use commands::QUOTE_MOST as CONTEXT_QUOTE_MOST;
 pub(crate) use commands::commands as assistant_commands;
 pub use context::{CONTEXT_AT_FIRST, ContextItem, ITEMS_MOST as CONTEXT_ITEMS_MOST};
+pub(super) use context::{MESSAGE_CHARS, cut};
 pub use links::{Found, LINK as ASSISTANT_LINK, Linked, message_link as assistant_message_link};
 #[doc(hidden)]
 pub use script::run_script_against;

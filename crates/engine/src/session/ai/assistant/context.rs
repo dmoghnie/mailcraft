@@ -19,7 +19,7 @@ use crate::{CmdError, Session};
 /// The most items pointed at in a turn.
 pub const ITEMS_MOST: usize = 20;
 /// The most of a message's text written in for it, in characters.
-pub(super) const MESSAGE_CHARS: usize = 12_000;
+pub(in crate::session::ai) const MESSAGE_CHARS: usize = 12_000;
 /// The most of a selected part written in, in characters.
 const QUOTE_CHARS: usize = 8000;
 /// What a model takes in when its profile doesn't say, in tokens (Ollama's own, for one).
@@ -262,7 +262,7 @@ pub(super) fn tokens(bytes: usize) -> usize {
 }
 
 /// `text` cut at `chars` characters, saying so.
-pub(super) fn cut(text: &str, chars: usize) -> String {
+pub(in crate::session::ai) fn cut(text: &str, chars: usize) -> String {
     match text.char_indices().nth(chars) {
         Some((at, _)) => format!("{}\n[… cut here: {} more characters]", text.get(..at).unwrap_or(text), text.chars().count().saturating_sub(chars)),
         None => text.to_string(),

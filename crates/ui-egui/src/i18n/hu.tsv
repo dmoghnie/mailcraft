@@ -2285,3 +2285,9 @@ count	occurrences	előfordulás
 	What needs my attention today?	Mi igényli ma a figyelmemet?
 	Write a message	Üzenet írása
 	Write a reply to this message	Írj választ erre az üzenetre
+	Summary	Összefoglaló
+	Close the summary	Az összefoglaló bezárása
+	Summarizing…	Összefoglalás…
+	It couldn't be summarized: {error}	Nem sikerült összefoglalni: {error}
+	Older messages left out for room: {count}	Helyhiány miatt kihagyott régebbi üzenetek: {count}
+	Summarize with AI	Összefoglalás MI-vel

@@ -2298,3 +2298,9 @@ count	occurrences	повторений
 	What needs my attention today?	Что требует моего внимания сегодня?
 	Write a message	Написать сообщение
 	Write a reply to this message	Напиши ответ на это сообщение
+	Summary	Сводка
+	Close the summary	Закрыть сводку
+	Summarizing…	Составление сводки…
+	It couldn't be summarized: {error}	Не удалось составить сводку: {error}
+	Older messages left out for room: {count}	Более старые сообщения, пропущенные из-за нехватки места: {count}
+	Summarize with AI	Составить сводку с помощью ИИ

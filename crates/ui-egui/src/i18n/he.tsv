@@ -2280,3 +2280,9 @@ count	occurrences	פעמים
 	What needs my attention today?	מה דורש את תשומת ליבי היום?
 	Write a message	כתיבת הודעה
 	Write a reply to this message	כתוב תשובה להודעה הזו
+	Summary	סיכום
+	Close the summary	סגירת הסיכום
+	Summarizing…	מסכם…
+	It couldn't be summarized: {error}	לא ניתן היה לסכם: {error}
+	Older messages left out for room: {count}	הודעות ישנות יותר שהושמטו מחוסר מקום: {count}
+	Summarize with AI	סיכום עם בינה מלאכותית

@@ -15,6 +15,7 @@ use crate::{Action, UiState, widgets};
 
 mod composer;
 mod markdown;
+pub(crate) mod summary;
 #[cfg(test)]
 mod tests;
 mod turns;

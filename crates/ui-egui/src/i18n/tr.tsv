@@ -2285,3 +2285,9 @@ count	occurrences	kez
 	What needs my attention today?	Bugün neyle ilgilenmem gerekiyor?
 	Write a message	İleti yaz
 	Write a reply to this message	Bu iletiye bir yanıt yaz
+	Summary	Özet
+	Close the summary	Özeti kapat
+	Summarizing…	Özetleniyor…
+	It couldn't be summarized: {error}	Özetlenemedi: {error}
+	Older messages left out for room: {count}	Yer olmadığı için çıkarılan eski iletiler: {count}
+	Summarize with AI	Yapay zekâ ile özetle

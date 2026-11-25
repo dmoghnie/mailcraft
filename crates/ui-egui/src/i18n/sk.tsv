@@ -2299,3 +2299,9 @@ count	occurrences	opakovaní
 	What needs my attention today?	Čo si dnes vyžaduje moju pozornosť?
 	Write a message	Napísať správu
 	Write a reply to this message	Napíš odpoveď na túto správu
+	Summary	Zhrnutie
+	Close the summary	Zavrieť zhrnutie
+	Summarizing…	Zhŕňa sa…
+	It couldn't be summarized: {error}	Nepodarilo sa zhrnúť: {error}
+	Older messages left out for room: {count}	Staršie správy vynechané pre nedostatok miesta: {count}
+	Summarize with AI	Zhrnúť pomocou AI

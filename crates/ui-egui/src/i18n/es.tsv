@@ -2285,3 +2285,9 @@ count	occurrences	repeticiones
 	What needs my attention today?	¿Qué necesita mi atención hoy?
 	Write a message	Escribir un mensaje
 	Write a reply to this message	Escribe una respuesta a este mensaje
+	Summary	Resumen
+	Close the summary	Cerrar el resumen
+	Summarizing…	Resumiendo…
+	It couldn't be summarized: {error}	No se pudo resumir: {error}
+	Older messages left out for room: {count}	Mensajes anteriores omitidos por falta de espacio: {count}
+	Summarize with AI	Resumir con IA

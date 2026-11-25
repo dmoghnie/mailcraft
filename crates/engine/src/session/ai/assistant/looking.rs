@@ -40,14 +40,14 @@ impl Session {
     }
 
     /// A message's text as it reads, its files named after it, when its source is kept here.
-    pub(super) fn message_text(&self, key: &MessageKey) -> Option<String> {
+    pub(in crate::session::ai) fn message_text(&self, key: &MessageKey) -> Option<String> {
         let (text, files) = self.message_parts(key)?;
         let files = if files.is_empty() { String::new() } else { format!("\n\n[Files: {}]", files.join(", ")) };
         Some(format!("{text}{files}"))
     }
 
     /// Who wrote a message to whom, when, about what, and where it is.
-    pub(super) fn message_head(&self, m: &Summary) -> String {
+    pub(in crate::session::ai) fn message_head(&self, m: &Summary) -> String {
         let list = |l: &[mailcraft_model::EmailAddress]| l.iter().map(ToString::to_string).collect::<Vec<_>>().join(", ");
         let mut head = format!("From: {}\nTo: {}", m.from, list(&m.to));
         if !m.cc.is_empty() {

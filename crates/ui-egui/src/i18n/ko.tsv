@@ -2284,3 +2284,9 @@ count	occurrences	회
 	What needs my attention today?	오늘 확인해야 할 것은 무엇인가요?
 	Write a message	메시지 작성
 	Write a reply to this message	이 메시지에 대한 답장을 써 줘
+	Summary	요약
+	Close the summary	요약 닫기
+	Summarizing…	요약하는 중…
+	It couldn't be summarized: {error}	요약하지 못했습니다: {error}
+	Older messages left out for room: {count}	공간이 부족해 뺀 이전 메시지: {count}
+	Summarize with AI	AI로 요약

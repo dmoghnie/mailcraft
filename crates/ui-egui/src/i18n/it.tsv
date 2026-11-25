@@ -2284,3 +2284,9 @@ count	occurrences	ripetizioni
 	What needs my attention today?	Cosa richiede la mia attenzione oggi?
 	Write a message	Scrivi un messaggio
 	Write a reply to this message	Scrivi una risposta a questo messaggio
+	Summary	Riepilogo
+	Close the summary	Chiudi il riepilogo
+	Summarizing…	Riepilogo in corso…
+	It couldn't be summarized: {error}	Impossibile riassumere: {error}
+	Older messages left out for room: {count}	Messaggi meno recenti omessi per mancanza di spazio: {count}
+	Summarize with AI	Riassumi con l’IA

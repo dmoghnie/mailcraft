@@ -386,3 +386,40 @@ fn a_script_proposed_to_be_kept_is_approved_from_its_card() {
     let kept = a.session.run("script.list", &json!({})).unwrap();
     assert!(kept["scripts"].as_array().unwrap().iter().any(|k| k["name"] == "unread_count"), "{kept}");
 }
+
+/// The last control named `label` in the window, clicked (a menu's item is drawn over the rest).
+fn click_last(ctx: &egui::Context, a: &mut MailApp, label: &str) {
+    let size = windows::layout::SIZE.with(std::cell::Cell::get);
+    let all = named(ctx, a, size);
+    let at = all.iter().filter(|n| n.name() == Some(label)).filter_map(Named::centre).next_back();
+    let at = at.unwrap_or_else(|| panic!("no {label} to click: {:?}", all.iter().filter_map(Named::name).collect::<Vec<_>>()));
+    click(ctx, a, at);
+}
+
+/// A conversation summed up from its message's More actions: a card at the top of the reading
+/// pane shows what's written as it comes and the model writing it, then the summary; Close lets
+/// it go.
+#[test]
+fn a_conversation_is_summed_up_from_more_actions_and_closed() {
+    let (mut a, ctx) = ready("assistant-summary");
+    let key = a.session.list.iter().find(|m| m.subject == "Re: Storyboard review on Thursday").map(|m| m.key.clone()).unwrap();
+    a.run("list.open", json!({"key": key.to_id()}));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    click_last(&ctx, &mut a, "More actions");
+    click_last(&ctx, &mut a, "Summarize with AI");
+    let id = a.session.thread_summary(&key).and_then(|s| s.asking).expect("asked for, on its way");
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "Summary") && has(&t, "Summarizing…") && has(&t, "small at localhost:11434"), "{t:?}");
+    a.session.apply(MailEvent::Ai { done: AiDone::Part { id, text: "- Zoe wants scenes 4 to 7".into(), thinking: String::new() } });
+    assert!(has(&texts(&ctx, &mut a), "Zoe wants scenes 4 to 7"), "what came so far");
+    let answer = AiAnswer { text: "- Zoe wants scenes 4 to 7 on Thursday.".into(), ..AiAnswer::default() };
+    a.session.apply(MailEvent::Ai { done: AiDone::Answered { id, answer: Some(answer), error: None } });
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "Zoe wants scenes 4 to 7 on Thursday.") && !has(&t, "Summarizing…"), "{t:?}");
+    click_last(&ctx, &mut a, "Close the summary");
+    frame(&ctx, &mut a, vec![]);
+    assert!(a.session.thread_summary(&key).is_none(), "let go");
+    assert!(!has(&texts(&ctx, &mut a), "Zoe wants scenes 4 to 7 on Thursday."));
+}
