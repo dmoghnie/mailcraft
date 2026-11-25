@@ -2380,3 +2380,18 @@ count	occurrences	opakovaní
 	Meeting times	Časy schôdzky
 	Propose meeting times	Navrhnúť časy schôdzky
 	From your free time in your work hours over the next week	Z vášho voľného času v pracovnom čase počas najbližšieho týždňa
+	has {field} that {op}	{field} {op}
+	contains “{text}”	obsahuje „{text}“
+	is “{text}”	je „{text}“
+	starts with “{text}”	začína na „{text}“
+	ends with “{text}”	končí na „{text}“
+	a sender	odosielateľ
+	a recipient	niektorý príjemca
+	a subject	predmet
+	a sender, recipient or subject	odosielateľ, príjemca alebo predmet
+	text	text
+	not ({condition})	neplatí ({condition})
+	is of high importance	má vysokú dôležitosť
+	is of low importance	má nízku dôležitosť
+	is larger than {size} KB	je väčšia ako {size} KB
+	is smaller than {size} KB	je menšia ako {size} KB

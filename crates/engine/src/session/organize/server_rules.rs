@@ -91,7 +91,7 @@ impl Session {
     /// A new rule on the server, last in the order, or the rule `id` made to do what `rule`
     /// says (its name and switch too).
     pub fn save_server_rule(&mut self, account: &str, id: Option<&str>, rule: Rule, drop_outlook_list: bool) -> CmdResult {
-        if rule.name.trim().is_empty() || rule.conditions.is_empty() || rule.actions.is_empty() {
+        if rule.name.trim().is_empty() || rule.filter.tests().is_empty() || rule.actions.is_empty() {
             return Err(CmdError::Params("a rule needs a name, a condition and an action".into()));
         }
         let rules = self.rules_to_change(account, drop_outlook_list)?;

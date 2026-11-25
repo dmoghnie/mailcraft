@@ -6,9 +6,11 @@ use serde::{Deserialize, Serialize};
 use crate::dates::Clock;
 use crate::{FolderRole, Summary, keyword_for};
 
+mod conditions;
 pub mod keywords;
 pub mod server_rules;
 
+pub use conditions::{CONDITION_DEPTH, CONDITION_TESTS, Condition, Importance, TextOp};
 pub use server_rules::{ServerRule, ServerRuleOp, ServerRules};
 
 /// A category: a name and colour shown on messages, stored on the server as a keyword so other
@@ -37,37 +39,6 @@ pub fn default_categories() -> Vec<Category> {
         .collect()
 }
 
-/// What a rule looks at. Text tests are case-insensitive "contains".
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "if", content = "value", rename_all = "camelCase")]
-pub enum Condition {
-    /// The sender's name or address.
-    From(String),
-    /// Any To or Cc recipient.
-    To(String),
-    Subject(String),
-    /// Subject, sender or recipients.
-    AnyText(String),
-    HasAttachment,
-    /// Newsletters, lists, automatic mail.
-    Bulk,
-}
-
-impl Condition {
-    pub fn matches(&self, m: &Summary) -> bool {
-        let has = |hay: &str, needle: &str| !needle.trim().is_empty() && hay.to_lowercase().contains(&needle.trim().to_lowercase());
-        let addr = |a: &crate::EmailAddress| format!("{} {}", a.name, a.email);
-        match self {
-            Condition::From(t) => has(&addr(&m.from), t),
-            Condition::To(t) => m.to.iter().chain(&m.cc).any(|a| has(&addr(a), t)),
-            Condition::Subject(t) => has(&m.subject, t),
-            Condition::AnyText(t) => has(&m.subject, t) || has(&addr(&m.from), t) || m.to.iter().chain(&m.cc).any(|a| has(&addr(a), t)),
-            Condition::HasAttachment => m.has_attachments,
-            Condition::Bulk => m.bulk,
-        }
-    }
-}
-
 /// What a rule does.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "do", content = "value", rename_all = "camelCase")]
@@ -86,27 +57,53 @@ pub enum RuleAction {
 }
 
 /// A rule, run on mail as it arrives in an Inbox, or (`sent`) on mail the user sends as its copy
-/// reaches Sent (the client applies it, like Outlook's client-side rules, issue #202).
+/// reaches Sent (the client applies it, like Outlook's client-side rules, issue #202): what it
+/// looks at (`where`, a query's) and what it does.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", from = "RuleRead")]
 pub struct Rule {
     pub name: String,
-    #[serde(default = "yes")]
     pub enabled: bool,
     /// Only this account's mail (`None`: every account).
-    #[serde(default)]
     pub account: Option<String>,
-    pub conditions: Vec<Condition>,
-    /// All conditions must match (`false`: any one).
-    #[serde(default = "yes")]
-    pub match_all: bool,
+    #[serde(rename = "where")]
+    pub filter: Condition,
     pub actions: Vec<RuleAction>,
     /// Don't run later rules on a message this one matched.
-    #[serde(default)]
     pub stop: bool,
     /// On mail the user sends (its copy in Sent), not mail arriving, as Outlook's rules can be.
-    #[serde(default)]
     pub sent: bool,
+}
+
+/// A rule as it's read: as written now (`where`), or as rules were before their conditions
+/// combined (a list, all or any of it).
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct RuleRead {
+    name: String,
+    #[serde(default = "yes")]
+    enabled: bool,
+    #[serde(default)]
+    account: Option<String>,
+    #[serde(default, rename = "where")]
+    filter: Option<Condition>,
+    #[serde(default)]
+    conditions: Vec<Condition>,
+    #[serde(default = "yes")]
+    match_all: bool,
+    actions: Vec<RuleAction>,
+    #[serde(default)]
+    stop: bool,
+    #[serde(default)]
+    sent: bool,
+}
+
+impl From<RuleRead> for Rule {
+    fn from(r: RuleRead) -> Rule {
+        let of = r.conditions;
+        let filter = r.filter.unwrap_or(if r.match_all { Condition::All { of } } else { Condition::Any { of } });
+        Rule { name: r.name, enabled: r.enabled, account: r.account, filter, actions: r.actions, stop: r.stop, sent: r.sent }
+    }
 }
 
 fn yes() -> bool {
@@ -115,13 +112,15 @@ fn yes() -> bool {
 
 impl Rule {
     pub fn matches(&self, m: &Summary) -> bool {
-        if !self.enabled || self.conditions.is_empty() || self.actions.is_empty() {
+        // One that looks at nothing, or past the limits, never matches (a text it looks for
+        // left empty doesn't match by itself, as before rules combined their conditions).
+        if !self.enabled || self.actions.is_empty() || self.filter.tests().is_empty() || self.filter.past_limits().is_some() {
             return false;
         }
         if self.account.as_ref().is_some_and(|a| *a != m.key.account) {
             return false;
         }
-        if self.match_all { self.conditions.iter().all(|c| c.matches(m)) } else { self.conditions.iter().any(|c| c.matches(m)) }
+        self.filter.matches(m)
     }
 }
 
@@ -303,15 +302,14 @@ mod tests {
             name: "News".into(),
             enabled: true,
             account: None,
-            conditions: vec![Condition::Bulk, Condition::From("letters".into())],
-            match_all: true,
+            filter: Condition::all(vec![Condition::Bulk, Condition::from("letters")]),
             actions: vec![RuleAction::MoveTo("News".into()), RuleAction::MarkRead],
             stop: true,
             sent: false,
         };
         let flag = Rule {
             name: "Boss".into(),
-            conditions: vec![Condition::From("boss@".into())],
+            filter: Condition::all(vec![Condition::from("boss@")]),
             actions: vec![RuleAction::Flag],
             stop: false,
             ..news.clone()
@@ -320,16 +318,35 @@ mod tests {
         assert_eq!(actions_for(&rules, &m("letters@shop.example", "Sale", true)), vec![RuleAction::MoveTo("News".into()), RuleAction::MarkRead]);
         assert!(actions_for(&rules, &m("letters@shop.example", "Hi", false)).is_empty(), "all conditions must hold");
         assert_eq!(actions_for(&rules, &m("BOSS@x.example", "Now", false)), vec![RuleAction::Flag]);
-        let any = Rule { match_all: false, ..news.clone() };
+        let any = Rule { filter: Condition::Any { of: vec![Condition::Bulk, Condition::from("letters")] }, ..news.clone() };
         assert!(any.matches(&m("x@y.example", "Hi", true)));
         assert!(!Rule { enabled: false, ..news.clone() }.matches(&m("letters@x", "", true)));
         assert!(!Rule { account: Some("a2".into()), ..news }.matches(&m("letters@x", "", true)));
-        assert!(Condition::To("me@".into()).matches(&m("a@b", "", false)));
-        assert!(!Condition::Subject("  ".into()).matches(&m("a@b", "anything", false)), "an empty test matches nothing");
+        assert!(Condition::To { value: "me@".into(), op: TextOp::Contains }.matches(&m("a@b", "", false)));
+        assert!(!Condition::subject("  ").matches(&m("a@b", "anything", false)), "an empty test matches nothing");
         // Rules round-trip through JSON (rules.json, the CLI).
         let json = serde_json::to_string(&rules).unwrap();
         assert!(json.contains("\"if\":\"bulk\""), "{json}");
         assert_eq!(serde_json::from_str::<Vec<Rule>>(&json).unwrap(), rules);
+    }
+
+    /// Rules written before conditions combined (a list, all or any of it) read as ever, and
+    /// are written back as a query's `where`.
+    #[test]
+    fn rules_written_before_read_as_ever() {
+        let before = r#"[{"name": "News", "conditions": [{"if": "bulk"}, {"if": "from", "value": "letters"}], "matchAll": false, "actions": [{"do": "markRead"}]},
+            {"name": "Boss", "enabled": false, "conditions": [{"if": "subject", "value": "now"}], "actions": [{"do": "flag"}], "stop": true}]"#;
+        let rules: Vec<Rule> = serde_json::from_str(before).unwrap();
+        assert_eq!(rules[0].filter, Condition::Any { of: vec![Condition::Bulk, Condition::from("letters")] });
+        assert_eq!((rules[1].filter.clone(), rules[1].enabled, rules[1].stop), (Condition::all(vec![Condition::subject("now")]), false, true));
+        let json = serde_json::to_string(&rules).unwrap();
+        assert!(
+            json.contains(r#""where":{"if":"any","of":[{"if":"bulk"},{"if":"from","value":"letters"}]}"#) && !json.contains("conditions"),
+            "{json}"
+        );
+        assert_eq!(serde_json::from_str::<Vec<Rule>>(&json).unwrap(), rules);
+        let op: Condition = serde_json::from_str(r#"{"if": "subject", "value": "x", "op": "startsWith"}"#).unwrap();
+        assert_eq!(op, Condition::Subject { value: "x".into(), op: TextOp::StartsWith });
     }
 
     #[test]

@@ -81,7 +81,7 @@ fn all_and_later_adds_a_rule_for_what_they_send_next() {
     assert_eq!(s.rules.len(), 1);
     let rule = &s.rules[0];
     assert_eq!(rule.account.as_deref(), Some("sample"));
-    assert_eq!(rule.conditions, [Condition::From(PAT.into())]);
+    assert_eq!(rule.filter, Condition::all(vec![Condition::from(PAT)]));
     assert_eq!(rule.actions, [RuleAction::Delete]);
     // Pat writes again: to Deleted Items as it arrives.
     from_pat(&mut s, 950, PAT, 0);

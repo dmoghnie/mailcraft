@@ -4,6 +4,7 @@ use super::*;
 
 mod attached;
 mod categories;
+mod combined_rules;
 mod focused;
 mod folder_order;
 mod inbox_groups;

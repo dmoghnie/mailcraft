@@ -145,8 +145,7 @@ fn real_ews_inbox_rules() {
         name: "MailCraft test".into(),
         enabled: true,
         account: None,
-        conditions: vec![Condition::Subject("mailcraft-rule-test".into())],
-        match_all: true,
+        filter: Condition::all(vec![Condition::subject("mailcraft-rule-test")]),
         actions: vec![RuleAction::MoveTo(junk.clone())],
         stop: true,
         sent: false,
@@ -164,7 +163,7 @@ fn real_ews_inbox_rules() {
     assert_eq!(error, None);
     let made = after.unwrap().rules.into_iter().find(|r| r.name == "MailCraft test").expect("on the server");
     let back = made.rule.clone().expect("read back as MailCraft's own");
-    assert_eq!((back.conditions, back.actions, back.stop), (new.conditions, new.actions, true), "its folder by its path");
+    assert_eq!((back.filter, back.actions, back.stop), (new.filter, new.actions, true), "its folder by its path");
     let now = ServerRule { name: "MailCraft test (off)".into(), enabled: false, ..made.clone() };
     let (after, error) =
         rules(&mut pool, Job::SetServerRules { account: "x1".into(), ops: vec![ServerRuleOp::Set { was: made, now }], drop_outlook_list: false });

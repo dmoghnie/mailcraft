@@ -2366,3 +2366,18 @@ count	occurrences	Terminen
 	Meeting times	Besprechungszeiten
 	Propose meeting times	Besprechungszeiten vorschlagen
 	From your free time in your work hours over the next week	Aus Ihrer freien Zeit in Ihren Arbeitszeiten in der kommenden Woche
+	has {field} that {op}	{field} hat, der {op}
+	contains “{text}”	„{text}“ enthält
+	is “{text}”	„{text}“ ist
+	starts with “{text}”	mit „{text}“ beginnt
+	ends with “{text}”	auf „{text}“ endet
+	a sender	einen Absender
+	a recipient	einen Empfänger
+	a subject	einen Betreff
+	a sender, recipient or subject	einen Absender, Empfänger oder Betreff
+	text	einen Text
+	not ({condition})	nicht ({condition})
+	is of high importance	hohe Wichtigkeit hat
+	is of low importance	niedrige Wichtigkeit hat
+	is larger than {size} KB	größer als {size} KB ist
+	is smaller than {size} KB	kleiner als {size} KB ist

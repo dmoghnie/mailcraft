@@ -1,7 +1,7 @@
 //! Issue #202: a rule for mail the user sends, made in the rule editor (Applies to: Mail you
 //! send) and said as such in the Rules dialog.
 
-use mailcraft_engine::model::organize::{Condition, RuleAction};
+use mailcraft_engine::model::organize::{Condition, RuleAction, TextOp};
 
 use super::*;
 
@@ -37,7 +37,12 @@ fn a_rule_for_mail_sent_is_made_in_the_editor() {
     click_named(&ctx, &mut a, "Save");
     assert!(a.ui.dialog.is_none(), "saved: {:?}", a.ui.dialog);
     let r = a.session.rules.last().cloned().expect("a rule");
-    assert!(r.sent && r.conditions == [Condition::To("zoe@".into())] && r.actions == [RuleAction::Categorize("Work".into())], "{r:?}");
+    assert!(
+        r.sent
+            && r.filter == Condition::all(vec![Condition::To { value: "zoe@".into(), op: TextOp::Contains }])
+            && r.actions == [RuleAction::Categorize("Work".into())],
+        "{r:?}"
+    );
     // Opened again: still for mail sent; the Rules dialog says so.
     let n = a.session.rules.len() - 1;
     assert!(crate::dialogs::RuleForm::from_rule(n, &r).sent);

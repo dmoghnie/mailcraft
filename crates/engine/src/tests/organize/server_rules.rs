@@ -24,8 +24,7 @@ fn rule(name: &str, word: &str) -> Rule {
         name: name.into(),
         enabled: true,
         account: None,
-        conditions: vec![Condition::Subject(word.into())],
-        match_all: true,
+        filter: Condition::all(vec![Condition::subject(word)]),
         actions: vec![RuleAction::MarkRead],
         stop: false,
         sent: false,
@@ -101,7 +100,7 @@ fn the_rules_on_the_server_are_asked_for_shown_and_changed() {
     s.run("rules.serverSave", &json!({"account": id, "id": "R1", "rule": rule("News", "newsletter")})).unwrap();
     let (changed, _) = ops(&mut s);
     assert!(
-        matches!(&changed[..], [ServerRuleOp::Set { now, .. }] if now.rule.as_ref().is_some_and(|r| r.conditions == [Condition::Subject("newsletter".into())]))
+        matches!(&changed[..], [ServerRuleOp::Set { now, .. }] if now.rule.as_ref().is_some_and(|r| r.filter == Condition::all(vec![Condition::subject("newsletter")])))
     );
 
     // A change that failed: the rules as the server has them, with why.

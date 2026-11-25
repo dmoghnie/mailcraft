@@ -2,6 +2,7 @@
 
 use super::*;
 
+mod conditions;
 mod quick_steps;
 mod search_folders;
 mod server_rules;
@@ -168,25 +169,32 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
                         f.test = RuleTest::To;
                     }
                 }
-                let l = ui.label(tl!("When mail"));
-                let tests: Vec<RuleTest> =
-                    RuleTest::ALL.into_iter().filter(|x| (f.server.is_none() || x.on_server()) && (!f.sent || x.for_sent())).collect();
-                let r = egui::ComboBox::from_id_salt("rule-test")
-                    .width(300.0)
-                    .selected_text(f.test.label())
-                    .show_ui(ui, |ui| {
-                        for x in tests.iter().copied() {
-                            ui.selectable_value(&mut f.test, x, x.label());
-                        }
-                    })
-                    .response
-                    .labelled_by(l.id);
-                crate::drop_down::keys(ui, &r, &mut f.test, &tests);
-                ui.end_row();
-                if f.test.needs_text() {
-                    ui.label("");
-                    ui.add(egui::TextEdit::singleline(&mut f.text).hint_text(tl!("Text or address")).desired_width(300.0));
+                // Conditions combined in ways the editor can't show are said, and kept as they are.
+                if let Some(r) = f.original.as_ref().filter(|_| f.conditions_fixed()) {
+                    ui.label(tl!("When mail"));
+                    ui.add(egui::Label::new(conditions::said(&r.filter)).wrap());
                     ui.end_row();
+                } else {
+                    let l = ui.label(tl!("When mail"));
+                    let tests: Vec<RuleTest> =
+                        RuleTest::ALL.into_iter().filter(|x| (f.server.is_none() || x.on_server()) && (!f.sent || x.for_sent())).collect();
+                    let r = egui::ComboBox::from_id_salt("rule-test")
+                        .width(300.0)
+                        .selected_text(f.test.label())
+                        .show_ui(ui, |ui| {
+                            for x in tests.iter().copied() {
+                                ui.selectable_value(&mut f.test, x, x.label());
+                            }
+                        })
+                        .response
+                        .labelled_by(l.id);
+                    crate::drop_down::keys(ui, &r, &mut f.test, &tests);
+                    ui.end_row();
+                    if f.test.needs_text() {
+                        ui.label("");
+                        ui.add(egui::TextEdit::singleline(&mut f.text).hint_text(tl!("Text or address")).desired_width(300.0));
+                        ui.end_row();
+                    }
                 }
                 let l = ui.label(tl!("Then"));
                 let actions: Vec<RuleDo> = RuleDo::ALL.into_iter().filter(|x| f.server.is_none() || x.on_server()).collect();
@@ -544,14 +552,8 @@ pub struct RuleForm {
 
 /// What the editor shows of a rule: its first condition and its first action.
 fn shown(r: &Rule) -> (RuleTest, String, RuleDo, String) {
-    let (test, text) = match r.conditions.first() {
-        Some(Condition::From(t)) => (RuleTest::From, t.clone()),
-        Some(Condition::To(t)) => (RuleTest::To, t.clone()),
-        Some(Condition::Subject(t)) => (RuleTest::Subject, t.clone()),
-        Some(Condition::AnyText(t)) => (RuleTest::AnyText, t.clone()),
-        Some(Condition::HasAttachment) => (RuleTest::HasAttachment, String::new()),
-        Some(Condition::Bulk) | None => (RuleTest::Bulk, String::new()),
-    };
+    // Conditions it can't show stand as list mail, left as they are (`conditions_fixed`).
+    let (test, text) = conditions::first_shown(&r.filter).unwrap_or((RuleTest::Bulk, String::new()));
     let (action, target) = match r.actions.first() {
         Some(RuleAction::MoveTo(f)) => (RuleDo::MoveTo, f.clone()),
         Some(RuleAction::MoveToRole(FolderRole::Trash)) | Some(RuleAction::Delete) => (RuleDo::Delete, String::new()),
@@ -573,19 +575,25 @@ fn put_first<T>(list: &mut Vec<T>, new: T) {
 }
 
 impl RuleForm {
+    /// The rule being changed has conditions the editor can't show (combined with any or not,
+    /// nested, or comparing other than by what a text contains): they're kept as they are.
+    pub(crate) fn conditions_fixed(&self) -> bool {
+        self.original.as_ref().is_some_and(|r| conditions::first_shown(&r.filter).is_none())
+    }
+
     pub(crate) fn to_rule(&self) -> Result<Rule, String> {
         if self.name.trim().is_empty() {
             return Err(tl!("Give the rule a name").to_string());
         }
-        if self.test.needs_text() && self.text.trim().is_empty() {
+        if !self.conditions_fixed() && self.test.needs_text() && self.text.trim().is_empty() {
             return Err(tl!("Say what to look for").to_string());
         }
         let t = self.text.trim().to_string();
         let condition = match self.test {
-            RuleTest::From => Condition::From(t),
-            RuleTest::To => Condition::To(t),
-            RuleTest::Subject => Condition::Subject(t),
-            RuleTest::AnyText => Condition::AnyText(t),
+            RuleTest::From => Condition::From { value: t, op: TextOp::Contains },
+            RuleTest::To => Condition::To { value: t, op: TextOp::Contains },
+            RuleTest::Subject => Condition::Subject { value: t, op: TextOp::Contains },
+            RuleTest::AnyText => Condition::AnyText { value: t, op: TextOp::Contains },
             RuleTest::HasAttachment => Condition::HasAttachment,
             RuleTest::Bulk => Condition::Bulk,
         };
@@ -605,8 +613,7 @@ impl RuleForm {
                 name: self.name.trim().to_string(),
                 enabled: true,
                 account: if self.action == RuleDo::MoveTo { self.account.clone() } else { None },
-                conditions: vec![condition],
-                match_all: true,
+                filter: Condition::all(vec![condition]),
                 actions: vec![action],
                 stop: self.stop,
                 sent: self.sent,
@@ -614,8 +621,8 @@ impl RuleForm {
         };
         let (test, text, act, target) = shown(original);
         let mut rule = Rule { name: self.name.trim().to_string(), stop: self.stop, sent: self.sent, ..original.clone() };
-        if self.test != test || self.text.trim() != text.trim() {
-            put_first(&mut rule.conditions, condition);
+        if !self.conditions_fixed() && (self.test != test || self.text.trim() != text.trim()) {
+            conditions::put_first_test(&mut rule.filter, condition);
         }
         let moved_elsewhere = self.action == RuleDo::MoveTo && self.account != original.account;
         if self.action != act || self.target != target || moved_elsewhere {
@@ -729,19 +736,7 @@ pub(super) fn folder_path_label(s: &Session, path: &str) -> String {
 
 /// One line describing a rule.
 pub(super) fn describe(s: &Session, r: &Rule) -> String {
-    let cond = r
-        .conditions
-        .iter()
-        .map(|c| match c {
-            Condition::From(t) => tf!("from “{text}”", text = t),
-            Condition::To(t) => tf!("to “{text}”", text = t),
-            Condition::Subject(t) => tf!("subject has “{text}”", text = t),
-            Condition::AnyText(t) => tf!("mentions “{text}”", text = t),
-            Condition::HasAttachment => tl!("has attachments").to_string(),
-            Condition::Bulk => tl!("is list mail").to_string(),
-        })
-        .collect::<Vec<_>>()
-        .join(&format!(" {} ", if r.match_all { tl!("and") } else { tl!("or") }));
+    let cond = conditions::said(&r.filter);
     let act = r
         .actions
         .iter()

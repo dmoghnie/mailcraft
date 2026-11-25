@@ -335,6 +335,11 @@ impl Session {
             if r.name.trim().is_empty() {
                 return Err(CmdError::Params("every rule needs a name".into()));
             }
+            // Past the limits (a hostile file or answer): one that looks at nothing, or for an
+            // empty text, never matches and is kept, as rules were before they combined.
+            if let Some(why) = r.filter.past_limits() {
+                return Err(CmdError::Params(format!("rule {}: {why}", r.name)));
+            }
             for a in &r.actions {
                 if let RuleAction::Categorize(c) = a
                     && self.category(c).is_none()

@@ -42,8 +42,8 @@ fn organising_renders_and_rules_save() {
     click_named(&ctx, &mut a, "Save");
     assert!(a.ui.dialog.is_none(), "saved and closed: {:?}", a.ui.dialog);
     use mailcraft_engine::model::organize::{Condition, RuleAction};
-    let rules: Vec<_> = a.session.rules.iter().map(|r| (r.conditions.clone(), r.actions.clone())).collect();
-    assert_eq!(rules, [(vec![Condition::From("zoe@studio.example".into())], vec![RuleAction::Categorize("Work".into())])]);
+    let rules: Vec<_> = a.session.rules.iter().map(|r| (r.filter.clone(), r.actions.clone())).collect();
+    assert_eq!(rules, [(Condition::all(vec![Condition::from("zoe@studio.example")]), vec![RuleAction::Categorize("Work".into())])]);
     a.ui.dialog = Some(Dialog::Rules);
     frame(&ctx, &mut a, vec![]);
     frame(&ctx, &mut a, vec![]);
@@ -349,13 +349,12 @@ fn a_completed_follow_up_shows_as_done() {
 fn a_rule_shown_in_part_keeps_the_rest() {
     use crate::dialogs::{RuleDo, RuleForm, RuleTest};
     use mailcraft_engine::model::FolderRole;
-    use mailcraft_engine::model::organize::{Condition, Rule, RuleAction};
+    use mailcraft_engine::model::organize::{Condition, Rule, RuleAction, TextOp};
     let rule = Rule {
         name: "Studio".into(),
         enabled: true,
         account: Some("sample".into()),
-        conditions: vec![Condition::From("zoe@".into()), Condition::Subject("cut".into())],
-        match_all: false,
+        filter: Condition::Any { of: vec![Condition::from("zoe@"), Condition::subject("cut")] },
         actions: vec![RuleAction::Flag, RuleAction::MoveToRole(FolderRole::Junk)],
         stop: true,
         sent: false,
@@ -368,11 +367,11 @@ fn a_rule_shown_in_part_keeps_the_rest() {
     (f.test, f.text) = (RuleTest::To, "ana@".into());
     (f.action, f.target) = (RuleDo::Categorize, "Work".into());
     let saved = f.to_rule().unwrap();
-    assert_eq!(saved.conditions, [Condition::To("ana@".into()), Condition::Subject("cut".into())]);
+    assert_eq!(saved.filter, Condition::Any { of: vec![Condition::To { value: "ana@".into(), op: TextOp::Contains }, Condition::subject("cut")] });
     assert_eq!(saved.actions, [RuleAction::Categorize("Work".into()), RuleAction::MoveToRole(FolderRole::Junk)]);
-    assert_eq!((saved.match_all, saved.account.as_deref(), saved.stop), (false, Some("sample"), true));
+    assert_eq!((saved.account.as_deref(), saved.stop), (Some("sample"), true));
     // One with nothing to show (no conditions, no actions) gets none it didn't have.
-    let bare = Rule { conditions: Vec::new(), actions: Vec::new(), ..rule.clone() };
+    let bare = Rule { filter: Condition::all(Vec::new()), actions: Vec::new(), ..rule.clone() };
     let mut f = RuleForm::from_rule(0, &bare);
     f.name = "Bare".into();
     assert_eq!(f.to_rule().unwrap(), Rule { name: "Bare".into(), ..bare });
@@ -390,8 +389,7 @@ fn a_rule_that_no_longer_moves_is_for_every_account() {
         name: "Studio".into(),
         enabled: true,
         account: Some("sample".into()),
-        conditions: vec![Condition::From("zoe@".into())],
-        match_all: true,
+        filter: Condition::all(vec![Condition::from("zoe@")]),
         actions: vec![RuleAction::MoveTo("Projects".into()), RuleAction::MarkRead],
         stop: false,
         sent: false,
@@ -491,8 +489,10 @@ fn many_rules(n: usize) -> Vec<mailcraft_engine::model::organize::Rule> {
             name: format!("Rule {i}"),
             enabled: i % 3 != 2,
             account: Some("sample".into()),
-            conditions: vec![Condition::From(format!("s{i}@")), Condition::Subject("report".into())],
-            match_all: i % 2 == 0,
+            filter: {
+                let of = vec![Condition::from(&format!("s{i}@")), Condition::subject("report")];
+                if i % 2 == 0 { Condition::all(of) } else { Condition::Any { of } }
+            },
             actions: vec![
                 if i == 3 { RuleAction::MoveTo("Projects/Short film".into()) } else { RuleAction::MoveTo(format!("Projects/p{i}")) },
                 RuleAction::Flag,
@@ -543,6 +543,51 @@ fn the_rules_dialog_describes_finds_and_switches() {
     let mut expected = many_rules(8);
     expected[1].enabled = false;
     assert_eq!(a.session.rules, expected);
+}
+
+/// A rule whose conditions the editor can't show (nested, "not", or comparing otherwise than by
+/// what a text contains) is said in words, in the list and in the editor, and saved with them as
+/// they were when what the editor shows is changed.
+#[test]
+fn a_rule_the_editor_cant_show_is_said_and_kept() {
+    use crate::dialogs::{RuleDo, RuleForm};
+    use mailcraft_engine::model::organize::{Condition, Rule, RuleAction, TextOp};
+    let filter = Condition::all(vec![
+        Condition::from("printshop"),
+        Condition::Any { of: vec![Condition::subject("receipt"), Condition::subject("invoice")] },
+        Condition::Not { of: Box::new(Condition::Bulk) },
+    ]);
+    let rule = Rule {
+        name: "Receipts".into(),
+        enabled: true,
+        account: None,
+        filter: filter.clone(),
+        actions: vec![RuleAction::Flag],
+        stop: false,
+        sent: false,
+    };
+    let mut f = RuleForm::from_rule(0, &rule);
+    assert!(f.conditions_fixed());
+    (f.action, f.target) = (RuleDo::MarkRead, String::new());
+    let saved = f.to_rule().unwrap();
+    assert_eq!((saved.filter, saved.actions), (filter, vec![RuleAction::MarkRead]));
+    let starts = Rule { name: "Replies".into(), filter: Condition::Subject { value: "Re:".into(), op: TextOp::StartsWith }, ..rule.clone() };
+    assert!(RuleForm::from_rule(1, &starts).conditions_fixed());
+
+    let (mut a, _) = app("rules-said");
+    let ctx = egui::Context::default();
+    frame(&ctx, &mut a, vec![]);
+    a.session.rules = vec![rule, starts];
+    let texts: Vec<String> = rules_drawn(&ctx, &mut a, "").into_iter().map(|(t, _)| t).collect();
+    let said = "If it from “printshop” and (subject has “receipt” or subject has “invoice”) and not (is list mail): flag";
+    assert!(texts.iter().any(|t| *t == format!("Receipts{said}")), "{texts:?}");
+    assert!(texts.iter().any(|t| t == "RepliesIf it has a subject that starts with “Re:”: flag"), "{texts:?}");
+    a.ui.dialog = Some(Dialog::EditRule(Box::new(RuleForm::from_rule(0, &a.session.rules[0]))));
+    // A frame for the dialog to settle: a window is sized before it's drawn.
+    frame(&ctx, &mut a, vec![]);
+    let words = said.trim_start_matches("If it ").trim_end_matches(": flag");
+    let texts = drawn_strings(&ctx, &mut a, egui::vec2(1280.0, 800.0));
+    assert!(texts.iter().any(|t| t == words), "the editor says them: {texts:?}");
 }
 
 /// The Rules dialog's lines follow the language as it's switched, between languages that word

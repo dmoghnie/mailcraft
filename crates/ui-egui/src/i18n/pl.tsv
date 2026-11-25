@@ -2379,3 +2379,18 @@ count	occurrences	wystąpieniach
 	Meeting times	Terminy spotkania
 	Propose meeting times	Zaproponuj terminy spotkania
 	From your free time in your work hours over the next week	Z wolnego czasu w Twoich godzinach pracy w najbliższym tygodniu
+	has {field} that {op}	ma {field}, który {op}
+	contains “{text}”	zawiera „{text}”
+	is “{text}”	to „{text}”
+	starts with “{text}”	zaczyna się od „{text}”
+	ends with “{text}”	kończy się na „{text}”
+	a sender	nadawcę
+	a recipient	odbiorcę
+	a subject	temat
+	a sender, recipient or subject	nadawcę, odbiorcę lub temat
+	text	tekst
+	not ({condition})	nie spełnia warunku ({condition})
+	is of high importance	ma wysoką ważność
+	is of low importance	ma niską ważność
+	is larger than {size} KB	jest większa niż {size} KB
+	is smaller than {size} KB	jest mniejsza niż {size} KB

@@ -2365,3 +2365,18 @@ count	occurrences	ripetizioni
 	Meeting times	Orari della riunione
 	Propose meeting times	Proponi orari per la riunione
 	From your free time in your work hours over the next week	Dal tuo tempo libero nell'orario di lavoro della prossima settimana
+	has {field} that {op}	ha {field} che {op}
+	contains “{text}”	contiene «{text}»
+	is “{text}”	è «{text}»
+	starts with “{text}”	inizia con «{text}»
+	ends with “{text}”	finisce con «{text}»
+	a sender	un mittente
+	a recipient	un destinatario
+	a subject	un oggetto
+	a sender, recipient or subject	un mittente, destinatario o oggetto
+	text	un testo
+	not ({condition})	non ({condition})
+	is of high importance	ha importanza alta
+	is of low importance	ha importanza bassa
+	is larger than {size} KB	è più grande di {size} KB
+	is smaller than {size} KB	è più piccolo di {size} KB

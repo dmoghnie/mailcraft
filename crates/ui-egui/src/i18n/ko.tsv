@@ -2365,3 +2365,18 @@ count	occurrences	회
 	Meeting times	회의 시간
 	Propose meeting times	회의 시간 제안
 	From your free time in your work hours over the next week	다음 일주일 동안 근무 시간 중 비어 있는 시간에서
+	has {field} that {op}	{field}이(가) {op}
+	contains “{text}”	"{text}"을(를) 포함하는
+	is “{text}”	"{text}"인
+	starts with “{text}”	"{text}"(으)로 시작하는
+	ends with “{text}”	"{text}"(으)로 끝나는
+	a sender	보낸 사람
+	a recipient	받는 사람
+	a subject	제목
+	a sender, recipient or subject	보낸 사람, 받는 사람 또는 제목
+	text	본문
+	not ({condition})	({condition})이(가) 아닌
+	is of high importance	중요도가 높은
+	is of low importance	중요도가 낮은
+	is larger than {size} KB	{size}KB보다 큰
+	is smaller than {size} KB	{size}KB보다 작은

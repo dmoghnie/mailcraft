@@ -2362,3 +2362,18 @@ count	occurrences	回
 	Meeting times	会議の候補時間
 	Propose meeting times	会議の時間を提案
 	From your free time in your work hours over the next week	今後 1 週間の勤務時間内の空き時間から
+	has {field} that {op}	{field}が{op}
+	contains “{text}”	「{text}」を含む
+	is “{text}”	「{text}」である
+	starts with “{text}”	「{text}」で始まる
+	ends with “{text}”	「{text}」で終わる
+	a sender	差出人
+	a recipient	宛先
+	a subject	件名
+	a sender, recipient or subject	差出人、宛先または件名
+	text	本文
+	not ({condition})	({condition})ではない
+	is of high importance	重要度が高い
+	is of low importance	重要度が低い
+	is larger than {size} KB	{size} KB より大きい
+	is smaller than {size} KB	{size} KB より小さい

@@ -2366,3 +2366,18 @@ count	occurrences	előfordulás
 	Meeting times	Megbeszélési időpontok
 	Propose meeting times	Megbeszélési időpontok javasolása
 	From your free time in your work hours over the next week	A következő hét munkaidejében lévő szabad idődből
+	has {field} that {op}	{field} {op}
+	contains “{text}”	tartalmazza ezt: „{text}”
+	is “{text}”	ez: „{text}”
+	starts with “{text}”	ezzel kezdődik: „{text}”
+	ends with “{text}”	ezzel végződik: „{text}”
+	a sender	a feladója
+	a recipient	egy címzettje
+	a subject	a tárgya
+	a sender, recipient or subject	a feladója, egy címzettje vagy a tárgya
+	text	a szövege
+	not ({condition})	nem ({condition})
+	is of high importance	fontossága magas
+	is of low importance	fontossága alacsony
+	is larger than {size} KB	nagyobb, mint {size} KB
+	is smaller than {size} KB	kisebb, mint {size} KB

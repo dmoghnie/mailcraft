@@ -19,8 +19,7 @@ fn subject(word: &str) -> Rule {
         name: "Invoices".into(),
         enabled: true,
         account: None,
-        conditions: vec![Condition::Subject(word.into())],
-        match_all: true,
+        filter: Condition::all(vec![Condition::subject(word)]),
         actions: vec![RuleAction::MarkRead],
         stop: false,
         sent: false,
@@ -75,7 +74,7 @@ fn an_exchange_accounts_rules_on_the_server_are_shown_and_changed() {
     let jobs = a.session.take_jobs();
     let Some(Job::SetServerRules { ops, .. }) = jobs.first() else { panic!("{jobs:?}") };
     assert!(matches!(&ops[..], [mailcraft_engine::model::organize::ServerRuleOp::Set { now, .. }]
-        if now.rule.as_ref().is_some_and(|r| r.conditions == [Condition::Subject("bill".into())])));
+        if now.rule.as_ref().is_some_and(|r| r.filter == Condition::all(vec![Condition::subject("bill")]))));
     // A new one on the server offers only what a server rule can do.
     let target = crate::dialogs::ServerTarget { account: id.clone(), id: None, drop_outlook_list: false };
     let f = crate::dialogs::RuleForm::for_server(target, None);

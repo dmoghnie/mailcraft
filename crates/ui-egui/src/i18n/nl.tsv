@@ -2361,3 +2361,18 @@ count	occurrences	keer
 	Meeting times	Vergadertijden
 	Propose meeting times	Vergadertijden voorstellen
 	From your free time in your work hours over the next week	Uit uw vrije tijd binnen uw werktijden in de komende week
+	has {field} that {op}	{field} {op}
+	contains “{text}”	“{text}” bevat
+	is “{text}”	“{text}” is
+	starts with “{text}”	met “{text}” begint
+	ends with “{text}”	op “{text}” eindigt
+	a sender	een afzender heeft die
+	a recipient	een ontvanger heeft die
+	a subject	een onderwerp heeft dat
+	a sender, recipient or subject	een afzender, ontvanger of onderwerp heeft dat
+	text	tekst heeft die
+	not ({condition})	niet voldoet aan ({condition})
+	is of high importance	hoge prioriteit heeft
+	is of low importance	lage prioriteit heeft
+	is larger than {size} KB	groter dan {size} KB is
+	is smaller than {size} KB	kleiner dan {size} KB is

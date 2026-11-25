@@ -2379,3 +2379,18 @@ count	occurrences	повторений
 	Meeting times	Время встречи
 	Propose meeting times	Предложить время встречи
 	From your free time in your work hours over the next week	Из свободного времени в ваши рабочие часы на ближайшую неделю
+	has {field} that {op}	таково, что {field} {op}
+	contains “{text}”	содержит «{text}»
+	is “{text}”	совпадает с «{text}»
+	starts with “{text}”	начинается с «{text}»
+	ends with “{text}”	заканчивается на «{text}»
+	a sender	отправитель
+	a recipient	получатель
+	a subject	тема
+	a sender, recipient or subject	отправитель, получатель или тема
+	text	текст
+	not ({condition})	не подходит под условие ({condition})
+	is of high importance	имеет высокую важность
+	is of low importance	имеет низкую важность
+	is larger than {size} KB	больше {size} КБ
+	is smaller than {size} KB	меньше {size} КБ

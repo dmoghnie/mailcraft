@@ -75,7 +75,7 @@ fn the_rules_on_the_server_are_read_as_mailcraft_can_say_them() {
     let [invoices, forward] = rules.rules.as_slice() else { panic!("{rules:?}") };
     assert_eq!((invoices.name.as_str(), invoices.priority, invoices.enabled), ("Invoices", 1, true));
     let rule = invoices.rule.clone().expect("said as MailCraft's own");
-    assert_eq!(rule.conditions, [Condition::Subject("invoice".into())]);
+    assert_eq!(rule.filter, Condition::all(vec![Condition::subject("invoice")]));
     assert_eq!(rule.actions, [RuleAction::MoveTo("Projects".into())]);
     assert!(rule.stop);
     assert_eq!(forward.name, "To my phone");
@@ -94,8 +94,7 @@ fn rules_made_and_changed_here_go_to_the_server() {
         name: "Receipts".into(),
         enabled: true,
         account: None,
-        conditions: vec![Condition::From("shop".into()), Condition::HasAttachment],
-        match_all: true,
+        filter: Condition::all(vec![Condition::from("shop"), Condition::HasAttachment]),
         actions: vec![RuleAction::MarkRead, RuleAction::MoveTo("Projects".into())],
         stop: false,
         sent: false,
@@ -105,20 +104,20 @@ fn rules_made_and_changed_here_go_to_the_server() {
     assert_eq!(error, None);
     let after = after.unwrap();
     let made = after.rules.iter().find(|r| r.name == "Receipts").expect("made");
-    assert_eq!(made.rule.as_ref().map(|r| (&r.conditions, &r.actions)), Some((&new.conditions, &new.actions)));
+    assert_eq!(made.rule.as_ref().map(|r| (&r.filter, &r.actions)), Some((&new.filter, &new.actions)));
     assert!(m.data.lock().unwrap().rules.iter().any(|r| r.write("t").contains(&format!("Id=\"{projects}\""))), "moved by its folder's id");
 
     // Changed here: what it looks for.
     let was = after.rules.iter().find(|r| r.name == "Invoices").cloned().unwrap();
     let mut changed = was.clone();
     if let Some(r) = changed.rule.as_mut() {
-        r.conditions = vec![Condition::Subject("bill".into())];
+        r.filter = Condition::all(vec![Condition::subject("bill")]);
     }
     let (after, error) = set(&mut m, vec![ServerRuleOp::Set { was, now: changed }], false);
     assert_eq!(error, None);
     let after = after.unwrap();
     let invoices = after.rules.iter().find(|r| r.name == "Invoices").unwrap();
-    assert_eq!(invoices.rule.as_ref().map(|r| r.conditions.clone()), Some(vec![Condition::Subject("bill".into())]));
+    assert_eq!(invoices.rule.as_ref().map(|r| r.filter.clone()), Some(Condition::all(vec![Condition::subject("bill")])));
 
     // One MailCraft can't say: off and renamed, all it does kept as it came.
     let was = rules.rules.iter().find(|r| r.name == "To my phone").cloned().unwrap();
@@ -183,8 +182,7 @@ fn a_rule_the_server_cant_hold_is_refused() {
         name: "Lists".into(),
         enabled: true,
         account: None,
-        conditions: vec![Condition::Bulk],
-        match_all: true,
+        filter: Condition::all(vec![Condition::Bulk]),
         actions: vec![RuleAction::Flag],
         stop: false,
         sent: false,
@@ -214,7 +212,7 @@ fn a_rule_written_reads_back_the_same() {
     );
     let back = crate::ews::read_rules_answer(&again).unwrap();
     let back = back.rules[0].rule.clone().unwrap();
-    assert_eq!((&back.conditions, &back.actions, back.stop), (&rule.conditions, &rule.actions, rule.stop));
+    assert_eq!((&back.filter, &back.actions, back.stop), (&rule.filter, &rule.actions, rule.stop));
     // Two folders or two categories aren't one rule on a server: refused, not one of them lost.
     let two = Rule { actions: vec![RuleAction::MoveTo("a".into()), RuleAction::MoveTo("b".into())], ..rule };
     assert!(crate::ews::rule_written(&two).is_err());

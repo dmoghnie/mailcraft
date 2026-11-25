@@ -2361,3 +2361,18 @@ count	occurrences	مرات
 	Meeting times	أوقات الاجتماع
 	Propose meeting times	اقتراح أوقات للاجتماع
 	From your free time in your work hours over the next week	من وقت فراغك ضمن ساعات عملك خلال الأسبوع القادم
+	has {field} that {op}	ذات {field} {op}
+	contains “{text}”	يحتوي على «{text}»
+	is “{text}”	هو «{text}»
+	starts with “{text}”	يبدأ بـ«{text}»
+	ends with “{text}”	ينتهي بـ«{text}»
+	a sender	مرسل
+	a recipient	مستلم
+	a subject	موضوع
+	a sender, recipient or subject	مرسل أو مستلم أو موضوع
+	text	نص
+	not ({condition})	ليست ({condition})
+	is of high importance	ذات أهمية عالية
+	is of low importance	ذات أهمية منخفضة
+	is larger than {size} KB	أكبر من {size} كيلوبايت
+	is smaller than {size} KB	أصغر من {size} كيلوبايت

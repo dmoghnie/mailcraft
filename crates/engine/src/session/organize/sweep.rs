@@ -148,8 +148,8 @@ impl Session {
 
     /// A rule sending what `of`'s sender sends later to Deleted Items (once: one there is kept).
     fn sweep_rule(&mut self, of: &SweepOf) -> Result<(), CmdError> {
-        let from = Condition::From(of.sender.clone());
-        let has = |r: &Rule| r.account.as_deref() == Some(of.account.as_str()) && r.conditions == [from.clone()] && r.actions == [RuleAction::Delete];
+        let from = Condition::all(vec![Condition::from(&of.sender)]);
+        let has = |r: &Rule| r.account.as_deref() == Some(of.account.as_str()) && r.filter == from && r.actions == [RuleAction::Delete];
         if self.rules.iter().any(has) {
             return Ok(());
         }
@@ -157,8 +157,7 @@ impl Session {
             name: of.sender.clone(),
             enabled: true,
             account: Some(of.account.clone()),
-            conditions: vec![from],
-            match_all: true,
+            filter: from,
             actions: vec![RuleAction::Delete],
             stop: true,
             sent: false,

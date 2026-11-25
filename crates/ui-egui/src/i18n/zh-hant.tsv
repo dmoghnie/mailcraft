@@ -2365,3 +2365,18 @@ count	occurrences	次
 	Meeting times	會議時間
 	Propose meeting times	建議會議時間
 	From your free time in your work hours over the next week	從你未來一週工作時間內的空閒時間中選取
+	has {field} that {op}	{field}{op}
+	contains “{text}”	包含「{text}」
+	is “{text}”	為「{text}」
+	starts with “{text}”	以「{text}」開頭
+	ends with “{text}”	以「{text}」結尾
+	a sender	寄件者
+	a recipient	收件者
+	a subject	主旨
+	a sender, recipient or subject	寄件者、收件者或主旨
+	text	內文
+	not ({condition})	不符合（{condition}）
+	is of high importance	重要性為高
+	is of low importance	重要性為低
+	is larger than {size} KB	大於 {size} KB
+	is smaller than {size} KB	小於 {size} KB

@@ -249,7 +249,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.set_rules(rules)
         })
         .params(
-            r#"{"rule": {"name": string, "conditions": [{"if": "from"|"to"|"subject"|"anyText", "value": string} | {"if": "hasAttachment"|"bulk"}], "matchAll"?: bool, "actions": [{"do": "moveTo", "value": folder} | {"do": "moveToRole", "value": "archive"|…} | {"do": "categorize", "value": name} | {"do": "markRead"|"flag"|"pin"|"delete"}], "account"?: string, "stop"?: bool, "enabled"?: bool, "sent"?: bool (on mail you send, as its copy reaches Sent, not mail arriving)}}"#,
+            r#"{"rule": {"name": string, "where": Condition, "actions": [{"do": "moveTo", "value": folder} | {"do": "moveToRole", "value": "archive"|…} | {"do": "categorize", "value": name} | {"do": "markRead"|"flag"|"pin"|"delete"}], "account"?: string, "stop"?: bool, "enabled"?: bool, "sent"?: bool (on mail you send, as its copy reaches Sent, not mail arriving)}} where a Condition is {"if": "all"|"any", "of": [Condition]} | {"if": "not", "of": Condition} | {"if": "from"|"to"|"subject"|"anyText"|"preview", "value": string, "op"?: "contains"|"is"|"startsWith"|"endsWith"} | {"if": "hasAttachment"|"bulk"} | {"if": "importance", "value": "high"|"low"} | {"if": "larger"|"smaller", "kb": number}, nested 6 deep at most, 50 tests at most (a rule written before, with "conditions" and "matchAll", is read as ever)"#,
         ),
         CommandSpec::new("rules.delete", "Delete rule", "Home › Rules", |s, v| {
             let i = p::u64(v, "index").and_then(|i| usize::try_from(i).ok()).ok_or_else(|| CmdError::Params("`index` is required".into()))?;

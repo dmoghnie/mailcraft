@@ -2366,3 +2366,18 @@ count	occurrences	kez
 	Meeting times	Toplantı saatleri
 	Propose meeting times	Toplantı saatleri öner
 	From your free time in your work hours over the next week	Önümüzdeki hafta çalışma saatlerinizdeki boş zamanınızdan
+	has {field} that {op}	{field} {op}
+	contains “{text}”	“{text}” içeriyor
+	is “{text}”	“{text}”
+	starts with “{text}”	“{text}” ile başlıyor
+	ends with “{text}”	“{text}” ile bitiyor
+	a sender	gönderen
+	a recipient	alıcı
+	a subject	konu
+	a sender, recipient or subject	gönderen, alıcı veya konu
+	text	metin
+	not ({condition})	({condition}) değil
+	is of high importance	önem derecesi yüksek
+	is of low importance	önem derecesi düşük
+	is larger than {size} KB	{size} KB'tan büyük
+	is smaller than {size} KB	{size} KB'tan küçük

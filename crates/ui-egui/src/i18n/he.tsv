@@ -2361,3 +2361,18 @@ count	occurrences	פעמים
 	Meeting times	מועדי פגישה
 	Propose meeting times	הצעת מועדים לפגישה
 	From your free time in your work hours over the next week	מהזמן הפנוי שלך בשעות העבודה בשבוע הקרוב
+	has {field} that {op}	בעלת {field} ש{op}
+	contains “{text}”	מכיל „{text}”
+	is “{text}”	הוא „{text}”
+	starts with “{text}”	מתחיל ב„{text}”
+	ends with “{text}”	מסתיים ב„{text}”
+	a sender	שולח
+	a recipient	נמען
+	a subject	נושא
+	a sender, recipient or subject	שולח, נמען או נושא
+	text	טקסט
+	not ({condition})	לא ({condition})
+	is of high importance	בחשיבות גבוהה
+	is of low importance	בחשיבות נמוכה
+	is larger than {size} KB	גדולה מ־{size} KB
+	is smaller than {size} KB	קטנה מ־{size} KB

@@ -2362,3 +2362,18 @@ count	occurrences	次
 	Meeting times	会议时间
 	Propose meeting times	建议会议时间
 	From your free time in your work hours over the next week	从你未来一周工作时间内的空闲时间中选取
+	has {field} that {op}	{field}{op}
+	contains “{text}”	包含“{text}”
+	is “{text}”	为“{text}”
+	starts with “{text}”	以“{text}”开头
+	ends with “{text}”	以“{text}”结尾
+	a sender	发件人
+	a recipient	收件人
+	a subject	主题
+	a sender, recipient or subject	发件人、收件人或主题
+	text	正文
+	not ({condition})	不满足（{condition}）
+	is of high importance	重要性为高
+	is of low importance	重要性为低
+	is larger than {size} KB	大于 {size} KB
+	is smaller than {size} KB	小于 {size} KB

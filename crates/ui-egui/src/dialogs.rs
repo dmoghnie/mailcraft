@@ -3,7 +3,7 @@
 use egui::{Margin, Rect, RichText, Sense, Ui, vec2};
 use mailcraft_engine::Compose;
 use mailcraft_engine::Session;
-use mailcraft_engine::model::organize::{Condition, Rule, RuleAction};
+use mailcraft_engine::model::organize::{Condition, Rule, RuleAction, TextOp};
 use mailcraft_engine::model::{AccountConfig, Folder, FolderRole, Security, SignInMethod};
 use serde_json::json;
 

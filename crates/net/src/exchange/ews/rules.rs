@@ -2,7 +2,7 @@
 //! `UpdateInboxRules`, MS-OXWSRULES): read as MailCraft's own rules where all of a rule can be
 //! said as one, and changed without losing what MailCraft can't say of the others.
 
-use mailcraft_model::organize::{Condition, Rule, RuleAction, ServerRule, ServerRuleOp, ServerRules};
+use mailcraft_model::organize::{Condition, Rule, RuleAction, ServerRule, ServerRuleOp, ServerRules, TextOp};
 
 use super::*;
 
@@ -144,9 +144,9 @@ fn as_rule(el: &El, name: &str, folder_path: &dyn Fn(RuleFolder<'_>) -> Option<S
     let mut conditions = Vec::new();
     for c in el.child("Conditions").map(|c| c.kids.as_slice()).unwrap_or_default() {
         conditions.push(match c.name.as_str() {
-            "ContainsSenderStrings" => Condition::From(one_string(c)?),
-            "ContainsRecipientStrings" => Condition::To(one_string(c)?),
-            "ContainsSubjectStrings" => Condition::Subject(one_string(c)?),
+            "ContainsSenderStrings" => Condition::from(&one_string(c)?),
+            "ContainsRecipientStrings" => Condition::To { value: one_string(c)?, op: TextOp::Contains },
+            "ContainsSubjectStrings" => Condition::subject(&one_string(c)?),
             "HasAttachments" if c.text.trim() == "true" => Condition::HasAttachment,
             _ => return None,
         });
@@ -179,8 +179,7 @@ fn as_rule(el: &El, name: &str, folder_path: &dyn Fn(RuleFolder<'_>) -> Option<S
         name: name.to_string(),
         enabled: el.text_of("IsEnabled") == Some("true"),
         account: None,
-        conditions,
-        match_all: true,
+        filter: Condition::all(conditions),
         actions,
         stop,
         sent: false,
@@ -207,7 +206,7 @@ fn rule_xml(id: Option<&str>, now: &ServerRule, was: Option<&ServerRule>, folder
 /// Whether two rules do the same (their name and switch aside, which the rule's own fields say).
 fn same_doing(a: Option<&Rule>, b: Option<&Rule>) -> bool {
     match (a, b) {
-        (Some(a), Some(b)) => (&a.conditions, a.match_all, &a.actions, a.stop) == (&b.conditions, b.match_all, &b.actions, b.stop),
+        (Some(a), Some(b)) => (&a.filter, &a.actions, a.stop) == (&b.filter, &b.actions, b.stop),
         (None, None) => true,
         _ => false,
     }
@@ -218,22 +217,27 @@ fn same_doing(a: Option<&Rule>, b: Option<&Rule>) -> bool {
 /// pinning) is refused: the editor doesn't offer it for one.
 fn what_it_does(rule: &Rule, folder_id: &dyn Fn(&str) -> Option<String>) -> Result<String> {
     let cant = |what: &str| NetError::No(format!("a rule on the server can't {what}"));
-    if !rule.match_all && rule.conditions.len() > 1 {
-        return Err(cant("match any one of several conditions"));
-    }
+    let tests = rule.filter.simple().ok_or_else(|| cant("match any one of several conditions, or one that isn't met"))?;
     let strings = |s: &str| format!("<t:String>{}</t:String>", esc(s));
     let (mut to, mut from, mut subject, mut attachments) = (None, None, None, false);
-    for c in &rule.conditions {
+    for c in tests {
         let (slot, t) = match c {
-            Condition::To(t) => (&mut to, t),
-            Condition::From(t) => (&mut from, t),
-            Condition::Subject(t) => (&mut subject, t),
+            Condition::To { value, op: TextOp::Contains } => (&mut to, value),
+            Condition::From { value, op: TextOp::Contains } => (&mut from, value),
+            Condition::Subject { value, op: TextOp::Contains } => (&mut subject, value),
             Condition::HasAttachment => {
                 attachments = true;
                 continue;
             }
-            Condition::AnyText(_) => return Err(cant("look at the sender, recipients and subject together")),
+            Condition::To { .. } | Condition::From { .. } | Condition::Subject { .. } => {
+                return Err(cant("tell whether a text is, starts with or ends with a word"));
+            }
+            Condition::AnyText { .. } => return Err(cant("look at the sender, recipients and subject together")),
             Condition::Bulk => return Err(cant("tell list mail")),
+            Condition::Preview { .. } => return Err(cant("look at a message's text")),
+            Condition::Importance { .. } => return Err(cant("look at a message's importance")),
+            Condition::Larger { .. } | Condition::Smaller { .. } => return Err(cant("look at a message's size")),
+            Condition::All { .. } | Condition::Any { .. } | Condition::Not { .. } => return Err(cant("nest conditions")),
         };
         if slot.replace(strings(t)).is_some() {
             return Err(cant("have two conditions of one kind"));

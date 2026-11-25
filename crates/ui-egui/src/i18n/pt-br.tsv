@@ -2366,3 +2366,18 @@ count	occurrences	ocorrências
 	Meeting times	Horários de reunião
 	Propose meeting times	Propor horários de reunião
 	From your free time in your work hours over the next week	Do seu tempo livre no horário de trabalho da próxima semana
+	has {field} that {op}	tiver {field} que {op}
+	contains “{text}”	contém “{text}”
+	is “{text}”	é “{text}”
+	starts with “{text}”	começa com “{text}”
+	ends with “{text}”	termina com “{text}”
+	a sender	um remetente
+	a recipient	um destinatário
+	a subject	um assunto
+	a sender, recipient or subject	um remetente, destinatário ou assunto
+	text	um texto
+	not ({condition})	não ({condition})
+	is of high importance	tiver importância alta
+	is of low importance	tiver importância baixa
+	is larger than {size} KB	tiver mais de {size} KB
+	is smaller than {size} KB	tiver menos de {size} KB
