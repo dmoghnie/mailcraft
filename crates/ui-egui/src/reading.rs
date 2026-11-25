@@ -50,13 +50,16 @@ pub(crate) use body::WEB_PICTURES;
 pub(crate) use body::picture_menu_for_tests;
 use body::*;
 pub(crate) use body::{Marked, marked_job, subject_marks, text_marks};
+pub(crate) use compose::TableCards;
 pub use compose::compose_window;
 #[cfg(test)]
 pub(crate) use compose::parse_local;
 #[cfg(test)]
+pub(crate) use compose::recipients as compose_chips;
+#[cfg(test)]
 pub(crate) use compose::send_block_text;
 use compose::*;
-pub(crate) use compose::{ComposeAlert, Suggested};
+pub(crate) use compose::{ComposeAlert, Suggested, dragged};
 pub(crate) use frame_lru::FrameLru;
 pub(crate) use long_text::LongText;
 #[cfg(test)]

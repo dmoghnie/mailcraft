@@ -6,6 +6,8 @@ use super::*;
 pub(super) mod layout;
 mod simple_ribbon;
 mod source;
+mod work_area;
+mod zoom;
 
 #[test]
 fn in_the_browser_a_popped_out_message_opens_in_a_window_of_its_own() {
@@ -76,6 +78,43 @@ fn double_clicked_mail_opens_in_its_own_window() {
     frame(&ctx, &mut a, vec![key(Key::Escape, Modifiers::NONE)]);
     frame(&ctx, &mut a, vec![]);
     assert!(a.session.windows.is_empty(), "Escape closes the window");
+}
+
+/// A relaxed double-click on a message opens it in its own window: 0.4 s between the clicks,
+/// which Windows and macOS count as a double-click. egui's own 0.3 s took it for two single
+/// clicks, and nothing opened (as AniCraft found).
+#[test]
+fn a_relaxed_double_click_opens_the_message() {
+    use egui::{PointerButton, Pos2, RawInput, Rect};
+    let (mut a, _) = app("relaxed-double-click");
+    let ctx = egui::Context::default();
+    ctx.enable_accesskit();
+    let size = windows::layout::SIZE.with(std::cell::Cell::get);
+    let mut time = 0.0;
+    let mut at = |a: &mut MailApp, after: f64, events: Vec<Event>| {
+        time += after;
+        windows::layout::dress(a);
+        let input = RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, size)), time: Some(time), events, ..Default::default() };
+        let mut out = ctx.run_ui(input, |ui| a.ui(ui));
+        windows::layout::look(a, &out.shapes);
+        out.textures_delta.clear();
+        out
+    };
+    let mut out = at(&mut a, 0.1, vec![]);
+    for _ in 0..3 {
+        out = at(&mut a, 0.1, vec![]);
+    }
+    let rows: Vec<Rect> = named_in(&out).into_iter().filter(|n| n.role == egui::accesskit::Role::ListItem).filter_map(|n| n.rect).collect();
+    let row = rows.iter().min_by(|x, y| x.min.y.total_cmp(&y.min.y)).expect("a message in the list").center();
+    let button = |pressed| Event::PointerButton { pos: row, button: PointerButton::Primary, pressed, modifiers: Modifiers::NONE };
+    at(&mut a, 0.1, vec![Event::PointerMoved(row), button(true)]);
+    at(&mut a, 0.05, vec![button(false)]);
+    at(&mut a, 0.4, vec![button(true)]);
+    at(&mut a, 0.05, vec![button(false)]);
+    for _ in 0..2 {
+        at(&mut a, 0.05, vec![]);
+    }
+    assert_eq!(a.session.windows.len(), 1, "the message opened in its own window");
 }
 
 /// A message's own window: its attachment buttons work on its message, not the one in the
@@ -293,11 +332,11 @@ fn a_window_whose_monitor_went_comes_back_on_screen() {
     use crate::WindowPlace;
     let saved = WindowPlace { x: 2100.0, y: 50.0, w: 1200.0, h: 800.0, maximized: false, monitor: Some([1920.0, 1080.0]) };
     let info = |monitor: egui::Vec2| egui::ViewportInfo { monitor_size: Some(monitor), ..Default::default() };
-    assert_eq!(saved.rescue(&info(egui::vec2(1600.0, 900.0)), None), Some(egui::pos2(200.0, 50.0)));
-    assert_eq!(saved.rescue(&info(egui::vec2(1920.0, 1080.0)), None), None, "the same monitor");
-    assert_eq!(saved.rescue(&egui::ViewportInfo::default(), None), None, "not known yet");
-    assert_eq!(WindowPlace { maximized: true, ..saved }.rescue(&info(egui::vec2(1600.0, 900.0)), None), None);
-    assert_eq!(WindowPlace { monitor: None, ..saved }.rescue(&info(egui::vec2(1600.0, 900.0)), None), None, "saved before monitors were kept");
+    assert_eq!(saved.rescue(&info(egui::vec2(1600.0, 900.0)), None, 1.0), Some(egui::pos2(200.0, 50.0)));
+    assert_eq!(saved.rescue(&info(egui::vec2(1920.0, 1080.0)), None, 1.0), None, "the same monitor");
+    assert_eq!(saved.rescue(&egui::ViewportInfo::default(), None, 1.0), None, "not known yet");
+    assert_eq!(WindowPlace { maximized: true, ..saved }.rescue(&info(egui::vec2(1600.0, 900.0)), None, 1.0), None);
+    assert_eq!(WindowPlace { monitor: None, ..saved }.rescue(&info(egui::vec2(1600.0, 900.0)), None, 1.0), None, "saved before monitors were kept");
 }
 
 /// A window restored where no monitor is any more, though one of the same size took the place of
@@ -316,16 +355,16 @@ fn a_window_on_no_monitor_comes_back_though_the_sizes_match() {
         native_pixels_per_point: Some(1.0),
         ..Default::default()
     };
-    let one = Monitors { all: vec![left], primary: Some(left) };
-    let both = Monitors { all: vec![left, right], primary: Some(left) };
-    assert_eq!(saved.rescue(&at(2100.0, 50.0), Some(&one)), Some(egui::pos2(360.0, 140.0)), "its monitor went");
-    assert_eq!(saved.rescue(&at(2100.0, 50.0), Some(&both)), None, "still there");
-    assert_eq!(saved.rescue(&at(2100.0, 50.0), None), None, "the system lists none: sizes only");
-    assert_eq!(saved.rescue(&at(1920.0 - 96.0, 50.0), Some(&one)), None, "enough of its top edge to drag by");
-    assert_eq!(saved.rescue(&at(1920.0 - 95.0, 50.0), Some(&one)), Some(egui::pos2(360.0, 140.0)));
-    assert_eq!(saved.rescue(&at(100.0, -900.0), Some(&one)), Some(egui::pos2(360.0, 140.0)), "its top edge above every monitor");
-    assert_eq!(WindowPlace { monitor: None, ..saved }.rescue(&at(2100.0, 50.0), Some(&one)), Some(egui::pos2(360.0, 140.0)));
-    assert_eq!(WindowPlace { maximized: true, ..saved }.rescue(&at(2100.0, 50.0), Some(&one)), None);
+    let one = Monitors { all: vec![left], primary: Some(left), ..Default::default() };
+    let both = Monitors { all: vec![left, right], primary: Some(left), ..Default::default() };
+    assert_eq!(saved.rescue(&at(2100.0, 50.0), Some(&one), 1.0), Some(egui::pos2(360.0, 140.0)), "its monitor went");
+    assert_eq!(saved.rescue(&at(2100.0, 50.0), Some(&both), 1.0), None, "still there");
+    assert_eq!(saved.rescue(&at(2100.0, 50.0), None, 1.0), None, "the system lists none: sizes only");
+    assert_eq!(saved.rescue(&at(1920.0 - 96.0, 50.0), Some(&one), 1.0), None, "enough of its top edge to drag by");
+    assert_eq!(saved.rescue(&at(1920.0 - 95.0, 50.0), Some(&one), 1.0), Some(egui::pos2(360.0, 140.0)));
+    assert_eq!(saved.rescue(&at(100.0, -900.0), Some(&one), 1.0), Some(egui::pos2(360.0, 140.0)), "its top edge above every monitor");
+    assert_eq!(WindowPlace { monitor: None, ..saved }.rescue(&at(2100.0, 50.0), Some(&one), 1.0), Some(egui::pos2(360.0, 140.0)));
+    assert_eq!(WindowPlace { maximized: true, ..saved }.rescue(&at(2100.0, 50.0), Some(&one), 1.0), None);
     // The primary monitor left of the origin, and at twice the pixels: in points, centred on it.
     let primary = egui::Rect::from_min_size(egui::pos2(-2560.0, 240.0), egui::vec2(2560.0, 1440.0));
     let hidpi = egui::ViewportInfo {
@@ -333,8 +372,8 @@ fn a_window_on_no_monitor_comes_back_though_the_sizes_match() {
         outer_rect: Some(egui::Rect::from_min_size(egui::pos2(5000.0, 50.0), egui::vec2(1200.0, 830.0))),
         ..at(0.0, 0.0)
     };
-    let far = Monitors { all: vec![primary], primary: Some(primary) };
-    assert_eq!(saved.rescue(&hidpi, Some(&far)), Some(egui::pos2(-1280.0 + 40.0, 120.0)));
+    let far = Monitors { all: vec![primary], primary: Some(primary), ..Default::default() };
+    assert_eq!(saved.rescue(&hidpi, Some(&far), 1.0), Some(egui::pos2(-1280.0 + 40.0, 120.0)));
 }
 
 /// A window too big for its screen, frame included, shrinks to fit and is centred; one that fits

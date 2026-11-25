@@ -14,6 +14,9 @@ pub(crate) const TOP_BAR_H: f32 = 40.0;
 pub(crate) const TOP_BAR_MARGIN: (i8, i8) = (8, 5);
 /// The narrowest the message list goes beside the reading pane, and the width the reading pane
 /// keeps while the folders and the list have any to give.
+/// The longest pause between the two clicks of a double-click, in seconds: the half second
+/// Windows and macOS accept by default.
+pub(crate) const DOUBLE_CLICK_SECONDS: f64 = 0.5;
 const LIST_LEAST: f32 = 280.0;
 const READING_LEAST: f32 = 300.0;
 
@@ -56,6 +59,17 @@ impl MailApp {
         // nor announced until the window was opened again (issue #68).
         self.pump();
         self.notices_pressed(ctx);
+        // A notification clicked (issue #273), here or as its link handed over from the
+        // notification centre: MailCraft comes forward, at the message it named, minimized or in
+        // the notification area too.
+        if let Some(opens) = self.services.notification_clicked().or_else(|| self.ui.link_shows.take()) {
+            self.show_window(ctx);
+            if let Some(key) = opens {
+                self.run("message.reveal", json!({"key": key.to_id()}));
+            }
+        }
+        // An organisation's theme and language (issue #245), as accounts come and go.
+        self.follow_organisation();
         self.announce(ctx);
         self.flush_jobs();
     }
@@ -322,6 +336,11 @@ impl MailApp {
         if !cfg!(target_os = "macos") && ctx.options(|o| !o.quit_shortcuts.is_empty()) {
             ctx.options_mut(|o| o.quit_shortcuts.clear());
         }
+        // A double-click as the desktop counts one: egui's 0.3 s between the clicks took a relaxed
+        // one for two single clicks, and the message didn't open (as AniCraft found).
+        if ctx.options(|o| o.input_options.max_double_click_delay < DOUBLE_CLICK_SECONDS) {
+            ctx.options_mut(|o| o.input_options.max_double_click_delay = DOUBLE_CLICK_SECONDS);
+        }
         self.ui.keeps_running = self.services.keeps_running();
         // Done in `logic` already when the app runs it, as the close is.
         let in_logic = self.ui.close_checked == Some(ctx.input(|i| i.time));
@@ -364,6 +383,15 @@ impl MailApp {
         // best; except on Linux, where winit knows no system theme and would say dark.
         let said = if cfg!(all(unix, not(target_os = "macos"))) { Some(dark) } else { self.ui.dark };
         super::windows::title_bars_in(&ctx, said);
+        // The text size (the comment on issue #267), as egui zooms every window: kept with the
+        // preferences, its keys MailCraft's commands rather than egui's own, which kept nothing.
+        if ctx.options(|o| o.zoom_with_keyboard) {
+            ctx.options_mut(|o| o.zoom_with_keyboard = false);
+        }
+        let zoom = f32::from(self.session.prefs.text_size) / 100.0;
+        if ctx.zoom_factor() != zoom {
+            ctx.set_zoom_factor(zoom);
+        }
         // The theme: light or dark, with the accent colour and top bar chosen (issue #8).
         let want = Tokens::themed(dark, mailcraft_engine::accent_rgb(&self.session.prefs.accent), self.session.prefs.plain_top_bar);
         if want != self.ui.tokens || ctx.global_style().visuals.panel_fill != self.ui.tokens.surface {
@@ -374,6 +402,7 @@ impl MailApp {
         self.shortcuts(&ctx);
 
         let mut acts: Vec<Action> = Vec::new();
+        self.messages_onto_windows(&ctx, &mut acts);
         if file {
             acts.push(Action::Backstage(backstage::Page::Info));
         }
@@ -450,6 +479,12 @@ impl MailApp {
                 egui::Panel::top("update-bar")
                     .frame(egui::Frame::new().fill(t.accent_soft).inner_margin(Margin::symmetric(12, 6)).stroke(egui::Stroke::new(1.0, t.border)))
                     .show(ui, |ui| self.update_bar(ui, acts));
+            }
+            // How the update installed as MailCraft last closed ended.
+            if self.ui.update_outcome.is_some() {
+                egui::Panel::top("update-outcome-bar")
+                    .frame(egui::Frame::new().fill(t.accent_soft).inner_margin(Margin::symmetric(12, 6)).stroke(egui::Stroke::new(1.0, t.border)))
+                    .show(ui, |ui| self.update_outcome_bar(ui));
             }
             // MailCraft's earlier Flatpak, whose mail came over at this start, still installed.
             if self.ui.old_flatpak.is_some() {
@@ -697,9 +732,13 @@ impl MailApp {
             if in_window && d.for_compose() {
                 self.ui.dialog = Some(d);
             } else {
+                // Its boxes of people suggest from the session, which drawing it can't change.
+                d.refresh_people(&mut self.session, &mut acts);
                 let keep = dialogs::show(&ctx, &mut d, &self.session, &mut self.ui.pictures, &t, &mut acts);
                 if keep && self.ui.dialog.is_none() {
                     self.ui.dialog = Some(d);
+                } else if !keep && self.ui.dialog.is_none() {
+                    self.ui.dialog = d.returns_to();
                 }
             }
         }
@@ -710,6 +749,8 @@ impl MailApp {
             super::caption::resize_zones(ui);
         }
         self.toasts(&ctx);
+        // Commands AI agents asked to run, waiting for the user (issue #255).
+        self.agents_asking_window(&ctx);
         crate::a11y::said(&ctx);
         self.undo_bar(&ctx);
         self.send_receive_window(&ctx);
@@ -727,7 +768,7 @@ impl MailApp {
             }
             for r in reminders::refresh(&mut self.ui.reminders, &self.session, false) {
                 let when = if r.all_day { String::new() } else { crate::calendar::hm(r.start, &self.session) };
-                self.services.notify(&r.summary, &if r.location.is_empty() { when } else { format!("{when} · {}", r.location) });
+                self.services.notify_reminder(&r.summary, &if r.location.is_empty() { when } else { format!("{when} · {}", r.location) });
             }
             reminders::show(&ctx, &mut self.ui.reminders, &self.session, &t, &mut acts);
             if reminders::showing(&self.ui.reminders) {

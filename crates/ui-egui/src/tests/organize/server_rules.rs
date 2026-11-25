@@ -55,7 +55,7 @@ fn an_exchange_accounts_rules_on_the_server_are_shown_and_changed() {
     let theirs = ServerRule { id: "R2".into(), name: "To my phone".into(), priority: 2, enabled: true, raw: "<b/>".into(), ..Default::default() };
     a.session.apply(MailEvent::ServerRules {
         account: id.clone(),
-        rules: Some(ServerRules { outlook_list: false, rules: vec![mine.clone(), theirs] }),
+        rules: Some(ServerRules { outlook_list: false, rules: vec![mine.clone(), theirs], ..Default::default() }),
         error: None,
     });
     let texts = drawn(&ctx, &mut a);
@@ -107,7 +107,7 @@ fn a_rules_note_stays_clear_of_its_buttons() {
     };
     a.session.apply(MailEvent::ServerRules {
         account: id,
-        rules: Some(ServerRules { outlook_list: false, rules: vec![rule("R1", 1), rule("R2", 2), rule("R3", 3)] }),
+        rules: Some(ServerRules { outlook_list: false, rules: vec![rule("R1", 1), rule("R2", 2), rule("R3", 3)], ..Default::default() }),
         error: None,
     });
     a.ui.dialog.get_or_insert(Dialog::Rules);
@@ -119,4 +119,116 @@ fn a_rules_note_stays_clear_of_its_buttons() {
     let note = shown.iter().find(|d| d.text.starts_with("Forward the studio's invoices R2")).expect("the rule's row");
     let up = shown.iter().filter(|d| d.text == "↑").map(|d| d.rect).find(|r| (r.center().y - note.rect.center().y).abs() < 10.0).expect("its ↑");
     assert!(note.rect.right() <= up.left(), "the note {:?} runs under ↑ {:?}", note.rect, up);
+}
+
+/// Issue #243: an IMAP account's rules on its server (Sieve): its section, with the user's other
+/// filters named, and said when MailCraft's aren't running; none for an account whose server
+/// keeps none.
+#[test]
+fn an_imap_accounts_rules_on_the_server_are_shown() {
+    let (mut a, _) = app("rules-on-sieve");
+    let ctx = egui::Context::default();
+    let id = a.session.run("account.add", &json!({"email": "ann@st.test", "password": "pw"})).unwrap()["account"].as_str().unwrap().to_string();
+    a.session.take_jobs();
+    let texts = drawn(&ctx, &mut a);
+    assert!(texts.iter().any(|t| t == "On the server: ann@st.test"), "{texts:?}");
+    let mine = ServerRule {
+        id: "1-a".into(),
+        name: "Invoices".into(),
+        priority: 1,
+        enabled: true,
+        rule: Some(subject("invoice")),
+        raw: "{}".into(),
+        ..Default::default()
+    };
+    a.session.apply(MailEvent::ServerRules {
+        account: id.clone(),
+        rules: Some(ServerRules { rules: vec![mine], other_script: Some("roundcube".into()), not_running: true, ..Default::default() }),
+        error: None,
+    });
+    let texts = drawn(&ctx, &mut a);
+    assert!(texts.iter().any(|t| t.contains("(“roundcube”) run first")), "{texts:?}");
+    assert!(texts.iter().any(|t| t.starts_with("These rules aren't running")), "{texts:?}");
+    assert!(texts.iter().any(|t| t.starts_with("Invoices")), "{texts:?}");
+    // A server without ManageSieve: no section.
+    a.session.apply(MailEvent::ServerRules { account: id, rules: None, error: Some(mailcraft_engine::model::organize::NO_SERVER_RULES.into()) });
+    let texts = drawn(&ctx, &mut a);
+    assert!(!texts.iter().any(|t| t.starts_with("On the server")), "{texts:?}");
+}
+
+/// Issue #243, as the tester met it on Mailcow: the rules found from Home (it had no Rules) and
+/// in File › Info, the server's beside MailCraft's; SOGo's filters running in their place said,
+/// with a button that runs them again; and SOGo's automatic reply shown as SOGo's, not as off,
+/// and not changed from here.
+#[test]
+fn rules_are_found_and_another_programs_filters_are_said() {
+    let (mut a, _) = app("rules-found");
+    let ctx = egui::Context::default();
+    ctx.enable_accesskit();
+    let id = a.session.run("account.add", &json!({"email": "ann@mc31.test", "password": "pw"})).unwrap()["account"].as_str().unwrap().to_string();
+    a.session.take_jobs();
+    a.session.run("rules.add", &json!({"rule": subject("receipt")})).unwrap();
+    for _ in 0..2 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    // Home › Rules › Manage rules.
+    click_named(&ctx, &mut a, "Rules");
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "Manage rules");
+    assert!(matches!(a.ui.dialog, Some(Dialog::Rules)), "{:?}", a.ui.dialog);
+    a.session.take_jobs();
+    let mine = ServerRule {
+        id: "1-a".into(),
+        name: "Archive invoices".into(),
+        priority: 1,
+        enabled: true,
+        rule: Some(subject("invoice")),
+        raw: "{}".into(),
+        ..Default::default()
+    };
+    let rules = ServerRules { rules: vec![mine], other_script: Some("sogo".into()), not_running: true, ..Default::default() };
+    a.session.apply(MailEvent::ServerRules { account: id.clone(), rules: Some(rules.clone()), error: None });
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    click_named(&ctx, &mut a, "Run my rules again");
+    assert_eq!(*a.session.server_rules(&id), mailcraft_engine::ServerRulesState::Loading, "sent to the server");
+
+    // File › Info: both lists, the warning, and SOGo's reply as SOGo's.
+    a.ui.dialog = None;
+    a.session.apply(MailEvent::ServerRules { account: id.clone(), rules: Some(rules), error: None });
+    a.act(crate::Action::Backstage(crate::backstage::Page::Info));
+    if let Some(b) = a.ui.backstage.as_mut() {
+        b.account = Some(id.clone());
+    }
+    let sogo = mailcraft_engine::model::job::Vacation {
+        enabled: true,
+        subject: "Away".into(),
+        text: "Back on Monday.".into(),
+        sent_by: Some("sogo".into()),
+        instead: Some("sogo".into()),
+        ..Default::default()
+    };
+    a.session.apply(MailEvent::Vacation { account: id.clone(), vacation: Some(sogo.clone()), error: None });
+    let texts = drawn_strings(&ctx, &mut a, egui::vec2(1280.0, 2400.0));
+    for want in [
+        "On, sent by your other filters on the server (“sogo”)",
+        "Invoices",
+        "On the server: ann@mc31.test",
+        "Archive invoices",
+        "Run my rules again",
+    ] {
+        assert!(texts.iter().any(|t| t == want), "{want}: {texts:?}");
+    }
+    // The replies' dialog: said whose they are, and not saved from here.
+    a.ui.backstage = None;
+    a.ui.dialog = Some(Dialog::vacation(&id, &sogo, false));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    let texts = drawn_strings(&ctx, &mut a, egui::vec2(1280.0, 900.0));
+    assert!(texts.iter().any(|t| t.starts_with("MailCraft's automatic replies and rules on the server aren't running")), "{texts:?}");
+    assert!(texts.iter().any(|t| t.starts_with("These are the replies your other filters on the server (“sogo”) send")), "{texts:?}");
+    let size = windows::layout::SIZE.with(std::cell::Cell::get);
+    assert!(named(&ctx, &mut a, size).iter().any(|n| n.label.as_deref() == Some("Save") && n.disabled), "Save is off");
 }

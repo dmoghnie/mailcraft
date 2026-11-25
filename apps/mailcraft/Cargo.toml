@@ -13,6 +13,8 @@ default-run = "mailcraft"
 workspace = true
 
 [dependencies]
+# The update's file flushed as the cache's are (a plain flush where a Mac refuses the full one).
+craft-atomic = { workspace = true }
 mailcraft-engine = { workspace = true }
 mailcraft-net = { workspace = true }
 mailcraft-ui-egui = { workspace = true }
@@ -30,6 +32,9 @@ craft-font-catalog = { workspace = true }
 skrifa = { version = "0.44", default-features = false, features = ["std"] }
 serde_json = { workspace = true }
 log = { workspace = true }
+# AI agents in the open window (issue #255): the control channel on loopback, its token and the
+# connection file `mailcraft-cli mcp` finds it by.
+craft-control = { workspace = true, features = ["agents"] }
 # The local UTC offset for message times.
 chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 iana-time-zone = "0.1"
@@ -37,8 +42,6 @@ iana-time-zone = "0.1"
 rfd = "0.18"
 # Pictures pasted into a message.
 arboard = { version = "3", default-features = false, features = ["image-data"] }
-# Desktop notifications for new mail (toasts, Notification Center, freedesktop notifications).
-notify-rust = { version = "4", default-features = false, features = ["z"] }
 # Decodes the window icon (assets/app-icon).
 image = { version = "0.25", default-features = false, features = ["png"] }
 # Passwords live in the system keychain, never in MailCraft's files.
@@ -55,23 +58,32 @@ winresource = "0.1"
 # `desktop::shell_open`.)
 [target.'cfg(not(windows))'.dependencies]
 open = "5"
+# Desktop notifications for new mail (Notification Center, freedesktop notifications); Windows'
+# toasts are MailCraft's own (`platform/toast.rs`).
+notify-rust = { version = "4", default-features = false, features = ["z"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 # Notifications under MailCraft's name: its app id's name and icon, per user (`platform/toast.rs`).
 # The version ipconfig (the network crate's DNS settings) uses, so it's built once.
 windows-registry = "0.100"
 # Whether Animation effects are on (`desktop/motion.rs`): the version egui's screen reader
-# support brings, so it's built once.
-windows = { version = "0.62", features = ["UI_ViewManagement"] }
+# support brings, so it's built once. Windows' toasts, made here (`platform/toast.rs`): one carries
+# a `mailcraft:` link, so a click in the notification centre comes back to MailCraft (issue #273),
+# which notify-rust's can't; the features notify-rust's toasts used, so nothing more is built.
+windows = { version = "0.62", features = ["Data_Xml_Dom", "Foundation", "System", "UI_Notifications", "UI_ViewManagement"] }
 # One MailCraft per data folder (`startup/single_instance.rs`): Unix sockets on Windows, which std lacks.
 # The version zbus brings, so it's built once.
 uds_windows = "1.2"
 # The Windows session the single-instance socket is named by (the process token's session id):
-# safe wrappers over Win32, only the `advapi` feature (as PdfCraft has it).
+# safe wrappers over Win32, only the `advapi` feature (as PdfCraft has it). `shell`: the app id it
+# runs under, so a click on its notification comes back to it (`platform/toast.rs`, issue #273).
 winit = { version = "0.30", default-features = false }
-winsafe = { version = "0.0.29", default-features = false, features = ["advapi", "dwm", "user"] }
+winsafe = { version = "0.0.29", default-features = false, features = ["advapi", "dwm", "shell", "user"] }
 # MailCraft's icon in the notification area, for running with its window closed (`desktop/tray.rs`).
 tray-icon = { version = "0.26", default-features = false }
+# The clipboard's HTML as the program that copied wrote it (`window/clipboard.rs`): arboard reads
+# its fragment alone. The version arboard uses, so it's built once.
+clipboard-win = "5.4"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 # Finder hands documents to an app through an `odoc` Apple event; winit 0.30 never sees it
@@ -84,10 +96,10 @@ fmv-macos-events = "=0.1.0"
 # come in through eframe already; muda builds the menu.
 dispatch2 = { version = "0.3.1", default-features = false, features = ["std"] }
 objc2 = { version = "0.6.4", default-features = false, features = ["std"] }
-# The Dock's count of unread mail (issue #93), as the window's title has it; and whether Reduce
-# motion is on (`desktop/motion.rs`).
-objc2-app-kit = { version = "0.3.2", default-features = false, features = ["std", "NSApplication", "NSResponder", "NSDockTile", "NSWorkspace", "NSAccessibility"] }
-objc2-foundation = { version = "0.3.2", default-features = false, features = ["std", "NSString"] }
+# The Dock's count of unread mail (issue #93), as the window's title has it; whether Reduce motion
+# is on (`desktop/motion.rs`); the part of each screen windows may use (`window/work_areas.rs`).
+objc2-app-kit = { version = "0.3.2", default-features = false, features = ["std", "NSApplication", "NSResponder", "NSDockTile", "NSWorkspace", "NSAccessibility", "NSScreen", "objc2-core-foundation"] }
+objc2-foundation = { version = "0.3.2", default-features = false, features = ["std", "NSString", "NSArray", "NSEnumerator", "NSGeometry"] }
 muda = { version = "0.21.2", default-features = false }
 
 [target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]

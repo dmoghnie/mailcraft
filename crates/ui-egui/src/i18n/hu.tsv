@@ -285,6 +285,9 @@
 	Keep MailCraft running when its window is closed	A MailCraft fusson tovább az ablak bezárása után is
 	Start MailCraft in the notification area	A MailCraft indítása az értesítési területen
 	Start MailCraft minimized	A MailCraft indítása kis méretben
+	Start MailCraft when you sign in	A MailCraft indítása bejelentkezéskor
+	It starts as you sign in to this computer and checks for mail. Its window comes up too, unless it's kept running when closed and started put away (below).	Elindul, amikor bejelentkezik erre a számítógépre, és ellenőrzi a leveleket. Az ablaka is megjelenik, kivéve, ha bezárás után tovább fut, és elrejtve indul (lent).
+	Starting MailCraft at sign-in couldn't be changed: {error}	A MailCraft bejelentkezéskori indítását nem sikerült módosítani. Hiba: {error}
 	It checks for mail and announces it with its window put away, as when it's closed. Started to open a link or a file, it opens the window.	A MailCraft rejtett ablakkal is ellenőrzi a leveleket, és értesít az új üzenetekről, akárcsak az ablak bezárása után. Ha hivatkozás vagy fájl megnyitásával indul, megjelenik az ablaka.
 	Show the unread mail on its icon	Az olvasatlan üzenetek számának megjelenítése az ikonon
 	How many unread messages the Inboxes have, in the corner of MailCraft's icon in the notification area	Az értesítési területen lévő MailCraft ikon sarkában a beérkezett olvasatlan üzenetek száma látható.
@@ -1279,6 +1282,8 @@ month	May	május
 	MailCraft {version} is ready	A MailCraft {version} telepítésre kész
 	MailCraft {version} is ready. Restart now to install it, or it installs when you close MailCraft.	A MailCraft {version} telepítésre kész. Indítsd újra most a telepítéshez, vagy a frissítés a MailCraft bezárásakor települ.
 	Restart MailCraft to install it now, or it installs when you close MailCraft.	Indítsd újra a MailCraftot az azonnali telepítéshez, vagy a frissítés a MailCraft bezárásakor települ.
+	MailCraft is updated to {version}.	A MailCraft frissült a(z) {version} verzióra.
+	MailCraft {version} didn't install. It's offered again.	A MailCraft {version} nem települt. Újra fel lesz ajánlva.
 	Restart now	Újraindítás most
 	The update is downloaded and checked. It installs now, as MailCraft closes, which takes a moment; open MailCraft again when it's done.	A frissítés letöltve és ellenőrizve. A telepítés a MailCraft bezárásakor indul, és rövid ideig tart. Ha kész, nyisd meg újra a MailCraftot.
 	Update and close	Frissítés és bezárás
@@ -1880,6 +1885,8 @@ count	occurrences	előfordulás
 	Default font	Alapértelmezett betűtípus
 	Font for new messages	Új üzenetek betűtípusa
 	New messages, replies and forwards are written in it. Text you set a font on keeps its own.	Az új üzenetek, válaszok és továbbított üzenetek ezt a betűtípust használják. A külön beállított betűtípusú szöveg változatlan marad.
+	Font size for new messages	Új üzenetek betűmérete
+	New messages, replies and forwards are written in it. Text you set a size on keeps its own.	Az új üzenetek, válaszok és továbbított üzenetek ezt a betűméretet használják. A külön beállított méretű szöveg változatlan marad.
 	Clean up old items	Régi elemek karbantartása
 	Clean up old items…	Régi elemek karbantartása…
 	Move old mail to an archive file on this computer, out of the mailbox.	Régi e-mailek áthelyezése a postaládából egy archiválási fájlba ezen a számítógépen.
@@ -2035,7 +2042,6 @@ count	occurrences	előfordulás
 	Names	Nevek
 	AutoArchive settings	Automatikus archiválás beállításai
 	From a mailing list.	Levelezőlistáról.
-	Unsubscribe	Leiratkozás
 	Unsubscribing from junk mail tells its sender that your address is read	A levélszemétről való leiratkozás elárulja a feladónak, hogy a címedet olvassák
 	Unsubscribe from this list?	Leiratkozol erről a listáról?
 	A message asking to leave it goes to {address}, from your account.	A kilépést kérő üzenet a fiókodból megy ide: {address}.
@@ -2386,3 +2392,174 @@ count	occurrences	előfordulás
 	Write rule	Szabály írása
 	Written by {model}	Írta: {model}
 	gets a yes from MailCraft's AI to “{question}”	a MailCraft MI igennel felel erre: „{question}”
+	Sort by	Rendezés
+	First name	Utónév
+	Last name	Vezetéknév
+	Open a repeating event	Ismétlődő esemény megnyitása
+	Open this occurrence	Ennek az előfordulásnak a megnyitása
+	Open the series	Sorozat megnyitása
+	Changes apply to this occurrence alone.	A módosítások csak erre az előfordulásra érvényesek.
+	Your other filters on the server (“{name}”) run first, and are left as they are.	A kiszolgálón lévő többi szűrőd („{name}”) fut először, és változatlan marad.
+	Found: {url}	Megtalálva: {url}
+	Task list	Feladatlista
+	Task lists	Feladatlisták
+	All task lists	Összes feladatlista
+	This task is in a task list that can't be changed here.	Ez a feladat olyan feladatlistában van, amely itt nem módosítható.
+	Occurrences of this task were changed on their own elsewhere: change it there.	A feladat egyes előfordulásait máshol külön módosították: ott módosítsa.
+	Everything with them…	Minden ezzel a személlyel…
+	Everything with sender…	Minden a feladóval…
+	Everything with them	Minden ezzel a személlyel
+	Search within everything with them	Keresés mindenben, ami ehhez a személyhez tartozik
+	Mail ({n})	Levelezés ({n})
+	Files ({n})	Mellékletek ({n})
+	Meetings ({n})	Értekezletek ({n})
+	Links ({n})	Hivatkozások ({n})
+	People ({n})	Személyek ({n})
+	Nothing here.	Itt nincs semmi.
+	Nothing here matches the search.	Itt semmi sem felel meg a keresésnek.
+	Files and links come from the mail on this computer: {n} of these messages aren't downloaded.	A mellékletek és hivatkozások a számítógépen lévő levelekből származnak: {n} üzenet nincs letöltve.
+	Only the newest of the mail with them is shown.	Csak a legújabb levelek láthatók ezzel a személlyel.
+	In their signature	Az aláírásában
+	Add to their contact…	Hozzáadás a névjegyéhez…
+	Open the newest	A legújabb megnyitása
+	Open (they sent it)	Megnyitás (ez a személy küldte)
+	They organise it	Ez a személy szervezi
+	They're invited	Ez a személy meghívott
+	{n} messages	{n} üzenet
+	One message	Egy üzenet
+	Overview	Áttekintés
+	Show all	Az összes megjelenítése
+	Find someone by name or address	Személy keresése név vagy cím alapján
+	Delegate	Delegálás
+	Delegate meeting	Értekezlet delegálása
+	Delegate…	Delegálás…
+	Delegated	Delegálva
+	Invite…	Meghívás…
+	Name <address>	Név <cím>
+	Pick guests from the address book	Vendégek kiválasztása a címjegyzékből
+	Someone else goes in your place: they get the invitation to answer, and the organizer is told.	Valaki más megy Ön helyett: megkapja a meghívást, hogy válaszoljon rá, és a szervező értesítést kap.
+	The whole series	A teljes sorozat
+	This occurrence	Ez az előfordulás
+	Who goes instead of you	Ki megy Ön helyett
+	Who is “{name}”?	Ki az, hogy „{name}”?
+	You asked {name} to go in your place.	Megkérte {name} személyt, hogy menjen Ön helyett.
+	{name} asked you to go in their place.	{name} megkérte Önt, hogy menjen helyette.
+	{name} asked {delegate} to go in their place.	{name} megkérte {delegate} személyt, hogy menjen helyette.
+	{name} (delegated to {delegate})	{name} (delegálta: {delegate})
+	AI agents	MI-ügynökök
+	Add MailCraft's MCP server to it: the command mailcraft-cli with the argument mcp	Adja hozzá a MailCraft MCP-kiszolgálóját: a mailcraft-cli parancsot az mcp argumentummal
+	Agents run this command from now on without asking	Az ügynökök ezt a parancsot mostantól kérdés nélkül futtatják
+	Allow	Engedélyezés
+	Always allow	Mindig engedélyez
+	An AI agent asks	Egy MI-ügynök kérdez
+	An AI agent wants to: {command}	Egy MI-ügynök ezt szeretné: {command}
+	An AI assistant on this computer (Claude Desktop, Claude Code…) reads your mail, calendar, tasks and people through MailCraft's MCP server, and asks here before each command it wants to run. Off, it reaches nothing.	Egy MI-asszisztens ezen a számítógépen (Claude Desktop, Claude Code…) a MailCraft MCP-kiszolgálóján keresztül olvassa a leveleit, a naptárát, a feladatait és a partnereit, és itt kérdez minden parancs előtt, amelyet futtatni szeretne. Kikapcsolva semmihez sem fér hozzá.
+	Commands agents run without asking first	Parancsok, amelyeket az ügynökök előzetes kérdés nélkül futtatnak
+	Connect an assistant	Asszisztens csatlakoztatása
+	Deny	Elutasítás
+	Forget	Elfelejtés
+	Let AI agents use MailCraft	MI-ügynökök használhatják a MailCraftot
+	Nothing yet	Még semmi
+	Run without asking	Futtatás kérdés nélkül
+	What AI agents did	Amit az MI-ügynökök tettek
+	{n} more waiting	Még {n} várakozik
+	Looked, changed nothing	Megnézte, semmit nem változtatott
+	Ran	Lefutott
+	You didn't allow it	Nem lett engedélyezve
+	Didn't run: {why}	Nem futott le: {why}
+	Let AI agents ask to run commands	Az MI-ügynökök kérhetik parancsok futtatását
+	Sending, moving, answering an invitation… each asked about here first, unless you always allow it. Off, agents only read.	Küldés, áthelyezés, meghívó megválaszolása… mindegyikről itt kérdez előbb, hacsak nem engedélyezi mindig. Kikapcsolva az ügynökök csak olvasnak.
+	Accounts AI agents read	Az MI-ügynökök által olvasott fiókok
+	One turned off is left out of all they read, and they can't take pictures of the window	A kikapcsolt fiók kimarad mindenből, amit olvasnak, és nem készíthetnek képet az ablakról
+	… and {n} more characters	… és még {n} karakter
+	A copy installed from MailCraft's releases looks for a newer one and installs it as it closes	A MailCraft kiadásaiból telepített példány újabbat keres, és bezáráskor telepíti
+	A notice under every message sent	Megjegyzés minden elküldött üzenet alatt
+	Accounts of {domains} only	Csak {domains} fiókjai
+	Encrypted connections only	Csak titkosított kapcsolatok
+	Locked	Zárolva
+	No certificate trusted by hand	Kézzel megbízhatónak jelölt tanúsítvány nincs
+	Not taken	Nem alkalmazva
+	Office	Iroda
+	Questions	Kérdések
+	Read from	Innen olvasva
+	Releases only	Csak kiadások
+	Set by your organisation	A szervezete állítja be
+	Set up for {organisation}	Beállítva ehhez: {organisation}
+	Update MailCraft by itself	A MailCraft frissítse magát
+	Your details for its signature	Az adatai az aláírásához
+	Your organisation	Az Ön szervezete
+	Your organisation doesn't allow trusting a certificate by hand.	A szervezete nem engedi, hogy egy tanúsítványt kézzel megbízhatónak jelöljön.
+	Your organisation set up MailCraft on this computer. What it locked, you can't change.	A szervezete állította be a MailCraftot ezen a számítógépen. Amit zárolt, azt nem módosíthatja.
+	Text size	Szövegméret
+	Everything in the window, larger or smaller. Ctrl and + or − change it too, and Ctrl+0 puts it back.	Az ablakban minden nagyobb vagy kisebb. A Ctrl és a + vagy − is módosítja, a Ctrl+0 visszaállítja.
+	Text size: {percent}%	Szövegméret: {percent}%
+	{percent}%	{percent}%
+	A table, as it will be sent. Backspace after it takes it out.	Egy táblázat, ahogy el lesz küldve. A mögötte lenyomott Backspace eltávolítja.
+	Attach messages	Üzenetek csatolása
+	Attach 1 message	1 üzenet csatolása
+	Attach {n} messages	{n} üzenet csatolása
+	Move to To	Áthelyezés a Címzett mezőbe
+	Move to Cc	Áthelyezés a Másolat mezőbe
+	Move to Bcc	Áthelyezés a Titkos másolat mezőbe
+	Copy addresses	Címek másolása
+	Mailing list:	Levelezőlista:
+	Unsubscribe	Leiratkozás
+	Show the message in its folder	Üzenet megjelenítése a mappájában
+	Buttons on a message in the list	Gombok a lista üzenetein
+	Shown when the pointer is over a message, up to {n}.	Akkor jelennek meg, ha a mutató egy üzenet fölött van, legfeljebb {n}.
+	Mark read or unread	Megjelölés olvasottként vagy olvasatlanként
+	Choose a date…	Dátum választása…
+	Pick a time in the future.	Válasszon egy jövőbeli időpontot.
+	In 1 minute	1 perc múlva
+	In 1 day	1 nap múlva
+	Proposal accepted: the meeting is at {when} now.	Javaslat elfogadva: a megbeszélés most {when} időpontban van.
+	Invitation: {summary}	Meghívó: {summary}
+	Updated: {summary}	Frissítve: {summary}
+	Cancelled: {summary}	Lemondva: {summary}
+	Cancelled: {summary} ({when})	Lemondva: {summary} ({when})
+	{summary} has been cancelled.	{summary}: az értekezletet lemondták.
+	{summary} on {when} has been cancelled.	{summary} ({when}): az értekezletet lemondták.
+	When: {when}	Mikor: {when}
+	Where: {place}	Hol: {place}
+	Fwd: {summary}	Tov: {summary}
+	{who} forwarded you this meeting, organized by {organizer}.	{who} továbbította neked ezt az értekezletet. Szervező: {organizer}.
+	{who} asked you to go to this meeting in their place. It's organized by {organizer}.	{who} arra kér, hogy helyette menj el erre az értekezletre. Szervező: {organizer}.
+	Accepted: {summary}	Elfogadva: {summary}
+	Tentative: {summary}	Feltételes: {summary}
+	Declined: {summary}	Elutasítva: {summary}
+	Delegated: {summary}	Delegálva: {summary}
+	{who} accepted the invitation to {summary}.	{who} elfogadta a meghívást: {summary}.
+	{who} tentatively accepted the invitation to {summary}.	{who} feltételesen elfogadta a meghívást: {summary}.
+	{who} declined the invitation to {summary}.	{who} elutasította a meghívást: {summary}.
+	{who} asked {delegate} to go to {summary} in their place.	{who} helyett {delegate} megy el: {summary}.
+	New time proposed: {summary}	Új időpont javasolva: {summary}
+	{who} proposes a new time for {summary}: {when}.	{who} új időpontot javasol: {summary}, {when}.
+	New time declined: {summary}	Új időpont elutasítva: {summary}
+	The proposed new time for {summary} was declined. The meeting stays as it was.	{summary}: a javasolt új időpontot elutasították. Az értekezlet változatlan marad.
+	Cancel meeting	Értekezlet lemondása
+	Cancel this occurrence	Ennek az előfordulásnak a lemondása
+	Send cancellation	Lemondás küldése
+	Delete without sending	Törlés küldés nélkül
+	Message to your guests	Üzenet a résztvevőknek
+	Your guests are sent a cancellation. Add a message to them, if you like.	A résztvevők lemondást kapnak. Ha szeretnéd, írj nekik üzenetet.
+	MailCraft's automatic replies and rules on the server aren't running: another program made its own filters (“{name}”) the ones that run.	A MailCraft automatikus válaszai és szabályai nem futnak a kiszolgálón: egy másik program a saját szűrőit („{name}”) tette futóvá.
+	Off: another program's filters (“{name}”) run in place of MailCraft's	Ki: a MailCraft szűrői helyett egy másik program szűrői („{name}”) futnak
+	On, sent by your other filters on the server (“{name}”)	Be, a kiszolgálón lévő többi szűrőd („{name}”) küldi
+	Run my rules again	Szabályaim újbóli futtatása
+	These are the replies your other filters on the server (“{name}”) send: change them in the program that made them. MailCraft's can be on only while those are off: the server sends one reply.	Ezeket a válaszokat a kiszolgálón lévő többi szűrőd („{name}”) küldi: abban a programban módosítsd őket, amelyik létrehozta őket. A MailCraft válaszai csak akkor lehetnek bekapcsolva, ha ezek ki vannak kapcsolva: a kiszolgáló egy választ küld.
+	These rules aren't running: another program made its own filters the ones that run. Run them again here, with that program's.	Ezek a szabályok nem futnak: egy másik program a saját szűrőit tette futóvá. Futtasd őket újra itt, a másik program szűrőivel együtt.
+	Account: {email}	Fiók: {email}
+	Details	Részletek
+	Event: “{name}”, {when}	Esemény: „{name}”, {when}
+	Message: “{subject}”, from {from}	Üzenet: „{subject}”, feladó: {from}
+	Task: “{name}”	Feladat: „{name}”
+	This occurrence: {when}	Ez az előfordulás: {when}
+	To: {who}	Címzett: {who}
+	Asking their server…	A kiszolgálójuk megkérdezése…
+	Click a time to move the meeting there	Kattints egy időpontra, hogy oda helyezd át az értekezletet
+	Hide Scheduling Assistant	Ütemezési segéd elrejtése
+	Scheduling Assistant	Ütemezési segéd
+	The next time you and your guests are all free	A következő időpont, amikor te és a résztvevők mind szabadok vagytok
+	Their times can't be had: {why}	Az idejük nem érhető el: {why}
+	You	Te
+	{free} of {all} free	{all} közül {free} szabad

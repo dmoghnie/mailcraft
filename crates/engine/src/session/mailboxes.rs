@@ -9,11 +9,13 @@ mod folder_order;
 mod folding;
 mod nav;
 mod patch;
+mod row_buttons;
 mod rows;
 mod sent_aside;
 pub(crate) use across::Transfer;
 pub(crate) use echo::{Echo, Echoes};
 pub(crate) use nav::{ListNav, NO_ROW, folder_hash, key_hash, key_hash_in};
+pub use row_buttons::{ROW_ACTIONS_MAX, RowAction};
 pub use rows::{ARRANGE_HEADINGS, Arrange, PINNED_HEADING, Row, arrange_list};
 pub(crate) use sent_aside::SentIndex;
 
@@ -380,16 +382,29 @@ impl Session {
     /// contacts, then the organisation directory's (issue #9), asked once the search is three
     /// letters long.
     pub fn suggest_contacts(&mut self, query: &str, limit: usize) -> Vec<Contact> {
+        let out = self.suggest_contacts_here(query, limit, false);
+        if out.len() >= limit {
+            return out;
+        }
+        self.look_up_directory(query, false);
+        self.with_directory(out, query, limit)
+    }
+
+    /// [`Session::suggest_contacts`] with nothing asked of a directory's server (AI agents'
+    /// reads ask nothing of one); with `directory`, what the directories answered before too.
+    pub(crate) fn suggest_contacts_here(&mut self, query: &str, limit: usize, directory: bool) -> Vec<Contact> {
         self.ensure_contacts();
-        let mut out = self.contacts.as_ref().map(|b| b.suggest(query, limit, self.clock.now)).unwrap_or_default();
-        if out.len() < limit {
-            self.look_up_directory(query, false);
-            for a in self.directory_people(query) {
-                if let Some(c) = out.iter_mut().find(|c| c.address.email.eq_ignore_ascii_case(&a.email)) {
-                    fill_name(&mut c.address, &a);
-                } else if out.len() < limit {
-                    out.push(Contact { address: a, sent: 0, received: 0, last: 0 });
-                }
+        let out = self.contacts.as_ref().map(|b| b.suggest(query, limit, self.clock.now)).unwrap_or_default();
+        if directory && out.len() < limit { self.with_directory(out, query, limit) } else { out }
+    }
+
+    /// `out` with the directories' people for `query` after them, up to `limit`.
+    fn with_directory(&self, mut out: Vec<Contact>, query: &str, limit: usize) -> Vec<Contact> {
+        for a in self.directory_people(query) {
+            if let Some(c) = out.iter_mut().find(|c| c.address.email.eq_ignore_ascii_case(&a.email)) {
+                fill_name(&mut c.address, &a);
+            } else if out.len() < limit {
+                out.push(Contact { address: a, sent: 0, received: 0, last: 0 });
             }
         }
         out
@@ -490,6 +505,22 @@ impl Session {
             for (a, f) in folders {
                 for m in &self.folder_state(&a, &f).messages {
                     book.add(m, &mine);
+                }
+            }
+            // The guests of the meetings in the user's own calendars (issue #253), each meeting
+            // once, when it is (or now, for one to come); the first hundred of a meeting (one
+            // placed from a stranger's invitation can name hundreds).
+            let now = self.clock.now;
+            for p in self.pim.values() {
+                let theirs = p.theirs();
+                let mut seen = std::collections::HashSet::new();
+                for e in p.events.iter().filter(|e| !theirs.contains(&e.calendar) && !e.event.attendees.is_empty() && e.event.status != "CANCELLED") {
+                    if seen.insert(e.event.uid.as_str()) {
+                        let organizer = e.event.organizer.as_ref().map(|o| EmailAddress::new(o.name.clone(), o.email.clone()));
+                        let guests: Vec<EmailAddress> =
+                            e.event.attendees.iter().take(100).map(|a| EmailAddress::new(a.name.clone(), a.email.clone())).collect();
+                        book.add_meeting(organizer.as_ref(), &guests, e.event.start.min(now), &mine);
+                    }
                 }
             }
             // People saved in an address book come first.

@@ -53,9 +53,9 @@ pub(super) fn commands() -> Vec<CommandSpec> {
                 s.prefs.undo_send_secs = u32::try_from(n).unwrap_or(0);
             }
             Ok(json!({"seconds": s.prefs.undo_send_secs}))
-        })
+        }).setting("undo_send_secs")
         .params(r#"{"seconds"?: 0-60 (0: sent at once)}"#),
-        CommandSpec::new("options.startIn", "Start in", "File › Options › Mail", start_in).params(
+        CommandSpec::new("options.startIn", "Start in", "File › Options › Mail", start_in).setting("start_in").params(
             r#"{"open"?: "firstInbox"|"allInboxes"|"last"|"folder" (what opens at the start), "account"?: string, "folder"?: string (the folder, for "folder")}"#,
         ),
         CommandSpec::new("outbox.edit", "Edit queued message", "Outbox", |s, v| {
@@ -124,6 +124,13 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         .params(r#"{"folder": string, "on"?: bool, "account"?: string}"#)
         .when(has_account),
         CommandSpec::new("list.open", "Open message", "Message list", open_message).leaves_body().params(r#"{"key": "account:validity:uid:folder"}"#),
+        // A new-mail notification clicked (issue #273): the message where it is.
+        CommandSpec::new("message.reveal", "Show the message in its folder", "A notification", |s, v| {
+            let k = parse_key(v).ok_or_else(|| CmdError::Params("`key` is required (account:validity:uid:folder)".into()))?;
+            s.reveal_message(&k)
+        })
+        .leaves_body()
+        .params(r#"{"key": "account:validity:uid:folder"} (its folder opened, the Focused or Other tab that has it, a filter hiding it lifted)"#),
         CommandSpec::new("list.select", "Select", "Message list", select).leaves_body().params(r#"{"key": string, "add"?: bool}"#),
         CommandSpec::new("list.selectAll", "Select all", "Message list", select_all).leaves_body().key("Mod+A"),
         // Issue #189: a heading folded away, or its mail shown again, as Outlook's groups.
@@ -250,7 +257,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.run_quick_step(p::str(v, "name"), index)
         })
         .params(r#"{"name"?: string, "index"?: number (from 0)}"#)
-        .when(has_selection),
+        .on_selection(has_selection),
         quick_step!(1),
         quick_step!(2),
         quick_step!(3),
@@ -282,6 +289,9 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             .key("Escape"),
         CommandSpec::new("search.server", "Search the server", "Search › end of the results", |s, _| s.search_server())
             .when(|s| s.search.is_none().then_some("search for something first")),
+        // Everything exchanged with one person (issue #178).
+        CommandSpec::new("person.activity", "Everything with this person", "Message › a name above it › its card", person_activity)
+            .params(r#"{"email": string, "query"?: string (narrows each part: the mail as a search does, the rest by words), "limit"?: number (of each part; default 20)}"#),
         CommandSpec::new("folder.more", "Show more from the server", "Folder › end of the list", |s, v| {
             let (account, folder) = match (p::str(v, "account"), p::str(v, "folder")) {
                 (Some(a), Some(f)) => (a.to_string(), f.to_string()),
@@ -293,7 +303,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             let step = if s.prefs.keep_messages == 0 { 1000 } else { s.prefs.keep_messages };
             let more = p::u64(v, "more").map_or(step, |n| u32::try_from(n.clamp(1, 100_000)).unwrap_or(step));
             s.show_more(&account, &folder, more)
-        })
+        }).setting("keep_messages")
         .params(r#"{"account"?: string, "folder"?: string (default: the folder on view), "more"?: number (default: as many as Options keeps)}"#),
     ]
 }
@@ -390,6 +400,43 @@ pub(crate) fn go_to_message(s: &mut Session, key: &mailcraft_model::MessageKey) 
     }
     s.open_message(key);
     Ok(json!({"key": key.to_id()}))
+}
+
+/// Everything exchanged with one person, as JSON: each part's first `limit` and its count.
+fn person_activity(s: &mut Session, v: &Value) -> CmdResult {
+    let email = p::req_str(v, "email")?;
+    if !email.contains('@') {
+        return Err(CmdError::Params(format!("not an address: {email}")));
+    }
+    let limit = p::u64(v, "limit").map_or(20, |n| usize::try_from(n).unwrap_or(usize::MAX)).clamp(1, 1_000);
+    let a = s.person_activity(email).refined(p::str(v, "query").unwrap_or(""));
+    let threads: Vec<Value> = a
+        .threads
+        .iter()
+        .take(limit)
+        .map(|t| json!({"subject": t.subject, "latest": t.latest, "messages": t.messages.iter().map(|m| json!({"key": m.key.to_id(), "subject": m.subject, "from": m.from.email, "date": m.when()})).collect::<Vec<_>>()}))
+        .collect();
+    let files: Vec<Value> = a
+        .files
+        .iter()
+        .take(limit)
+        .map(|f| json!({"name": f.name, "size": f.size, "key": f.key.to_id(), "index": f.index, "date": f.date, "fromThem": f.from_them}))
+        .collect();
+    let links: Vec<Value> = a.links.iter().take(limit).map(|l| json!({"url": l.url, "key": l.key.to_id(), "date": l.date})).collect();
+    let meetings: Vec<Value> = a
+        .meetings
+        .iter()
+        .take(limit)
+        .map(|m| json!({"account": m.account, "uid": m.uid, "summary": m.summary, "start": m.start, "end": m.end, "theirs": m.theirs}))
+        .collect();
+    let people: Vec<Value> = a.people.iter().take(limit).map(|x| json!({"name": x.name, "email": x.email, "count": x.count})).collect();
+    Ok(json!({
+        "email": a.email, "name": a.name, "addresses": a.addresses, "contact": a.contact.as_ref().map(|(acc, uid)| json!({"account": acc, "uid": uid})),
+        "messages": a.message_count(), "threads": threads, "threadCount": a.threads.len(),
+        "files": files, "fileCount": a.files.len(), "links": links, "linkCount": a.links.len(),
+        "meetings": meetings, "meetingCount": a.meetings.len(), "people": people, "peopleCount": a.people.len(),
+        "found": {"phones": a.found.phones, "websites": a.found.websites}, "notDownloaded": a.not_downloaded, "cutShort": a.cut_short,
+    }))
 }
 
 pub(super) fn open_message(s: &mut Session, v: &Value) -> CmdResult {

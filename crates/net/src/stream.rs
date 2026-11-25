@@ -11,6 +11,7 @@ use rustls::{ClientConfig, ClientConnection, StreamOwned};
 
 use crate::{NetError, Result};
 
+pub(crate) mod binding;
 pub(crate) mod trust;
 pub use trust::Trusted;
 #[cfg(target_os = "android")]

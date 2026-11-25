@@ -26,7 +26,7 @@ pub(super) fn models(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action
             on: ai.local_only,
             cmd: "ai.localOnly",
         };
-        switch_row(ui, t, true, local_only, acts);
+        switch_row(s, ui, t, true, local_only, acts);
         for p in &ai.profiles {
             profile(s, t, ui, p, acts);
         }
@@ -48,7 +48,7 @@ pub(super) fn models(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action
                 on: ai.needs_me,
                 cmd: "ai.needsMe",
             };
-            switch_row(ui, t, false, needs_me, acts);
+            switch_row(s, ui, t, false, needs_me, acts);
             digest_when(t, ui, ai.digest, acts);
             style(s, t, ui, acts);
         }

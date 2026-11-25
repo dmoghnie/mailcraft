@@ -1,6 +1,6 @@
 //! MailCraft against a real Mailcow (Dovecot, Postfix, SOGo) on this computer: setting an account
-//! up, and categories shared with SOGo webmail and other users (issue #28). Never a real
-//! account; run by hand:
+//! up, categories shared with SOGo webmail and other users (issue #28), and what an AI agent
+//! reads through `mailcraft-cli mcp` (issue #255). Never a real account; run by hand:
 //!
 //! ```text
 //! MAILCRAFT_REAL_MAILCOW="127.0.0.1:22143 127.0.0.1:22588 http://127.0.0.1:22080 \
@@ -249,4 +249,342 @@ fn real_mailcow_categories_with_sogo() {
     // Undone here once the folder is read again (the refusal makes the worker read it).
     c.pump(60, "Later taken back", |s, _| s.folder_state(&cid, &shared).messages.iter().any(|x| x.subject == subject && !x.flags.has("$label5")));
     assert!(!imap.flags("INBOX", &subject).iter().any(|f| f == "$label5"), "not on the server");
+}
+
+/// Everything with someone (issue #178), from real mail: ann writes to bob, carol on copy,
+/// through Postfix, with a file, a link and her number in her signature; bob answers from
+/// MailCraft. Bob's MailCraft puts the two together from his Inbox and Sent Items, with ann's
+/// file and link (or, while her message isn't downloaded, says so), her number to offer, and
+/// carol beside her (never bob himself).
+#[test]
+#[ignore = "needs a Mailcow on this computer in MAILCRAFT_REAL_MAILCOW"]
+fn real_mailcow_everything_with_someone() {
+    let Some(m) = Mailcow::from_env() else { return };
+    let tag = std::process::id();
+    let (ann, _) = m.user(0);
+    let (bob, _) = m.user(1);
+    let (carol, _) = m.user(2);
+    let subject = format!("The cut {tag}");
+    let raw = format!(
+        "From: Ann Example <{ann}>\r\nTo: Bob <{bob}>\r\nCc: Carol <{carol}>\r\nSubject: {subject}\r\nMessage-ID: <cut-{tag}@mc31.test>\r\n\
+         Date: Sat, 21 Nov 2026 09:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary=\"b\"\r\n\r\n\
+         --b\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe second cut is at https://cut.example/{tag} for you, with the rushes{tag}.\r\n\r\n\
+         -- \r\nAnn Example\r\nTel +44 20 7946 0958\r\n\r\n\
+         --b\r\nContent-Type: application/pdf; name=\"notes-{tag}.pdf\"\r\nContent-Disposition: attachment; filename=\"notes-{tag}.pdf\"\r\n\
+         Content-Transfer-Encoding: base64\r\n\r\nJVBERi0xLjQK\r\n--b--\r\n"
+    );
+    m.send(0, &[bob, carol], raw.as_bytes());
+
+    let (mut b, bid) = App::new(&m, 1, "person");
+    let key = b.wait_for_mail(&bid, &subject);
+    let ours = |a: &mailcraft_engine::PersonActivity| a.threads.iter().find(|t| t.subject == subject).cloned();
+    let first = b.s.person_activity(ann);
+    let file = format!("notes-{tag}.pdf");
+    eprintln!("before it's opened: {} messages, {} not downloaded, files {:?}", first.message_count(), first.not_downloaded, first.files);
+    assert!(ours(&first).is_some(), "her message, from the Inbox");
+    assert!(first.not_downloaded > 0 || first.files.iter().any(|f| f.name == file), "a file not counted is said to be missing");
+
+    // Read, and answered from MailCraft: the answer goes out and into Sent Items on Mailcow.
+    b.s.run("list.open", &json!({"key": key.to_id()})).unwrap();
+    b.pump(60, "the message read", |s, _| s.reading.as_ref().is_some_and(|r| r.parsed.is_some()));
+    b.s.run("mail.reply", &json!({})).unwrap();
+    b.s.run("compose.update", &json!({"body": "Looks good, Ann."})).unwrap();
+    b.s.run("compose.send", &json!({})).unwrap();
+    b.pump(60, "sent", |_, e| matches!(e, Event::Sent { .. }));
+    let sent = b.s.account(&bid).and_then(|a| a.folder(FolderRole::Sent)).map(|f| f.path.clone()).expect("Sent Items");
+    let answer = format!("Re: {subject}");
+    let end = std::time::Instant::now() + std::time::Duration::from_secs(90);
+    while !b.s.folder_state(&bid, &sent).messages.iter().any(|x| x.subject == answer) {
+        assert!(std::time::Instant::now() < end, "the answer didn't reach Sent Items");
+        b.pool.submit(mailcraft_engine::model::Job::SyncFolder { account: bid.clone(), folder: sent.clone() });
+        b.settle(2);
+    }
+
+    let a = b.s.person_activity(&ann.to_uppercase());
+    let thread = ours(&a).expect("the conversation");
+    let subjects: Vec<&str> = thread.messages.iter().map(|x| x.subject.as_str()).collect();
+    eprintln!("bob and ann: {} conversations; ours: {subjects:?}", a.threads.len());
+    assert_eq!(subjects, [answer.as_str(), subject.as_str()], "his answer from Sent Items, the newest first");
+    assert_eq!(a.name, "Ann Example");
+    assert!(a.files.iter().any(|f| f.name == file && f.from_them && f.key == key), "{:?}", a.files);
+    let link = format!("https://cut.example/{tag}");
+    assert!(a.links.iter().any(|l| l.url == link), "{:?}", a.links);
+    assert_eq!(a.found.phones, ["+44 20 7946 0958"], "her number, from her signature");
+    assert!(a.people.iter().any(|p| p.email.eq_ignore_ascii_case(carol)), "{:?}", a.people);
+    assert!(!a.people.iter().any(|p| p.email.eq_ignore_ascii_case(bob) || p.email.eq_ignore_ascii_case(ann)), "{:?}", a.people);
+    // Narrowed by a word of her message's text alone (the other tests here share the run's
+    // number): her message, read from its text (files and links go by their own names).
+    let word = format!("rushes{tag}");
+    let r = a.refined(&word);
+    eprintln!("narrowed to {word}: {} conversations, files {:?}, links {:?}", r.threads.len(), r.files.len(), r.links.len());
+    assert_eq!(r.threads.iter().map(|t| t.subject.as_str()).collect::<Vec<_>>(), [subject.as_str()]);
+    assert_eq!(r.message_count(), 1, "her message, not his answer");
+    // The command, as the CLI runs it.
+    let v = b.s.run("person.activity", &json!({"email": ann, "query": format!("subject:\"{subject}\"")})).unwrap();
+    eprintln!("person.activity: {v}");
+    assert_eq!(v["threadCount"], 1);
+    assert_eq!(v["threads"][0]["messages"].as_array().map(Vec::len), Some(2));
+}
+
+/// What an AI agent reads through `mailcraft-cli mcp` (issue #255), MailCraft closed: ann's mail
+/// as synced from Mailcow, found by a word of its text and read whole, and still unread on the
+/// server after. The CLI itself, as an assistant starts it: the account added and synced with it,
+/// then its MCP server on stdin and stdout.
+#[test]
+#[ignore = "needs a Mailcow on this computer in MAILCRAFT_REAL_MAILCOW"]
+fn real_mailcow_mail_read_through_mcp() {
+    use std::io::{BufRead, Write};
+    use std::process::{Command, Stdio};
+    let Some(m) = Mailcow::from_env() else { return };
+    let ((ann, password), (bob, _)) = (m.user(0), m.user(1));
+    let tag = mailcow::now();
+    let subject = format!("Mix notes {tag}");
+    let word = format!("kestrel{tag}");
+    let raw = format!(
+        "From: {bob}\r\nTo: {ann}\r\nSubject: {subject}\r\nMessage-ID: <mcp-{tag}@mc31.test>\r\nDate: Sat, 31 Oct 2026 09:00:00 +0000\r\n\
+         MIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe reel to send is {word}.\r\n"
+    );
+    m.send(1, &[ann], raw.as_bytes());
+    let dir = std::path::Path::new(env!("CARGO_TARGET_TMPDIR")).join(format!("real-mcp-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    let cli = |args: &[&str]| -> String {
+        let out = Command::new(env!("CARGO_BIN_EXE_mailcraft-cli"))
+            .arg("--data")
+            .arg(&dir)
+            .args(args)
+            .env("MAILCRAFT_PASSWORD", password)
+            .output()
+            .unwrap();
+        assert!(out.status.success(), "{args:?}: {}", String::from_utf8_lossy(&out.stderr));
+        String::from_utf8_lossy(&out.stdout).into_owned()
+    };
+    cli(&["add", "--email", ann, "--imap", &m.imap, "--imap-security", "none", "--smtp", &m.smtp, "--smtp-security", "none"]);
+    // Delivery takes a moment.
+    let end = std::time::Instant::now() + std::time::Duration::from_secs(120);
+    loop {
+        cli(&["sync", "--timeout", "60"]);
+        if cli(&["search", &format!("subject:\"{subject}\"")]).contains(&subject) {
+            break;
+        }
+        assert!(std::time::Instant::now() < end, "bob's message didn't arrive");
+        std::thread::sleep(std::time::Duration::from_secs(2));
+    }
+
+    // Agents let in, as File › Options › AI agents saves it (MailCraft closed, nothing else does).
+    let settings = |prefs: serde_json::Value| std::fs::write(dir.join("ui.json"), json!({"prefs": prefs}).to_string()).unwrap();
+    settings(json!({"agents": true}));
+    let mut mcp = Command::new(env!("CARGO_BIN_EXE_mailcraft-cli"))
+        .arg("--data")
+        .arg(&dir)
+        .arg("mcp")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let mut input = mcp.stdin.take().unwrap();
+    let mut output = std::io::BufReader::new(mcp.stdout.take().unwrap());
+    let mut ask = |id: u64, method: &str, params: serde_json::Value| -> serde_json::Value {
+        writeln!(input, "{}", json!({"jsonrpc": "2.0", "id": id, "method": method, "params": params})).unwrap();
+        let mut line = String::new();
+        output.read_line(&mut line).unwrap();
+        let v: serde_json::Value = serde_json::from_str(&line).unwrap();
+        assert_eq!(v["id"], id, "{v}");
+        v
+    };
+    let tool = |v: &serde_json::Value| -> serde_json::Value {
+        assert!(v["result"]["isError"] != true, "{v}");
+        serde_json::from_str(v["result"]["content"][0]["text"].as_str().unwrap()).unwrap()
+    };
+    ask(1, "initialize", json!({"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "test", "version": "1"}}));
+    let accounts = tool(&ask(2, "tools/call", json!({"name": "list_accounts", "arguments": {}})));
+    eprintln!("list_accounts: {accounts}");
+    assert!(accounts.to_string().contains(ann), "{accounts}");
+    let found = tool(&ask(3, "tools/call", json!({"name": "search_mail", "arguments": {"query": word}})));
+    eprintln!("search_mail {word}: {found}");
+    assert_eq!(found["found"], 1, "{found}");
+    let key = found["messages"][0]["key"].as_str().unwrap().to_string();
+    let read = tool(&ask(4, "tools/call", json!({"name": "read_message", "arguments": {"key": key}})));
+    eprintln!("read_message: {read}");
+    assert_eq!(read["subject"], subject.as_str());
+    assert!(read["from"].as_str().unwrap().contains(bob) && read["text"].as_str().unwrap().contains(&word), "{read}");
+    assert_eq!(read["unread"], true);
+    // Kept from agents: the same server stays connected, and reads nothing of it now.
+    let id = accounts[0]["account"].as_str().unwrap().to_string();
+    settings(json!({"agents": true, "agentsHidden": [id]}));
+    assert_eq!(tool(&ask(5, "tools/call", json!({"name": "search_mail", "arguments": {"query": word}})))["found"], 0);
+    let refused = ask(6, "tools/call", json!({"name": "read_message", "arguments": {"key": key}}));
+    assert_eq!(refused["result"]["isError"], true, "{refused}");
+    drop(input);
+    assert!(mcp.wait().unwrap().success());
+    // Read by the agent, and nothing told the server.
+    let flags = m.imap_as(0).flags("INBOX", &subject);
+    assert!(!flags.iter().any(|f| f.eq_ignore_ascii_case("\\Seen")), "{flags:?}");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+/// An organisation's profile (issue #245) against Mailcow: its servers for the domain make an
+/// address and a password all an account needs; a locked signature filled from the person's
+/// details, and the disclaimer, reach the other side in what's sent; another domain's account
+/// isn't allowed; and with encrypted connections required, this test server (which has none)
+/// is held back, said.
+#[test]
+#[ignore = "needs a Mailcow on this computer in MAILCRAFT_REAL_MAILCOW"]
+fn real_mailcow_organisation_profile() {
+    use mailcraft_engine::policy::Organisation;
+    let Some(m) = Mailcow::from_env() else { return };
+    let ((ann, password), (bob, _)) = (m.user(0), m.user(1));
+    let domain = ann.split('@').nth(1).unwrap().to_string();
+    let tag = mailcow::now();
+    let profile = |encrypted: bool| {
+        let v = json!({
+            "organisation": "MC31",
+            "requireEncryption": encrypted,
+            "accounts": {"onlyOrganisationDomains": true,
+                         "servers": {domain.clone(): {"imap": format!("{}:none", m.imap), "smtp": format!("{}:none", m.smtp)}}},
+            "signature": {"name": "MC31", "text": "{name}\n{title}", "locked": true},
+            "disclaimer": {"text": format!("Confidential to MC31 ({tag}).")}
+        });
+        Organisation::from_sources(vec![("test".into(), v, true)])
+    };
+    let mut a = App::open("org-ann", password);
+    a.s.set_organisation(profile(false));
+    assert!(a.s.run("account.add", &json!({"email": "someone@gmail.example", "password": "pw"})).is_err(), "only its domains");
+    let id = a.add(json!({"email": ann, "password": password}));
+    assert_eq!(a.s.account(&id).map(|x| format!("{}:{}", x.config.imap.host, x.config.imap.port)), Some(m.imap.clone()));
+    a.pump(120, "online", |_, e| matches!(e, Event::Status { status: SyncStatus::Online { .. }, .. }));
+    a.s.run("account.details", &json!({"account": id, "title": "Sound editor"})).unwrap();
+    let subject = format!("Mix review {tag}");
+    a.s.run("mail.new", &json!({})).unwrap();
+    a.s.run("compose.update", &json!({"to": bob, "subject": subject})).unwrap();
+    a.s.run("compose.send", &json!({})).unwrap();
+    a.pump(60, "sent", |_, e| matches!(e, Event::Sent { .. }));
+    // On Mailcow, in bob's Inbox: the signature and the disclaimer, as sent.
+    let end = std::time::Instant::now() + std::time::Duration::from_secs(90);
+    let text = loop {
+        let t = m.imap_as(1).newest_text("INBOX");
+        if t.contains(&tag.to_string()) {
+            break t;
+        }
+        assert!(std::time::Instant::now() < end, "the message didn't reach bob");
+        std::thread::sleep(std::time::Duration::from_secs(2));
+    };
+    eprintln!("as bob got it: {text}");
+    assert!(text.contains("Sound editor") && text.contains(&format!("Confidential to MC31 ({tag}).")), "{text}");
+    // Encrypted connections required: this server has none, so the account is held back.
+    a.s.set_organisation(profile(true));
+    let config = a.s.account(&id).unwrap().config.clone();
+    a.s.push_job(mailcraft_engine::model::Job::Start { account: config, password: None });
+    assert!(a.s.take_jobs().is_empty());
+    let status = format!("{:?}", a.s.account(&id).unwrap().status);
+    assert!(status.contains("encrypted"), "{status}");
+}
+
+/// Issue #243, as the tester met it: a rule MailCraft keeps on the server (Sieve), then SOGo's
+/// automatic reply turned on in SOGo, which makes SOGo's own script the one that runs. MailCraft
+/// shows SOGo's reply as SOGo's (it showed off), says its rules aren't running, won't add a reply
+/// of its own beside SOGo's (Pigeonhole stops a script that sends two, and runs no rule), and
+/// runs its rules again when asked: a matching message is filed, and SOGo's reply still goes.
+#[test]
+#[ignore = "needs a Mailcow on this computer in MAILCRAFT_REAL_MAILCOW"]
+fn real_mailcow_sogo_takes_over_the_filters() {
+    use mailcraft_engine::ServerRulesState;
+    let Some(m) = Mailcow::from_env() else { return };
+    let tag = std::process::id();
+    let (ann, _) = m.user(0);
+    let (bob, _) = m.user(1);
+    let (mut app, id) = App::new(&m, 0, "sogo-filters");
+    // Mailcow's ManageSieve, on this computer.
+    app.pool.sieve_port = 22190;
+    app.pump(120, "online", |_, e| matches!(e, Event::Status { status: SyncStatus::Online { .. }, .. }));
+    let loaded = |app: &mut App, what: &str| {
+        app.pump(60, what, |s, _| matches!(s.server_rules(&id), ServerRulesState::Loaded { .. } | ServerRulesState::Failed(_)));
+        match app.s.server_rules(&id).clone() {
+            ServerRulesState::Loaded { rules, error } => (rules, error),
+            other => panic!("{what}: {other:?}"),
+        }
+    };
+    let vacation = |app: &mut App| {
+        app.s.run("account.vacation", &json!({"account": id})).unwrap();
+        app.pump(60, "the replies", |s, _| !matches!(s.account(&id).map(|a| &a.vacation), Some(mailcraft_engine::VacationState::Loading)));
+        app.s.run("account.vacation", &json!({"account": id, "refresh": false})).unwrap()
+    };
+    let sogo = m.sogo(0);
+    let reply = |on: bool| {
+        let mut d = sogo.json("Preferences/jsonDefaults");
+        d["Vacation"] = json!({"enabled": i32::from(on), "autoReplyText": format!("Away ({tag})."), "customSubjectEnabled": 1,
+            "customSubject": "Away", "daysBetweenResponse": 1, "autoReplyEmailAddresses": [ann]});
+        sogo.post("Preferences/save", &json!({ "defaults": d }));
+    };
+    reply(false);
+
+    // MailCraft's rule on the server, as the tester made one: the subject's word → Archive.
+    app.s.run("rules.server", &json!({"account": id})).unwrap();
+    let (before, _) = loaded(&mut app, "the rules");
+    for r in before.rules {
+        app.s.run("rules.serverDelete", &json!({"account": id, "id": r.id})).unwrap();
+        loaded(&mut app, "an old rule deleted");
+    }
+    let word = format!("invoice{tag}");
+    use mailcraft_engine::model::organize::{Condition, Rule, RuleAction};
+    let rule = Rule {
+        name: "Invoices".into(),
+        enabled: true,
+        account: None,
+        filter: Condition::subject(&word),
+        actions: vec![RuleAction::MoveTo("Archive".into())],
+        stop: true,
+        sent: false,
+    };
+    app.s.run("rules.serverSave", &json!({"account": id, "rule": rule})).unwrap();
+    let (rules, error) = loaded(&mut app, "the rule saved");
+    assert_eq!((rules.rules.len(), error, rules.not_running), (1, None, false), "{rules:?}");
+
+    // SOGo's automatic reply turned on, in SOGo.
+    reply(true);
+    let v = vacation(&mut app);
+    eprintln!("the replies MailCraft shows: {v}");
+    assert_eq!((v["vacation"]["enabled"].as_bool(), v["vacation"]["sent_by"].as_str()), (Some(true), Some("sogo")), "{v}");
+    assert!(v["vacation"]["text"].as_str().is_some_and(|t| t.contains(&format!("Away ({tag})."))), "{v}");
+    app.s.run("rules.server", &json!({"account": id})).unwrap();
+    let (rules, _) = loaded(&mut app, "the rules again");
+    assert!(rules.not_running && rules.other_script.as_deref() == Some("sogo"), "{rules:?}");
+
+    // A reply of MailCraft's own beside SOGo's: refused.
+    app.s.run("account.setVacation", &json!({"account": id, "enabled": true, "text": "Out."})).unwrap();
+    let mut said = String::new();
+    app.pump(60, "refused", |_, e| match e {
+        Event::Vacation { error, .. } => {
+            said = format!("{error:?}");
+            true
+        }
+        _ => false,
+    });
+    assert!(said.contains("one at a time"), "{said}");
+
+    // Run again: MailCraft's rule files the mail, SOGo's reply still goes.
+    app.s.run("rules.serverResume", &json!({"account": id})).unwrap();
+    let (rules, error) = loaded(&mut app, "running again");
+    assert_eq!((rules.not_running, error), (false, None), "{rules:?}");
+    let subject = format!("Your {word}");
+    m.send(1, &[ann], &message(&format!("Bob <{bob}>"), ann, &subject, &format!("sogo-filters-{tag}@mc31.test")));
+    let end = std::time::Instant::now() + std::time::Duration::from_secs(60);
+    let (mut ann_box, mut bob_box) = (m.imap_as(0), m.imap_as(1));
+    loop {
+        let filed = ann_box.subjects("Archive").contains(&subject);
+        let replied = bob_box.subjects("INBOX").iter().any(|s| s == "Away");
+        if filed && replied {
+            break;
+        }
+        assert!(std::time::Instant::now() < end, "filed {filed}, SOGo's reply {replied}");
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    }
+
+    // As it was: SOGo's reply off, MailCraft's rule gone.
+    reply(false);
+    app.s.run("rules.server", &json!({"account": id})).unwrap();
+    let (rules, _) = loaded(&mut app, "the rules at the end");
+    for r in rules.rules {
+        app.s.run("rules.serverDelete", &json!({"account": id, "id": r.id})).unwrap();
+        loaded(&mut app, "the rule deleted");
+    }
 }

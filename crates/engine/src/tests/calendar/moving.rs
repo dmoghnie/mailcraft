@@ -15,7 +15,7 @@ fn when(s: &Session, uid: &str) -> (i64, i64) {
 /// How many invitations to `subject` the sample account has sent (it files them in Sent).
 fn invitations(s: &Session, subject: &str) -> usize {
     let sent = s.store.as_ref().unwrap().load_folder("sample", "Sent").unwrap();
-    sent.messages.iter().filter(|m| m.subject == format!("Invitation: {subject}")).count()
+    sent.messages.iter().filter(|m| m.subject == format!("Invitation: {subject}") || m.subject == format!("Updated: {subject}")).count()
 }
 
 #[test]
@@ -70,7 +70,8 @@ fn a_meeting_the_user_organizes_tells_its_guests() {
     let (start, _) = when(&s, &uid);
     s.run("event.move", &json!({"uid": uid, "by": 3600})).unwrap();
     assert_eq!(invitations(&s, "Trailer review"), 2, "the guests are told");
-    let (method, raw) = sent_calendar(&s, "Sent", "Invitation: Trailer review");
+    // An update, said so (issue #235).
+    let (method, raw) = sent_calendar(&s, "Sent", "Updated: Trailer review");
     assert_eq!(method, "REQUEST");
     assert!(raw.contains("zoe@studio.example"));
     assert_eq!(when(&s, &uid).0, start + 3600);
@@ -79,14 +80,14 @@ fn a_meeting_the_user_organizes_tells_its_guests() {
 #[test]
 fn what_cant_be_moved_says_why() {
     let mut s = sample_session("move-refused");
-    // One that repeats.
+    // One that repeats, as a whole: its occurrences are dragged one at a time (issue #241).
     let weekly = made(&mut s, json!({"summary": "Stand-up", "start": "2026-10-21T09:00", "repeat": "weekly"}));
     let before = when(&s, &weekly);
     let e = s.run("event.move", &json!({"uid": weekly, "by": 3600})).unwrap_err();
     assert!(e.to_string().contains("repeating"), "{e}");
     assert_eq!(when(&s, &weekly), before);
     let items = s.agenda(before.0 - 3600, before.0 + 8 * 86_400);
-    assert!(items.iter().filter(|i| i.uid == weekly).all(|i| !s.movable(i)), "not dragged");
+    assert!(items.iter().filter(|i| i.uid == weekly).all(|i| i.recurring && s.movable(i)), "each occurrence dragged");
     // A meeting someone else organized.
     let mut invited = s.find_event(&weekly).unwrap().1.event.clone();
     invited.uid = "invited@soundlab.example".into();
@@ -97,6 +98,7 @@ fn what_cant_be_moved_says_why() {
         name: "Riley".into(),
         partstat: "ACCEPTED".into(),
         rsvp: false,
+        ..Default::default()
     }];
     let account = s.find_event(&weekly).unwrap().0.to_string();
     let calendar = s.find_event(&weekly).unwrap().1.calendar.clone();

@@ -560,3 +560,43 @@ fn a_change_crossing_a_guests_answer_keeps_both() {
     assert_eq!((out.errors.len(), out.refused.as_slice()), (1, ["solo".to_string()].as_slice()), "{:?}", out.errors);
     assert!(server.data.lock().unwrap().items[&format!("{CAL}solo.ics")].1.contains("Dentist (moved)"));
 }
+
+/// Google OAuth account: CalDAV sync with a Bearer token.
+#[test]
+fn google_oauth_bearer_auth() {
+    let server = serve();
+    let token = "test-access-token-12345";
+    server.data.lock().unwrap().bearer = Some(token.into());
+    server.data.lock().unwrap().put(&format!("{CAL}g.ics"), &ical::write(&[event("g", "Meeting", 1_800_000_000)], None, 0));
+
+    let dav = Dav::bearer(token, &["127.0.0.1"]);
+    // Discover the home with Bearer auth.
+    let home = dav.home_from(Kind::Calendars, &format!("{}/.well-known/caldav", server.base)).unwrap().unwrap();
+
+    // The contacts at the fake's address too: nothing is looked for out on the network.
+    let contacts = format!("{}/dav/", server.base);
+    let at_google = Where {
+        email: "user@gmail.com",
+        username: "",
+        others: &[],
+        imap_host: "imap.gmail.com",
+        caldav: None,
+        carddav: Some(&contacts),
+        mails: true,
+    };
+
+    // First sync: discover and read.
+    let mut pim = Pim { caldav_home: Some(home), ..Default::default() };
+    pim.ensure_defaults();
+    let first = sync(&dav, &at_google, &pim, 100, Zone::UTC).unwrap();
+    assert!(first.errors.is_empty(), "{:?}", first.errors);
+
+    // Events synced with Bearer auth.
+    let cal_id = format!("{}{CAL}", server.base);
+    assert_eq!(first.calendars.as_ref().map(|c| (c.len(), c[0].name.as_str(), c[0].id.as_str())), Some((1, "Work", cal_id.as_str())));
+    assert_eq!(first.events.iter().map(|e| e.event.summary.as_str()).collect::<Vec<_>>(), ["Meeting"]);
+
+    // Wrong token refused.
+    let dav_wrong = Dav::bearer("wrong-token", &["127.0.0.1"]);
+    assert!(matches!(dav_wrong.home_from(Kind::Calendars, &format!("{}/.well-known/caldav", server.base)), Err(crate::NetError::Auth(_))));
+}

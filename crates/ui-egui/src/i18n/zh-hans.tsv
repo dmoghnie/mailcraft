@@ -285,6 +285,9 @@
 	Keep MailCraft running when its window is closed	关闭窗口后让 MailCraft 继续运行
 	Start MailCraft in the notification area	在通知区域启动 MailCraft
 	Start MailCraft minimized	以最小化方式启动 MailCraft
+	Start MailCraft when you sign in	登录时启动 MailCraft
+	It starts as you sign in to this computer and checks for mail. Its window comes up too, unless it's kept running when closed and started put away (below).	登录这台电脑时启动并检查邮件。除非设为关闭后继续运行并以收起方式启动（见下方），否则窗口也会打开。
+	Starting MailCraft at sign-in couldn't be changed: {error}	无法更改登录时启动 MailCraft：{error}
 	It checks for mail and announces it with its window put away, as when it's closed. Started to open a link or a file, it opens the window.	它会像关闭窗口时一样，在窗口收起的情况下检查并提示新邮件。为打开链接或文件而启动时，它会打开窗口。
 	Show the unread mail on its icon	在图标上显示未读邮件
 	How many unread messages the Inboxes have, in the corner of MailCraft's icon in the notification area	收件箱中未读邮件的数量，显示在通知区域中 MailCraft 图标的角上
@@ -1030,7 +1033,7 @@ month	May	5月
 	0 minutes before start	开始前 0 分钟
 	1 Reminder	1 个提醒
 	{n} Reminders	{n} 个提醒
-	Click Snooze to be reminded again in:	单击“推迟”，在以下时间后再次提醒:
+	Click Snooze to be reminded again in:	单击“暂停提醒”，在以下时间后再次提醒:
 	Dismiss	关闭
 	Dismiss All	全部关闭
 	Open Item	打开项目
@@ -1274,6 +1277,8 @@ month	May	5月
 	MailCraft {version} is ready	MailCraft {version} 已准备就绪
 	MailCraft {version} is ready. Restart now to install it, or it installs when you close MailCraft.	MailCraft {version} 已准备就绪。立即重新启动以安装，或在关闭 MailCraft 时安装。
 	Restart MailCraft to install it now, or it installs when you close MailCraft.	重新启动 MailCraft 即可立即安装，否则将在关闭 MailCraft 时安装。
+	MailCraft is updated to {version}.	MailCraft 已更新到 {version}。
+	MailCraft {version} didn't install. It's offered again.	MailCraft {version} 未能安装。它会再次提供。
 	Restart now	立即重新启动
 	The update is downloaded and checked. It installs now, as MailCraft closes, which takes a moment; open MailCraft again when it's done.	更新已下载并通过校验。它现在会在 MailCraft 关闭时安装，需要片刻；完成后请再次打开 MailCraft。
 	Update and close	更新并关闭
@@ -1875,6 +1880,8 @@ count	occurrences	次
 	Default font	默认字体
 	Font for new messages	新邮件的字体
 	New messages, replies and forwards are written in it. Text you set a font on keeps its own.	新邮件、回复和转发都使用此字体书写。你设置了字体的文字保留其自己的字体。
+	Font size for new messages	新邮件的字号
+	New messages, replies and forwards are written in it. Text you set a size on keeps its own.	新邮件、回复和转发都使用此字号书写。你设置了字号的文字保留其自己的字号。
 	Clean up old items	清理旧项目
 	Clean up old items…	清理旧项目…
 	Move old mail to an archive file on this computer, out of the mailbox.	将旧邮件从邮箱移到这台电脑上的存档文件中。
@@ -2031,7 +2038,6 @@ count	occurrences	次
 	Names	姓名
 	AutoArchive settings	自动存档设置
 	From a mailing list.	来自邮件列表。
-	Unsubscribe	退订
 	Unsubscribing from junk mail tells its sender that your address is read	退订垃圾邮件会让发件人知道你的地址有人在读
 	Unsubscribe from this list?	退订此邮件列表?
 	A message asking to leave it goes to {address}, from your account.	一封请求退出的邮件将从你的帐户发送到 {address}。
@@ -2382,3 +2388,174 @@ count	occurrences	次
 	Write rule	编写规则
 	Written by {model}	由 {model} 编写
 	gets a yes from MailCraft's AI to “{question}”	MailCraft 的 AI 对“{question}”回答“是”
+	Sort by	排序方式
+	First name	名字
+	Last name	姓氏
+	Open a repeating event	打开定期事件
+	Open this occurrence	打开这一次
+	Open the series	打开整个系列
+	Changes apply to this occurrence alone.	更改仅应用于这一次。
+	Your other filters on the server (“{name}”) run first, and are left as they are.	你在服务器上的其他筛选器（“{name}”）会先运行，并保持原样。
+	Found: {url}	已找到：{url}
+	Task list	任务列表
+	Task lists	任务列表
+	All task lists	所有任务列表
+	This task is in a task list that can't be changed here.	此任务所在的任务列表无法在此处更改。
+	Occurrences of this task were changed on their own elsewhere: change it there.	此任务的某些重复已在别处单独更改：请在那里更改。
+	Everything with them…	与此人的所有内容…
+	Everything with sender…	与发件人的所有内容…
+	Everything with them	与此人的所有内容
+	Search within everything with them	在与此人的所有内容中搜索
+	Mail ({n})	邮件 ({n})
+	Files ({n})	附件 ({n})
+	Meetings ({n})	会议 ({n})
+	Links ({n})	链接 ({n})
+	People ({n})	联系人 ({n})
+	Nothing here.	这里没有内容。
+	Nothing here matches the search.	这里没有与搜索匹配的内容。
+	Files and links come from the mail on this computer: {n} of these messages aren't downloaded.	附件和链接来自这台电脑上的邮件：其中 {n} 封邮件尚未下载。
+	Only the newest of the mail with them is shown.	仅显示与此人的最新邮件。
+	In their signature	签名中的信息
+	Add to their contact…	添加到其联系人…
+	Open the newest	打开最新的
+	Open (they sent it)	打开 (此人发送)
+	They organise it	由此人组织
+	They're invited	此人已受邀
+	{n} messages	{n} 封邮件
+	One message	1 封邮件
+	Overview	概览
+	Show all	全部显示
+	Find someone by name or address	按姓名或地址查找联系人
+	Delegate	委托他人
+	Delegate meeting	委托他人参加会议
+	Delegate…	委托他人…
+	Delegated	已委托
+	Invite…	邀请…
+	Name <address>	姓名 <地址>
+	Pick guests from the address book	从通讯簿选择来宾
+	Someone else goes in your place: they get the invitation to answer, and the organizer is told.	由其他人代你参加：对方会收到邀请并可答复，组织者也会得到通知。
+	The whole series	整个系列
+	This occurrence	这一次
+	Who goes instead of you	由谁代你参加
+	Who is “{name}”?	“{name}”是谁？
+	You asked {name} to go in your place.	你已请 {name} 代你参加。
+	{name} asked you to go in their place.	{name} 请你代其参加。
+	{name} asked {delegate} to go in their place.	{name} 请 {delegate} 代其参加。
+	{name} (delegated to {delegate})	{name}（已委托 {delegate}）
+	AI agents	AI 代理
+	Add MailCraft's MCP server to it: the command mailcraft-cli with the argument mcp	为它添加 MailCraft 的 MCP 服务器：命令 mailcraft-cli，参数 mcp
+	Agents run this command from now on without asking	代理从现在起不经询问即运行此命令
+	Allow	允许
+	Always allow	始终允许
+	An AI agent asks	AI 代理请求
+	An AI agent wants to: {command}	AI 代理想要：{command}
+	An AI assistant on this computer (Claude Desktop, Claude Code…) reads your mail, calendar, tasks and people through MailCraft's MCP server, and asks here before each command it wants to run. Off, it reaches nothing.	这台电脑上的 AI 助手（Claude Desktop、Claude Code…）通过 MailCraft 的 MCP 服务器读取你的邮件、日历、任务和联系人，并在运行每个命令前先在这里询问。关闭后它无法访问任何内容。
+	Commands agents run without asking first	代理不经询问即运行的命令
+	Connect an assistant	连接助手
+	Deny	拒绝
+	Forget	忘记
+	Let AI agents use MailCraft	允许 AI 代理使用 MailCraft
+	Nothing yet	暂无
+	Run without asking	不经询问即运行
+	What AI agents did	AI 代理做过的事
+	{n} more waiting	还有 {n} 个在等待
+	Looked, changed nothing	已查看，未做更改
+	Ran	已运行
+	You didn't allow it	你未允许
+	Didn't run: {why}	未运行：{why}
+	Let AI agents ask to run commands	允许 AI 代理请求运行命令
+	Sending, moving, answering an invitation… each asked about here first, unless you always allow it. Off, agents only read.	发送、移动、答复邀请……每个命令都会先在这里询问，除非你始终允许它。关闭时，代理只能读取。
+	Accounts AI agents read	AI 代理读取的帐户
+	One turned off is left out of all they read, and they can't take pictures of the window	关闭的帐户不在它们读取的任何内容中，它们也不能截取窗口的图片
+	… and {n} more characters	……还有 {n} 个字符
+	A copy installed from MailCraft's releases looks for a newer one and installs it as it closes	从 MailCraft 版本安装的副本会查找更新的版本，并在关闭时安装
+	A notice under every message sent	每封发出的邮件下方的声明
+	Accounts of {domains} only	仅限 {domains} 的帐户
+	Encrypted connections only	仅限加密连接
+	Locked	已锁定
+	No certificate trusted by hand	没有手动信任的证书
+	Not taken	未采用
+	Office	办公室
+	Questions	咨询
+	Read from	读取自
+	Releases only	仅正式版本
+	Set by your organisation	由你的组织设置
+	Set up for {organisation}	为 {organisation} 设置
+	Update MailCraft by itself	自动更新 MailCraft
+	Your details for its signature	用于其签名的你的信息
+	Your organisation	你的组织
+	Your organisation doesn't allow trusting a certificate by hand.	你的组织不允许手动信任证书。
+	Your organisation set up MailCraft on this computer. What it locked, you can't change.	你的组织在这台电脑上设置了 MailCraft。它锁定的内容你无法更改。
+	Text size	文字大小
+	Everything in the window, larger or smaller. Ctrl and + or − change it too, and Ctrl+0 puts it back.	窗口中的一切变大或变小。Ctrl 加 + 或 − 也可以更改，Ctrl+0 恢复原样。
+	Text size: {percent}%	文字大小：{percent}%
+	{percent}%	{percent}%
+	A table, as it will be sent. Backspace after it takes it out.	表格，按发送时的样子显示。在它后面按 Backspace 可将其删除。
+	Attach messages	附加邮件
+	Attach 1 message	附加 1 封邮件
+	Attach {n} messages	附加 {n} 封邮件
+	Move to To	移到收件人
+	Move to Cc	移到抄送
+	Move to Bcc	移到密送
+	Copy addresses	复制地址
+	Mailing list:	邮件列表：
+	Unsubscribe	退订
+	Show the message in its folder	在所在文件夹中显示邮件
+	Buttons on a message in the list	列表中邮件上的按钮
+	Shown when the pointer is over a message, up to {n}.	指针悬停在邮件上时显示，最多 {n} 个。
+	Mark read or unread	标记为已读或未读
+	Choose a date…	选择日期…
+	Pick a time in the future.	请选择将来的时间。
+	In 1 minute	1 分钟后
+	In 1 day	1 天后
+	Proposal accepted: the meeting is at {when} now.	已接受提议：会议现在改为 {when}。
+	Invitation: {summary}	邀请: {summary}
+	Updated: {summary}	已更新: {summary}
+	Cancelled: {summary}	已取消: {summary}
+	Cancelled: {summary} ({when})	已取消: {summary} ({when})
+	{summary} has been cancelled.	{summary} 已取消。
+	{summary} on {when} has been cancelled.	{when} 的 {summary} 已取消。
+	When: {when}	时间: {when}
+	Where: {place}	地点: {place}
+	Fwd: {summary}	转发: {summary}
+	{who} forwarded you this meeting, organized by {organizer}.	{who} 向你转发了此会议，组织者为 {organizer}。
+	{who} asked you to go to this meeting in their place. It's organized by {organizer}.	{who} 请你代其参加此会议，组织者为 {organizer}。
+	Accepted: {summary}	已接受: {summary}
+	Tentative: {summary}	暂定: {summary}
+	Declined: {summary}	已拒绝: {summary}
+	Delegated: {summary}	已委托: {summary}
+	{who} accepted the invitation to {summary}.	{who} 已接受 {summary} 的邀请。
+	{who} tentatively accepted the invitation to {summary}.	{who} 已暂定接受 {summary} 的邀请。
+	{who} declined the invitation to {summary}.	{who} 已拒绝 {summary} 的邀请。
+	{who} asked {delegate} to go to {summary} in their place.	{who} 已请 {delegate} 代其参加 {summary}。
+	New time proposed: {summary}	提议新时间: {summary}
+	{who} proposes a new time for {summary}: {when}.	{who} 为 {summary} 提议了新时间: {when}。
+	New time declined: {summary}	新时间被拒绝: {summary}
+	The proposed new time for {summary} was declined. The meeting stays as it was.	为 {summary} 提议的新时间已被拒绝。会议保持不变。
+	Cancel meeting	取消会议
+	Cancel this occurrence	取消这一次
+	Send cancellation	发送取消通知
+	Delete without sending	删除但不发送
+	Message to your guests	给与会者的消息
+	Your guests are sent a cancellation. Add a message to them, if you like.	与会者会收到取消通知。如有需要，可以给他们附上一条消息。
+	MailCraft's automatic replies and rules on the server aren't running: another program made its own filters (“{name}”) the ones that run.	MailCraft 在服务器上的自动答复和规则没有运行：另一个程序让它自己的筛选器（“{name}”）成为运行的那组。
+	Off: another program's filters (“{name}”) run in place of MailCraft's	关闭：运行的是另一个程序的筛选器（“{name}”），而不是 MailCraft 的
+	On, sent by your other filters on the server (“{name}”)	开启，由你在服务器上的其他筛选器（“{name}”）发送
+	Run my rules again	重新运行我的规则
+	These are the replies your other filters on the server (“{name}”) send: change them in the program that made them. MailCraft's can be on only while those are off: the server sends one reply.	这些是你在服务器上的其他筛选器（“{name}”）发送的答复：请在创建它们的程序中更改。只有这些关闭时，MailCraft 的答复才能开启：服务器只发送一份答复。
+	These rules aren't running: another program made its own filters the ones that run. Run them again here, with that program's.	这些规则没有运行：另一个程序让它自己的筛选器成为运行的那组。在这里重新运行它们，并与那个程序的筛选器一起运行。
+	Account: {email}	账户: {email}
+	Details	详细信息
+	Event: “{name}”, {when}	事件: “{name}”，{when}
+	Message: “{subject}”, from {from}	邮件: “{subject}”，发件人 {from}
+	Task: “{name}”	任务: “{name}”
+	This occurrence: {when}	这一次: {when}
+	To: {who}	收件人: {who}
+	Asking their server…	正在询问他们的服务器…
+	Click a time to move the meeting there	点击一个时间，把会议移到那里
+	Hide Scheduling Assistant	隐藏日程安排助理
+	Scheduling Assistant	日程安排助理
+	The next time you and your guests are all free	你和所有与会者都空闲的下一个时间
+	Their times can't be had: {why}	无法获得他们的时间: {why}
+	You	你
+	{free} of {all} free	{all} 人中 {free} 人空闲

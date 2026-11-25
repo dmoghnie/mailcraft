@@ -243,15 +243,18 @@ fn the_version_line_names_the_program_and_its_build() {
 }
 
 mod accounts;
+mod agents;
 mod ai;
 mod calendar;
 mod directory;
 mod mail;
 mod opening;
+mod organisation;
 mod organize;
 mod photos;
 mod ribbon;
 mod safety;
 mod smime;
 mod templates;
+mod view;
 mod writing;

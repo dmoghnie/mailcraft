@@ -26,6 +26,8 @@ mod changing;
 mod events;
 mod mailboxes;
 mod opening;
+mod organisation;
+pub use organisation::{BY_ORGANISATION, DETAILS, ORG_SETTINGS, camel};
 mod organize;
 mod photos;
 mod prefs;
@@ -38,6 +40,7 @@ mod writing;
 pub(crate) use accounts::REMOVE_BACKSTOP;
 pub(crate) use accounts::RuleChange;
 pub(crate) use accounts::data_file_path;
+pub(crate) use accounts::dav_address;
 pub use accounts::{AgeUnit, ArchiveRule, AutoArchive, Compacting, Compaction, FolderArchive, IDLE_AFTER_S};
 pub use accounts::{Changes, ImportState, Imports, SignInCheck, TrustedCertificate};
 pub use ai::STYLE_MOST;
@@ -62,7 +65,10 @@ pub(crate) use changing::{MOVED_IN_MAX, MovedIn};
 pub(crate) use opening::source_lines;
 pub use opening::{BodyWork, PreparedBody, SOURCE_SHOWN, SourceView, Toward};
 pub(crate) use searching::FoundAside;
-pub use searching::{IndexPass, SearchProgress, SearchScope, SearchStats, SearchWork, ServerSearch, no_answer, suggest};
+pub use searching::{
+    IndexPass, PersonActivity, PersonFile, PersonLink, PersonMeeting, PersonPeer, PersonThread, SearchProgress, SearchScope, SearchStats, SearchWork,
+    ServerSearch, no_answer, suggest,
+};
 pub use security::{
     CardSearch, KeySource, KnownCert, KnownKey, Lock, PGP_DOC, PgpSettings, Reach, RevocationCheck, SMIME_DOC, Scheme, Seal, Security, SignedBy,
     SmimeSettings,
@@ -76,13 +82,14 @@ pub use writing::{
 // The message list's arrangement and rows, named here as before.
 #[cfg(test)]
 pub(crate) use mailboxes::arrange_list;
-pub use mailboxes::{ARRANGE_HEADINGS, Arrange, ListFilter, PINNED_HEADING, Row};
+pub use mailboxes::{ARRANGE_HEADINGS, Arrange, ListFilter, PINNED_HEADING, ROW_ACTIONS_MAX, Row, RowAction};
 // Organizing mail's own parts, named here as before.
 pub use opening::SenderMarks;
 pub use organize::{attached, junk, quick_steps, search_folders, server_rules, sweep, vips};
 pub use prefs::{
-    ACCENTS, CtrlEnter, DICTIONARY_MAX, FolderDensity, HOME_BUTTONS, InboxGroup, NotesOrder, Prefs, RIBBON_ADDED_MOST, RIBBON_MOST, RIBBON_ROW,
-    ReadInPane, ReadingPane, SenderAddresses, StartIn, SwipeAction, accent_code, accent_rgb, dictionary_word,
+    ACCENTS, AGENTS_ALWAYS_MAX, CtrlEnter, DICTIONARY_MAX, FolderDensity, HOME_BUTTONS, InboxGroup, NORMAL_TEXT, NotesOrder, Prefs,
+    RIBBON_ADDED_MOST, RIBBON_MOST, RIBBON_ROW, ReadInPane, ReadingPane, SenderAddresses, StartIn, SwipeAction, TEXT_SIZE_RANGE, TEXT_SIZES,
+    accent_code, accent_rgb, dictionary_word, text_size_step,
 };
 pub mod pim;
 pub use pim::invite;
@@ -322,6 +329,8 @@ pub struct Session {
     /// Message templates, read from their file when it opens.
     pub(crate) templates: writing::KeptTemplates,
     pub prefs: Prefs,
+    /// What the meeting mail MailCraft writes says, in the window's language (issue #235).
+    pub mail_words: pim::invite::MailWords,
     pub clock: Clock,
     pub notices: Vec<Notice>,
     /// Message files put into folders (issue #38), for the window to say: what each drop did,
@@ -513,6 +522,11 @@ pub struct Session {
     /// This is a build of a release, which is offered releases only, never test builds
     /// (`MAILCRAFT_UPDATE_CHANNEL=stable`).
     pub updates_stable_only: bool,
+    /// The organisation's profile as read (issue #245; empty: there's none), set by the app as
+    /// it starts ([`Session::set_organisation`]).
+    pub organisation: std::sync::Arc<crate::policy::Organisation>,
+    /// What of it applies, given the accounts' domains.
+    pub org: crate::policy::Effective,
     /// File › About's update check.
     pub update: UpdateCheck,
     /// MailCraft's own AI as it runs: questions waiting, tests, what went where (`ai.rs`).
@@ -556,6 +570,7 @@ impl Session {
             drafted: writing::DraftedMemo::default(),
             templates: writing::KeptTemplates::default(),
             prefs: Prefs::default(),
+            mail_words: pim::invite::MailWords::default(),
             clock,
             notices: Vec::new(),
             filed: Vec::new(),
@@ -650,6 +665,8 @@ impl Session {
             seed: (clock.now as u64) ^ 0x9E37_79B9_7F4A_7C15 ^ process_random(),
             build_sha: None,
             updates_stable_only: false,
+            organisation: std::sync::Arc::default(),
+            org: crate::policy::Effective::default(),
             update: UpdateCheck::NotAsked,
             ai: ai::AiState::default(),
         };
@@ -717,6 +734,8 @@ impl Session {
         let result = self.run_command(id, params);
         // A file handed over for it that it didn't take (refused before it looked for it).
         self.drop_handed(params);
+        // What the organisation locked stays as it locked it (issue #245), whatever ran.
+        self.hold_org_locks();
         result
     }
 
@@ -729,16 +748,28 @@ impl Session {
             log::error!("the open message couldn't be shown");
             PANICS_CAUGHT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         }
+        // The messages it acts on named (issue #255): selected first, as clicks would, from the
+        // list shown, as a click can.
+        if spec.on_selection
+            && let Some(keys) = params.get("keys").and_then(Value::as_array)
+        {
+            let keys: Vec<MessageKey> = keys.iter().filter_map(Value::as_str).filter_map(MessageKey::from_id).collect();
+            if keys.is_empty() || keys.iter().any(|k| self.index_of(k).is_none()) {
+                return Err(CmdError::Params("`keys`: messages in the list shown (its folder opened first: folder.open)".into()));
+            }
+            self.selection = keys;
+        }
         if let Some(why) = (spec.enabled)(self) {
             return Err(CmdError::Disabled(why.to_string()));
         }
         if let Some(why) = self.compaction_blocks(id, params) {
             return Err(CmdError::Disabled(why));
         }
+        let locked = self.org_locked_run(id)?;
         let run = spec.run;
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| run(self, params)));
         match result {
-            Ok(r) => r,
+            Ok(r) => self.org_refuses_change(locked).map_or(r, Err),
             Err(_) => {
                 log::error!("command {id} panicked");
                 PANICS_CAUGHT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -756,7 +787,12 @@ impl Session {
         self.save_needs_me();
         self.save_digest();
         self.save_chats();
-        std::mem::take(&mut self.jobs)
+        let jobs = std::mem::take(&mut self.jobs);
+        // As the organisation allows them (issue #245); without its rules, as they are.
+        if !self.org.require_encryption && !self.org.no_certificate_exceptions {
+            return jobs;
+        }
+        jobs.into_iter().filter_map(|j| self.org_job(j)).collect()
     }
 
     pub fn push_job(&mut self, job: Job) {

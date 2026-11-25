@@ -33,11 +33,13 @@ Some things are left out on purpose; they are listed under [Not planned](#not-pl
 ### 3. Dragging attachments out on a Wayland-only desktop
 
 - **Impact:** You can't drag an attachment out of MailCraft on a Wayland-only desktop, or when
-  `MAILCRAFT_WAYLAND=1` is set. Dragging works on Windows, macOS and X11.
+  `MAILCRAFT_WAYLAND=1` is set, nor a message from the list onto a message being written in a
+  window of its own (#270). Dragging works on Windows, macOS and X11.
 - **Workaround:** Run under X11 or XWayland (the default), or use **Save**.
 - **Cause:** winit 0.30 can't start a drag on Wayland. winit 0.31 can, with
   `ActiveEventLoop::start_drag` (rust-windowing/winit#4571), once egui and the Craft forks move
-  to it.
+  to it. Wayland doesn't tell an app where its windows are, so a message let go over another of
+  its windows can't be told from one let go anywhere else.
 
 ### 4. Signed updates and releases
 
@@ -100,8 +102,8 @@ Test builds update themselves ([how test builds update](updates.md)). These part
   and contacts server on this computer. In MailCraft, add an account and, under its form, click
   **Add a CalDAV and CardDAV account**: the address `http://localhost:37358/`, the EteSync user
   name, and the password the bridge shows (not the EteSync password). Calendars and
-  contacts sync both ways. Lists of tasks don't (MailCraft syncs tasks with Exchange only), and
-  the bridge doesn't offer notes.
+  contacts sync both ways, and task lists the bridge offers as a CalDAV server's (not tried
+  through the bridge); it doesn't offer notes.
 - **Cause:** It needs an Etebase client of MailCraft's own: the Rust library EteSync publishes
   brings C libraries with it (OpenSSL and libsodium), which MailCraft doesn't build with.
 
@@ -161,15 +163,16 @@ Test builds update themselves ([how test builds update](updates.md)). These part
 
 ### 13. Finding a time: what isn't done yet
 
-- **Impact:** A meeting's own form has no Scheduling Assistant: its guests' times and AutoPick
-  are in the calendar alone (**Next free time**, over the calendars shown). Everyone shown counts
-  as required, and rooms aren't looked at. Exchange's own suggested times aren't asked for.
-- **Workaround:** Show the guests' calendars (**Open shared calendar**), find the time with
-  **Next free time**, and click it for the meeting; leave an optional guest's calendar unticked.
-- **Cause:** The event form edits one event and reads no one's times; the search goes over the
-  times the calendar has, which works for every kind of account, where the servers' own
-  suggestions (Exchange's `SuggestionsViewOptions`, Microsoft Graph's `findMeetingTimes`) come
-  from those servers alone.
+- **Impact:** Every guest counts as required, in a meeting's Scheduling Assistant and in the
+  calendar's **Next free time**, and rooms aren't looked at. The meeting's band in the assistant
+  is moved with a click, not dragged, and shows its day alone. Exchange's own suggested times
+  aren't asked for.
+- **Workaround:** Leave an optional guest out while finding the time, and add them after; for a
+  day other than the meeting's, change its date.
+- **Cause:** The search goes over the times MailCraft has (the calendar's, and the guests'
+  free/busy times), which works for every kind of account, where the servers' own suggestions
+  (Exchange's `SuggestionsViewOptions`, Microsoft Graph's `findMeetingTimes`) come from those
+  servers alone; MailCraft's guests have no optional kind yet.
 
 ### 14. Message list groups: what isn't done yet
 
@@ -182,14 +185,10 @@ Test builds update themselves ([how test builds update](updates.md)). These part
 
 ### 15. Moving an event: what isn't done yet
 
-- **Impact:** An event that repeats isn't dragged to another time (Outlook moves the occurrence
-  dragged, on its own), nor is an event's length changed by dragging its edge. A meeting someone
-  else organized isn't dragged either.
-- **Workaround:** Open the event and change its start and end in its form: a repeating one
-  moves as a whole there.
-- **Cause:** Nothing changes one occurrence of a series on its own yet: the form and the
-  calendar change the whole series, and the series moved for one occurrence went wrong on its
-  days (Monday's moved to Tuesday, the rule still said Mondays).
+- **Impact:** An event's length isn't changed by dragging its edge, and a meeting someone else
+  organized isn't dragged (its time is theirs to change).
+- **Workaround:** Open the event and change its end in its form.
+- **Cause:** The calendar drags an event's box only, not its edges.
 
 ### 16. People's photos: what isn't shown yet
 
@@ -204,14 +203,131 @@ Test builds update themselves ([how test builds update](updates.md)). These part
 ### 17. Meetings: what isn't done yet
 
 - **Impact:** A new time for one occurrence of a series can't be proposed from its invitation,
-  nor taken when a guest proposes one. Your place in a meeting can't be handed to someone else
-  (delegated), as SOGo offers. Invitations already in the Inbox aren't offered as an account is
+  nor taken when a guest proposes one. An account with calendars only (no mail) can't delegate a
+  meeting. The meeting form doesn't show the guests' free/busy times beside it, as Outlook's
+  Scheduling Assistant does. Invitations already in the Inbox aren't offered as an account is
   added: Invitations in the Inbox… in the calendar finds them.
-- **Workaround:** Change the occurrence in the calendar: its guests are sent it.
+- **Workaround:** Change the occurrence in the calendar: its guests are sent it. Delegate from an
+  account with mail, or in the server's web calendar. Open the guests' calendars in the Schedule
+  view (Open shared calendar…) to find a time, and make the meeting from there.
 - **Cause:** Taking a proposal moves the meeting as a whole; an occurrence's proposal needs that
-  occurrence changed on its own.
+  occurrence changed on its own. A delegate is told by the account's mail: without mail, the
+  server would have to tell them, and Nextcloud and Stalwart don't (Nextcloud doesn't tell the
+  organizer whom either). The form is a dialog of its own, apart from the calendar's views.
 
-### 18. Phones: a first build
+### 18. Tasks on CalDAV servers: what isn't done yet
+
+- **Impact:** A task's due or start time of day (Nextcloud's Tasks can give one) shows as its
+  day; it stays on the server as it was, unless that day is changed here (the task then goes
+  back with the day alone). A server with no task list (a new Nextcloud account, before its
+  Tasks app makes one) keeps none of MailCraft's tasks: they stay on this computer. MailCraft
+  doesn't make, rename or delete task lists, nor sync subtasks as such, nor Microsoft To Do.
+- **Workaround:** Make the task list in the server's own web page (Nextcloud's Tasks makes one
+  when opened); MailCraft finds it at its next sync. Set due times there.
+- **Cause:** Tasks are kept by day, as Outlook's are. A collection is taken for a task list only
+  when it says it takes `VTODO`s: one that says nothing (SOGo's calendars' `.ics` and `.xml`
+  views) isn't, so tasks don't go where they'd be lost.
+
+### 19. Everything with one person: what isn't done yet
+
+- **Impact:** Its files and links come from the mail with them that's on this computer, the
+  newest 300 messages; mail not downloaded yet (an account kept online only) isn't counted, and
+  it says how many. Its search finds a word of a message's text in those 300; older mail by its
+  subject, names and first lines. The web addresses in their signature are shown, not offered
+  for their contact; only the newest of their messages with a signature is read. Someone
+  writing from an address their contact doesn't have shows apart.
+- **Workaround:** Open a message to download it. Add their other addresses to their contact to
+  see them as one person.
+- **Cause:** It's made from what's on this computer, nothing asked of a server. The contact form
+  has Outlook's places for phone numbers, not yet one for a web page.
+
+### 20. AI agents: what isn't done yet
+
+- **Impact:** With MailCraft closed, agents read its data folder but run no command and see no
+  window: MailCraft isn't started for them. What they read is what's on this computer: a message
+  not downloaded yet is listed without its text, and a search reads the text of 1,000 messages
+  at most, saying how many it left.
+- **Workaround:** Open MailCraft for an agent to run commands; open a folder to download its
+  mail.
+- **Cause:** Only the open window asks you about a command, so nothing runs while it's closed.
+- **Impact:** An organisation's profile can turn agents off, let them only read, or have every
+  command asked about, but can't let them reach only some accounts (its own domain's): which
+  accounts agents read is each person's choice.
+- **Workaround:** Each person turns accounts off under **File › Options › AI agents**.
+- **Cause:** The accounts kept from agents are the person's own setting, by account; a profile
+  names domains, and isn't read where that setting is checked yet.
+
+### 21. An organisation's profile: what isn't done yet
+
+- **Impact:** A profile can't set the interface's font, nor point updates at a mirror of the
+  organisation's own; the browser build reads none. A signature's details come from Exchange's
+  or Microsoft 365's directory, else from what the person gives in File › Info (no LDAP
+  directory is asked). Locks hold in MailCraft on this computer, not for someone with an
+  administrator's rights or another mail program.
+- **Workaround:** Updates can be turned off for the organisation to deploy each version itself.
+  What must hold everywhere (a disclaimer, encryption) is set on the mail server too.
+- **Cause:** The interface font waits for fonts to be chosen at all (#166); a mirror for updates
+  being signed (#233). Locks are a program's own, which its user's system can override.
+
+### 22. Work and school accounts: Need admin approval
+
+- **Impact:** Where an organisation lets people approve only apps from a verified publisher,
+  **Sign in with Microsoft** stops at **Need admin approval**, and the account can't be added.
+- **Workaround:** An administrator approves MailCraft once for everyone, or the organisation
+  gives its own app in its profile ([how](oauth.md#your-organisation-needs-to-approve-mailcraft)).
+- **Cause:** MailCraft's Microsoft app has no verified publisher. That takes a publisher verified
+  in Microsoft's partner programme.
+
+### 23. Starting at sign-in: a portable copy, Flatpak and Snap, a Mac's Login Items
+
+- **Impact:** **File › Options › General › Start MailCraft when you sign in** isn't offered in a
+  portable copy, nor in the Flatpak or a Snap. On a Mac, MailCraft turned off under **System
+  Settings › General › Login Items › Allow in the Background** still shows the option on.
+- **Workaround:** A portable copy on Windows: a shortcut to `mailcraft.exe` in the Startup folder
+  (type `shell:startup` in Explorer's address bar). The Flatpak: the desktop's own list of apps
+  started at sign-in (GNOME Tweaks' Startup Applications, KDE's Autostart). On a Mac, turn it
+  on again there.
+- **Cause:** A portable copy leaves nothing on the computer, and the path it would name changes
+  with the USB stick's drive letter. A sandbox starts an app at sign-in only through its Background
+  portal, which MailCraft doesn't ask yet. macOS keeps Login Items' switches where apps can't read
+  them.
+
+### 24. Backups on a schedule
+
+- **Impact:** MailCraft on a computer doesn't back itself up (#266); in the browser, **File › Open
+  & Export › Back up…** saves everything as one file, when asked.
+- **Workaround:** A backup program that copies MailCraft's two folders, with MailCraft closed or
+  from a snapshot of the disk ([which folders](../README.md#build-and-run)); **Export to Outlook
+  data file** for an account's mail as a `.pst`.
+- **Cause:** On a computer, MailCraft's data is files a backup program copies already. A backup
+  MailCraft made itself while it runs would have to read each data file as it was at one moment,
+  while it goes on writing to it; the browser's backup is made in memory, too small a place for a
+  computer's mailboxes.
+
+### 25. Tables in a message being written: what isn't done yet
+
+- **Impact:** A table pasted into a message (#268) goes as it is: its cells can't be edited in
+  MailCraft, nor rows or columns added. A cell merged down several rows keeps to its first row,
+  and a picture in a cell is left out. A table can't be made from nothing (Outlook's
+  **Insert › Table**).
+- **Workaround:** Change the table where it was made (Excel, the web page) and paste it again;
+  Backspace after a table takes it out.
+- **Cause:** The message editor holds text and its formatting; a table is kept beside the text
+  as the HTML it goes out as, drawn where its text stands, which the editor doesn't edit.
+
+### 26. A portable copy's notifications in the notification centre
+
+- **Impact:** On Windows, a portable copy's new-mail notification clicked once its banner has
+  gone, in the notification centre, does nothing; one clicked while it shows brings MailCraft
+  forward at that mail (#273). An installed MailCraft's does from the notification centre too.
+- **Workaround:** Click MailCraft on the taskbar or in the notification area; the mail is at the
+  top of the Inbox.
+- **Cause:** Windows answers a click in the notification centre by starting the program a link
+  in the notification is registered for (`mailcraft:`). The installer registers it for everyone;
+  a portable copy writes nothing to the registry, and Windows doesn't start a link one program
+  registers for its user alone from a notification.
+
+### 27. Phones: a first build
 
 - **Impact:** MailCraft for Android (`apps/mailcraft-mobile`) reads, writes, files and searches
   mail over IMAP, SMTP and JMAP, but has no calendar, people, rules, attachments to open or add,
@@ -223,7 +339,7 @@ Test builds update themselves ([how test builds update](updates.md)). These part
   in both shells, and background checking needs the phones' own job schedulers. The iOS app
   needs a Mac with Xcode to build and test.
 
-### 19. MailCraft's AI assistant: what isn't done yet
+### 28. MailCraft's AI assistant: what isn't done yet
 
 - **Impact:** The assistant works with mail alone: it can't look at or change the calendar,
   people, tasks or rules. On its cards, what a change does and why a step failed are in English
@@ -232,7 +348,7 @@ Test builds update themselves ([how test builds update](updates.md)). These part
 - **Cause:** Each kind of item needs tools of its own, each change a proposal checked again when
   approved. A card's words are written by the engine, as the CLI and agents read them.
 
-### 20. Chats with MailCraft's AI: kept as plain files
+### 29. Chats with MailCraft's AI: kept as plain files
 
 - **Impact:** A chat with MailCraft's AI keeps what the model was given and said, which can be
   mail, contacts' details and summaries, in a file in the data folder (`assistant-<id>.json`),
@@ -244,7 +360,7 @@ Test builds update themselves ([how test builds update](updates.md)). These part
 - **Cause:** Chats are written as JSON, as MailCraft's other settings files are; encrypting them
   needs a key kept in the system keychain for them, which isn't done yet.
 
-### 21. Scanned PDFs: not read by MailCraft's AI
+### 30. Scanned PDFs: not read by MailCraft's AI
 
 - **Impact:** **Summarize with AI** on a PDF that's pictures of its pages (a scan, a fax) says
   the PDF has no text to read.
@@ -253,6 +369,17 @@ Test builds update themselves ([how test builds update](updates.md)). These part
 - **Cause:** A PDF's text is read from what its pages draw as text (`mime::pdf_text`). A scan's
   pages would have to be drawn as pictures and sent to the model for pictures; the engine,
   which builds for the browser and the phones too, has no PDF renderer, only the window has.
+
+### 31. Windows: no buttons on new-mail notifications
+
+- **Impact:** On Windows, a new-mail notification has no **Mark as read**, **Archive**,
+  **Delete** or **Reply** buttons; on Linux, the BSDs and a Mac it has them. A click on it still
+  brings MailCraft forward at that mail.
+- **Workaround:** Click the notification, then act on the message in MailCraft.
+- **Cause:** Windows' notifications are MailCraft's own, so one can carry a link a click in the
+  notification centre starts (`platform/toast.rs`). Their buttons would be actions in the
+  notification's XML, answered through its click event or a link of their own; none is written
+  yet, and they couldn't be tried without a Windows computer.
 
 ## Not planned
 
@@ -277,3 +404,9 @@ These are outside MailCraft's control, or accepted as they are.
   another user on the computer can copy it into their own `shell:sendto` folder), **Send with
   MailCraft** in Dolphin, Nemo and PCManFM-Qt, and files dropped on MailCraft's Dock icon or
   window.
+- **Windows Server 2016, and Windows 10 before version 1709, without a graphics card** (over
+  Remote Desktop, a virtual machine without one): the window can't open (#256). MailCraft draws
+  with DirectX 12 through wgpu, which needs more than those versions' own software renderer
+  has. A graphics card whose driver has DirectX 12 draws it there (over Remote Desktop, with the
+  policy that lets its sessions use it), as does Windows 10 version 1709, Windows Server 2019 or
+  later.

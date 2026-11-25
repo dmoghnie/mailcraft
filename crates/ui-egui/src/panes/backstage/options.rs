@@ -5,6 +5,7 @@ use super::*;
 /// MailCraft's own colour, the accent when none is chosen ([`theme::APP_COLOR`]).
 const APP_RGB: [u8; 3] = [theme::APP_COLOR.r(), theme::APP_COLOR.g(), theme::APP_COLOR.b()];
 
+mod agents;
 mod ai;
 mod calendar;
 mod general;
@@ -12,6 +13,7 @@ mod inbox;
 mod mail;
 mod safety;
 mod templates;
+pub(super) use agents::log as agents_log;
 
 pub(super) fn options(s: &Session, st: &UiState, ui: &mut Ui, acts: &mut Vec<Action>) {
     let t = st.tokens;
@@ -34,12 +36,32 @@ pub(super) fn options(s: &Session, st: &UiState, ui: &mut Ui, acts: &mut Vec<Act
     ai::scripts(s, &t, ui, acts);
     ai::servers(s, &t, ui, acts);
     ai::record(s, &t, ui);
+    agents::agents(s, &t, ui, acts);
 }
 
 /// One setting of a card, one per row, by its name and the line about it (in the rows Info and
 /// Open & Export draw too).
 fn setting(ui: &mut Ui, t: &Tokens, first: bool, label: &str, about: Option<&str>, control: impl FnOnce(&mut Ui)) {
     setting_row(ui, t, first, name(t, label), about.map(|a| note(t, a)), control);
+}
+
+/// [`setting`], for one the command `cmd` changes: its controls greyed out, and said, while the
+/// organisation has it locked (issue #245; the command would be refused anyway).
+fn setting_by(s: &Session, cmd: &str, ui: &mut Ui, t: &Tokens, first: bool, label: &str, about: Option<&str>, control: impl FnOnce(&mut Ui)) {
+    setting_held(s.command_locked(cmd).is_some(), ui, t, first, label, about, control);
+}
+
+/// [`setting`], its controls greyed out and said to be the organisation's when `locked`.
+fn setting_held(locked: bool, ui: &mut Ui, t: &Tokens, first: bool, label: &str, about: Option<&str>, control: impl FnOnce(&mut Ui)) {
+    if !locked {
+        setting(ui, t, first, label, about, control);
+        return;
+    }
+    let locked = tl!("Set by your organisation");
+    let said = about.map_or_else(|| locked.to_string(), |a| format!("{a} · {locked}"));
+    setting(ui, t, first, label, Some(&said), |ui| {
+        ui.add_enabled_ui(false, control);
+    });
 }
 
 /// A setting that is a switch: its name, also the switch's to a screen reader; the line about
@@ -52,9 +74,9 @@ struct Switch<'a> {
 }
 
 /// A setting that is a switch, its name given once.
-fn switch_row(ui: &mut Ui, t: &Tokens, first: bool, w: Switch<'_>, acts: &mut Vec<Action>) {
+fn switch_row(s: &Session, ui: &mut Ui, t: &Tokens, first: bool, w: Switch<'_>, acts: &mut Vec<Action>) {
     let Switch { label, about, on, cmd } = w;
-    setting(ui, t, first, label, about, |ui| {
+    setting_by(s, cmd, ui, t, first, label, about, |ui| {
         let mut v = on;
         if widgets::switch(ui, t, &mut v, label).changed() {
             acts.push(Action::Run(cmd, json!({"on": v})));

@@ -32,6 +32,12 @@ pub enum Action {
     ForCompose(u64, Box<Action>),
     /// Check Names again, a directory it waited on having answered (issue #211).
     RecheckNames,
+    /// Check the names typed in the meeting form's guests (issue #253); `true`: again, a
+    /// directory it waited on having answered.
+    CheckGuestNames(bool),
+    /// The address book for the meeting form's guests (issue #253): the form comes back as it
+    /// closes.
+    GuestsFromBook,
     OpenAttachment(usize),
     SaveAttachment(usize),
     /// Something to tell the user, as the app's notices do (already in their language).
@@ -62,9 +68,15 @@ pub enum Action {
         name: String,
         open: bool,
     },
+    /// Everything with the person at this address (issue #178).
+    Person(String),
+    /// Someone else looked for from that dialog, by name or address: who it finds.
+    PersonLookup(String),
     /// Search every folder for this (shown in the box, with the Search tab).
     Search(String),
     SetDark(Option<bool>),
+    /// MailCraft made to start as the user signs in, or not (issue #87).
+    StartAtSignIn(bool),
     /// Print the open message (as a PDF opened in the system's viewer).
     Print,
     /// Save the open message as a PDF, or as its `.eml` source.
@@ -234,11 +246,13 @@ impl MailApp {
             };
             // Only the system notification and the title's unread count announce mail. No
             // RequestUserAttention: Windows keeps that highlight on the taskbar until focus returns.
-            self.notify_mail(ctx, &title, &body, news.iter().map(|m| m.key.clone()).collect(), private);
+            // Clicked, it shows the newest of them (issue #273).
+            let newest = news.iter().max_by_key(|m| m.date).map(|m| m.key.clone());
+            self.notify_mail(ctx, &title, &body, news.iter().map(|m| m.key.clone()).collect(), newest, private);
         }
         // A digest made by itself is written (each morning, as asked in File › Options › AI).
         if self.session.take_digest_ready() {
-            self.notify_mail(ctx, tl!("Your digest is ready"), tl!("Open MailCraft to read it."), Vec::new(), false);
+            self.notify_mail(ctx, tl!("Your digest is ready"), tl!("Open MailCraft to read it."), Vec::new(), None, false);
         }
         let unread = self.session.inbox_unread();
         let view = match self.session.module {
@@ -298,6 +312,8 @@ impl MailApp {
             // Commands, and what the window does itself.
             Action::Run(id, p) => self.act_run(id, p),
             Action::RecheckNames => self.check_names(true),
+            Action::CheckGuestNames(again) => self.check_guest_names(again),
+            Action::GuestsFromBook => self.guests_from_book(),
             Action::Submit(id, p) => self.submit(id, p),
             Action::Open(k) => self.run("list.open", json!({"key": k.to_id()})),
             Action::Dialog(d) => self.ui.dialog = Some(d),
@@ -306,9 +322,34 @@ impl MailApp {
             Action::Backstage(p) => self.ui.backstage = Some(backstage::Backstage::new(p)),
             Action::NewNote => self.new_note(),
             Action::Search(q) => self.search_everywhere(q),
-            Action::SetDark(d) => self.ui.dark = d,
+            // In the main window, brought forward: asked for from a message's own window too.
+            Action::Person(email) => {
+                self.ui.dialog = Some(Dialog::person(&mut self.session, &email));
+                self.ui.focus_main = true;
+            }
+            Action::PersonLookup(text) => {
+                if let Some(Dialog::Person(f)) = &mut self.ui.dialog {
+                    f.people_found =
+                        if text.trim().is_empty() { Vec::new() } else { self.session.suggest_contacts(&text, crate::dialogs::PEOPLE_OFFERED) };
+                }
+            }
+            // Not while the organisation has the theme locked (issue #245).
+            Action::SetDark(d) => {
+                if !self.session.org.theme.as_ref().is_some_and(|g| g.locked) {
+                    self.ui.dark = d;
+                }
+            }
+            // The switch then says what the system has, read back.
+            Action::StartAtSignIn(on) => match self.services.set_start_at_sign_in(on) {
+                Ok(()) => self.ui.at_sign_in = self.services.starts_at_sign_in(),
+                Err(e) => self.session.notice(tf!("Starting MailCraft at sign-in couldn't be changed: {error}", error = e), true),
+            },
             Action::ShowFormatted(key, on) => self.ui.shown_as.set(&key, on, self.session.prefs.show_html),
-            Action::SetLanguage(l) => self.ui.language = l,
+            Action::SetLanguage(l) => {
+                if !self.session.org.language.as_ref().is_some_and(|g| g.locked) {
+                    self.ui.language = l;
+                }
+            }
             Action::OpenUrl(url) => self.open_link(&url),
             Action::AskAi(items) => {
                 if !self.session.prefs.assistant_pane.shown {

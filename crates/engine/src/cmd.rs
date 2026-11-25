@@ -70,6 +70,7 @@ macro_rules! toggle {
             Ok(json!({"on": s.prefs.$field}))
         })
         .params($params)
+        .setting(stringify!($field))
     };
 }
 
@@ -115,6 +116,7 @@ mod pim;
 mod printing;
 mod security;
 mod signatures;
+pub(crate) use signatures::signature_param;
 mod tasks;
 pub(crate) use tasks::{go_to_task, task_from};
 mod templates;

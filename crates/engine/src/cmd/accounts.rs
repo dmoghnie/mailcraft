@@ -18,7 +18,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         })
         .params(r#"{"account"?: string, "folder"?: string (Deleted Items and Junk are emptied for good; any other folder's mail goes to Deleted Items), "role"?: "trash"|"junk"}"#),
         CommandSpec::new("account.add", "Add account", "File › Accounts", add_account)
-            .params(r#"{"email": string, "password"?: string, "oauth"?: "google"|"microsoft", "deferSignIn"?: bool, "local"?: bool, "name"?: string, "username"?: string, "imapHost"?: string, "imapPort"?: number, "imapSecurity"?: "tls"|"starttls"|"none", "smtpHost"?: string, "smtpPort"?: number, "smtpSecurity"?: …, "smtpUsername"?: string and "smtpPassword"?: string (the outgoing server's own sign-in, when it isn't the incoming server's), "signIn"?: "automatic"|"password"|"ntlm" (how the incoming server is signed in to), "smtpSignIn"?: "automatic"|"password"|"ntlm"|"none" (the outgoing server's; "none": it takes mail without a sign-in), "jmap"?: string (a JMAP session URL, instead of IMAP and SMTP), "pop"?: true (POP3 instead of IMAP: popHost, popPort, popSecurity, "popDelete"?: bool to remove mail from the server once downloaded, else a copy stays: "popKeepDays"?: number (removed that many days after downloading; 14 when not given, 0 for never), "popDeleteWithTrash"?: bool (removed once deleted here for good)), "pst"?: string (an existing Outlook data file whose mail comes in first), "ews"?: string|true (on-premises Exchange: its EWS address or server name, or true to find it with Autodiscover; username DOMAIN\\user or an address), "graph"?: true|string (Exchange Online through Microsoft Graph; signs in with Microsoft), "dav"?: string (calendars and contacts only, with no mail server: its CalDAV and CardDAV server's address; signs in as username, or the address, with password), "userAgent"?: string (with ews: the User-Agent its requests name instead of MailCraft's, for a server that lets in only clients it knows), "onlineOnly"?: bool (keep none of its mail on this computer; not for POP)}"#),
+            .params(r#"{"email": string, "password"?: string, "oauth"?: "google"|"microsoft", "deferSignIn"?: bool, "local"?: bool, "name"?: string, "username"?: string, "imapHost"?: string, "imapPort"?: number, "imapSecurity"?: "tls"|"starttls"|"none", "smtpHost"?: string, "smtpPort"?: number, "smtpSecurity"?: …, "smtpUsername"?: string and "smtpPassword"?: string (the outgoing server's own sign-in, when it isn't the incoming server's), "signIn"?: "automatic"|"password"|"ntlm" (how the incoming server is signed in to), "smtpSignIn"?: "automatic"|"password"|"ntlm"|"none" (the outgoing server's; "none": it takes mail without a sign-in), "jmap"?: string (a JMAP session URL, instead of IMAP and SMTP), "pop"?: true (POP3 instead of IMAP: popHost, popPort, popSecurity, "popDelete"?: bool to remove mail from the server once downloaded, else a copy stays: "popKeepDays"?: number (removed that many days after downloading; 14 when not given, 0 for never), "popDeleteWithTrash"?: bool (removed once deleted here for good)), "pst"?: string (an existing Outlook data file whose mail comes in first), "ews"?: string|true (on-premises Exchange: its EWS address or server name, or true to find it with Autodiscover; username DOMAIN\\user or an address), "graph"?: true|string (Exchange Online through Microsoft Graph; signs in with Microsoft), "dav"?: string (calendars and contacts only, with no mail server: its CalDAV and CardDAV server's address; signs in as username, or the address, with password), "caldav"?: string and "carddav"?: string (a mail account's calendar and contacts servers, as its provider's settings name them; else found from the address), "userAgent"?: string (with ews: the User-Agent its requests name instead of MailCraft's, for a server that lets in only clients it knows), "onlineOnly"?: bool (keep none of its mail on this computer; not for POP)}"#),
         CommandSpec::new("account.check", "Check the sign-in", "File › Accounts", check_account).params(
             r#"{the params of account.add, for an IMAP, POP or JMAP account with its password} (signs in to its servers and leaves, adding nothing; account.checked has the answer)"#,
         ),
@@ -37,6 +37,10 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             // Nothing found may only mean this computer was offline when it asked: asked again
             // when wanted, it isn't the answer for the rest of the session.
             let again = p::bool(v, "again").unwrap_or(false);
+            // The organisation names the servers of its own domains (issue #245).
+            if let Some(c) = s.org_account_config(&email) {
+                s.discovered.insert(email.clone(), Some((Some(c), "your organisation".into())));
+            }
             match s.discovered.get(&email) {
                 Some(Some((Some(c), source))) => {
                     let elsewhere = s.discovered_elsewhere.get(&email);
@@ -47,7 +51,8 @@ pub(super) fn commands() -> Vec<CommandSpec> {
                 Some(None) => Ok(json!({"pending": true})),
                 Some(Some((None, _))) | None => {
                     s.discovered.insert(email.clone(), None);
-                    s.push_job(mailcraft_model::Job::Discover { email });
+                    let rules = s.discover_rules();
+                    s.push_job(mailcraft_model::Job::Discover { email, rules });
                     Ok(json!({"pending": true}))
                 }
             }
@@ -120,7 +125,18 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         ),
         CommandSpec::new("account.list", "Accounts", "File › Accounts", list_accounts),
         // Asks where MailCraft is published; File › About shows the answer (`Session::update`).
+        CommandSpec::new("options.updates", "Update MailCraft by itself", "File › Options › General", |s, v| {
+            let value = p::req_str(v, "value")?;
+            s.prefs.updates = crate::policy::Updates::parse(value).ok_or_else(|| CmdError::Params(format!("`value` is on, stable or off, not `{value}`")))?;
+            Ok(json!({"value": s.prefs.updates}))
+        })
+        .setting("updates")
+        .params(r#"{"value": "on"|"stable"|"off" (as the copy was installed, releases only, or never)}"#),
         CommandSpec::new("app.checkUpdates", "Check for updates", "File › About", |s, _| {
+            // Updates turned off by the organisation: it updates MailCraft itself.
+            if s.prefs.updates == crate::policy::Updates::Off && s.setting_locked("updates") {
+                return Err(CmdError::Disabled(crate::session::BY_ORGANISATION.into()));
+            }
             if s.jmap_only {
                 return Err(CmdError::Failed("the browser version is always the newest".into()));
             }
@@ -183,6 +199,8 @@ pub(super) fn commands() -> Vec<CommandSpec> {
                     Some(o @ ("known" | "none")) => o.to_string(),
                     Some(other) => return Err(CmdError::Params(format!("`outside` is all, known or none, not `{other}`"))),
                 },
+                // What the server says of another program's replies, never set from here.
+                ..Default::default()
             };
             s.set_vacation(&id, vacation)
         })
@@ -207,6 +225,9 @@ pub(super) fn server(v: &Value, prefix: &str, guess: &ServerConfig) -> Result<Se
 }
 
 pub(super) fn add_account(s: &mut Session, v: &Value) -> CmdResult {
+    // The organisation's servers for the address, where none are named (issue #245).
+    let with_org = s.with_org_servers(v);
+    let v = &with_org;
     if let Some(server) = p::str(v, "dav") {
         return add_calendar_only(s, v, server);
     }
@@ -315,10 +336,18 @@ fn new_account(s: &Session, v: &Value) -> Result<NewAccount, CmdError> {
         online_only: p::bool(v, "onlineOnly").unwrap_or(false),
         check_every: None,
         check_by_hand: false,
-        dav: None,
+        // Its calendar and contacts servers, when the provider's settings named them (issue
+        // #176); otherwise found from the address as the account connects.
+        dav: {
+            let caldav = crate::session::dav_address(p::str(v, "caldav").unwrap_or_default())?;
+            let carddav = crate::session::dav_address(p::str(v, "carddav").unwrap_or_default())?;
+            (!caldav.is_empty() || !carddav.is_empty()).then_some(mailcraft_model::DavSettings { caldav, carddav, username: None })
+        },
         user_agent,
         trusted_certificates: Vec::new(),
         trusted_authorities: Vec::new(),
+        details: Default::default(),
+        org_signature: String::new(),
     };
     // A line break or tab pasted in with the user name: no server would ever take it (in an
     // Exchange `DOMAIN\user`, a `\r` read from JSON became part of it, and sign-in failed).

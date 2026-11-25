@@ -223,7 +223,12 @@ impl Session {
             Event::Releases { releases, error } => {
                 self.update = match error {
                     Some(e) => UpdateCheck::Failed(e),
-                    None => match newer_release(env!("CARGO_PKG_VERSION"), self.build_sha.as_deref(), &releases, self.updates_stable_only) {
+                    None => match newer_release(
+                        env!("CARGO_PKG_VERSION"),
+                        self.build_sha.as_deref(),
+                        &releases,
+                        self.updates_stable_only || self.prefs.updates == crate::policy::Updates::Stable,
+                    ) {
                         Some(r) => UpdateCheck::Available(r.clone()),
                         None => UpdateCheck::UpToDate(releases.first().map(|r| r.tag.clone()).unwrap_or_default()),
                     },
@@ -290,8 +295,13 @@ impl Session {
         }
         // What it had under way for Send / Receive stops with it.
         self.transfers_stopped(&account, &status);
+        let online = matches!(status, SyncStatus::Online { .. });
         if let Some(a) = self.account_mut(&account) {
             a.status = status;
+        }
+        // Its own details, from its organisation's directory (issue #245), once it can be asked.
+        if online {
+            self.ask_own_details();
         }
     }
 
@@ -415,6 +425,17 @@ impl Session {
                 self.save_accounts();
             }
             self.jobs.push(Job::Start { account: config, password: None });
+            // A calendar or address book the last sign-in was refused (a Google account's, signed
+            // in before MailCraft asked for them) is looked for again with this one, not a day on.
+            let refused = self
+                .pim
+                .get(account)
+                .is_some_and(|p| p.dav_checked.is_some() && [&p.caldav_home, &p.carddav_home].into_iter().any(|h| h.as_deref() == Some("")));
+            if refused {
+                self.pim_mut(account).dav_checked = Some(0);
+                self.save_pim(account);
+                self.jobs.push(Job::SyncDav { account: account.to_string() });
+            }
             match other {
                 Some(o) => self.notice(format!("{who} is signed in (as {o})"), false),
                 None => self.notice(format!("{who} is signed in"), false),

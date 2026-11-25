@@ -14,10 +14,9 @@
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
-/// Files beside the executable that switch on portable mode (either one; contents are ignored).
-pub const MARKERS: [&str; 2] = ["portable.txt", "MailCraft.portable"];
-/// The data folder created beside the executable in portable mode.
-pub const DATA_DIR: &str = "MailCraftData";
+/// Files beside the executable that switch on portable mode (either one; contents are ignored),
+/// and the data folder made beside it: the store's, which the command line reads too.
+pub use mailcraft_engine::store::location::{PORTABLE_DATA as DATA_DIR, PORTABLE_MARKERS as MARKERS};
 
 /// The outcome of looking for a portable marker.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -40,7 +39,7 @@ pub fn current() -> &'static Portable {
 /// Look for a marker beside the executable in `exe_dir` and, when one is there, make its data
 /// folder.
 pub fn resolve(exe_dir: Option<&Path>) -> Portable {
-    let Some(base) = exe_dir.map(|d| bundle_parent(d).unwrap_or(d)) else { return Portable::default() };
+    let Some(base) = exe_dir.map(mailcraft_engine::store::location::portable_base) else { return Portable::default() };
     let Some(marker) = MARKERS.iter().map(|m| base.join(m)).find(|p| p.is_file()) else { return Portable::default() };
     let folder = base.join(DATA_DIR);
     match writable(&folder) {
@@ -56,16 +55,6 @@ pub fn resolve(exe_dir: Option<&Path>) -> Portable {
     }
 }
 
-/// On macOS the executable is in `X.app/Contents/MacOS`: the folder the bundle is in.
-fn bundle_parent(exe_dir: &Path) -> Option<&Path> {
-    if !cfg!(target_os = "macos") || exe_dir.file_name()? != "MacOS" {
-        return None;
-    }
-    let contents = exe_dir.parent()?;
-    let bundle = contents.parent()?;
-    (contents.file_name()? == "Contents" && bundle.extension()? == "app").then_some(bundle.parent()?)
-}
-
 /// Make `dir` and prove a file can be written in it (a folder can exist yet be read-only).
 fn writable(dir: &Path) -> std::io::Result<()> {
     std::fs::create_dir_all(dir)?;
@@ -75,19 +64,23 @@ fn writable(dir: &Path) -> std::io::Result<()> {
 /// Names a probe tries before the folder counts as unwritable.
 const PROBE_TRIES: u32 = 64;
 
-/// Prove a file can be made in `dir`: one is made and removed again. It's made new
-/// (`create_new`), so whatever is already at its name (a file, a link someone left there
-/// pointing elsewhere) is never opened, written through or removed: the next name is tried
-/// instead (as PhotoCraft's portable check). Only the probe made here is removed.
+/// Prove a file can be made and written in `dir`: one is made, a byte written into it and on the
+/// disk, and it's removed again. On a full drive a file can be made with nothing written into it,
+/// and a portable copy (or an update into its folder) that took that for a yes failed at its first
+/// save (as CADCraft found). It's made new (`create_new`), so whatever is already at its name (a
+/// file, a link someone left there pointing elsewhere) is never opened, written through or
+/// removed: the next name is tried instead (as PhotoCraft's portable check). Only the probe made
+/// here is removed.
 pub(crate) fn probe(dir: &Path, stem: &str) -> std::io::Result<()> {
     let pid = std::process::id();
     for n in 0..PROBE_TRIES {
         let path = dir.join(format!("{stem}-{pid}-{n}"));
         match std::fs::OpenOptions::new().write(true).create_new(true).open(&path) {
-            Ok(file) => {
+            Ok(mut file) => {
+                let written = std::io::Write::write_all(&mut file, &[0]).and_then(|()| file.sync_all());
                 drop(file);
                 let _ = std::fs::remove_file(&path);
-                return Ok(());
+                return written;
             }
             Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => continue,
             Err(e) => return Err(e),

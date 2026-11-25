@@ -15,15 +15,17 @@
 //!    domain itself, [`candidates`]), asked whether they answer over TLS by the caller's probe
 //!    (the network's is in `protocols`, which this module stays apart from).
 //!
-//! The first answer wins; a POP server offered alongside is kept (`pop`) for POP accounts. A
-//! JMAP server the domain's `_jmap._tcp` SRV record names (RFC 8620 §2.2) is kept beside it
-//! (`jmap`, offered, not chosen); with only that published, it's the answer (and `imap` has no
-//! host) before any server is asked. Only
+//! The first answer wins; a POP server offered alongside is kept (`pop`) for POP accounts, and the
+//! calendar and address book servers a file names (`<calendar type="caldav">`, `<addressBook
+//! type="carddav">`, issue #176) for the account's calendars and contacts. A JMAP server the
+//! domain's `_jmap._tcp` SRV record names (RFC 8620 §2.2) is kept beside it (`jmap`, offered, not
+//! chosen); with only that published, it's the answer (and `imap` has no host) before any server
+//! is asked. Only
 //! the domain's own server is told the address; the others are asked about the domain, and
 //! only when the user types an address into the account dialog. Everything fetched is hostile input: sizes are capped and
 //! a bad file is simply skipped.
 
-use mailcraft_model::{AccountConfig, Security, ServerConfig, SignInMethod};
+use mailcraft_model::{AccountConfig, DavSettings, DiscoverRules, Security, ServerConfig, SignInMethod};
 
 use crate::xml::{self, El};
 
@@ -168,7 +170,28 @@ pub fn parse_config(xml: &str, email: &str) -> Option<AccountConfig> {
     c.sign_in = methods.sign_in();
     c.smtp_sign_in = smtp_methods.sign_in();
     c.pop = pick("incomingServer", "pop3").map(|(s, _, _)| s);
+    // Calendars and contacts (issue #176), where the file names them: signed in to as the mail
+    // server is (the file's own user name is the same address in every one seen).
+    let dav = |tag: &str, kind: &str| -> String {
+        let mut blocks = Vec::new();
+        doc.all(tag, &mut blocks);
+        blocks.into_iter().filter(|b| b.attr("type") == Some(kind)).find_map(|b| dav_url(text_of(b, "serverURL")?, email)).unwrap_or_default()
+    };
+    let (caldav, carddav) = (dav("calendar", "caldav"), dav("addressBook", "carddav"));
+    if !caldav.is_empty() || !carddav.is_empty() {
+        c.dav = Some(DavSettings { caldav, carddav, username: None });
+    }
     Some(c)
+}
+
+/// A calendar or address book server's address from a configuration file: https alone (the file
+/// came from the network, and the password goes there), with the address's parts put in.
+fn dav_url(given: &str, email: &str) -> Option<String> {
+    let (local, domain) = email.rsplit_once('@').unwrap_or((email, ""));
+    let url = given.trim().replace("%EMAILADDRESS%", email).replace("%EMAILLOCALPART%", local).replace("%EMAILDOMAIN%", domain);
+    let host = url.get(..8).filter(|s| s.eq_ignore_ascii_case("https://")).and_then(|_| url.get(8..))?.split(['/', '?', '#']).next()?;
+    let ok = url.len() <= 2048 && !host.is_empty() && !url.chars().any(|c| c.is_whitespace() || c.is_control());
+    ok.then_some(url)
 }
 
 /// The registrable part of a host name (`aspmx.l.google.com` → `google.com`; two-letter country
@@ -221,13 +244,27 @@ pub struct Lookups<'a> {
 
 /// Find settings for `email` (see the module docs for the order).
 pub fn discover_with(email: &str, l: &mut Lookups<'_>) -> Option<Found> {
+    discover_ruled(email, l, &DiscoverRules::default())
+}
+
+/// [`discover_with`] the ways `rules` allow (an organisation's, issue #245): its own autoconfig
+/// file first, then each way it hasn't turned off.
+pub fn discover_ruled(email: &str, l: &mut Lookups<'_>, rules: &DiscoverRules) -> Option<Found> {
     let email = email.trim();
     let domain = email.rsplit_once('@').map(|(_, d)| d.trim().to_ascii_lowercase()).filter(|d| d.contains('.'))?;
     if !domain.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-')) {
         return None;
     }
-    let published = published(email, &domain, l);
-    let jmap = jmap_session(&domain, l);
+    // The organisation's own file, asked about the address.
+    if let Some(url) = rules.autoconfig.as_deref().filter(|u| u.starts_with("https://")) {
+        let enc = crate::http::pct(email);
+        let asked = if url.contains('?') { format!("{url}&emailaddress={enc}") } else { format!("{url}?emailaddress={enc}") };
+        if let Some(c) = (l.fetch)(&asked).and_then(|x| parse_config(&x, email)) {
+            return Some(Found::vouched(c, "your organisation".into()));
+        }
+    }
+    let published = published(email, &domain, l, rules);
+    let jmap = if rules.dns { jmap_session(&domain, l) } else { None };
     if let Some(mut found) = published {
         // The JMAP server came through DNS, whatever the rest came through.
         found.elsewhere = found.elsewhere.or_else(|| jmap.as_deref().and_then(|u| foreign(&domain, url_host(u))));
@@ -240,8 +277,11 @@ pub fn discover_with(email: &str, l: &mut Lookups<'_>) -> Option<Found> {
         c.jmap = Some(url);
         return Some(Found::through_dns(c, "DNS (a JMAP SRV record)".into(), &domain));
     }
-    // Nothing published: the domain's own servers under the usual names, if they answer. An
-    // outgoing server that didn't is guessed on the incoming one's host.
+    // Nothing published: the domain's own servers under the usual names, if they answer (asked
+    // as its own files are). An outgoing server that didn't is guessed on the incoming one's host.
+    if !rules.domain {
+        return None;
+    }
     let (imap, smtp) = candidates(&domain);
     let (imap, smtp) = (l.probe)(&imap, &smtp);
     let imap = imap?;
@@ -262,25 +302,33 @@ fn jmap_session(domain: &str, l: &mut Lookups<'_>) -> Option<String> {
     named.then(|| if port == 443 { format!("https://{host}/.well-known/jmap") } else { format!("https://{host}:{port}/.well-known/jmap") })
 }
 
-/// Settings published for `domain` (steps 1 to 5 of the module docs).
-fn published(email: &str, domain: &str, l: &mut Lookups<'_>) -> Option<Found> {
+/// Settings published for `domain` (steps 1 to 5 of the module docs), the ways `rules` allow.
+fn published(email: &str, domain: &str, l: &mut Lookups<'_>, rules: &DiscoverRules) -> Option<Found> {
     let enc = crate::http::pct(email);
     let try_url = |l: &mut Lookups<'_>, url: &str| (l.fetch)(url).and_then(|x| parse_config(&x, email));
-    for url in [
-        format!("https://autoconfig.{domain}/mail/config-v1.1.xml?emailaddress={enc}"),
-        format!("https://{domain}/.well-known/autoconfig/mail/config-v1.1.xml"),
-    ] {
-        if let Some(c) = try_url(l, &url) {
-            return Some(Found::vouched(c, domain.to_string()));
+    if rules.domain {
+        for url in [
+            format!("https://autoconfig.{domain}/mail/config-v1.1.xml?emailaddress={enc}"),
+            format!("https://{domain}/.well-known/autoconfig/mail/config-v1.1.xml"),
+        ] {
+            if let Some(c) = try_url(l, &url) {
+                return Some(Found::vouched(c, domain.to_string()));
+            }
         }
     }
-    if let Some(c) = try_url(l, &format!("https://autoconfig.thunderbird.net/v1.1/{domain}")) {
+    if rules.thunderbird
+        && let Some(c) = try_url(l, &format!("https://autoconfig.thunderbird.net/v1.1/{domain}"))
+    {
         return Some(Found::vouched(c, "the ISP database".into()));
     }
-    if let Some(mx) = (l.mx)(domain).into_iter().next() {
+    if rules.mx
+        && let Some(mx) = (l.mx)(domain).into_iter().next()
+    {
         let base = base_domain(&mx);
         if base != domain {
-            if let Some(c) = try_url(l, &format!("https://autoconfig.thunderbird.net/v1.1/{base}")) {
+            if rules.thunderbird
+                && let Some(c) = try_url(l, &format!("https://autoconfig.thunderbird.net/v1.1/{base}"))
+            {
                 // Which provider it is came from the MX record.
                 return Some(Found::through_dns(c, format!("the ISP database ({base} handles this domain's mail)"), domain));
             }
@@ -289,6 +337,9 @@ fn published(email: &str, domain: &str, l: &mut Lookups<'_>) -> Option<Found> {
                 return Some(Found::through_dns(c, base, domain));
             }
         }
+    }
+    if !rules.dns {
+        return None;
     }
     // Where Outlook looks: the host an `_autodiscover._tcp` record names, which providers point
     // at their configuration server.
@@ -314,6 +365,11 @@ fn published(email: &str, domain: &str, l: &mut Lookups<'_>) -> Option<Found> {
 /// Find settings for `email` over the network, `probe` asking servers whether they answer
 /// (`mailcraft_net::answering::answering`).
 pub fn discover(email: &str, probe: Probe<'_>) -> Option<Found> {
+    discover_by(email, &DiscoverRules::default(), probe)
+}
+
+/// [`discover`] the ways `rules` allow.
+pub fn discover_by(email: &str, rules: &DiscoverRules, probe: Probe<'_>) -> Option<Found> {
     let mut fetch = |url: &str| {
         crate::http::get(url, MAX_XML)
             .ok()
@@ -322,7 +378,7 @@ pub fn discover(email: &str, probe: Probe<'_>) -> Option<Found> {
     };
     let mut mx = crate::dns::mx;
     let mut srv = crate::dns::srv;
-    discover_with(email, &mut Lookups { fetch: &mut fetch, mx: &mut mx, srv: &mut srv, probe })
+    discover_ruled(email, &mut Lookups { fetch: &mut fetch, mx: &mut mx, srv: &mut srv, probe }, rules)
 }
 
 #[cfg(test)]
@@ -477,6 +533,30 @@ mod tests {
 
     /// A provider's file is read as XML: a server in a comment isn't offered, and character
     /// references and CDATA are read as such.
+    /// Issue #176: the calendar and address book servers a file names come with the mail
+    /// servers; one that isn't https, or is junk, is left out.
+    #[test]
+    fn reads_calendar_and_contacts_servers() {
+        let xml = XML.replace(
+            "</emailProvider>",
+            r#"</emailProvider>
+  <addressBook type="carddav"><username>%EMAILADDRESS%</username><authentication>http-basic</authentication>
+    <serverURL>https://cloud.example.org/remote.php/dav</serverURL></addressBook>
+  <calendar type="caldav"><serverURL>https://cloud.%EMAILDOMAIN%/remote.php/dav/calendars/%EMAILLOCALPART%/</serverURL></calendar>"#,
+        );
+        let c = parse_config(&xml, "zoe@example.org").unwrap();
+        let dav = c.dav.unwrap();
+        assert_eq!(dav.carddav, "https://cloud.example.org/remote.php/dav");
+        assert_eq!(dav.caldav, "https://cloud.example.org/remote.php/dav/calendars/zoe/");
+        assert_eq!(dav.username, None, "signed in to as the mail server is");
+        assert_eq!(parse_config(XML, "zoe@example.org").unwrap().dav, None, "none named");
+        for bad in ["http://cloud.example.org/dav", "ftp://x", "https://", "https:// spaced.example/", "javascript:alert(1)", ""] {
+            let xml = XML.replace("</emailProvider>", &format!(r#"</emailProvider><calendar type="caldav"><serverURL>{bad}</serverURL></calendar>"#));
+            assert_eq!(parse_config(&xml, "zoe@example.org").unwrap().dav, None, "{bad}");
+        }
+        assert_eq!(dav_url(&format!("https://x.example/{}", "a".repeat(3000)), "z@x.example"), None, "too long");
+    }
+
     #[test]
     fn reads_comments_references_and_cdata_as_xml() {
         const FILE: &str = r#"<clientConfig version="1.1"><emailProvider id="example.org">

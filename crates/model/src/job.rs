@@ -142,8 +142,8 @@ pub enum Job {
     /// Read a calendar subscribed to by its link (issue #7), unless it's unchanged since the
     /// version named by `etag` / `modified`; answered by [`Event::CalendarFetched`].
     FetchCalendar { account: String, calendar: String, url: String, etag: String, modified: String },
-    /// Look up the server settings for an address (autoconfiguration).
-    Discover { email: String },
+    /// Look up the server settings for an address (autoconfiguration), the ways `rules` allow.
+    Discover { email: String, rules: crate::DiscoverRules },
     /// Sign in to a new account's servers, as it will connect, and sign out again, before it's
     /// added: answered by [`Event::SignInChecked`] with the same `id`. Nothing is kept.
     CheckSignIn { id: u64, account: AccountConfig, password: Secret, smtp_password: Option<Secret> },
@@ -159,12 +159,13 @@ pub enum Job {
     GetVacation { account: String },
     /// Change them.
     SetVacation { account: String, vacation: Vacation },
-    /// Read the mailbox's Inbox rules on its server (Exchange's, issue #139); answered by
+    /// Read the mailbox's rules on its server (Exchange's, issue #139; Sieve's, issue #243); answered by
     /// [`Event::ServerRules`].
     GetServerRules { account: String },
     /// Change them, then read them again; `drop_outlook_list`: remove Outlook's own copy of the
     /// rules, which the server won't change them beside.
-    SetServerRules { account: String, ops: Vec<crate::organize::ServerRuleOp>, drop_outlook_list: bool },
+    /// `keywords`: each category's keyword by its name, for rules written as Sieve (issue #243).
+    SetServerRules { account: String, ops: Vec<crate::organize::ServerRuleOp>, drop_outlook_list: bool, keywords: Vec<(String, String)> },
     /// Sync the account's calendars and address books with its CalDAV / CardDAV server (changes
     /// made here first).
     SyncDav { account: String },

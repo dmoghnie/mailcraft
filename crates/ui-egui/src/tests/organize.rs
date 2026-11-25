@@ -9,6 +9,7 @@ mod folder_pane;
 mod inbox_groups;
 mod needs_me;
 mod no_answer;
+mod row_buttons;
 mod rule_words;
 mod sent_rules;
 mod server_rules;
@@ -668,13 +669,13 @@ fn measure_rules_dialog() {
 /// on, gone with either off.
 #[test]
 fn options_offer_notifications_for_other_with_the_focused_inbox() {
-    let _tall = crate::tests::windows::layout::Dressed::new(egui::vec2(1280.0, 2800.0), "");
+    let _tall = crate::tests::windows::layout::Dressed::new(egui::vec2(1280.0, 6000.0), "");
     let (mut a, _) = app("notify-other");
     let ctx = egui::Context::default();
     ctx.enable_accesskit();
     let shown = |ctx: &egui::Context, a: &mut MailApp| {
         frame(ctx, a, vec![]);
-        drawn_text(ctx, a, egui::vec2(1280.0, 2800.0)).iter().any(|d| d.text == "Notify of mail in Other too")
+        drawn_text(ctx, a, egui::vec2(1280.0, 6000.0)).iter().any(|d| d.text == "Notify of mail in Other too")
     };
     a.ui.backstage = Some(crate::backstage::Backstage::new(crate::backstage::Page::Options));
     assert!(!shown(&ctx, &mut a), "the Focused Inbox off: nothing to say");

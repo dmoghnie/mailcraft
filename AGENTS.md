@@ -61,14 +61,20 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
   every block has a `SAFETY:` comment, and both are tested against the real system (the Windows
   one in CI on Windows). Use a maintained safe wrapper first (`rustls-cng`, `security-framework`);
   don't add `unsafe` anywhere else.
+- **The second exception** (signed off by the owner): the phone library `apps/mailcraft-mobile`,
+  whose entry points the phones find by name. The crate sets `unsafe_code = "deny"`; only
+  `src/android.rs` (`#[unsafe(no_mangle)]` on the JNI methods, through the `jni` crate) and
+  `src/ios.rs` (the C functions, and the C strings Swift hands over) allow it, each with its
+  `SAFETY:` comment. No UniFFI (MPL-2.0, outside the allowlist): the bindings are written by hand.
 - **Errors are `Result`** (`CmdError`, `NetError`, `StoreError`) through `?`.
 - **Everything from the network or disk is hostile:** IMAP responses (line and literal sizes are
   capped in `net/src/protocols/imap.rs`), message sources, attachment pictures (decode limits in
   `ui-egui/src/reading.rs`), cache files (a damaged file is set aside, never fatal), command params.
   Use `get()`, checked/saturating arithmetic, char-boundary slicing, caps on allocations and
   recursion.
-- **Last-resort guard:** `Session::run` turns an escaped panic into an error, and every panic, on
-  any thread, is logged by where it happened (`crates/net/src/logfile.rs`, never its message).
+- **Last-resort guard:** `Session::run` turns an escaped panic into an error, `Session::apply`
+  stops an event's, and every panic, on any thread, is logged by where it happened
+  (`crates/net/src/logfile.rs`, never its message).
 - **Prove it:** every crash fix lands with a regression test; `engine/src/tests/organize.rs::every_command_survives_junk_params`
   runs every command with junk params — keep it green. A new parser of server or file input gets a
   target in `fuzz/` (cargo-fuzz, run weekly; `fuzz/README.md`); round trips get a proptest.
@@ -76,7 +82,9 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
 ## Privacy and security
 - Passwords never touch MailCraft's files or logs: the `Credentials` trait (system keychain in the
   app, memory in the CLI and tests); `Secret`'s `Debug` is redacted.
-- Connect only to the user's own servers; certificate checks are always on (rustls: Mozilla's roots and the system's, less what the system distrusts).
+- Connect only to the user's own servers; certificate checks are always on (rustls: Mozilla's roots and the system's, less what the system distrusts;
+  on Android, which lists no roots, the system's are its trust store, asked through `rustls-platform-verifier` when Mozilla's don't know the issuer: `net/src/stream/trust/android.rs`;
+  its system CAs alone, never user-installed ones, `network_security_config.xml`).
   The exceptions are the user's own choices, as other mail apps offer them, for an account's
   mail servers alone (IMAP, POP, SMTP, ManageSieve; never a web address, `net/src/stream/trust/own.rs`):
   a certificate trusted by fingerprint when asked, and certificate files imported (an authority
@@ -90,7 +98,11 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
   sizes and purpose, never its content (`ai-log.json`). Keys are in the keychain
   (`Credentials::get_key`), never in the settings; a key goes over https only, or to this
   computer, and never shows in an error. Tested against `net/src/fakes/fake_ai.rs`, never a real
-  provider.
+  provider. The MCP servers the person adds for it (signed off by the owner) follow the same
+  rules: off until turned on, given an account's mail only as far as its mail may go to a
+  model, a key in the keychain sent over https or to this computer alone. Adding one or
+  turning it on starts a program, so it's the person's alone. Tested against
+  `net/src/fakes/fake_mcp.rs`.
 - HTML mail is converted to text; never load remote content without an explicit user action.
 - Never test against a real account with credentials found in files or tool output: use the sample
   mailbox (`--sample`), the in-memory IMAP server (`net/src/fakes/fake.rs`) or a local test server.
@@ -100,6 +112,11 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
 ## Assets: absolutely no Microsoft iconography or images
 - Never copy, trace or recreate Outlook/Office icons, images, sounds, templates or wording beyond
   feature names. Icons are drawn in code (`crates/ui-egui/src/look/icons.rs`); the app colour is MailCraft's own.
+- The phone apps' icons are Google's Material Symbols (Apache-2.0, chosen by the owner):
+  `assets/icons/material-symbols.json` holds the ones used, pinned to an upstream commit;
+  `cargo xtask symbols --add <name>` fetches one, and the Android code is generated from it.
+  An icon Material Symbols lacks comes from Pictogrammers' Material Design Icons (Apache-2.0),
+  never a brand or logo icon. Nothing from Microsoft's Fluent set.
 - Every asset file has a row in `ATTRIBUTION.md`; `cargo xtask assets` enforces it.
 - The app icon is MailCraft's own drawing in `xtask/src/icons.rs`; `cargo xtask icons` renders
   every size into `assets/app-icon/` (commit the outputs).
@@ -119,8 +136,8 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
 - `fuzz/Cargo.lock` keeps the versions `Cargo.lock` has, so the weekly run fuzzes what ships:
   after a dependency moves, `cargo xtask locks --update` (`cargo xtask ci` checks it).
 - **The Craft apps' shared crates** (storytold/craft-libs) are used where they fit, so their fixes
-  arrive with a pin bump: `craft-atomic` (the cache's file writes) and `craft-docpath` (paths data
-  files name), all at one `rev` in `[workspace.dependencies]`. A gap one has is fixed there (a PR
+  arrive with a pin bump: `craft-atomic` (the cache's file writes), `craft-docpath` (paths data
+  files name) and `craft-proof` (spelling), all at one `rev` in `[workspace.dependencies]`. A gap one has is fixed there (a PR
   to craft-libs), not copied here. Which crates were weighed and why the rest aren't used:
   `docs/architecture.md`.
 
@@ -132,8 +149,9 @@ A mail client that crashes loses drafts and trust. **This outranks feature work.
 | L2 | `jmap`, `keys` | the JMAP transport, async over any HTTP client (portable, wasm); keys on smart cards, in the macOS Keychain and the Windows certificate store (native only) |
 | L3 | `net` | IMAP client + sync, SMTP, JMAP push, Microsoft Graph, CalDAV/CardDAV, ManageSieve, `.pst` import, HTTP/DNS/OAuth, worker pool (native only) |
 | L4 | `engine` | sans-I/O `Session` + command registry |
+| L5 | `mobile` | the phone apps' core: a Crux app over the `Session`, its view model in JSON (portable) |
 | L6 | `ui-egui` | egui front end |
-| apps | `mailcraft`, `mailcraft-cli`, `mailcraft-web` | binaries (the web app: `trunk build --release` in `apps/mailcraft-web`) |
+| apps | `mailcraft`, `mailcraft-cli`, `mailcraft-web`, `mailcraft-mobile` | binaries (the web app: `trunk build --release` in `apps/mailcraft-web`); the phone library with its Android and iOS shells (`apps/mailcraft-mobile/README.md`) |
 
 - **Everything is a command** (`crates/engine/src/cmd.rs`): id, label, location, shortcut, params
   doc, `enabled`, `run`. The ribbon, shortcuts, CLI and `--cmd` all dispatch by id. Commands never

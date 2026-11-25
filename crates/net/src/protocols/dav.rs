@@ -14,7 +14,7 @@
 use std::collections::HashMap;
 
 use mailcraft_model::ical::{self, CalEvent};
-use mailcraft_model::pim::{BookInfo, CalendarInfo, DavSync, LOCAL, Pim, StoredCard, StoredEvent};
+use mailcraft_model::pim::{BookInfo, CalendarInfo, DavSync, LOCAL, Pim, StoredCard, StoredEvent, StoredTask, TaskList};
 use mailcraft_model::vcard;
 
 use crate::http::{self, Request, Response, Url};
@@ -102,22 +102,58 @@ impl Kind {
     }
 }
 
-/// A signed-in DAV session: Basic sign-in, or Digest once the server asks for it.
+/// How a DAV session signs in.
+enum Auth {
+    /// Basic or Digest authentication with username and password.
+    Password { user: String, password: String, basic: String },
+    /// An OAuth access token, and the hosts it may go to.
+    Bearer(bearer::Bearer),
+}
+
+/// A signed-in DAV session: Basic sign-in, or Digest once the server asks for it, or Bearer token.
 pub struct Dav {
-    user: String,
-    password: String,
-    basic: String,
+    auth: Auth,
     /// The server's Digest challenge once it gave one (Baïkal's default): every request after
-    /// answers it, rather than being refused first.
+    /// answers it, rather than being refused first. Only for Password auth.
     digest: std::sync::Mutex<Option<digest::Challenge>>,
     /// Set while the account's server is being looked for: who may have the password then.
+    /// Only for Password auth.
     guard: std::sync::Mutex<Option<guard::Guard>>,
 }
 
 impl Dav {
     pub fn new(user: &str, password: &str) -> Dav {
         let basic = format!("Basic {}", mailcraft_model::base64::encode(format!("{user}:{password}").as_bytes()));
-        Dav { user: user.into(), password: password.into(), basic, digest: std::sync::Mutex::default(), guard: std::sync::Mutex::default() }
+        Dav {
+            auth: Auth::Password { user: user.into(), password: password.into(), basic },
+            digest: std::sync::Mutex::default(),
+            guard: std::sync::Mutex::default(),
+        }
+    }
+
+    /// A session that signs in with an OAuth access token (Google's CalDAV and CardDAV), sent
+    /// over https to `hosts` alone.
+    pub fn bearer(token: &str, hosts: &[&str]) -> Dav {
+        Dav { auth: Auth::Bearer(bearer::Bearer::new(token, hosts)), digest: std::sync::Mutex::default(), guard: std::sync::Mutex::default() }
+    }
+
+    /// Why Google refused this session's access token (a 403 for a permission it lacks, or the
+    /// API turned off): `None` for any other answer.
+    fn token_refused(&self, resp: &Response) -> Option<String> {
+        let Auth::Bearer(b) = &self.auth else { return None };
+        let why = (resp.status == 403).then(|| bearer::refusal(&resp.headers, &resp.body)).flatten()?;
+        b.note_refused(&why);
+        Some(why)
+    }
+
+    /// What Google said, when `e` is its refusing this session's token a permission (the
+    /// calendars, or the contacts): that part waits for a new sign-in while the rest syncs. `None`
+    /// for any other error, a token refused outright (401) among them, which stops the sync.
+    pub(crate) fn permission_refused(&self, e: &NetError) -> Option<String> {
+        match (&self.auth, e) {
+            (Auth::Bearer(b), NetError::Auth(why)) if b.was_refused(why) => Some(why.clone()),
+            _ => None,
+        }
     }
 
     /// Looking for the server of the account `email` (its mail server `mail_host`) from here on,
@@ -170,11 +206,22 @@ impl Dav {
         self.digest.lock().unwrap_or_else(std::sync::PoisonError::into_inner).clone()
     }
 
-    /// Send a request signed in: with Basic, or the server's Digest challenge. Refused with a
-    /// Digest challenge it can answer, it's sent again answering it (twice at most: once more
-    /// for a nonce gone stale, or another realm a redirect led to); refused again, it's the
-    /// password.
+    /// Send a request signed in: with the access token (to its hosts alone), or with Basic or the
+    /// server's Digest challenge. Refused with a Digest challenge it can answer, it's sent again
+    /// answering it (twice at most: once more for a nonce gone stale, or another realm a redirect
+    /// led to); refused again, it's the password.
     fn send(&self, req: &Request) -> Result<Response> {
+        match &self.auth {
+            Auth::Bearer(b) => match b.for_url(&req.url) {
+                Some(token) => http::send(&req.clone().header("Authorization", token)),
+                None => http::send(req),
+            },
+            Auth::Password { user, password, basic } => self.send_with_password(req, user, password, basic),
+        }
+    }
+
+    /// Send with password auth: check guard, try Basic or Digest.
+    fn send_with_password(&self, req: &Request, user: &str, password: &str, basic: &str) -> Result<Response> {
         if let Some(resp) = self.unsigned(req)? {
             return Ok(resp);
         }
@@ -184,8 +231,8 @@ impl Dav {
             let (auth, answered) = {
                 let mut held = self.digest.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
                 match held.as_mut() {
-                    Some(c) => (c.authorization(&self.user, &self.password, &req.method, &uri), Some(c.realm.clone())),
-                    None => (self.basic.clone(), None),
+                    Some(c) => (c.authorization(user, password, &req.method, &uri), Some(c.realm.clone())),
+                    None => (basic.to_string(), None),
                 }
             };
             let resp = http::send(&req.clone().header("Authorization", &auth))?;
@@ -233,9 +280,13 @@ impl Dav {
                 continue;
             }
             // Only 401 is the sign-in refused: a 403 is this request's (a collection the user may
-            // not read), and asking for the password again wouldn't change it.
+            // not read), and asking for the password again wouldn't change it; unless it's Google
+            // refusing the access token itself.
             if resp.status == 401 {
                 return Err(NetError::Auth("the calendar server refused the user name or password".into()));
+            }
+            if let Some(why) = self.token_refused(&resp) {
+                return Err(NetError::Auth(why));
             }
             return Ok((resp, url));
         }
@@ -365,15 +416,19 @@ impl Dav {
     /// `owner` is known and is neither the home's owner nor the signed-in user is marked
     /// someone else's (SOGo lists the calendars subscribed to in the user's home, issue #30).
     pub fn collections(&self, kind: Kind, home: &str) -> Result<Vec<Item>> {
+        let all = self.all_collections(kind, home)?;
+        Ok(all.into_iter().filter(|i| kind != Kind::Calendars || holds_events(i)).collect())
+    }
+
+    /// Every collection of a kind in a home: for calendars, those of events and the task lists
+    /// alike (issue #201), each to be taken as what it holds ([`holds_events`], [`holds_tasks`]).
+    pub fn all_collections(&self, kind: Kind, home: &str) -> Result<Vec<Item>> {
         let props = "<d:resourcetype/><d:displayname/><cs:getctag/><d:sync-token/><a:calendar-color/><c:supported-calendar-component-set/><d:current-user-privilege-set/><d:owner/><d:current-user-principal/>";
         let (mut items, at) = self.propfind(home, "1", props)?;
         let want = if kind == Kind::Calendars { "calendar" } else { "addressbook" };
         mark_foreign(&mut items, &at, home);
         let mut out = Vec::new();
         for mut i in items.into_iter().filter(|i| i.kinds.iter().any(|k| k == want)) {
-            if kind == Kind::Calendars && !i.comps.is_empty() && !i.comps.iter().any(|c| c == "VEVENT") {
-                continue;
-            }
             i.href = absolute(&at, &i.href)?;
             out.push(i);
         }
@@ -450,10 +505,18 @@ impl Dav {
         };
         req = req.header(cond.0, &cond.1);
         let resp = self.send(&req)?;
+        if let Some(why) = self.token_refused(&resp) {
+            return Err(NetError::Auth(why));
+        }
         match resp.status {
             200..=299 => Ok(Ok(resp.header("ETag").unwrap_or_default().to_string())),
             401 => Err(NetError::Auth("the calendar server refused the user name or password".into())),
-            s => Ok(Err(Refused::from_status(s))),
+            s => {
+                // Where, and on which condition: what tells a wrong address (404, issue #147's
+                // Zoho) from a copy the server says changed (412) in the log (never the item).
+                log::info!("calendars and contacts: PUT {url} ({}) answered HTTP {s}", cond.0);
+                Ok(Err(Refused::from_status(s)))
+            }
         }
     }
 
@@ -464,6 +527,9 @@ impl Dav {
             req = req.header("If-Match", etag);
         }
         let resp = self.send(&req)?;
+        if let Some(why) = self.token_refused(&resp) {
+            return Err(NetError::Auth(why));
+        }
         match resp.status {
             200..=299 | 404 | 410 => Ok(Ok(())),
             401 => Err(NetError::Auth("the calendar server refused the user name or password".into())),
@@ -535,6 +601,19 @@ impl std::fmt::Display for Refused {
             Refused::Other(s) => write!(f, "the server refused it (HTTP {s})"),
         }
     }
+}
+
+/// Whether a calendar collection holds events: it says it takes `VEVENT`, or says nothing of
+/// what it takes (RFC 4791 §5.2.3: then anything).
+pub fn holds_events(c: &Item) -> bool {
+    c.comps.is_empty() || c.comps.iter().any(|x| x == "VEVENT")
+}
+
+/// Whether a calendar collection is a task list (issue #201): it says it takes `VTODO`. One that
+/// says nothing isn't taken for one: SOGo lists its calendars' `.ics` and `.xml` views beside
+/// them as calendars that say nothing, and tasks would go there.
+pub fn holds_tasks(c: &Item) -> bool {
+    c.comps.iter().any(|x| x == "VTODO")
 }
 
 /// Mark the collections of a home listing (read at `at`) that are someone else's: an `owner`
@@ -616,7 +695,10 @@ fn worth_looking_for(email: &str, imap_host: &str) -> bool {
     !mailcraft_model::google_mail(email, imap_host)
 }
 
+mod bearer;
 pub(crate) mod digest;
+mod free_busy;
+pub use free_busy::schedule_answers;
 pub(crate) mod guard;
 mod multistatus;
 pub use multistatus::multistatus;

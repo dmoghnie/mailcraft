@@ -1,14 +1,15 @@
-//! The buttons on new-mail notifications, as the system reports them. Each notification with
-//! buttons waits for its answer on a thread of its own, until a button is pressed or it's
+//! The buttons on new-mail notifications, as the system reports them (Linux, the BSDs, macOS;
+//! Windows' toasts are MailCraft's own and have none yet). Each notification waits for its
+//! answer on a thread of its own (`notified.rs`), until it's clicked, a button is pressed or it's
 //! closed (macOS keeps one in Notification Center, waiting, until it's cleared); the button
 //! pressed is kept until the window asks (`Services::notices_pressed`).
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
-/// At most this many notifications wait for their buttons at once: past these, the next has
-/// none (each holds a thread while it waits).
-pub(crate) const WAITING_MOST: usize = 8;
+/// At most this many notifications wait for their click or their buttons at once: past these,
+/// the next has no buttons and its click isn't followed (each holds a thread while it waits).
+pub(crate) const WAITING_MOST: usize = 32;
 
 /// The buttons pressed kept for the window, at most (it asks every pass).
 const PRESSED_MOST: usize = 64;

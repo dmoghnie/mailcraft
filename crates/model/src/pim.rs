@@ -8,6 +8,7 @@ use crate::vcard::Card;
 
 pub mod free_busy;
 pub mod ical;
+pub mod signature;
 pub mod vcard;
 pub mod work_hours;
 
@@ -275,9 +276,14 @@ pub struct Pim {
     /// Notes (Outlook's Notes): the server's (Exchange) and those kept here.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub notes: Vec<StoredNote>,
-    /// Tasks (Outlook's Tasks): the server's (Exchange) and those kept here.
+    /// Tasks (Outlook's Tasks): the server's (Exchange, CalDAV) and those kept here.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tasks: Vec<StoredTask>,
+    /// The CalDAV server's task lists (issue #201); none when it keeps no tasks (tasks then stay
+    /// on this computer).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub task_lists: Vec<TaskList>,
+
     /// Where the server keeps the user's calendars and address books (found once); empty when
     /// it has none.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -323,10 +329,16 @@ pub struct Pim {
     /// alarm's `ACKNOWLEDGED`, RFC 9074).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub reminder_answers: Vec<ReminderAnswer>,
+    /// Answers to the user's meetings from someone a guest handed their place to (issue #254)
+    /// that came before that guest's own answer saying so: taken in once it does.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub delegate_answers: Vec<crate::MessageKey>,
 }
 
 /// The most notices kept waiting for the server.
 pub const MAX_NOTICES: usize = 500;
+/// The most delegates' answers kept waiting for the guest's ([`Pim::delegate_answers`]).
+pub const MAX_DELEGATE_ANSWERS: usize = 100;
 /// The most reminder answers kept waiting for the server.
 pub const MAX_REMINDER_ANSWERS: usize = 500;
 
@@ -354,7 +366,7 @@ pub struct ReminderAnswer {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Notice {
     pub uid: String,
-    /// `REQUEST`, `CANCEL` or `REPLY`.
+    /// `REQUEST`, a change (`UPDATE`, sent as a `REQUEST` that says so), `CANCEL` or `REPLY`.
     pub method: String,
     /// A guest's answer (`ACCEPTED`, `TENTATIVE`, `DECLINED`).
     #[serde(default, skip_serializing_if = "String::is_empty")]
@@ -415,11 +427,20 @@ pub struct DavSync {
     #[serde(default)]
     pub pushed_notes: Vec<StoredNote>,
     /// The server's tasks (Exchange's Tasks folder, issue #161), read in full (`None`: it keeps
-    /// none, so tasks stay on this computer), and the tasks stored there this time.
+    /// none, so tasks stay on this computer), and the tasks stored there this time (Exchange's,
+    /// or in a CalDAV task list).
     #[serde(default)]
     pub tasks: Option<Vec<StoredTask>>,
     #[serde(default)]
     pub pushed_tasks: Vec<StoredTask>,
+    /// The CalDAV server's task lists (issue #201; `None`: no CalDAV), the tasks of those read
+    /// in full (`synced_task_lists`) except those unchanged (`kept`, by href).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_lists: Option<Vec<TaskList>>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub list_tasks: Vec<StoredTask>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub synced_task_lists: Vec<String>,
     /// Deletions done (by href).
     pub deleted: Vec<String>,
     /// What couldn't be stored or deleted (tried again next time).
@@ -440,6 +461,11 @@ pub struct DavSync {
     /// taken in, everything else left as it is.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub people_only: bool,
+    /// The homes were taken as saved, not looked for: the last look ([`Pim::dav_checked`]) stays
+    /// as it was, so a server not found is looked for again a day after that look, not a day after
+    /// the last of the syncs since.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub homes_kept: bool,
 }
 
 impl Pim {
@@ -545,6 +571,19 @@ impl Pim {
 
     pub fn default_book(&self) -> Option<&BookInfo> {
         self.books.iter().find(|b| !b.read_only)
+    }
+
+    /// The CalDAV task list new tasks go to (issue #201): the first made for tasks alone, else
+    /// the first that takes them; the user's own and writable. `None` when the server keeps no
+    /// tasks: they stay on this computer.
+    pub fn default_task_list(&self) -> Option<&TaskList> {
+        let mut usable = self.task_lists.iter().filter(|l| !l.read_only && !l.foreign);
+        usable.clone().find(|l| l.tasks_only).or_else(|| usable.next())
+    }
+
+    /// Whether a task list is one the user may change.
+    pub fn task_list_writable(&self, id: &str) -> bool {
+        id.is_empty() || self.task_lists.iter().any(|l| l.id == id && !l.read_only)
     }
 }
 

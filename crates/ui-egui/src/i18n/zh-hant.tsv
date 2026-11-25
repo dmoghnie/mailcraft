@@ -285,6 +285,9 @@
 	Keep MailCraft running when its window is closed	關閉視窗後讓 MailCraft 繼續執行
 	Start MailCraft in the notification area	在通知區域啟動 MailCraft
 	Start MailCraft minimized	以最小化方式啟動 MailCraft
+	Start MailCraft when you sign in	登入時啟動 MailCraft
+	It starts as you sign in to this computer and checks for mail. Its window comes up too, unless it's kept running when closed and started put away (below).	登入這台電腦時啟動並檢查郵件。除非設為關閉後繼續執行並以收起方式啟動（見下方），否則視窗也會開啟。
+	Starting MailCraft at sign-in couldn't be changed: {error}	無法變更登入時啟動 MailCraft：{error}
 	It checks for mail and announces it with its window put away, as when it's closed. Started to open a link or a file, it opens the window.	它會像關閉視窗時一樣，在視窗收起的情況下檢查並提示新郵件。為開啟連結或檔案而啟動時，它會開啟視窗。
 	Show the unread mail on its icon	在圖示上顯示未讀郵件
 	How many unread messages the Inboxes have, in the corner of MailCraft's icon in the notification area	收件匣中未讀郵件的數量，顯示在通知區域中 MailCraft 圖示的角落
@@ -1033,7 +1036,7 @@ month	May	5月
 	0 minutes before start	開始前 0 分鐘
 	1 Reminder	1 個提醒
 	{n} Reminders	{n} 個提醒
-	Click Snooze to be reminded again in:	按一下「延後」，在以下時間後再次提醒：
+	Click Snooze to be reminded again in:	按一下「延後提醒」，在以下時間後再次提醒：
 	Dismiss	關閉
 	Dismiss All	全部關閉
 	Open Item	開啟項目
@@ -1277,6 +1280,8 @@ month	May	5月
 	MailCraft {version} is ready	MailCraft {version} 已準備就緒
 	MailCraft {version} is ready. Restart now to install it, or it installs when you close MailCraft.	MailCraft {version} 已準備就緒。立即重新啟動以安裝，或在關閉 MailCraft 時安裝。
 	Restart MailCraft to install it now, or it installs when you close MailCraft.	重新啟動 MailCraft 即可立即安裝，否則將在關閉 MailCraft 時安裝。
+	MailCraft is updated to {version}.	MailCraft 已更新至 {version}。
+	MailCraft {version} didn't install. It's offered again.	MailCraft {version} 未能安裝。它會再次提供。
 	Restart now	立即重新啟動
 	The update is downloaded and checked. It installs now, as MailCraft closes, which takes a moment; open MailCraft again when it's done.	更新已下載並通過驗證。它現在會在 MailCraft 關閉時安裝，需要片刻；完成後請再次開啟 MailCraft。
 	Update and close	更新並關閉
@@ -1878,6 +1883,8 @@ count	occurrences	次
 	Default font	預設字型
 	Font for new messages	新郵件的字型
 	New messages, replies and forwards are written in it. Text you set a font on keeps its own.	新郵件、回覆和轉寄都使用此字型書寫。你設定了字型的文字保留其自己的字型。
+	Font size for new messages	新郵件的字型大小
+	New messages, replies and forwards are written in it. Text you set a size on keeps its own.	新郵件、回覆和轉寄都使用此字型大小書寫。你設定了字型大小的文字保留其自己的大小。
 	Clean up old items	清理舊項目
 	Clean up old items…	清理舊項目…
 	Move old mail to an archive file on this computer, out of the mailbox.	將舊郵件從信箱移到這台電腦上的封存檔案中。
@@ -2034,7 +2041,6 @@ count	occurrences	次
 	Names	姓名
 	AutoArchive settings	自動封存設定
 	From a mailing list.	來自郵寄清單。
-	Unsubscribe	取消訂閱
 	Unsubscribing from junk mail tells its sender that your address is read	取消訂閱垃圾郵件會讓寄件者知道你的地址有人在讀
 	Unsubscribe from this list?	要取消訂閱此郵寄清單嗎?
 	A message asking to leave it goes to {address}, from your account.	一封要求退出的郵件會從你的帳戶寄到 {address}。
@@ -2385,3 +2391,174 @@ count	occurrences	次
 	Write rule	撰寫規則
 	Written by {model}	由 {model} 撰寫
 	gets a yes from MailCraft's AI to “{question}”	MailCraft 的 AI 對「{question}」回答「是」
+	Sort by	排序方式
+	First name	名字
+	Last name	姓氏
+	Open a repeating event	開啟定期事件
+	Open this occurrence	開啟這一次
+	Open the series	開啟整個系列
+	Changes apply to this occurrence alone.	變更只會套用到這一次。
+	Your other filters on the server (“{name}”) run first, and are left as they are.	你在伺服器上的其他篩選器（「{name}」）會先執行，並保持原樣。
+	Found: {url}	已找到：{url}
+	Task list	任務清單
+	Task lists	任務清單
+	All task lists	所有任務清單
+	This task is in a task list that can't be changed here.	此任務所在的任務清單無法在此處變更。
+	Occurrences of this task were changed on their own elsewhere: change it there.	此任務的某些重複已在別處個別變更：請在那裡變更。
+	Everything with them…	與此人的所有內容…
+	Everything with sender…	與寄件者的所有內容…
+	Everything with them	與此人的所有內容
+	Search within everything with them	在與此人的所有內容中搜尋
+	Mail ({n})	郵件 ({n})
+	Files ({n})	附件 ({n})
+	Meetings ({n})	會議 ({n})
+	Links ({n})	連結 ({n})
+	People ({n})	連絡人 ({n})
+	Nothing here.	這裡沒有內容。
+	Nothing here matches the search.	這裡沒有符合搜尋的內容。
+	Files and links come from the mail on this computer: {n} of these messages aren't downloaded.	附件和連結來自這台電腦上的郵件：其中 {n} 封郵件尚未下載。
+	Only the newest of the mail with them is shown.	僅顯示與此人的最新郵件。
+	In their signature	簽名中的資訊
+	Add to their contact…	新增至其連絡人…
+	Open the newest	開啟最新的
+	Open (they sent it)	開啟 (此人寄出)
+	They organise it	由此人召集
+	They're invited	此人已受邀
+	{n} messages	{n} 封郵件
+	One message	1 封郵件
+	Overview	概覽
+	Show all	全部顯示
+	Find someone by name or address	依姓名或地址尋找連絡人
+	Delegate	委託他人
+	Delegate meeting	委託他人參加會議
+	Delegate…	委託他人…
+	Delegated	已委託
+	Invite…	邀請…
+	Name <address>	姓名 <地址>
+	Pick guests from the address book	從通訊錄選取來賓
+	Someone else goes in your place: they get the invitation to answer, and the organizer is told.	由其他人代你參加：對方會收到邀請並可回覆，召集人也會收到通知。
+	The whole series	整個系列
+	This occurrence	這一次
+	Who goes instead of you	由誰代你參加
+	Who is “{name}”?	「{name}」是誰？
+	You asked {name} to go in your place.	你已請 {name} 代你參加。
+	{name} asked you to go in their place.	{name} 請你代其參加。
+	{name} asked {delegate} to go in their place.	{name} 請 {delegate} 代其參加。
+	{name} (delegated to {delegate})	{name}（已委託 {delegate}）
+	AI agents	AI 代理
+	Add MailCraft's MCP server to it: the command mailcraft-cli with the argument mcp	為它加入 MailCraft 的 MCP 伺服器：指令 mailcraft-cli，引數 mcp
+	Agents run this command from now on without asking	代理從現在起不經詢問即執行此指令
+	Allow	允許
+	Always allow	一律允許
+	An AI agent asks	AI 代理請求
+	An AI agent wants to: {command}	AI 代理想要：{command}
+	An AI assistant on this computer (Claude Desktop, Claude Code…) reads your mail, calendar, tasks and people through MailCraft's MCP server, and asks here before each command it wants to run. Off, it reaches nothing.	這台電腦上的 AI 助理（Claude Desktop、Claude Code…）透過 MailCraft 的 MCP 伺服器讀取你的郵件、行事曆、工作和聯絡人，並在執行每個指令前先在這裡詢問。關閉後它無法存取任何內容。
+	Commands agents run without asking first	代理不經詢問即執行的指令
+	Connect an assistant	連接助理
+	Deny	拒絕
+	Forget	忘記
+	Let AI agents use MailCraft	允許 AI 代理使用 MailCraft
+	Nothing yet	尚無
+	Run without asking	不經詢問即執行
+	What AI agents did	AI 代理做過的事
+	{n} more waiting	還有 {n} 個在等待
+	Looked, changed nothing	已檢視，未做變更
+	Ran	已執行
+	You didn't allow it	你未允許
+	Didn't run: {why}	未執行：{why}
+	Let AI agents ask to run commands	允許 AI 代理程式要求執行命令
+	Sending, moving, answering an invitation… each asked about here first, unless you always allow it. Off, agents only read.	傳送、移動、回覆邀請……每個命令都會先在這裡詢問，除非你一律允許它。關閉時，代理程式只能讀取。
+	Accounts AI agents read	AI 代理程式讀取的帳戶
+	One turned off is left out of all they read, and they can't take pictures of the window	關閉的帳戶不在它們讀取的任何內容中，它們也無法擷取視窗的圖片
+	… and {n} more characters	……還有 {n} 個字元
+	A copy installed from MailCraft's releases looks for a newer one and installs it as it closes	從 MailCraft 版本安裝的副本會尋找較新的版本，並在關閉時安裝
+	A notice under every message sent	每封寄出郵件下方的聲明
+	Accounts of {domains} only	僅限 {domains} 的帳戶
+	Encrypted connections only	僅限加密連線
+	Locked	已鎖定
+	No certificate trusted by hand	沒有手動信任的憑證
+	Not taken	未採用
+	Office	辦公室
+	Questions	洽詢
+	Read from	讀取自
+	Releases only	僅正式版本
+	Set by your organisation	由你的組織設定
+	Set up for {organisation}	為 {organisation} 設定
+	Update MailCraft by itself	自動更新 MailCraft
+	Your details for its signature	用於其簽名的你的資料
+	Your organisation	你的組織
+	Your organisation doesn't allow trusting a certificate by hand.	你的組織不允許手動信任憑證。
+	Your organisation set up MailCraft on this computer. What it locked, you can't change.	你的組織在這台電腦上設定了 MailCraft。它鎖定的內容你無法變更。
+	Text size	文字大小
+	Everything in the window, larger or smaller. Ctrl and + or − change it too, and Ctrl+0 puts it back.	視窗中的一切變大或變小。Ctrl 加 + 或 − 也可以變更，Ctrl+0 恢復原樣。
+	Text size: {percent}%	文字大小：{percent}%
+	{percent}%	{percent}%
+	A table, as it will be sent. Backspace after it takes it out.	表格，依傳送時的樣子顯示。在它後面按 Backspace 可將其刪除。
+	Attach messages	附加郵件
+	Attach 1 message	附加 1 封郵件
+	Attach {n} messages	附加 {n} 封郵件
+	Move to To	移到收件者
+	Move to Cc	移到副本
+	Move to Bcc	移到密件副本
+	Copy addresses	複製地址
+	Mailing list:	郵寄清單：
+	Unsubscribe	取消訂閱
+	Show the message in its folder	在所在資料夾中顯示郵件
+	Buttons on a message in the list	清單中郵件上的按鈕
+	Shown when the pointer is over a message, up to {n}.	指標停在郵件上時顯示，最多 {n} 個。
+	Mark read or unread	標示為已讀或未讀
+	Choose a date…	選擇日期…
+	Pick a time in the future.	請選擇未來的時間。
+	In 1 minute	1 分鐘後
+	In 1 day	1 天後
+	Proposal accepted: the meeting is at {when} now.	已接受提議：會議現在改為 {when}。
+	Invitation: {summary}	邀請: {summary}
+	Updated: {summary}	已更新: {summary}
+	Cancelled: {summary}	已取消: {summary}
+	Cancelled: {summary} ({when})	已取消: {summary} ({when})
+	{summary} has been cancelled.	{summary} 已取消。
+	{summary} on {when} has been cancelled.	{when} 的 {summary} 已取消。
+	When: {when}	時間: {when}
+	Where: {place}	地點: {place}
+	Fwd: {summary}	轉寄: {summary}
+	{who} forwarded you this meeting, organized by {organizer}.	{who} 已將此會議轉寄給你，召集人為 {organizer}。
+	{who} asked you to go to this meeting in their place. It's organized by {organizer}.	{who} 請你代其參加此會議，召集人為 {organizer}。
+	Accepted: {summary}	已接受: {summary}
+	Tentative: {summary}	暫定: {summary}
+	Declined: {summary}	已拒絕: {summary}
+	Delegated: {summary}	已委託: {summary}
+	{who} accepted the invitation to {summary}.	{who} 已接受 {summary} 的邀請。
+	{who} tentatively accepted the invitation to {summary}.	{who} 已暫定接受 {summary} 的邀請。
+	{who} declined the invitation to {summary}.	{who} 已拒絕 {summary} 的邀請。
+	{who} asked {delegate} to go to {summary} in their place.	{who} 已請 {delegate} 代其參加 {summary}。
+	New time proposed: {summary}	提議新時間: {summary}
+	{who} proposes a new time for {summary}: {when}.	{who} 為 {summary} 提議了新時間: {when}。
+	New time declined: {summary}	新時間遭拒絕: {summary}
+	The proposed new time for {summary} was declined. The meeting stays as it was.	為 {summary} 提議的新時間已遭拒絕。會議維持不變。
+	Cancel meeting	取消會議
+	Cancel this occurrence	取消這一次
+	Send cancellation	傳送取消通知
+	Delete without sending	刪除但不傳送
+	Message to your guests	給與會者的訊息
+	Your guests are sent a cancellation. Add a message to them, if you like.	與會者會收到取消通知。如有需要，可以附上一則訊息給他們。
+	MailCraft's automatic replies and rules on the server aren't running: another program made its own filters (“{name}”) the ones that run.	MailCraft 在伺服器上的自動回覆和規則沒有執行：另一個程式讓它自己的篩選器（「{name}」）成為執行的那組。
+	Off: another program's filters (“{name}”) run in place of MailCraft's	關閉：執行的是另一個程式的篩選器（「{name}」），而不是 MailCraft 的
+	On, sent by your other filters on the server (“{name}”)	開啟，由你在伺服器上的其他篩選器（「{name}」）傳送
+	Run my rules again	重新執行我的規則
+	These are the replies your other filters on the server (“{name}”) send: change them in the program that made them. MailCraft's can be on only while those are off: the server sends one reply.	這些是你在伺服器上的其他篩選器（「{name}」）傳送的回覆：請在建立它們的程式中變更。只有這些關閉時，MailCraft 的回覆才能開啟：伺服器只會傳送一份回覆。
+	These rules aren't running: another program made its own filters the ones that run. Run them again here, with that program's.	這些規則沒有執行：另一個程式讓它自己的篩選器成為執行的那組。在這裡重新執行它們，並與那個程式的篩選器一起執行。
+	Account: {email}	帳戶: {email}
+	Details	詳細資料
+	Event: “{name}”, {when}	事件: 「{name}」，{when}
+	Message: “{subject}”, from {from}	郵件: 「{subject}」，寄件者 {from}
+	Task: “{name}”	工作: 「{name}」
+	This occurrence: {when}	這一次: {when}
+	To: {who}	收件者: {who}
+	Asking their server…	正在詢問他們的伺服器…
+	Click a time to move the meeting there	按一下某個時間，把會議移到那裡
+	Hide Scheduling Assistant	隱藏排程小幫手
+	Scheduling Assistant	排程小幫手
+	The next time you and your guests are all free	你和所有與會者都有空的下一個時間
+	Their times can't be had: {why}	無法取得他們的時間: {why}
+	You	你
+	{free} of {all} free	{all} 人中 {free} 人有空

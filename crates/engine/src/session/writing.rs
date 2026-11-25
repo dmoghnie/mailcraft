@@ -4,6 +4,7 @@ use mailcraft_model::lookalike;
 
 use super::*;
 
+mod bodies;
 mod check_names;
 mod drafts;
 mod forgotten;
@@ -15,6 +16,7 @@ mod reopen;
 mod send_again;
 mod sending;
 mod signatures;
+mod tables;
 mod templates;
 mod undo_send;
 mod unsubscribe;
@@ -79,6 +81,10 @@ pub struct Compose {
     pub signature_code: String,
     #[serde(default)]
     pub signature_tag: String,
+    /// Tables pasted into it (issue #268), in the order they stand in its text
+    /// ([`Compose::table_places`]).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tables: Vec<mime::PastedTable>,
     pub to: String,
     pub cc: String,
     pub bcc: String,
@@ -108,6 +114,9 @@ pub struct Compose {
     /// messages when it was begun. Sent as HTML for it, even with nothing else formatted.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub font: Option<String>,
+    /// Its text's size in points where none is set on it (issue #267), as the font is.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<u8>,
     /// The pictures placed in the text (each where a [`mime::rich::PICTURE`] stands).
     #[serde(default)]
     pub inline: Vec<mime::InlinePicture>,
@@ -177,7 +186,7 @@ impl Compose {
         use std::hash::{Hash, Hasher};
         let mut h = std::collections::hash_map::DefaultHasher::new();
         (&self.account, &self.from, &self.to, &self.cc, &self.bcc, &self.reply_to, &self.subject, &self.body).hash(&mut h);
-        (&self.signature, &self.signature_name, &self.signature_code).hash(&mut h);
+        (&self.signature, &self.signature_name, &self.signature_code, &self.tables).hash(&mut h);
         (self.importance, self.read_receipt, self.plain, self.send_after, self.sign).hash(&mut h);
         (!self.encrypt_auto).then_some(self.encrypt).hash(&mut h);
         // As the editor keeps them each frame (fitted to the text), and the scheme, by their form.
@@ -212,66 +221,6 @@ impl Compose {
             (was, now) => was.is_none() && now.is_none(),
         };
         same_quote && *at == self.fingerprint()
-    }
-
-    /// The text, HTML and pictures to send: formatted when the text uses formatting or has
-    /// pictures (and the message isn't set to plain text), else plain text alone; the original
-    /// of a reply kept as it came after it ([`Quote`]).
-    pub fn bodies(&self) -> (String, Option<String>, Vec<mime::InlinePicture>) {
-        self.with_quote(self.own_bodies())
-    }
-
-    /// [`Compose::bodies`] of the text alone.
-    fn own_bodies(&self) -> (String, Option<String>, Vec<mime::InlinePicture>) {
-        let mut styles = self.styles.clone();
-        styles.fit(&self.body);
-        let used = mime::rich::pictures(&self.body, &styles);
-        let pictures: Vec<mime::InlinePicture> = self.inline.iter().filter(|p| used.contains(&p.cid)).cloned().collect();
-        let text = mime::rich::to_text(&self.body, &styles);
-        if self.plain || (styles.is_plain() && pictures.is_empty() && self.font.is_none()) {
-            (text, None, Vec::new())
-        } else {
-            (text, Some(mime::rich::to_html_in(&self.body, &styles, self.font.as_deref())), pictures)
-        }
-    }
-
-    /// Set the text (and forget its formatting).
-    pub fn set_text(&mut self, text: String) {
-        self.styles = mime::rich::Styles::plain(&text);
-        self.body = text;
-    }
-
-    /// [`Compose::bodies`], with the signature's `code` in the HTML where the signature
-    /// stands (issue #11: a business card in columns, which the text can't hold), as long as it
-    /// stands there as it was put in; the text keeps the signature's text. Its pictures go with
-    /// it, under this message's own `cid:`s.
-    pub fn bodies_with(&self, code: &str) -> (String, Option<String>, Vec<mime::InlinePicture>) {
-        let (text, html, pictures) = self.own_bodies();
-        let at = self.signature_at().filter(|_| !self.plain && !code.trim().is_empty());
-        let Some(b) = at else { return self.with_quote((text, html, pictures)) };
-        let mut styles = self.styles.clone();
-        styles.fit(&self.body);
-        let start = self.body.get(..b).unwrap_or("").chars().count();
-        let end = start + self.signature.chars().count();
-        // `-- ` stays text, as above every signature; the code is its next line.
-        let (before, before_styles) = mime::rich::slice(&self.body, &styles, 0..start + "-- ".len());
-        let (after, after_styles) = mime::rich::slice(&self.body, &styles, end..self.body.chars().count());
-        let (code_html, code_pictures) = mime::signature_code_parts(code, &self.signature_code_tag());
-        let mut out = mime::rich::to_html_in(&before, &before_styles, self.font.as_deref());
-        // Marked, so a saved draft opened again has the code back as it was.
-        out.push_str(&format!("<div class=\"{}\">{code_html}</div>", mime::SIGNATURE_CLASS));
-        if !after.trim().is_empty() {
-            out.push_str(&mime::rich::to_html_in(&after, &after_styles, self.font.as_deref()));
-        }
-        let mut used = mime::rich::pictures(&before, &before_styles);
-        used.extend(mime::rich::pictures(&after, &after_styles));
-        let mut pictures: Vec<mime::InlinePicture> = pictures.into_iter().filter(|p| used.contains(&p.cid)).collect();
-        for p in code_pictures {
-            if !pictures.iter().any(|q| q.cid == p.cid) {
-                pictures.push(p);
-            }
-        }
-        self.with_quote((text, Some(out), pictures))
     }
 }
 
@@ -396,8 +345,8 @@ impl Session {
         let sig = self.signature_for(&account, &from, false);
         let id = self.fresh_id();
         let window = self.prefs.new_mail_window;
-        let font = self.prefs.compose_font.clone();
-        self.open_compose(Compose { id, account, from, window, font, ..Default::default() });
+        let (font, size) = (self.prefs.compose_font.clone(), self.prefs.compose_size);
+        self.open_compose(Compose { id, account, from, window, font, size, ..Default::default() });
         self.put_signature(sig.as_ref(), None)?;
         self.compose.as_mut().ok_or_else(|| CmdError::Failed("compose".into()))
     }
@@ -505,6 +454,7 @@ impl Session {
             window: self.prefs.reply_window,
             quote,
             font: self.prefs.compose_font.clone(),
+            size: self.prefs.compose_size,
             ..Default::default()
         };
         Ok((c, signature))
@@ -552,6 +502,7 @@ impl Session {
             scheme,
             window: self.prefs.reply_window,
             font: self.prefs.compose_font.clone(),
+            size: self.prefs.compose_size,
             ..Default::default()
         };
         c.set_text(String::new());
@@ -685,6 +636,10 @@ impl Session {
         }
         self.can_send(&c.account)?;
         let mut d = self.draft_of(&c, false)?;
+        // The organisation's disclaimer, as it's sent (issue #245).
+        if let Some(email) = self.account(&c.account).map(|a| a.config.email.clone()) {
+            self.add_disclaimer(&email, &mut d);
+        }
         if sending::no_recipient(&d) {
             return Err(CmdError::Params("add at least one recipient".into()));
         }

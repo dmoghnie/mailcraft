@@ -1,7 +1,7 @@
 # Architecture
 
 This page explains how MailCraft's crates fit together and why they are split this way. It is for
-contributors. The rules every change follows are in [`CLAUDE.md`](../CLAUDE.md); what each version
+contributors. The rules every change follows are in [`AGENTS.md`](../AGENTS.md); what each version
 added is in the [changelog](../CHANGELOG.md).
 
 ## How a click becomes network work
@@ -65,7 +65,7 @@ In the browser (`apps/mailcraft-web`), the same `ui-egui` and engine run over JM
 ## Source layout
 
 Code is split by topic. `foo.rs` sits beside a `foo/` folder and declares its pieces; there is no
-`mod.rs`. A big type keeps one `impl`, continued across files. The size limits are in `CLAUDE.md`,
+`mod.rs`. A big type keeps one `impl`, continued across files. The size limits are in `AGENTS.md`,
 and `cargo xtask sizes` enforces them.
 
 | Where | What |
@@ -301,7 +301,11 @@ How it works:
   that acts on it finishes parsing the body first. The CLI and the tests always parse straight
   away.
 - **Tasks** live in each account's `pim.json`; an on-premises Exchange account's also in its
-  mailbox's Tasks folder, synced as its notes are (`net/src/exchange/ews_pim/tasks.rs`).
+  mailbox's Tasks folder, synced as its notes are (`net/src/exchange/ews_pim/tasks.rs`); a
+  CalDAV account's also in its server's task lists, the calendar collections that take `VTODO`s,
+  read in the same pass as the calendars (a collection holding both read once,
+  `net/src/protocols/dav/syncing/reading.rs`) and merged per list as events are per calendar
+  (`engine/src/session/pim/sync.rs`).
 - **Sending:** `Session::send_block` says why an account can't send. `Session::deliver`, which
   every way of sending goes through, refuses to send from such an account.
 
@@ -491,7 +495,7 @@ MailCraft uses what the other Craft apps share where it fits, so the suite's fix
 
 ## Crash safety
 
-MailCraft must never crash; the rules are in `CLAUDE.md`. `Session::run` (a command),
+MailCraft must never crash; the rules are in `AGENTS.md`. `Session::run` (a command),
 `Session::apply` (an event), lanes and the importer's lanes catch escaped panics. A damaged cache file or index is set aside, never fatal.
 
 ## Tests

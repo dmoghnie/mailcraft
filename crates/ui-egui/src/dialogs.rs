@@ -23,6 +23,7 @@ mod importing;
 mod mailbox;
 mod organize;
 mod other;
+mod person;
 pub(crate) mod pim_dialogs;
 mod signatures;
 #[cfg(test)]
@@ -39,6 +40,10 @@ pub use dav::DavForm;
 pub(crate) use importing::skip_line;
 pub use mailbox::*;
 pub use organize::*;
+pub(crate) use person::PEOPLE_OFFERED;
+pub use person::PersonForm;
+#[cfg(test)]
+pub(crate) use person::{PersonTab, lookup_id as person_lookup_id, search_id as person_search_id};
 pub use signatures::SignatureForm;
 pub use writing::*;
 
@@ -243,22 +248,31 @@ pub enum Dialog {
     Task(Box<crate::pim_dialogs::TaskForm>),
     /// Follow Up › Custom… on a flagged message of the To-Do Bar (issue #160).
     FollowUp(Box<crate::pim_dialogs::FollowUpForm>),
+    /// Snooze › Choose a date… (issue #274).
+    Snooze(Box<crate::pim_dialogs::SnoozeForm>),
     /// Propose new time, for a meeting the user is invited to (issue #238).
     Propose(Box<crate::pim_dialogs::ProposeForm>),
     /// Invitations in the Inbox the calendar hasn't got (issue #237).
     WaitingInvites(Box<crate::pim_dialogs::WaitingForm>),
-    /// Forward a meeting the user is invited to (issue #234): to whom.
-    ForwardMeeting {
+    /// An occurrence of a repeating event opened (issue #241): that occurrence on its own, or
+    /// the series, as Outlook asks.
+    OpenRecurring {
         uid: String,
+        occurrence: i64,
         summary: String,
-        to: String,
     },
+    /// Forward or delegate a meeting the user is invited to (issues #234, #254): to whom.
+    PassMeeting(Box<crate::pim_dialogs::PassForm>),
+    /// Delete a meeting the user organizes (issue #235): the guests told, with a message, or not.
+    CancelMeeting(Box<crate::pim_dialogs::CancelForm>),
     Contact(Box<crate::pim_dialogs::ContactForm>),
     /// File › Options › AI: a model added or changed.
     AiModel(Box<AiModelForm>),
     /// File › Options › AI: a script MailCraft's AI keeps, added or changed.
     Script(Box<ScriptForm>),
     Server(Box<ServerForm>),
+    /// Everything with one person (issue #178).
+    Person(Box<PersonForm>),
     /// File › Info › Clean up old items: old mail archived to a data file (issue #179).
     Archive(Box<ArchiveForm>),
     /// File › Options › Data files › AutoArchive settings (issue #180).
@@ -384,16 +398,19 @@ impl Dialog {
 
     /// Dialogs that belong to the message being written (shown in its window when it has one).
     pub fn for_compose(&self) -> bool {
-        matches!(
-            self,
-            Dialog::SelectNames(_)
-                | Dialog::CheckNames(_)
-                | Dialog::SaveChanges
-                | Dialog::EmptySubject
-                | Dialog::CtrlEnter { .. }
-                | Dialog::SendCheck(_)
-                | Dialog::WordCount(..)
-        ) || matches!(self, Dialog::Signature(f) if f.insert)
+        // The address book for a meeting's guests (issue #253) is the meeting form's, which isn't
+        // a message's: it shows, and gives the form back, where the form was.
+        matches!(self, Dialog::SelectNames(f) if f.purpose != NamesFor::Guests)
+            || matches!(
+                self,
+                Dialog::CheckNames(_)
+                    | Dialog::SaveChanges
+                    | Dialog::EmptySubject
+                    | Dialog::CtrlEnter { .. }
+                    | Dialog::SendCheck(_)
+                    | Dialog::WordCount(..)
+            )
+            || matches!(self, Dialog::Signature(f) if f.insert)
     }
 
     /// The add-account dialog with the address filled in (servers guessed from it).
@@ -463,9 +480,26 @@ impl Dialog {
         }
     }
 
-    /// An event, opened at one of its occurrences.
+    /// An event, opened at one of its occurrences: a series as a whole.
     pub fn open_event(s: &Session, uid: &str, occurrence: i64) -> Option<Dialog> {
         crate::pim_dialogs::EventForm::open(s, uid, occurrence).map(|f| Dialog::Event(Box::new(f)))
+    }
+
+    /// An event's occurrence clicked or opened in the calendar: one that repeats asks whether
+    /// that occurrence alone is opened or the series (issue #241); another opens.
+    pub fn open_item(s: &Session, uid: &str, occurrence: i64) -> Option<Dialog> {
+        let (_, stored) = s.find_event(uid)?;
+        let e = &stored.event;
+        if e.rrule.is_some() || !e.rdates.is_empty() {
+            let summary = s.occurrence_event(uid, occurrence).map_or_else(|| e.summary.clone(), |o| o.summary);
+            return Some(Dialog::OpenRecurring { uid: uid.to_string(), occurrence, summary });
+        }
+        Dialog::open_event(s, uid, occurrence)
+    }
+
+    /// One occurrence of a repeating event, opened on its own (issue #241).
+    pub fn open_occurrence(s: &Session, uid: &str, occurrence: i64) -> Option<Dialog> {
+        crate::pim_dialogs::EventForm::open_occurrence(s, uid, occurrence).map(|f| Dialog::Event(Box::new(f)))
     }
 
     /// The signature editor for the first account (`--cmd ui.signature`).
@@ -482,6 +516,11 @@ impl Dialog {
     /// A task, to edit.
     pub fn open_task(s: &Session, uid: &str) -> Option<Dialog> {
         crate::pim_dialogs::TaskForm::open(s, uid).map(|f| Dialog::Task(Box::new(f)))
+    }
+
+    /// Everything with the person at `email` (issue #178).
+    pub fn person(s: &mut Session, email: &str) -> Dialog {
+        Dialog::Person(Box::new(PersonForm::new(s, email)))
     }
 
     pub fn new_contact() -> Dialog {
@@ -537,6 +576,8 @@ impl Dialog {
             split: v.external.is_some(),
             external: v.external.clone().unwrap_or_default(),
             outside: Outside::from_code(&v.outside),
+            sent_by: v.sent_by.clone(),
+            instead: v.instead.clone(),
             error: None,
         }))
     }
@@ -806,10 +847,14 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         | Dialog::Event(..)
         | Dialog::Task(..)
         | Dialog::FollowUp(..)
+        | Dialog::Snooze(..)
         | Dialog::Propose(..)
-        | Dialog::ForwardMeeting { .. }
+        | Dialog::PassMeeting(..)
+        | Dialog::CancelMeeting(..)
+        | Dialog::OpenRecurring { .. }
         | Dialog::WaitingInvites(..)
         | Dialog::Contact(..) => other::draw(ui, d, s, pics, t, acts),
+        Dialog::Person(f) => person::draw(ui, f, s, t, acts),
     }
 }
 

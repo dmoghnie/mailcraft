@@ -569,6 +569,8 @@ pub(crate) fn tour() {
             accounts::graph_form(),
             accounts::pop_form(),
             accounts::calendar_form(),
+            Dialog::person(&mut a.session, "zoe@studio.example"),
+            Dialog::person(&mut a.session, "nobody@nowhere.example"),
             Dialog::Preview {
                 title: "notes.txt".into(),
                 header: vec![("From".into(), "Zoe".into())],
@@ -838,9 +840,11 @@ impl crate::Services for Ticking {
 
 mod access;
 mod accounts;
+mod agents;
 mod assistant;
 mod calendar;
 mod commands;
+mod organisation;
 mod organize;
 mod pictures;
 mod reading;

@@ -8,9 +8,9 @@
 //! `ui.settings`), `ui.openExport`, `ui.options` and `ui.about` open the File page at that page;
 //! `ui.addAccount` (optionally `={"email":…,"advanced":true,"graph":true}`, `"pop":true` or
 //! `"calendarOnly":true`), `ui.newEvent`,
-//! `ui.newContact`, `ui.newTask`, `ui.openTask` (`={"uid":…}`), `ui.commands` (Find a command) and
-//! `ui.sweep` (Sweep, for the message selected)
-//! open those dialogs.
+//! `ui.newContact`, `ui.newTask`, `ui.openTask` (`={"uid":…}`), `ui.commands` (Find a command),
+//! `ui.sweep` (Sweep, for the message selected) and `ui.person` (`={"email":…}`, everything with
+//! someone) open those dialogs.
 #![cfg_attr(all(target_os = "windows", not(debug_assertions)), windows_subsystem = "windows")]
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
@@ -30,11 +30,9 @@ use secrets::Keychain;
 
 #[cfg(target_os = "macos")]
 use platform::apple_events;
-#[cfg(windows)]
-use platform::toast;
 use platform::{appearance, secrets};
 use startup::{args, logfile, portable, single_instance};
-use window::{ClipboardKeys, app_icon, clipboard_files, drag_out, read_clipboard};
+use window::{ClipboardKeys, app_icon, clipboard_files, clipboard_html, drag_out, read_clipboard};
 use window::{display, graphics};
 
 mod desktop;
@@ -44,6 +42,7 @@ mod startup;
 mod window;
 #[cfg(test)]
 mod windows_manifest;
+mod windows_programs;
 
 /// The system's UI font, if installed (never bundled).
 fn system_fonts() -> (Option<Vec<u8>>, Option<Vec<u8>>) {
@@ -62,9 +61,10 @@ fn system_fonts() -> (Option<Vec<u8>>, Option<Vec<u8>>) {
         };
         places.iter().map(|(r, b)| (PathBuf::from(r), PathBuf::from(b))).collect()
     };
+    // A damaged file is passed over for the next (egui stopped MailCraft on it, at every start).
     for (r, b) in candidates {
-        if let Ok(reg) = std::fs::read(r) {
-            return (Some(reg), std::fs::read(b).ok());
+        if let Some((reg, _)) = desktop::fonts::first_readable([(r, 0)]) {
+            return (Some(reg), desktop::fonts::first_readable([(b, 0)]).map(|(bold, _)| bold));
         }
     }
     (None, None)
@@ -96,6 +96,8 @@ struct App {
     monitors_looked: Option<std::time::Instant>,
     /// MailCraft's icon in the notification area, while it's kept running there.
     tray: desktop::tray::Tray,
+    /// AI agents' control channel, while the user lets them in (issue #255).
+    agents: desktop::agents::Channel,
 }
 
 /// How often changed settings are written while MailCraft runs.
@@ -117,6 +119,7 @@ impl App {
         let monitors = frame.winit_window().map(|w| mailcraft_ui_egui::Monitors {
             all: w.available_monitors().map(|m| rect((m.position().x, m.position().y), (m.size().width, m.size().height))).collect(),
             primary: w.primary_monitor().map(|m| rect((m.position().x, m.position().y), (m.size().width, m.size().height))),
+            work: window::work_areas::list(),
         });
         mailcraft_ui_egui::set_monitors(ctx, monitors);
     }
@@ -182,6 +185,12 @@ impl App {
                 self.badge = Some(unread);
             }
         }
+        // AI agents' requests (issue #255): answered, minimized or hidden too.
+        self.agents.follow(&mut self.app, ctx);
+        // What the settings say of updating, for the updater's next check.
+        if let Some(u) = &self.updater {
+            u.follow_choice(self.app.session.prefs.updates);
+        }
         // An update ready while the window is minimized or behind others: the system says so.
         self.app.follow_update(ctx);
         self.tray.follow(&mut self.app, ctx);
@@ -215,6 +224,8 @@ impl App {
         if let Some(server) = &self.instance {
             server.close();
         }
+        // Agents' connection file and token go: nothing listens any more.
+        self.agents.stop();
         // A test build downloaded and checked: installed now that MailCraft closes (unless it was
         // kept for later); a download still going stops, to carry on next time.
         if let Some(u) = &self.updater {
@@ -271,7 +282,7 @@ fn main() -> eframe::Result {
     }
     // Text pasted from Outlook, Word or a web page keeps its look.
     // A logo copied with it from older Word or Outlook, a file of Office's own, comes along too.
-    mailcraft_ui_egui::set_clipboard_html(|| read_clipboard(|c| c.get().html().ok()).filter(|h| !h.trim().is_empty()).map(desktop::office_pictures));
+    mailcraft_ui_egui::set_clipboard_html(|| clipboard_html().map(desktop::office_pictures));
     let launch = Launch::resolve(args, opened);
     // MailCraft's Flatpak under its id before 0.36 kept its mail in that id's sandbox: brought
     // across before anything is made in this one's.
@@ -319,7 +330,14 @@ fn main() -> eframe::Result {
         say(&format!("the sample mailbox couldn't be created: {e}"));
     }
     let build_sha = option_env!("MAILCRAFT_BUILD_SHA").filter(|s| !s.trim().is_empty()).map(str::to_string);
+    // The organisation's profile (issue #245), before anything signs in: its own Microsoft
+    // registration is taken here; the session gets it once the window's settings are back.
+    let organisation = desktop::organisation::read(launch.portable.dir.as_deref());
+    let org_logo = organisation.effective(&[]).logo.as_deref().and_then(desktop::organisation::logo);
     let made = Made { clock: Clock::new(now, offset), portable: launch.portable.dir.is_some(), build_sha: build_sha.clone() };
+    // A notification clicked comes back to this MailCraft (issue #273).
+    #[cfg(windows)]
+    platform::toast::claim(made.portable);
     // The data files open on a thread of their own, and the session is made there from them,
     // while the window shows how that goes (a file not closed properly is checked: minutes).
     let (progress, opened) = {
@@ -338,8 +356,15 @@ fn main() -> eframe::Result {
     // `DISPLAY` is logged as it's chosen).
     let x11 = cfg!(all(unix, not(target_os = "macos"))) && display::choose_from_env() == display::Choice::X11;
     let (options, card) = launch::window(launch.sample, saved_ui.as_ref(), theme, x11);
-    let started =
-        Started { launch, opening: Opening { progress, opened, card, made }, state_path, instance, updater, looks: Looks { saved_ui, theme, x11 } };
+    let started = Started {
+        launch,
+        opening: Opening { progress, opened, card, made },
+        state_path,
+        instance,
+        updater,
+        looks: Looks { saved_ui, theme, x11 },
+        organisation: (organisation, org_logo),
+    };
     // A window that can't open says why, rather than the app leaving without a word (or
     // staying in the background); a panic on the way is caught for that too.
     let ran = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| run(options, started)));
@@ -360,7 +385,7 @@ fn main() -> eframe::Result {
     rfd::MessageDialog::new()
         .set_level(rfd::MessageLevel::Error)
         .set_title("MailCraft")
-        .set_description(cant_open(&failed))
+        .set_description(cant_open(&failed, graphics::windows_build()))
         .set_buttons(rfd::MessageButtons::Ok)
         .show();
     std::process::exit(1)
@@ -396,23 +421,21 @@ fn say(what: &str) {
     let _ = std::io::Write::write_fmt(&mut std::io::stderr(), format_args!("mailcraft: {what}\n"));
 }
 
-/// Tell standard output, as `println!` would without its panic on a closed pipe.
+/// Tell standard output, as `println!` would without its panic on a closed pipe. On Windows the
+/// released app is a window program, with no console of its own: what `--help` and `--version`
+/// printed went nowhere (issue #257), so it goes to the console MailCraft was started from, if any
+/// (failing where there's none, or it has its own: a debug build).
 fn say_out(what: &str) {
+    #[cfg(windows)]
+    let _ = winsafe::AttachConsole(winsafe::PidParent::Parent);
     let _ = std::io::Write::write_fmt(&mut std::io::stdout(), format_args!("{what}\n"));
 }
 
 /// What the message box says when the window can't open.
-fn cant_open(why: &str) -> String {
-    let (help, log) = if cfg!(windows) {
-        (
-            "Updating it may help, or starting MailCraft with the environment variable WGPU_FORCE_FALLBACK_ADAPTER=1, which draws it with \
-             Windows' software renderer.",
-            "%APPDATA%\\MailCraft\\mailcraft.log",
-        )
-    } else {
-        ("Updating it may help.", "mailcraft.log, in MailCraft's data folder")
-    };
-    format!("MailCraft's window couldn't open:\n{why}\n\nThis is usually the graphics driver. {help}\n\nThe details are in {log}.")
+fn cant_open(why: &str, build: Option<u32>) -> String {
+    let log = if cfg!(windows) { "%APPDATA%\\MailCraft\\mailcraft.log" } else { "mailcraft.log, in MailCraft's data folder" };
+    let help = graphics::advice(why, cfg!(windows), build);
+    format!("MailCraft's window couldn't open:\n{why}\n\n{help}\n\nThe details are in {log}.")
 }
 
 /// The data files opening (`desktop/boot.rs`), what the window shows meanwhile, and what the
@@ -444,15 +467,24 @@ struct Started {
     instance: Option<single_instance::Server>,
     updater: Option<self_update::Updater>,
     looks: Looks,
+    /// The organisation's profile, and its logo's bytes (issue #245).
+    organisation: (mailcraft_engine::policy::Organisation, Option<Vec<u8>>),
 }
 
 /// Open the window and run the app until it closes: the boot card while the data files open,
 /// then MailCraft.
 fn run(options: eframe::NativeOptions, started: Started) -> eframe::Result {
-    let Started { launch, opening: Opening { progress, opened, card, made }, state_path, instance, updater, looks: Looks { saved_ui, theme, x11 } } =
-        started;
+    let Started {
+        launch,
+        opening: Opening { progress, opened, card, made },
+        state_path,
+        instance,
+        updater,
+        looks: Looks { saved_ui, theme, x11 },
+        organisation: (organisation, org_logo),
+    } = started;
     let put_away = launch.starts_away(saved_ui.as_ref());
-    let Launch { args: cmd_args, handed, sample, base, .. } = launch;
+    let Launch { args: cmd_args, handed, sample, base, root, .. } = launch;
     // The guard stays here, outside the closure, so the handlers live as long as the loop.
     #[cfg(target_os = "macos")]
     let (_finder_guard, finder) = apple_events::listen();
@@ -494,7 +526,7 @@ fn run(options: eframe::NativeOptions, started: Started) -> eframe::Result {
                 apple_events::repaint_on_arrival(&finder, &cc.egui_ctx);
                 // ⌘Q asks before what's being written is lost; without the menu it still runs,
                 // quitting as winit's does.
-                if let Err(e) = apple_events::install_menu(&cc.egui_ctx) {
+                if let Err(e) = apple_events::install_menu(&cc.egui_ctx, desktop::tray::ask_exit) {
                     log::warn!("the app menu wasn't put in place, so Quit won't ask first: {e}");
                 }
             }
@@ -531,12 +563,13 @@ fn run(options: eframe::NativeOptions, started: Started) -> eframe::Result {
                         data: desktop_data,
                         base,
                         moved,
-                        #[cfg(windows)]
                         portable: app_portable,
                         updater: updater.clone(),
                         own_title_bar,
                         frame_guard,
                         x11,
+                        clicks: desktop::notified::Clicks::waking(ctx),
+                        root: root.clone(),
                         ..Default::default()
                     }),
                 );
@@ -555,6 +588,8 @@ fn run(options: eframe::NativeOptions, started: Started) -> eframe::Result {
                 if theme.is_some() {
                     app.ui.dark = theme;
                 }
+                // The organisation's profile over the settings, before any start-up command.
+                app.set_organisation(organisation.clone(), org_logo.clone());
                 desktop::start::commands(&mut app, &args);
                 handed.give(&mut app);
                 // From here the open message's body is read and parsed on a thread of its own (the
@@ -576,6 +611,7 @@ fn run(options: eframe::NativeOptions, started: Started) -> eframe::Result {
                     looked: std::time::Instant::now(),
                     monitors_looked: None,
                     tray: desktop::tray::Tray::new(native_wayland),
+                    agents: desktop::agents::Channel::new(root.clone()),
                 }
             });
             Ok(Box::new(desktop::boot::Window::Booting(Box::new(desktop::boot::Booting {
@@ -631,9 +667,33 @@ mod tests {
     /// A window that can't open says why, in plain sentences (no gaps left from the source).
     #[test]
     fn a_window_that_cant_open_says_why() {
-        let m = cant_open("no graphics adapter");
+        let m = cant_open("no graphics adapter", None);
         assert!(m.starts_with("MailCraft's window couldn't open:\nno graphics adapter\n"), "{m}");
         assert!(m.contains("mailcraft.log") && !m.contains("  "), "{m}");
+    }
+
+    /// Issue #256: Windows Server 2016 over Remote Desktop, where DirectX 12 offers nothing at all.
+    /// The message says that Windows is too old for the software renderer, and doesn't send people
+    /// to the variable that draws with it (they set it, and nothing changed).
+    #[test]
+    fn an_old_windows_without_a_gpu_is_told_so() {
+        let none = format!("WGPU error: Adapter selection failed: {}", graphics::NONE_FOUND);
+        let fallback = "WGPU_FORCE_FALLBACK_ADAPTER";
+        let server_2016 = graphics::advice(&none, true, Some(14393));
+        assert!(server_2016.contains("1709") && server_2016.contains("14393") && !server_2016.contains(fallback), "{server_2016}");
+        // A newer Windows that found nothing: its driver, still without the variable.
+        let newer = graphics::advice(&none, true, Some(19045));
+        assert!(!newer.contains("1709") && !newer.contains(fallback) && newer.contains("driver"), "{newer}");
+        // Nothing known of the build: the driver.
+        assert!(!graphics::advice(&none, true, None).contains("1709"));
+        // An adapter found that can't draw: the variable is still offered, whatever the build.
+        let found = "a graphics adapter can't draw the window; DirectX 12 found Intel(R) HD Graphics (IntegratedGpu)";
+        assert!(graphics::advice(found, true, Some(14393)).contains(fallback));
+        // Not Windows: the driver alone.
+        let elsewhere = graphics::advice(&none, false, Some(14393));
+        assert!(!elsewhere.contains(fallback) && !elsewhere.contains("1709"), "{elsewhere}");
+        // And whole sentences in the box.
+        assert!(!cant_open(&none, Some(14393)).contains("  "));
     }
 
     /// The system's thumbnailer (as when ffmpeg isn't installed) makes a video's frame through

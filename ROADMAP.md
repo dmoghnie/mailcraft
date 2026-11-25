@@ -30,5 +30,7 @@ The work left is listed in [known gaps](docs/gaps.md), most-hit first:
 - Signed releases and signed updates.
 - MailCraft on phones: the Android app past its first build (calendar, people, attachments,
   notifications, checking in the background), and the iOS app built and tested on a Mac.
+- Backups on a schedule (#266): MailCraft copying its folders itself, each data file as it was at
+  one moment while it goes on writing, into a folder you choose, keeping the last few.
 
 See [what each version added](CHANGELOG.md) and [what's still missing](docs/gaps.md).

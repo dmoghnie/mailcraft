@@ -5,13 +5,13 @@ use super::*;
 pub(super) fn commands() -> Vec<CommandSpec> {
     vec![
         // View
-        CommandSpec::new("view.readingPane", "Reading pane", "View › Layout", reading_pane).params(r#"{"value": "right"|"bottom"|"off"}"#),
+        CommandSpec::new("view.readingPane", "Reading pane", "View › Layout", reading_pane).setting("reading_pane").params(r#"{"value": "right"|"bottom"|"off"}"#),
         CommandSpec::new("view.conversations", "Show as conversations", "View › Messages", |s, v| {
             s.prefs.conversations = p::bool(v, "on").unwrap_or(!s.prefs.conversations);
             s.refresh_list();
             s.rethread_reading();
             Ok(json!({"on": s.prefs.conversations}))
-        })
+        }).setting("conversations")
         .params(r#"{"on"?: bool}"#),
         toggle!("view.preview", "Message preview", "View › Messages", show_preview),
         toggle!("view.compact", "Compact list", "View › Layout", compact),
@@ -20,14 +20,14 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.prefs.folder_density = crate::FolderDensity::from_code(code)
                 .ok_or_else(|| CmdError::Params(format!("`value` is \"spacious\", \"medium\" or \"compact\", not `{code}`")))?;
             Ok(json!({"value": code}))
-        })
+        }).setting("folder_density")
         .params(r#"{"value": "spacious"|"medium"|"compact"} (the folder pane's text size, row height and indent)"#),
         CommandSpec::new("view.groups", "Show in groups", "View › Arrangement", |s, v| {
             s.prefs.groups = p::bool(v, "on").unwrap_or(!s.prefs.groups);
             // Headings folded away (issue #189) fold only while they're shown.
             s.rebuild_rows();
             Ok(json!({"on": s.prefs.groups}))
-        })
+        }).setting("groups")
         .params(r#"{"on"?: bool}"#),
         toggle!("view.singleLine", "Single-line list", "View › Layout", single_line),
         toggle!("view.classicRibbon", "Classic ribbon", "View › Layout", classic_ribbon),
@@ -41,7 +41,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.prefs.accent = crate::session::accent_code(given)
                 .ok_or_else(|| CmdError::Params(format!("`{given}` isn't one of the accent colours or a colour as #rrggbb")))?;
             Ok(json!({"color": s.prefs.accent}))
-        })
+        }).setting("accent")
         .params(r##"{"color": "teal"|"blue"|"indigo"|"violet"|"rose"|"red"|"orange"|"green"|"#rrggbb" ("" or "teal": MailCraft's own)}"##),
         toggle!("view.plainTopBar", "Plain top bar", "File › Options › Personalize", plain_top_bar),
         toggle!("view.lightMessages", "Messages on a light background", "File › Options › General", light_messages),
@@ -56,12 +56,12 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.prefs.date_style = style;
             s.clock = s.clock.styled(style);
             Ok(json!({"order": style.order.code(), "hours12": style.hours12, "fullInList": style.full_in_list}))
-        })
+        }).setting("date_style")
         .params(r#"{"order"?: "iso"|"dmy"|"mdy"|"dmy."|"ymd." (2026-10-28, 28/10/2026, 10/28/2026, 28.10.2026, 2026.10.28), "hours12"?: bool, "fullInList"?: bool}"#),
         CommandSpec::new("view.systemTitleBar", "Use the system title bar", "File › Options › General", |s, v| {
             s.prefs.system_title_bar = p::bool(v, "on").unwrap_or(!s.prefs.system_title_bar);
             Ok(json!({"on": s.prefs.system_title_bar, "atNextStart": true}))
-        })
+        }).setting("system_title_bar")
         .params(r#"{"on"?: bool} (Windows; when MailCraft starts again)"#),
         CommandSpec::new("view.arrange", "Arrange by", "View › Arrangement", |s, v| {
             let by = p::req_str(v, "by")?;
@@ -71,13 +71,13 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.prefs.reverse_sort = p::bool(v, "reverse").unwrap_or(false);
             s.refresh_list();
             Ok(json!({"by": s.prefs.arrange.code(), "reverse": s.prefs.reverse_sort}))
-        }).leaves_body()
+        }).setting("arrange,reverse_sort").leaves_body()
         .params(r#"{"by": "date"|"from"|"to"|"subject"|"size"|"flag"|"attachments", "reverse"?: bool}"#),
         CommandSpec::new("view.reverseSort", "Reverse sort", "View › Arrangement", |s, v| {
             s.prefs.reverse_sort = p::bool(v, "on").unwrap_or(!s.prefs.reverse_sort);
             s.refresh_list();
             Ok(json!({"on": s.prefs.reverse_sort}))
-        }).leaves_body()
+        }).setting("reverse_sort").leaves_body()
         .params(r#"{"on"?: bool}"#),
         CommandSpec::new("view.folderPane", "Minimize the folder pane", "View › Layout", |s, v| {
             s.prefs.folder_pane_minimized = p::bool(v, "minimized").unwrap_or(!s.prefs.folder_pane_minimized);
@@ -109,7 +109,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.group_tab = crate::InboxGroup::Primary;
             s.refresh_list();
             Ok(json!({"on": s.prefs.focused_inbox}))
-        })
+        }).setting("focused_inbox")
         .params(r#"{"on"?: bool}"#),
         CommandSpec::new("list.focusTab", "Focused / Other", "Message list", |s, v| {
             let value = p::req_str(v, "value")?;
@@ -153,8 +153,20 @@ pub(super) fn commands() -> Vec<CommandSpec> {
                 Some(_) => return Err(CmdError::Params("`font` is a font's name or null".into())),
             };
             Ok(json!({ "font": s.prefs.compose_font }))
-        })
+        }).setting("compose_font")
         .params(r#"{"font"?: string (an installed typeface: new messages, replies and forwards are written in it) | null (MailCraft's own)}"#),
+        CommandSpec::new("options.composeSize", "Font size for new messages", "File › Options › Mail", |s, v| {
+            s.prefs.compose_size = match v.get("size") {
+                Some(serde_json::Value::Null) | None => None,
+                Some(z) => {
+                    let z = z.as_u64().and_then(|z| u8::try_from(z).ok());
+                    let ok = mailcraft_mime::rich::font_size(z).ok_or_else(|| CmdError::Params(format!("`size` is one of {:?} or null", mailcraft_mime::rich::SIZES)))?;
+                    (ok != mailcraft_mime::rich::DEFAULT_SIZE).then_some(ok)
+                }
+            };
+            Ok(json!({ "size": s.prefs.compose_size }))
+        }).setting("compose_size")
+        .params(r#"{"size"?: number (points: 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28 or 36; new messages, replies and forwards are written in it) | null (MailCraft's own, 11)}"#),
         CommandSpec::new("spelling.addWord", "Add to dictionary", "Message editor › Spelling", |s, v| {
             let word = p::req_str(v, "word")?;
             let w = crate::session::dictionary_word(word).ok_or_else(|| CmdError::Params(format!("`{word}` isn't a word")))?;
@@ -165,8 +177,37 @@ pub(super) fn commands() -> Vec<CommandSpec> {
                 return Err(CmdError::Failed("the dictionary is full".into()));
             }
             Ok(json!({ "added": s.prefs.dictionary.insert(w) }))
-        })
+        }).setting("dictionary")
         .params(r#"{"word": string (taken as spelled right in every language), "remove"?: true (taken out of the dictionary)}"#),
+        CommandSpec::new("view.textSize", "Text size", "File › Options › General", |s, v| {
+            s.prefs.text_size = match v.get("percent") {
+                Some(serde_json::Value::Null) | None => crate::NORMAL_TEXT,
+                Some(z) => z.as_u64().and_then(|z| u16::try_from(z).ok()).filter(|z| crate::TEXT_SIZE_RANGE.contains(z)).ok_or_else(|| {
+                    CmdError::Params(format!("`percent` is from {} to {}, or null", crate::TEXT_SIZE_RANGE.start(), crate::TEXT_SIZE_RANGE.end()))
+                })?,
+            };
+            Ok(json!({ "percent": s.prefs.text_size }))
+        })
+        .setting("text_size")
+        .params(r#"{"percent"?: number (80 to 200: the whole window's text and controls, larger or smaller) | null (its own size, 100)}"#),
+        CommandSpec::new("view.textBigger", "Larger text", "View", |s, _| {
+            s.prefs.text_size = crate::session::text_size_step(s.prefs.text_size, true);
+            Ok(json!({ "percent": s.prefs.text_size }))
+        })
+        .key("Mod+Plus / Mod+Shift+Plus / Mod+Equals")
+        .setting("text_size"),
+        CommandSpec::new("view.textSmaller", "Smaller text", "View", |s, _| {
+            s.prefs.text_size = crate::session::text_size_step(s.prefs.text_size, false);
+            Ok(json!({ "percent": s.prefs.text_size }))
+        })
+        .key("Mod+Minus")
+        .setting("text_size"),
+        CommandSpec::new("view.textNormal", "Text at its own size", "View", |s, _| {
+            s.prefs.text_size = crate::NORMAL_TEXT;
+            Ok(json!({ "percent": s.prefs.text_size }))
+        })
+        .key("Mod+0")
+        .setting("text_size"),
         toggle!("view.closeToTray", "Keep MailCraft running when its window is closed", "File › Options › General", close_to_tray),
         toggle!("view.startInTray", "Start MailCraft with its window put away", "File › Options › General", start_in_tray),
         toggle!("view.trayUnread", "The unread count on the notification area's icon", "File › Options › General", tray_unread),
@@ -182,10 +223,64 @@ pub(super) fn commands() -> Vec<CommandSpec> {
                 };
             }
             Ok(json!({"does": s.prefs.ctrl_enter}))
-        })
+        }).setting("ctrl_enter")
         .params(r#"{"does"?: "ask"|"send"|"nothing"}"#),
+        // Issue #274: Archive (or Pin) among a row's buttons, as the user chooses.
+        CommandSpec::new("options.rowActions", "Buttons on a message in the list", "File › Options › Mail", |s, v| {
+            if let Some(given) = v.get("actions") {
+                let codes = given.as_array().ok_or_else(|| CmdError::Params("`actions` is a list".into()))?;
+                let mut chosen = Vec::new();
+                for c in codes {
+                    let code = c.as_str().unwrap_or_default();
+                    chosen.push(crate::RowAction::from_code(code).ok_or_else(|| CmdError::Params(format!("`{c}` isn't delete, archive, flag, read or pin")))?);
+                }
+                chosen.sort();
+                chosen.dedup();
+                if chosen.len() > crate::ROW_ACTIONS_MAX {
+                    return Err(CmdError::Params(format!("a row has room for {} buttons", crate::ROW_ACTIONS_MAX)));
+                }
+                s.prefs.row_actions = chosen;
+            }
+            Ok(json!({"actions": s.prefs.row_actions}))
+        }).setting("row_actions")
+        .params(r#"{"actions"?: ["delete"|"archive"|"flag"|"read"|"pin"] (up to 4; [] for none)}"#),
         toggle!("calendar.tentativeInvites", "Invitations into the calendar as tentative", "File › Options › Calendar", tentative_invites),
         toggle!("calendar.recordAnswers", "Record guests' answers as they arrive", "File › Options › Calendar", record_answers),
+        // AI agents (issue #255): whether they may use MailCraft, whether they may ask to run
+        // commands, the accounts kept from them, and the commands they may run without the
+        // window asking first. None is an agent's own to run.
+        toggle!("options.agents", "Let AI agents use MailCraft", "File › Options › AI agents", agents),
+        toggle!("options.agentsRun", "Let AI agents ask to run commands", "File › Options › AI agents", agents_run),
+        CommandSpec::new("options.agentsAccount", "Accounts AI agents read", "File › Options › AI agents", |s, v| {
+            let id = p::str(v, "account").ok_or_else(|| CmdError::Params("say which account".into()))?;
+            if s.account(id).is_none() {
+                return Err(CmdError::Params(format!("no account `{id}`")));
+            }
+            let on = v.get("on").and_then(serde_json::Value::as_bool).unwrap_or(true);
+            s.prefs.agents_hidden.retain(|x| x != id);
+            if !on {
+                s.prefs.agents_hidden.push(id.to_string());
+            }
+            Ok(json!({"hidden": s.prefs.agents_hidden}))
+        })
+        .params(r#"{"account": string (its id), "on"?: bool (agents read it; default true)}"#),
+        CommandSpec::new("options.agentsAlways", "Commands agents run without asking", "File › Options › AI agents", |s, v| {
+            match (p::str(v, "allow"), p::str(v, "forget")) {
+                (Some(id), _) => {
+                    if s.agent_command(id).is_err() {
+                        return Err(CmdError::Params(format!("`{id}` isn't a command agents may run")));
+                    }
+                    if !s.prefs.agents_always.iter().any(|x| x == id) && s.prefs.agents_always.len() < crate::session::AGENTS_ALWAYS_MAX {
+                        s.prefs.agents_always.push(id.to_string());
+                    }
+                }
+                (None, Some("")) => s.prefs.agents_always.clear(),
+                (None, Some(id)) => s.prefs.agents_always.retain(|x| x != id),
+                (None, None) => {}
+            }
+            Ok(json!({"always": s.prefs.agents_always}))
+        }).setting("agents_always")
+        .params(r#"{"allow"?: string (a command's id: agents run it without asking), "forget"?: string (one such command's id; "" for all)}"#),
         CommandSpec::new("options.answeredInvites", "After answering a meeting invitation", "File › Options › Mail", |s, v| {
             if let Some(after) = p::str(v, "after") {
                 s.prefs.answered_invites = match after {
@@ -212,7 +307,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
                 s.prefs.answered_replies = on;
             }
             Ok(json!({"after": s.prefs.answered_invites, "folders": s.prefs.answered_folders, "replies": s.prefs.answered_replies}))
-        })
+        }).setting("answered_invites,answered_replies")
         .params(r#"{"after"?: "keep"|"delete"|"move", "account"?: string, "folder"?: string (with "move": where the account's go; "" for none), "replies"?: bool (guests' answers too)}"#),
         CommandSpec::new("view.todoBar", "To-Do Bar", "View › Layout", |s, v| {
             if p::bool(v, "off") == Some(true) {
@@ -231,7 +326,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             }
             let bar = s.prefs.todo_bar;
             Ok(json!({"calendar": bar.calendar, "appointments": bar.appointments, "tasks": bar.tasks, "width": bar.width, "split": bar.split}))
-        })
+        }).setting("todo_bar")
         .params(
             r#"{"part"?: "calendar"|"appointments"|"tasks" (that part; none: all of them), "on"?: bool (shown or hidden; not given: the other way), "off"?: true (all hidden), "width"?: number, "split"?: 15…85 (the appointments' share of the height, in percent, when the tasks are under them)}"#,
         ),
@@ -289,7 +384,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             let n = p::u64(v, "count").ok_or_else(|| CmdError::Params("`count` is required (1 to 6)".into()))?;
             s.prefs.calendar_months = u8::try_from(n.clamp(1, 6)).unwrap_or(1);
             Ok(json!({"count": s.prefs.calendar_months}))
-        })
+        }).setting("calendar_months")
         .params(r#"{"count": number (1 to 6)}"#),
         CommandSpec::new("calendar.workTime", "Work time", "File › Options › Calendar", |s, v| {
             let days: Option<Vec<u32>> = match v.get("days") {
@@ -314,7 +409,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             };
             let (start, end) = (time("start")?, time("end")?);
             s.set_work_time(days.as_deref(), start, end)
-        })
+        }).setting("work_time")
         .params(r#"{"days"?: [number] (0 Monday … 6 Sunday), "start"?: "HH:MM", "end"?: "HH:MM"}"#),
         CommandSpec::new("account.keepMail", "Mail kept on this computer", "File › Options › Mail", |s, v| {
             if let Some(n) = p::u64(v, "messages") {
@@ -325,7 +420,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             }
             s.apply_sync_prefs();
             Ok(json!({"messages": s.prefs.keep_messages, "offline": s.prefs.keep_offline}))
-        })
+        }).setting("keep_messages,keep_offline")
         .params(r#"{"messages"?: number (the newest of each folder kept; 0: all), "offline"?: number (of those, the newest downloaded in full)}"#),
         CommandSpec::new("account.onlineOnly", "Online only", "File › Options › Mail", |s, v| {
             let id = p::req_str(v, "account")?;
@@ -370,7 +465,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
                 other => return Err(CmdError::Params(format!("`by` is modified, title or color, not `{other}`"))),
             };
             Ok(json!({"by": p::req_str(v, "by")?}))
-        })
+        }).setting("notes_order")
         .params(r#"{"by": "modified"|"title"|"color"}"#),
         CommandSpec::new("view.readingOptions", "Reading pane options", "File › Options › Mail", |s, v| {
             if let Some(on) = p::bool(v, "markRead") {
@@ -390,7 +485,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
                 crate::session::ReadInPane::Left => "left",
             };
             Ok(json!({"markRead": s.prefs.mark_read_on_open, "when": when, "after": s.prefs.read_after_secs}))
-        })
+        }).setting("mark_read_on_open,read_after_secs,read_in_pane")
         .params(r#"{"markRead"?: bool (in the reading pane at all; opening a message in its own window always does), "when"?: "shown"|"left" (when it's shown, or once another is chosen), "after"?: number (seconds shown first, with "shown")}"#),
         toggle!("view.animations", "Play animations", "File › Options › General", animations, r#"{"on"?: bool (none: switch)}"#),
         toggle!("view.photoLocation", "Send where photos were taken", "File › Options › Safety", keep_photo_location, r#"{"on"?: bool (none: switch; off, the place is taken out of attached photos as they're sent)}"#),
@@ -402,9 +497,9 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.prefs.sender_addresses = crate::session::SenderAddresses::from_code(show)
                 .ok_or_else(|| CmdError::Params(format!("`show` is always, strangers or never, not `{show}`")))?;
             Ok(json!({"show": s.prefs.sender_addresses.code()}))
-        })
+        }).setting("sender_addresses")
         .params(r#"{"show": "always"|"strangers"|"never" (strangers: for senders who aren't contacts, written to or in the directory)}"#),
-        CommandSpec::new("view.externalTag", "Tag mail from outside the organisation", "File › Options › Safety", external_tag).params(
+        CommandSpec::new("view.externalTag", "Tag mail from outside the organisation", "File › Options › Safety", external_tag).setting("external_tag,org_domains").params(
             r#"{"on"?: bool (none: as it is), "domains"?: [string] | string (the organisation's domains, separated by commas or spaces; empty: those of your accounts, mail services left out)}"#,
         ),
         CommandSpec::new("view.trustSender", "Show pictures from a sender", "File › Options › Privacy", |s, v| {
@@ -418,7 +513,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
                 s.prefs.trusted_senders.remove(&who);
             }
             Ok(json!({"trusted": s.prefs.trusted_senders.iter().collect::<Vec<_>>()}))
-        })
+        }).setting("trusted_senders,auto_pictures")
         .params(r#"{"address": string, "on"?: bool}"#),
     ]
 }

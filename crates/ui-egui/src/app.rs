@@ -1,6 +1,7 @@
 //! The window (`MailApp`), in parts: each continues `impl MailApp` with what it draws or does.
 
 mod actions;
+mod agents;
 mod alt_code;
 mod bodies;
 pub(crate) mod boot;
@@ -23,6 +24,7 @@ pub(crate) use data_files::{compacting, importing};
 use files::dropped;
 
 pub use actions::Action;
+pub use agents::{AGENTS_OFF, AgentAnswer, AgentLogLine, AgentOutcome, Agents};
 pub use alt_code::{alt_code_pages, alt_codes};
 pub(crate) use bodies::Bodies;
 pub use boot::BootCard;
@@ -35,6 +37,9 @@ pub(crate) use ribbon::junk_menu;
 pub(crate) use search_box::{Chip, SearchDrop, SearchTimes, Suggested, scope_label};
 pub(crate) use state::use_editor;
 pub use state::{PaneSizes, UiState};
+pub(crate) use windows::at_zoom;
+#[cfg(test)]
+pub(crate) use windows::work_area;
 pub use windows::{Monitors, WindowPlace, after_open, set_monitors};
 
 pub struct MailApp {
@@ -49,8 +54,10 @@ impl MailApp {
         let seen = session.notices.len();
         let has_files = !services.downloads();
         let keeps_running = services.keeps_running();
+        let at_sign_in = services.starts_at_sign_in();
         let (data_folder, pending_move) = (services.data_folder(), services.pending_data_move());
         let old_flatpak = services.carried_over_from();
+        let update_outcome = services.update_outcome();
         let mut session = session;
         session.set_zone(services.zone().as_deref());
         // The window's network side keeps each account's search index up, and the window steps
@@ -71,9 +78,11 @@ impl MailApp {
         let ui = UiState {
             has_files,
             keeps_running,
+            at_sign_in,
             data_folder,
             pending_move,
             old_flatpak,
+            update_outcome,
             seen_notices: seen,
             craft_apps,
             can_drag_out: services.can_drag_out(),
@@ -113,6 +122,13 @@ impl MailApp {
     pub(super) fn apply_language(&mut self, ctx: &egui::Context) {
         let lang = i18n::Lang::from_pref(&self.ui.language);
         i18n::set_current(lang);
+        // Meeting mail in the window's language, and the default categories, untouched, named
+        // in it (issue #235).
+        if self.ui.words_lang != Some(lang.code()) {
+            self.ui.words_lang = Some(lang.code());
+            self.session.mail_words = i18n::mail_words();
+            self.session.name_default_categories();
+        }
         // egui's own parts mirrored for Arabic and Hebrew (the Craft apps' egui): submenus open
         // to the left, scroll bars on the left, closed arrows pointing left.
         if ctx.global_style().right_to_left != lang.rtl() {
@@ -242,9 +258,20 @@ impl MailApp {
 
     /// A `mailto:` link or a mail file the system handed MailCraft (as its mail app, or through
     /// Open with): a new message to write, the message shown, or the events or people added and
-    /// shown. Nothing is sent and nothing is attached.
+    /// shown; or a notification's `mailcraft:` link, the message it names shown. Nothing is sent
+    /// and nothing is attached.
     pub fn open_handed(&mut self, what: &str) {
         use mailcraft_engine::CmdError;
+        use mailcraft_engine::model::app_link;
+        // A notification's own link (issue #273): MailCraft shown, at its message. Another
+        // `mailcraft:` link asks for nothing MailCraft does.
+        if app_link::is_app_link(what) {
+            if let Some(shows) = app_link::parse(what) {
+                self.ui.backstage = None;
+                self.ui.link_shows = Some(shows);
+            }
+            return;
+        }
         let mailto = mailcraft_engine::model::mailto::is_mailto(what);
         let r = if mailto { self.session.run("mail.mailto", &json!({"url": what})) } else { self.session.run("file.open", &json!({"path": what})) };
         let name = mailcraft_engine::model::file_name(what);

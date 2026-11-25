@@ -14,6 +14,10 @@ pub const USER: &str = "me@studio.example";
 pub const PASSWORD: &str = "pw";
 pub const CAL: &str = "/dav/cal/work/";
 pub const BOOK: &str = "/dav/card/main/";
+/// The user's scheduling outbox, when the server schedules (RFC 6638).
+pub const OUTBOX: &str = "/dav/outbox/";
+/// A list of tasks alone (`VTODO`), as Nextcloud's Tasks makes, when the server has one.
+pub const TASKS: &str = "/dav/cal/tasks/";
 
 #[derive(Default)]
 pub struct Data {
@@ -38,6 +42,30 @@ pub struct Data {
     /// Collections the user may not read (403 to reading them), as a calendar shared for free /
     /// busy only.
     pub unreadable: Vec<String>,
+    /// People whose free/busy time the scheduling outbox gives (when it `schedules`): address →
+    /// their `FREEBUSY` lines. Anyone else is an unknown calendar user.
+    pub free_busy: BTreeMap<String, String>,
+    /// The free/busy queries POSTed to the outbox: their `Originator` and `Recipient` headers and
+    /// their body.
+    pub queries: Vec<(String, String, String)>,
+    /// The calendar says it takes to-dos as well as events (`VEVENT`, `VTODO`), as SOGo's and
+    /// Radicale's do; else it says nothing of what it takes.
+    pub cal_tasks: bool,
+    /// A list of tasks alone ([`TASKS`]), as Nextcloud's; `Some(true)`: one the user may only
+    /// read.
+    pub task_list: Option<bool>,
+    /// Require a Bearer token (Google Calendar over CalDAV): the token expected.
+    pub bearer: Option<String>,
+    /// Refuse the right Bearer token with 403 for a permission it lacks (`insufficient_scope`), as
+    /// Google does a token from a sign-in that didn't grant calendars.
+    pub bearer_forbidden: bool,
+    /// Refuse it so for the address books alone, as Google does a sign-in that granted the
+    /// calendars and not the contacts.
+    pub bearer_lacks_contacts: bool,
+    /// Or for everything but the address books: a sign-in that granted the contacts alone.
+    pub bearer_lacks_calendars: bool,
+    /// Refuse the right token outright (401) for the address books: not a permission it lacks.
+    pub contacts_reject_token: bool,
 }
 
 /// Whether an `Authorization` value answers the fake's Digest challenge for this request.
@@ -98,7 +126,8 @@ pub fn serve() -> Server {
     std::thread::spawn(move || {
         for conn in l.incoming() {
             let Ok(mut s) = conn else { continue };
-            let Some(r) = serving::read_request(&s, &auth) else { continue };
+            let bearer = shared.lock().unwrap().bearer.clone();
+            let Some(r) = serving::read_request(&s, &auth, bearer.as_deref()) else { continue };
             let (status, mut headers, body) = shared.lock().unwrap().answer(&r);
             headers.push(("Connection", "close".into()));
             super::http::respond(&mut s, status, &headers, body.as_bytes());
@@ -121,6 +150,9 @@ mod serving;
 
 #[cfg(test)]
 mod scheduling;
+
+#[cfg(test)]
+mod tasks;
 
 #[cfg(test)]
 mod tests;

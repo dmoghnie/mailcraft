@@ -285,6 +285,9 @@
 	Keep MailCraft running when its window is closed	إبقاء MailCraft قيد التشغيل عند إغلاق نافذته
 	Start MailCraft in the notification area	تشغيل MailCraft في منطقة الإعلامات
 	Start MailCraft minimized	تشغيل MailCraft مصغّرًا
+	Start MailCraft when you sign in	تشغيل MailCraft عند تسجيل الدخول
+	It starts as you sign in to this computer and checks for mail. Its window comes up too, unless it's kept running when closed and started put away (below).	يبدأ عند تسجيل دخولك إلى هذا الكمبيوتر ويتحقق من البريد. تظهر نافذته أيضًا، ما لم يكن قيد التشغيل بعد الإغلاق ويبدأ مخفيًا (أدناه).
+	Starting MailCraft at sign-in couldn't be changed: {error}	تعذّر تغيير تشغيل MailCraft عند تسجيل الدخول: {error}
 	It checks for mail and announces it with its window put away, as when it's closed. Started to open a link or a file, it opens the window.	يتحقق من البريد ويعلن عنه ونافذته مخفية، كما لو كانت مغلقة. وإذا شُغّل لفتح رابط أو ملف، فإنه يفتح النافذة.
 	Show the unread mail on its icon	إظهار البريد غير المقروء على أيقونته
 	How many unread messages the Inboxes have, in the corner of MailCraft's icon in the notification area	عدد الرسائل غير المقروءة في صناديق الوارد، في زاوية أيقونة MailCraft في منطقة الإعلامات
@@ -1029,7 +1032,7 @@ month	May	مايو
 	0 minutes before start	0 دقيقة قبل البدء
 	1 Reminder	تذكير واحد
 	{n} Reminders	{n} تذكيرات
-	Click Snooze to be reminded again in:	انقر فوق «غفوة» للتذكير مرة أخرى بعد:
+	Click Snooze to be reminded again in:	انقر فوق «تأجيل» للتذكير مرة أخرى بعد:
 	Dismiss	تجاهل
 	Dismiss All	تجاهل الكل
 	Open Item	فتح العنصر
@@ -1273,6 +1276,8 @@ month	May	مايو
 	MailCraft {version} is ready	MailCraft {version} جاهز
 	MailCraft {version} is ready. Restart now to install it, or it installs when you close MailCraft.	MailCraft {version} جاهز. أعد التشغيل الآن لتثبيته، أو سيُثبَّت عند إغلاق MailCraft.
 	Restart MailCraft to install it now, or it installs when you close MailCraft.	أعد تشغيل MailCraft لتثبيته الآن، أو سيُثبَّت عند إغلاق MailCraft.
+	MailCraft is updated to {version}.	تم تحديث MailCraft إلى {version}.
+	MailCraft {version} didn't install. It's offered again.	لم يُثبَّت MailCraft {version}. سيُعرَض مرة أخرى.
 	Restart now	إعادة التشغيل الآن
 	The update is downloaded and checked. It installs now, as MailCraft closes, which takes a moment; open MailCraft again when it's done.	تم تنزيل التحديث والتحقق منه. يُثبَّت الآن أثناء إغلاق MailCraft، وهذا يستغرق لحظة؛ افتح MailCraft مجددًا عند انتهائه.
 	Update and close	تحديث وإغلاق
@@ -1874,6 +1879,8 @@ count	occurrences	مرات
 	Default font	الخط الافتراضي
 	Font for new messages	خط الرسائل الجديدة
 	New messages, replies and forwards are written in it. Text you set a font on keeps its own.	تُكتب به الرسائل الجديدة والردود وإعادة التوجيه. النص الذي تحدد له خطًا يحتفظ بخطه.
+	Font size for new messages	حجم خط الرسائل الجديدة
+	New messages, replies and forwards are written in it. Text you set a size on keeps its own.	تُكتب به الرسائل الجديدة والردود وإعادة التوجيه. النص الذي تحدد له حجمًا يحتفظ بحجمه.
 	Clean up old items	تنظيف العناصر القديمة
 	Clean up old items…	تنظيف العناصر القديمة…
 	Move old mail to an archive file on this computer, out of the mailbox.	نقل البريد القديم من صندوق البريد إلى ملف أرشيف على هذا الكمبيوتر.
@@ -2030,7 +2037,6 @@ count	occurrences	مرات
 	Names	الأسماء
 	AutoArchive settings	إعدادات الأرشفة التلقائية
 	From a mailing list.	من قائمة بريدية.
-	Unsubscribe	إلغاء الاشتراك
 	Unsubscribing from junk mail tells its sender that your address is read	إلغاء الاشتراك من البريد العشوائي يُخبر مُرسله بأن عنوانك يُقرأ
 	Unsubscribe from this list?	إلغاء الاشتراك في هذه القائمة؟
 	A message asking to leave it goes to {address}, from your account.	تُرسَل رسالة تطلب الخروج منها إلى {address}، من حسابك.
@@ -2381,3 +2387,174 @@ count	occurrences	مرات
 	Write rule	اكتب القاعدة
 	Written by {model}	كتبها {model}
 	gets a yes from MailCraft's AI to “{question}”	رسالة يجيب ذكاء MailCraft الاصطناعي بـ«نعم» عن «{question}» بشأنها
+	Sort by	ترتيب حسب
+	First name	الاسم الأول
+	Last name	اسم العائلة
+	Open a repeating event	فتح حدث متكرر
+	Open this occurrence	فتح هذا التكرار
+	Open the series	فتح السلسلة
+	Changes apply to this occurrence alone.	تنطبق التغييرات على هذا التكرار وحده.
+	Your other filters on the server (“{name}”) run first, and are left as they are.	عوامل التصفية الأخرى لديك على الخادم («{name}») تعمل أولًا، وتبقى كما هي.
+	Found: {url}	تم العثور عليه: {url}
+	Task list	قائمة المهام
+	Task lists	قوائم المهام
+	All task lists	كل قوائم المهام
+	This task is in a task list that can't be changed here.	هذه المهمة في قائمة مهام لا يمكن تغييرها من هنا.
+	Occurrences of this task were changed on their own elsewhere: change it there.	غُيّرت مرّات من هذه المهمة كلٌّ على حدة في مكان آخر: غيّرها هناك.
+	Everything with them…	كل شيء مع هذا الشخص…
+	Everything with sender…	كل شيء مع المرسل…
+	Everything with them	كل شيء مع هذا الشخص
+	Search within everything with them	البحث في كل ما يخص هذا الشخص
+	Mail ({n})	البريد ({n})
+	Files ({n})	المرفقات ({n})
+	Meetings ({n})	الاجتماعات ({n})
+	Links ({n})	الروابط ({n})
+	People ({n})	الأشخاص ({n})
+	Nothing here.	لا شيء هنا.
+	Nothing here matches the search.	لا شيء هنا يطابق البحث.
+	Files and links come from the mail on this computer: {n} of these messages aren't downloaded.	تأتي المرفقات والروابط من البريد الموجود على هذا الكمبيوتر: لم يتم تنزيل {n} من هذه الرسائل.
+	Only the newest of the mail with them is shown.	يُعرض أحدث بريد فقط مع هذا الشخص.
+	In their signature	في توقيعه
+	Add to their contact…	إضافة إلى جهة اتصاله…
+	Open the newest	فتح الأحدث
+	Open (they sent it)	فتح (أرسله هذا الشخص)
+	They organise it	ينظمه هذا الشخص
+	They're invited	هذا الشخص مدعو
+	{n} messages	{n} رسائل
+	One message	رسالة واحدة
+	Overview	نظرة عامة
+	Show all	إظهار الكل
+	Find someone by name or address	البحث عن شخص بالاسم أو العنوان
+	Delegate	تفويض
+	Delegate meeting	تفويض الاجتماع
+	Delegate…	تفويض…
+	Delegated	مفوَّض
+	Invite…	دعوة…
+	Name <address>	الاسم <العنوان>
+	Pick guests from the address book	اختيار الضيوف من دفتر العناوين
+	Someone else goes in your place: they get the invitation to answer, and the organizer is told.	يحضر شخص آخر مكانك: تصله الدعوة ليرد عليها، ويُبلَّغ المنظِّم.
+	The whole series	السلسلة كلها
+	This occurrence	هذا التكرار
+	Who goes instead of you	من يحضر بدلاً منك
+	Who is “{name}”?	من هو «{name}»؟
+	You asked {name} to go in your place.	طلبت من {name} الحضور مكانك.
+	{name} asked you to go in their place.	طلب منك {name} الحضور مكانه.
+	{name} asked {delegate} to go in their place.	طلب {name} من {delegate} الحضور مكانه.
+	{name} (delegated to {delegate})	{name} (فوَّض {delegate})
+	AI agents	وكلاء الذكاء الاصطناعي
+	Add MailCraft's MCP server to it: the command mailcraft-cli with the argument mcp	أضف إليه خادم MCP الخاص بـ MailCraft: الأمر mailcraft-cli مع الوسيط mcp
+	Agents run this command from now on without asking	يشغّل الوكلاء هذا الأمر من الآن دون سؤال
+	Allow	سماح
+	Always allow	السماح دائمًا
+	An AI agent asks	يطلب وكيل ذكاء اصطناعي
+	An AI agent wants to: {command}	يريد وكيل ذكاء اصطناعي: {command}
+	An AI assistant on this computer (Claude Desktop, Claude Code…) reads your mail, calendar, tasks and people through MailCraft's MCP server, and asks here before each command it wants to run. Off, it reaches nothing.	يقرأ مساعد ذكاء اصطناعي على هذا الكمبيوتر (Claude Desktop وClaude Code…) بريدك وتقويمك ومهامك وجهات اتصالك عبر خادم MCP الخاص بـ MailCraft، ويسأل هنا قبل كل أمر يريد تشغيله. عند الإيقاف لا يصل إلى شيء.
+	Commands agents run without asking first	أوامر يشغّلها الوكلاء دون سؤال أولًا
+	Connect an assistant	ربط مساعد
+	Deny	رفض
+	Forget	نسيان
+	Let AI agents use MailCraft	السماح لوكلاء الذكاء الاصطناعي باستخدام MailCraft
+	Nothing yet	لا شيء بعد
+	Run without asking	التشغيل دون سؤال
+	What AI agents did	ما فعله وكلاء الذكاء الاصطناعي
+	{n} more waiting	{n} أخرى بانتظار الرد
+	Looked, changed nothing	اطّلع دون تغيير شيء
+	Ran	نُفّذ
+	You didn't allow it	لم تسمح به
+	Didn't run: {why}	لم يُنفَّذ: {why}
+	Let AI agents ask to run commands	السماح لوكلاء الذكاء الاصطناعي بطلب تشغيل الأوامر
+	Sending, moving, answering an invitation… each asked about here first, unless you always allow it. Off, agents only read.	الإرسال والنقل والرد على دعوة… يُسأل عن كل منها هنا أولًا، ما لم تسمح به دائمًا. عند الإيقاف، يقرأ الوكلاء فقط.
+	Accounts AI agents read	الحسابات التي يقرؤها وكلاء الذكاء الاصطناعي
+	One turned off is left out of all they read, and they can't take pictures of the window	الحساب الموقوف يُستبعد من كل ما يقرؤونه، ولا يمكنهم التقاط صور للنافذة
+	… and {n} more characters	… و{n} حرفًا آخر
+	A copy installed from MailCraft's releases looks for a newer one and installs it as it closes	تبحث النسخة المثبتة من إصدارات MailCraft عن نسخة أحدث وتثبّتها عند إغلاقها
+	A notice under every message sent	تنبيه أسفل كل رسالة مرسلة
+	Accounts of {domains} only	حسابات {domains} فقط
+	Encrypted connections only	الاتصالات المشفّرة فقط
+	Locked	مقفل
+	No certificate trusted by hand	لا شهادة موثوقة يدويًا
+	Not taken	لم يُؤخذ
+	Office	المكتب
+	Questions	للاستفسار
+	Read from	قُرئ من
+	Releases only	الإصدارات فقط
+	Set by your organisation	تحدّده مؤسستك
+	Set up for {organisation}	مُعدّ لـ {organisation}
+	Update MailCraft by itself	تحديث MailCraft تلقائيًا
+	Your details for its signature	بياناتك لتوقيعها
+	Your organisation	مؤسستك
+	Your organisation doesn't allow trusting a certificate by hand.	لا تسمح مؤسستك بالوثوق بشهادة يدويًا.
+	Your organisation set up MailCraft on this computer. What it locked, you can't change.	أعدّت مؤسستك MailCraft على هذا الكمبيوتر. لا يمكنك تغيير ما أقفلته.
+	Text size	حجم النص
+	Everything in the window, larger or smaller. Ctrl and + or − change it too, and Ctrl+0 puts it back.	كل ما في النافذة، أكبر أو أصغر. يغيّره أيضًا Ctrl مع + أو −، ويعيده Ctrl+0 كما كان.
+	Text size: {percent}%	حجم النص: {percent}%
+	{percent}%	{percent}%
+	A table, as it will be sent. Backspace after it takes it out.	جدول كما سيُرسَل. يحذفه مفتاح Backspace بعده.
+	Attach messages	إرفاق رسائل
+	Attach 1 message	إرفاق رسالة واحدة
+	Attach {n} messages	إرفاق {n} رسائل
+	Move to To	نقل إلى «إلى»
+	Move to Cc	نقل إلى «نسخة»
+	Move to Bcc	نقل إلى «نسخة مخفية»
+	Copy addresses	نسخ العناوين
+	Mailing list:	قائمة بريدية:
+	Unsubscribe	إلغاء الاشتراك
+	Show the message in its folder	عرض الرسالة في مجلدها
+	Buttons on a message in the list	الأزرار على رسالة في القائمة
+	Shown when the pointer is over a message, up to {n}.	تظهر عند وضع المؤشر على رسالة، حتى {n}.
+	Mark read or unread	وضع علامة مقروءة أو غير مقروءة
+	Choose a date…	اختيار تاريخ…
+	Pick a time in the future.	اختر وقتًا في المستقبل.
+	In 1 minute	خلال دقيقة واحدة
+	In 1 day	خلال يوم واحد
+	Proposal accepted: the meeting is at {when} now.	تم قبول الاقتراح: الاجتماع الآن في {when}.
+	Invitation: {summary}	دعوة: {summary}
+	Updated: {summary}	تم التحديث: {summary}
+	Cancelled: {summary}	أُلغي: {summary}
+	Cancelled: {summary} ({when})	أُلغي: {summary} ({when})
+	{summary} has been cancelled.	أُلغي الاجتماع {summary}.
+	{summary} on {when} has been cancelled.	أُلغي الاجتماع {summary} في {when}.
+	When: {when}	الموعد: {when}
+	Where: {place}	المكان: {place}
+	Fwd: {summary}	إعادة توجيه: {summary}
+	{who} forwarded you this meeting, organized by {organizer}.	أُعيد توجيه هذا الاجتماع إليك من {who}، والمنظّم هو {organizer}.
+	{who} asked you to go to this meeting in their place. It's organized by {organizer}.	طُلب منك حضور هذا الاجتماع نيابةً عن {who}. المنظّم هو {organizer}.
+	Accepted: {summary}	مقبول: {summary}
+	Tentative: {summary}	مبدئي: {summary}
+	Declined: {summary}	مرفوض: {summary}
+	Delegated: {summary}	مفوَّض: {summary}
+	{who} accepted the invitation to {summary}.	{who}: تم قبول الدعوة إلى {summary}.
+	{who} tentatively accepted the invitation to {summary}.	{who}: تم قبول الدعوة إلى {summary} مبدئيًا.
+	{who} declined the invitation to {summary}.	{who}: تم رفض الدعوة إلى {summary}.
+	{who} asked {delegate} to go to {summary} in their place.	{who}: طُلب من {delegate} حضور {summary} بالنيابة.
+	New time proposed: {summary}	اقتراح موعد جديد: {summary}
+	{who} proposes a new time for {summary}: {when}.	{who}: موعد جديد مقترح لـ {summary}: {when}.
+	New time declined: {summary}	رُفض الموعد الجديد: {summary}
+	The proposed new time for {summary} was declined. The meeting stays as it was.	رُفض الموعد الجديد المقترح لـ {summary}. يبقى الاجتماع كما كان.
+	Cancel meeting	إلغاء الاجتماع
+	Cancel this occurrence	إلغاء هذا التكرار
+	Send cancellation	إرسال الإلغاء
+	Delete without sending	حذف دون إرسال
+	Message to your guests	رسالة إلى الحضور
+	Your guests are sent a cancellation. Add a message to them, if you like.	يتلقى الحضور إشعارًا بالإلغاء. أضف رسالة إليهم إن شئت.
+	MailCraft's automatic replies and rules on the server aren't running: another program made its own filters (“{name}”) the ones that run.	الردود التلقائية وقواعد MailCraft على الخادم لا تعمل: جعل برنامج آخر عوامل التصفية الخاصة به («{name}») هي التي تعمل.
+	Off: another program's filters (“{name}”) run in place of MailCraft's	متوقفة: تعمل عوامل تصفية برنامج آخر («{name}») بدلًا من عوامل MailCraft
+	On, sent by your other filters on the server (“{name}”)	مفعّلة، ترسلها عوامل التصفية الأخرى لديك على الخادم («{name}»)
+	Run my rules again	تشغيل قواعدي مجددًا
+	These are the replies your other filters on the server (“{name}”) send: change them in the program that made them. MailCraft's can be on only while those are off: the server sends one reply.	هذه هي الردود التي ترسلها عوامل التصفية الأخرى لديك على الخادم («{name}»): غيّرها في البرنامج الذي أنشأها. لا يمكن تفعيل ردود MailCraft إلا عندما تكون هذه متوقفة: يرسل الخادم ردًا واحدًا.
+	These rules aren't running: another program made its own filters the ones that run. Run them again here, with that program's.	هذه القواعد لا تعمل: جعل برنامج آخر عوامل التصفية الخاصة به هي التي تعمل. أعد تشغيلها هنا، مع عوامل تصفية ذلك البرنامج.
+	Account: {email}	الحساب: {email}
+	Details	التفاصيل
+	Event: “{name}”, {when}	الحدث: «{name}»، {when}
+	Message: “{subject}”, from {from}	الرسالة: «{subject}»، من {from}
+	Task: “{name}”	المهمة: «{name}»
+	This occurrence: {when}	هذا التكرار: {when}
+	To: {who}	إلى: {who}
+	Asking their server…	جارٍ سؤال خادمهم…
+	Click a time to move the meeting there	انقر وقتًا لنقل الاجتماع إليه
+	Hide Scheduling Assistant	إخفاء مساعد الجدولة
+	Scheduling Assistant	مساعد الجدولة
+	The next time you and your guests are all free	الوقت التالي الذي تكون فيه أنت وكل الحضور متفرغين
+	Their times can't be had: {why}	تعذّر الحصول على أوقاتهم: {why}
+	You	أنت
+	{free} of {all} free	{free} من {all} متفرغون

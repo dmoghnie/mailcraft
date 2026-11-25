@@ -184,6 +184,9 @@ pub struct Prefs {
     /// How tasks are listed, and whether the list leaves out those done.
     pub tasks_order: pim::TasksOrder,
     pub tasks_hide_done: bool,
+    /// The CalDAV task list the Tasks list shows alone (issue #201); `None`: every task.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tasks_list: Option<String>,
     /// Calendars left out of the calendar (`account/calendar id`), as Outlook's unticked ones.
     pub hidden_calendars: BTreeSet<String>,
     /// Day and week show each calendar in a column of its own (Outlook's side-by-side view)
@@ -303,6 +306,14 @@ pub struct Prefs {
     /// "New mail messages" font; `None`: MailCraft's own.
     #[serde(default, skip_serializing_if = "Option::is_none", deserialize_with = "checked_font")]
     pub compose_font: Option<String>,
+    /// The size, in points, new messages, replies and forwards are written in (issue #267), with
+    /// the font; `None`: MailCraft's own ([`mime::rich::DEFAULT_SIZE`]).
+    #[serde(default, skip_serializing_if = "Option::is_none", deserialize_with = "checked_size")]
+    pub compose_size: Option<u8>,
+    /// The interface's text size in percent (the comment on issue #267): everything in the
+    /// window drawn larger or smaller, as a browser zooms; 100 is MailCraft's own.
+    #[serde(default = "normal_text", skip_serializing_if = "is_normal_text", deserialize_with = "checked_text_size")]
+    pub text_size: u16,
     /// Closing the window leaves MailCraft running in the notification area, where the app
     /// has one (issue #67): mail is still checked and announced.
     pub close_to_tray: bool,
@@ -348,6 +359,9 @@ pub struct Prefs {
     pub ctrl_enter: CtrlEnter,
     /// Seconds a message sent waits in the Outbox, to be undone (issue #135); 0: none.
     pub undo_send_secs: u32,
+    /// What updating MailCraft by itself does (issue #207): as the copy was installed, releases
+    /// only, or never.
+    pub updates: crate::policy::Updates,
     /// What opens at the start (issue #172).
     pub start_in: StartIn,
     /// The folder open last (All Inboxes or an account's), for [`StartIn::Last`].
@@ -362,6 +376,24 @@ pub struct Prefs {
     /// Outlook, Exchange and SOGo do (issue #236): one that's genuine, from a guest on the list,
     /// for the meeting as it is. Any other waits for Record the answer.
     pub record_answers: bool,
+    /// AI agents may use MailCraft through its MCP server (issue #255): read the mail, calendar,
+    /// tasks and people, and run the commands the user allows in the window. Off until turned on
+    /// (File › Options › AI agents).
+    pub agents: bool,
+    /// Agents may ask to run commands, each asked about in the window first. Off, they only
+    /// read: the first step the issue asks for.
+    pub agents_run: bool,
+    /// The commands agents may run without the window asking first (Always allow), by id.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub agents_always: Vec<String>,
+    /// The accounts kept from agents, by id: what agents read leaves them out.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub agents_hidden: Vec<String>,
+    /// The defaults an organisation's profile gave, as given (issue #245), by setting: each is
+    /// put in once, and again only when the organisation gives another, so a default the person
+    /// changed stays as they left it.
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    pub org_applied: BTreeMap<String, serde_json::Value>,
     /// What becomes of a meeting invitation's mail (and its earlier versions in the Inbox) once
     /// it's answered, in the message or the calendar, and of a cancellation once it's taken in
     /// (issue #31), as Outlook's "Delete meeting requests and notifications from Inbox after
@@ -378,6 +410,9 @@ pub struct Prefs {
     /// How the message list is arranged (View › Arrange by), and turned the other way round.
     pub arrange: Arrange,
     pub reverse_sort: bool,
+    /// The buttons a message in the list shows under the pointer (issue #274), as chosen.
+    #[serde(deserialize_with = "checked_row_actions")]
+    pub row_actions: Vec<crate::RowAction>,
     /// Work offline (Send / Receive › Work Offline): no account connects; kept across starts.
     pub work_offline: bool,
     /// Ignored conversations (Delete › Ignore): their messages' Message-IDs; replies to any of
@@ -518,13 +553,14 @@ impl SenderAddresses {
 }
 
 /// The ribbon's Home buttons, by the command each runs, in their order there.
-pub const HOME_BUTTONS: [&str; 17] = [
+pub const HOME_BUTTONS: [&str; 18] = [
     "mail.new",
     "mail.delete",
     "mail.archive",
     "mail.junk",
     "mail.move",
     "quickStep.run",
+    "rules.list",
     "mail.reply",
     "mail.replyAll",
     "mail.forward",
@@ -586,6 +622,7 @@ impl Default for Prefs {
             notes_order: NotesOrder::Modified,
             tasks_order: pim::TasksOrder::Due,
             tasks_hide_done: false,
+            tasks_list: None,
             hidden_calendars: BTreeSet::new(),
             calendars_side_by_side: false,
             schedule_work_hours: false,
@@ -621,6 +658,7 @@ impl Default for Prefs {
             confirm_permanent_delete: true,
             ctrl_enter: CtrlEnter::Ask,
             undo_send_secs: 0,
+            updates: crate::policy::Updates::On,
             start_in: StartIn::FirstInbox,
             last_open: None,
             favorites: None,
@@ -634,6 +672,8 @@ impl Default for Prefs {
             spelling: true,
             dictionary: BTreeSet::new(),
             compose_font: None,
+            compose_size: None,
+            text_size: NORMAL_TEXT,
             close_to_tray: false,
             start_in_tray: false,
             tray_unread: true,
@@ -652,11 +692,17 @@ impl Default for Prefs {
             show_favorites: true,
             tentative_invites: true,
             record_answers: true,
+            agents: false,
+            agents_run: false,
+            agents_always: Vec::new(),
+            agents_hidden: Vec::new(),
+            org_applied: BTreeMap::new(),
             answered_invites: AnsweredInvites::Delete,
             answered_folders: BTreeMap::new(),
             answered_replies: false,
             arrange: Arrange::Date,
             reverse_sort: false,
+            row_actions: crate::RowAction::DEFAULT.to_vec(),
             work_offline: false,
             ignored: IgnoredIds::default(),
             follow_up: BTreeMap::new(),
@@ -747,9 +793,17 @@ fn checked_reminders<'de, D: serde::Deserializer<'de>>(d: D) -> Result<BTreeMap<
     Ok(kept)
 }
 
+/// A row's buttons read from disk: each once, as many as a row holds.
+fn checked_row_actions<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Vec<crate::RowAction>, D::Error> {
+    Ok(crate::RowAction::tidy(<Vec<crate::RowAction> as serde::Deserialize>::deserialize(d)?))
+}
+
 /// The most words the dictionary keeps, and the longest word.
 pub const DICTIONARY_MAX: usize = 10_000;
 pub const DICTIONARY_WORD_MAX: usize = 100;
+
+/// The most commands AI agents may run without asking (issue #255).
+pub const AGENTS_ALWAYS_MAX: usize = 200;
 
 /// A word as the dictionary keeps it, when it's one: trimmed, one word (no space or control
 /// character), at most [`DICTIONARY_WORD_MAX`] characters.
@@ -764,6 +818,40 @@ pub fn dictionary_word(w: &str) -> Option<String> {
 fn checked_font<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error> {
     let read = <Option<String> as serde::Deserialize>::deserialize(d)?;
     Ok(read.as_deref().and_then(mailcraft_mime::rich::font_name))
+}
+
+/// The interface's own text size, in percent.
+pub const NORMAL_TEXT: u16 = 100;
+/// The text sizes File › Options › General offers, in percent.
+pub const TEXT_SIZES: [u16; 8] = [80, 90, NORMAL_TEXT, 110, 125, 150, 175, 200];
+/// The least and most text size kept, in percent: the keys go no further.
+pub const TEXT_SIZE_RANGE: std::ops::RangeInclusive<u16> = 80..=200;
+
+/// The next text size up or down from `percent`, by tens, within [`TEXT_SIZE_RANGE`].
+pub fn text_size_step(percent: u16, up: bool) -> u16 {
+    let next = if up { (percent / 10).saturating_add(1).saturating_mul(10) } else { percent.saturating_sub(1) / 10 * 10 };
+    next.clamp(*TEXT_SIZE_RANGE.start(), *TEXT_SIZE_RANGE.end())
+}
+
+fn normal_text() -> u16 {
+    NORMAL_TEXT
+}
+
+fn is_normal_text(percent: &u16) -> bool {
+    *percent == NORMAL_TEXT
+}
+
+/// The text size read from disk: within [`TEXT_SIZE_RANGE`], else the interface's own.
+fn checked_text_size<'de, D: serde::Deserializer<'de>>(d: D) -> Result<u16, D::Error> {
+    let read = <Option<serde_json::Value> as serde::Deserialize>::deserialize(d)?;
+    Ok(read.and_then(|v| v.as_u64()).and_then(|v| u16::try_from(v).ok()).filter(|v| TEXT_SIZE_RANGE.contains(v)).unwrap_or(NORMAL_TEXT))
+}
+
+/// The size for new messages read from disk: only one the size box offers
+/// ([`mime::rich::SIZES`]).
+fn checked_size<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Option<u8>, D::Error> {
+    let read = <Option<serde_json::Value> as serde::Deserialize>::deserialize(d)?;
+    Ok(mailcraft_mime::rich::font_size(read.and_then(|v| v.as_u64()).and_then(|v| u8::try_from(v).ok())))
 }
 
 /// The dictionary's words read from disk: only what are words, up to [`DICTIONARY_MAX`].

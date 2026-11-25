@@ -13,7 +13,7 @@ pub mod server_rules;
 
 pub use conditions::{CONDITION_DEPTH, CONDITION_TESTS, Condition, Importance, QUESTION_CHARS, RULE_QUESTIONS, TextOp};
 pub use rule_schema::{RuleAnswer, WORDS_DEPTH, rule_answer_schema};
-pub use server_rules::{ServerRule, ServerRuleOp, ServerRules};
+pub use server_rules::{NO_SERVER_RULES, ServerRule, ServerRuleOp, ServerRules};
 
 /// A category: a name and colour shown on messages, stored on the server as a keyword so other
 /// clients (and other computers) see it too.

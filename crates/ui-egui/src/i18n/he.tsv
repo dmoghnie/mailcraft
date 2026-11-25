@@ -285,6 +285,9 @@
 	Keep MailCraft running when its window is closed	להשאיר את MailCraft פועל כשהחלון שלו נסגר
 	Start MailCraft in the notification area	הפעלת MailCraft באזור ההודעות
 	Start MailCraft minimized	הפעלת MailCraft ממוזער
+	Start MailCraft when you sign in	הפעלת MailCraft בעת הכניסה למחשב
+	It starts as you sign in to this computer and checks for mail. Its window comes up too, unless it's kept running when closed and started put away (below).	הוא מופעל כשנכנסים למחשב הזה ובודק דואר. גם החלון שלו נפתח, אלא אם הוא נשאר פועל אחרי הסגירה ומופעל כשהוא מוסתר (למטה).
+	Starting MailCraft at sign-in couldn't be changed: {error}	לא ניתן היה לשנות את הפעלת MailCraft בעת הכניסה: {error}
 	It checks for mail and announces it with its window put away, as when it's closed. Started to open a link or a file, it opens the window.	הוא בודק דואר ומודיע עליו כשהחלון שלו מוסתר, כמו כשהוא סגור. כשהוא מופעל כדי לפתוח קישור או קובץ, הוא פותח את החלון.
 	Show the unread mail on its icon	הצגת הדואר שלא נקרא על הסמל שלו
 	How many unread messages the Inboxes have, in the corner of MailCraft's icon in the notification area	כמה הודעות שלא נקראו יש בתיבות הדואר הנכנס, בפינת הסמל של MailCraft באזור ההודעות
@@ -1273,6 +1276,8 @@ month	May	מאי
 	MailCraft {version} is ready	MailCraft {version} מוכן
 	MailCraft {version} is ready. Restart now to install it, or it installs when you close MailCraft.	MailCraft {version} מוכן. הפעל מחדש עכשיו כדי להתקין אותו, או שהוא יותקן כשתסגור את MailCraft.
 	Restart MailCraft to install it now, or it installs when you close MailCraft.	הפעל מחדש את MailCraft כדי להתקין אותו עכשיו, או שהוא יותקן כשתסגור את MailCraft.
+	MailCraft is updated to {version}.	MailCraft עודכן לגרסה {version}.
+	MailCraft {version} didn't install. It's offered again.	MailCraft {version} לא הותקן. הוא יוצע שוב.
 	Restart now	להפעיל מחדש עכשיו
 	The update is downloaded and checked. It installs now, as MailCraft closes, which takes a moment; open MailCraft again when it's done.	העדכון הורד ונבדק. הוא מותקן עכשיו, בזמן ש-MailCraft נסגר, וזה לוקח רגע; פתח את MailCraft שוב כשזה יסתיים.
 	Update and close	לעדכן ולסגור
@@ -1874,6 +1879,8 @@ count	occurrences	פעמים
 	Default font	גופן ברירת מחדל
 	Font for new messages	גופן להודעות חדשות
 	New messages, replies and forwards are written in it. Text you set a font on keeps its own.	הודעות חדשות, תשובות והעברות נכתבות בו. טקסט שקבעת לו גופן שומר על הגופן שלו.
+	Font size for new messages	גודל גופן להודעות חדשות
+	New messages, replies and forwards are written in it. Text you set a size on keeps its own.	הודעות חדשות, תשובות והעברות נכתבות בגודל זה. טקסט שקבעת לו גודל שומר על הגודל שלו.
 	Clean up old items	ניקוי פריטים ישנים
 	Clean up old items…	ניקוי פריטים ישנים…
 	Move old mail to an archive file on this computer, out of the mailbox.	העברת דואר ישן מתיבת הדואר לקובץ ארכיון במחשב הזה.
@@ -2030,7 +2037,6 @@ count	occurrences	פעמים
 	Names	שמות
 	AutoArchive settings	הגדרות העברה אוטומטית לארכיון
 	From a mailing list.	מרשימת תפוצה.
-	Unsubscribe	ביטול מינוי
 	Unsubscribing from junk mail tells its sender that your address is read	ביטול מינוי מדואר זבל מגלה לשולח שהכתובת שלך נקראת
 	Unsubscribe from this list?	לבטל את המינוי לרשימה הזו?
 	A message asking to leave it goes to {address}, from your account.	הודעה שמבקשת לעזוב אותה תישלח אל {address}, מהחשבון שלך.
@@ -2381,3 +2387,174 @@ count	occurrences	פעמים
 	Write rule	כתיבת כלל
 	Written by {model}	נכתב על ידי {model}
 	gets a yes from MailCraft's AI to “{question}”	מקבל „כן” מה-AI של MailCraft לשאלה „{question}”
+	Sort by	מיון לפי
+	First name	שם פרטי
+	Last name	שם משפחה
+	Open a repeating event	פתיחת אירוע חוזר
+	Open this occurrence	פתח את המופע הזה
+	Open the series	פתח את הסדרה
+	Changes apply to this occurrence alone.	השינויים חלים על המופע הזה בלבד.
+	Your other filters on the server (“{name}”) run first, and are left as they are.	המסננים האחרים שלך בשרת („{name}”) פועלים קודם, ונשארים כמו שהם.
+	Found: {url}	נמצא: {url}
+	Task list	רשימת משימות
+	Task lists	רשימות משימות
+	All task lists	כל רשימות המשימות
+	This task is in a task list that can't be changed here.	משימה זו נמצאת ברשימת משימות שאי אפשר לשנות כאן.
+	Occurrences of this task were changed on their own elsewhere: change it there.	מופעים של משימה זו שונו כל אחד בנפרד במקום אחר: יש לשנות אותה שם.
+	Everything with them…	הכול עם האדם הזה…
+	Everything with sender…	הכול עם השולח…
+	Everything with them	הכול עם האדם הזה
+	Search within everything with them	חיפוש בכל מה שקשור לאדם הזה
+	Mail ({n})	דואר ({n})
+	Files ({n})	קבצים מצורפים ({n})
+	Meetings ({n})	פגישות ({n})
+	Links ({n})	קישורים ({n})
+	People ({n})	אנשים ({n})
+	Nothing here.	אין כאן כלום.
+	Nothing here matches the search.	שום דבר כאן לא תואם לחיפוש.
+	Files and links come from the mail on this computer: {n} of these messages aren't downloaded.	הקבצים המצורפים והקישורים לקוחים מהדואר שבמחשב הזה: {n} מההודעות האלה לא הורדו.
+	Only the newest of the mail with them is shown.	מוצג רק הדואר החדש ביותר עם האדם הזה.
+	In their signature	בחתימה שלו
+	Add to their contact…	הוספה לאיש הקשר שלו…
+	Open the newest	פתיחת החדשה ביותר
+	Open (they sent it)	פתיחה (האדם הזה שלח)
+	They organise it	האדם הזה מארגן
+	They're invited	האדם הזה מוזמן
+	{n} messages	{n} הודעות
+	One message	הודעה אחת
+	Overview	סקירה
+	Show all	הצגת הכול
+	Find someone by name or address	חיפוש אדם לפי שם או כתובת
+	Delegate	האצלה
+	Delegate meeting	האצלת הפגישה
+	Delegate…	האצלה…
+	Delegated	הואצל
+	Invite…	הזמנה…
+	Name <address>	שם <כתובת>
+	Pick guests from the address book	בחירת אורחים מפנקס הכתובות
+	Someone else goes in your place: they get the invitation to answer, and the organizer is told.	מישהו אחר ילך במקומך: הוא יקבל את ההזמנה כדי להשיב עליה, והמארגן יעודכן.
+	The whole series	כל הסדרה
+	This occurrence	המופע הזה
+	Who goes instead of you	מי ילך במקומך
+	Who is “{name}”?	מי זה „{name}”?
+	You asked {name} to go in your place.	ביקשת מ-{name} ללכת במקומך.
+	{name} asked you to go in their place.	{name} ביקש/ה ממך ללכת במקומו/ה.
+	{name} asked {delegate} to go in their place.	{name} ביקש/ה מ-{delegate} ללכת במקומו/ה.
+	{name} (delegated to {delegate})	{name} (הואצל ל-{delegate})
+	AI agents	סוכני בינה מלאכותית
+	Add MailCraft's MCP server to it: the command mailcraft-cli with the argument mcp	הוסיפו לו את שרת ה-MCP של MailCraft: הפקודה mailcraft-cli עם הארגומנט mcp
+	Agents run this command from now on without asking	סוכנים מריצים את הפקודה הזו מעכשיו בלי לשאול
+	Allow	אפשר
+	Always allow	אפשר תמיד
+	An AI agent asks	סוכן בינה מלאכותית מבקש
+	An AI agent wants to: {command}	סוכן בינה מלאכותית רוצה: {command}
+	An AI assistant on this computer (Claude Desktop, Claude Code…) reads your mail, calendar, tasks and people through MailCraft's MCP server, and asks here before each command it wants to run. Off, it reaches nothing.	עוזר בינה מלאכותית במחשב הזה (Claude Desktop, ‏Claude Code…) קורא את הדואר, היומן, המשימות ואנשי הקשר שלך דרך שרת ה-MCP של MailCraft, ושואל כאן לפני כל פקודה שהוא רוצה להריץ. כשזה כבוי, הוא לא מגיע לשום דבר.
+	Commands agents run without asking first	פקודות שסוכנים מריצים בלי לשאול קודם
+	Connect an assistant	חיבור עוזר
+	Deny	דחה
+	Forget	שכח
+	Let AI agents use MailCraft	לאפשר לסוכני בינה מלאכותית להשתמש ב-MailCraft
+	Nothing yet	עדיין כלום
+	Run without asking	הרצה בלי לשאול
+	What AI agents did	מה סוכני הבינה המלאכותית עשו
+	{n} more waiting	עוד {n} ממתינות
+	Looked, changed nothing	צפה, לא שינה דבר
+	Ran	בוצע
+	You didn't allow it	לא אישרת זאת
+	Didn't run: {why}	לא בוצע: {why}
+	Let AI agents ask to run commands	לאפשר לסוכני בינה מלאכותית לבקש להריץ פקודות
+	Sending, moving, answering an invitation… each asked about here first, unless you always allow it. Off, agents only read.	שליחה, העברה, מענה להזמנה… כל אחת נשאלת כאן קודם, אלא אם תמיד תאפשר אותה. כשכבוי, הסוכנים רק קוראים.
+	Accounts AI agents read	חשבונות שסוכני בינה מלאכותית קוראים
+	One turned off is left out of all they read, and they can't take pictures of the window	חשבון כבוי מושמט מכל מה שהם קוראים, והם לא יכולים לצלם את החלון
+	… and {n} more characters	… ועוד {n} תווים
+	A copy installed from MailCraft's releases looks for a newer one and installs it as it closes	עותק שהותקן מהגרסאות של MailCraft מחפש גרסה חדשה יותר ומתקין אותה כשהוא נסגר
+	A notice under every message sent	הודעה מתחת לכל הודעה שנשלחת
+	Accounts of {domains} only	רק חשבונות של {domains}
+	Encrypted connections only	רק חיבורים מוצפנים
+	Locked	נעול
+	No certificate trusted by hand	אין אישור שסומך עליו ידנית
+	Not taken	לא נלקח
+	Office	משרד
+	Questions	שאלות
+	Read from	נקרא מתוך
+	Releases only	רק גרסאות רשמיות
+	Set by your organisation	נקבע על ידי הארגון שלך
+	Set up for {organisation}	הוגדר עבור {organisation}
+	Update MailCraft by itself	לעדכן את MailCraft מעצמו
+	Your details for its signature	הפרטים שלך עבור החתימה שלו
+	Your organisation	הארגון שלך
+	Your organisation doesn't allow trusting a certificate by hand.	הארגון שלך אינו מאפשר לסמוך על אישור ידנית.
+	Your organisation set up MailCraft on this computer. What it locked, you can't change.	הארגון שלך הגדיר את MailCraft במחשב זה. את מה שנעל אין באפשרותך לשנות.
+	Text size	גודל הטקסט
+	Everything in the window, larger or smaller. Ctrl and + or − change it too, and Ctrl+0 puts it back.	כל מה שבחלון, גדול או קטן יותר. גם Ctrl עם + או − משנים אותו, ו-Ctrl+0 מחזיר אותו.
+	Text size: {percent}%	גודל הטקסט: {percent}%
+	{percent}%	{percent}%
+	A table, as it will be sent. Backspace after it takes it out.	טבלה, כפי שתישלח. Backspace אחריה מוחק אותה.
+	Attach messages	צירוף הודעות
+	Attach 1 message	צרף הודעה אחת
+	Attach {n} messages	צרף {n} הודעות
+	Move to To	העבר אל "אל"
+	Move to Cc	העבר אל "עותק"
+	Move to Bcc	העבר אל "עותק מוסתר"
+	Copy addresses	העתק כתובות
+	Mailing list:	רשימת תפוצה:
+	Unsubscribe	ביטול הרשמה
+	Show the message in its folder	הצג את ההודעה בתיקייה שלה
+	Buttons on a message in the list	לחצנים על הודעה ברשימה
+	Shown when the pointer is over a message, up to {n}.	מוצגים כשהמצביע מעל הודעה, עד {n}.
+	Mark read or unread	סימון כנקראה או כלא נקראה
+	Choose a date…	בחירת תאריך…
+	Pick a time in the future.	בחר מועד עתידי.
+	In 1 minute	בעוד דקה
+	In 1 day	בעוד יום
+	Proposal accepted: the meeting is at {when} now.	ההצעה התקבלה: הפגישה נקבעה כעת ל-{when}.
+	Invitation: {summary}	הזמנה: {summary}
+	Updated: {summary}	עודכן: {summary}
+	Cancelled: {summary}	בוטל: {summary}
+	Cancelled: {summary} ({when})	בוטל: {summary} ({when})
+	{summary} has been cancelled.	הפגישה {summary} בוטלה.
+	{summary} on {when} has been cancelled.	הפגישה {summary} ב-{when} בוטלה.
+	When: {when}	מתי: {when}
+	Where: {place}	איפה: {place}
+	Fwd: {summary}	הועבר: {summary}
+	{who} forwarded you this meeting, organized by {organizer}.	הפגישה הזו הועברה אליך מאת {who}. מארגן: {organizer}.
+	{who} asked you to go to this meeting in their place. It's organized by {organizer}.	התבקשת להשתתף בפגישה הזו במקום {who}. מארגן: {organizer}.
+	Accepted: {summary}	התקבל: {summary}
+	Tentative: {summary}	אולי: {summary}
+	Declined: {summary}	נדחה: {summary}
+	Delegated: {summary}	הואצל: {summary}
+	{who} accepted the invitation to {summary}.	{who}: ההזמנה ל-{summary} התקבלה.
+	{who} tentatively accepted the invitation to {summary}.	{who}: ההזמנה ל-{summary} התקבלה באופן מותנה.
+	{who} declined the invitation to {summary}.	{who}: ההזמנה ל-{summary} נדחתה.
+	{who} asked {delegate} to go to {summary} in their place.	{who}: ההשתתפות ב-{summary} הואצלה אל {delegate}.
+	New time proposed: {summary}	הוצע מועד חדש: {summary}
+	{who} proposes a new time for {summary}: {when}.	{who}: הצעה למועד חדש ל-{summary}: {when}.
+	New time declined: {summary}	המועד החדש נדחה: {summary}
+	The proposed new time for {summary} was declined. The meeting stays as it was.	המועד החדש שהוצע ל-{summary} נדחה. הפגישה נשארת כפי שהייתה.
+	Cancel meeting	ביטול הפגישה
+	Cancel this occurrence	ביטול המופע הזה
+	Send cancellation	שליחת הודעת ביטול
+	Delete without sending	מחיקה בלי לשלוח
+	Message to your guests	הודעה למשתתפים
+	Your guests are sent a cancellation. Add a message to them, if you like.	המשתתפים יקבלו הודעת ביטול. אפשר להוסיף להם הודעה.
+	MailCraft's automatic replies and rules on the server aren't running: another program made its own filters (“{name}”) the ones that run.	התשובות האוטומטיות והכללים של MailCraft בשרת לא פועלים: תוכנה אחרת הפכה את המסננים שלה („{name}”) לאלה שפועלים.
+	Off: another program's filters (“{name}”) run in place of MailCraft's	כבוי: במקום המסננים של MailCraft פועלים המסננים של תוכנה אחרת („{name}”)
+	On, sent by your other filters on the server (“{name}”)	פועל, נשלח על ידי המסננים האחרים שלך בשרת („{name}”)
+	Run my rules again	הפעלת הכללים שלי מחדש
+	These are the replies your other filters on the server (“{name}”) send: change them in the program that made them. MailCraft's can be on only while those are off: the server sends one reply.	אלה התשובות שהמסננים האחרים שלך בשרת („{name}”) שולחים: אפשר לשנות אותן בתוכנה שיצרה אותם. התשובות של MailCraft יכולות לפעול רק כשאלה כבויות: השרת שולח תשובה אחת.
+	These rules aren't running: another program made its own filters the ones that run. Run them again here, with that program's.	הכללים האלה לא פועלים: תוכנה אחרת הפכה את המסננים שלה לאלה שפועלים. אפשר להפעיל אותם כאן מחדש, יחד עם אלה של התוכנה ההיא.
+	Account: {email}	חשבון: {email}
+	Details	פרטים
+	Event: “{name}”, {when}	אירוע: „{name}”, {when}
+	Message: “{subject}”, from {from}	הודעה: „{subject}”, מאת {from}
+	Task: “{name}”	משימה: „{name}”
+	This occurrence: {when}	המופע הזה: {when}
+	To: {who}	אל: {who}
+	Asking their server…	שואלים את השרת שלהם…
+	Click a time to move the meeting there	לחיצה על שעה מעבירה אליה את הפגישה
+	Hide Scheduling Assistant	הסתרת עוזר התזמון
+	Scheduling Assistant	עוזר התזמון
+	The next time you and your guests are all free	הזמן הבא שבו את/ה וכל המשתתפים פנויים
+	Their times can't be had: {why}	אי אפשר לקבל את הזמנים שלהם: {why}
+	You	את/ה
+	{free} of {all} free	{free} מתוך {all} פנויים

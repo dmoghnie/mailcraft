@@ -50,8 +50,8 @@ use serde_json::{Value, json};
 
 pub use app::caption::{MIN_WINDOW_SIZE, take_zooming};
 pub use app::{
-    Action, BootCard, ClipboardRead, FramePart, MailApp, Monitors, PaneSizes, RibbonTab, UiState, WindowPlace, after_open, alt_code_pages, alt_codes,
-    clipboard_keys, control_click, set_monitors,
+    AGENTS_OFF, Action, AgentAnswer, AgentLogLine, AgentOutcome, BootCard, ClipboardRead, FramePart, MailApp, Monitors, PaneSizes, RibbonTab,
+    UiState, WindowPlace, after_open, alt_code_pages, alt_codes, clipboard_keys, control_click, set_monitors,
 };
 pub(crate) use app::{Pane, SearchDrop, junk_menu, scope_label, use_editor};
 pub use dialogs::{AccountKind, Dialog};
@@ -73,7 +73,9 @@ pub(crate) fn lock<T>(m: &std::sync::Mutex<T>) -> std::sync::MutexGuard<'_, T> {
     m.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
 }
 use icons::Icon;
-pub use services::{Backend, InstallAsks, KeptOnClose, Lane, MailNotice, NullBackend, NullServices, Picked, Services, UpdateState, Work};
+pub use services::{
+    Backend, InstallAsks, KeptOnClose, Lane, MailNotice, NullBackend, NullServices, Picked, Services, UpdateOutcome, UpdateState, Work,
+};
 use theme::Tokens;
 
 /// How the app reads HTML from the clipboard, set once at start (the clipboard is the

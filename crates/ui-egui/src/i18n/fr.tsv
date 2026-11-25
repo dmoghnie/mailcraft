@@ -285,6 +285,9 @@
 	Keep MailCraft running when its window is closed	Garder MailCraft en cours d’exécution quand sa fenêtre est fermée
 	Start MailCraft in the notification area	Démarrer MailCraft dans la zone de notification
 	Start MailCraft minimized	Démarrer MailCraft réduit
+	Start MailCraft when you sign in	Démarrer MailCraft à l’ouverture de session
+	It starts as you sign in to this computer and checks for mail. Its window comes up too, unless it's kept running when closed and started put away (below).	Il démarre quand vous ouvrez une session sur cet ordinateur et relève le courrier. Sa fenêtre s’ouvre aussi, sauf s’il reste en cours d’exécution à la fermeture et démarre rangé (ci-dessous).
+	Starting MailCraft at sign-in couldn't be changed: {error}	Le démarrage de MailCraft à l’ouverture de session n’a pas pu être modifié : {error}
 	It checks for mail and announces it with its window put away, as when it's closed. Started to open a link or a file, it opens the window.	Il relève le courrier et l’annonce, sa fenêtre rangée, comme quand elle est fermée. Lancé pour ouvrir un lien ou un fichier, il ouvre la fenêtre.
 	Show the unread mail on its icon	Afficher le courrier non lu sur son icône
 	How many unread messages the Inboxes have, in the corner of MailCraft's icon in the notification area	Le nombre de messages non lus des boîtes de réception, dans le coin de l’icône de MailCraft dans la zone de notification
@@ -1034,7 +1037,7 @@ month	May	mai
 	0 minutes before start	0 minute avant le début
 	1 Reminder	1 rappel
 	{n} Reminders	{n} rappels
-	Click Snooze to be reminded again in:	Cliquez sur Répéter pour être averti de nouveau dans :
+	Click Snooze to be reminded again in:	Cliquez sur Répéter plus tard pour être averti de nouveau dans :
 	Dismiss	Ignorer
 	Dismiss All	Tout ignorer
 	Open Item	Ouvrir l'élément
@@ -1278,6 +1281,8 @@ month	May	mai
 	MailCraft {version} is ready	MailCraft {version} est prêt
 	MailCraft {version} is ready. Restart now to install it, or it installs when you close MailCraft.	MailCraft {version} est prêt. Redémarrez maintenant pour l'installer, ou il s'installera à la fermeture de MailCraft.
 	Restart MailCraft to install it now, or it installs when you close MailCraft.	Redémarrez MailCraft pour l'installer maintenant, ou il s'installera à la fermeture de MailCraft.
+	MailCraft is updated to {version}.	MailCraft a été mis à jour vers la version {version}.
+	MailCraft {version} didn't install. It's offered again.	MailCraft {version} ne s'est pas installé. Il sera proposé à nouveau.
 	Restart now	Redémarrer maintenant
 	The update is downloaded and checked. It installs now, as MailCraft closes, which takes a moment; open MailCraft again when it's done.	La mise à jour est téléchargée et vérifiée. Elle s'installe maintenant, à la fermeture de MailCraft, ce qui prend un instant ; rouvrez MailCraft une fois terminé.
 	Update and close	Mettre à jour et fermer
@@ -1879,6 +1884,8 @@ count	occurrences	occurrences
 	Default font	Police par défaut
 	Font for new messages	Police des nouveaux messages
 	New messages, replies and forwards are written in it. Text you set a font on keeps its own.	Les nouveaux messages, les réponses et les transferts sont écrits dans cette police. Le texte auquel vous donnez une police garde la sienne.
+	Font size for new messages	Taille de police des nouveaux messages
+	New messages, replies and forwards are written in it. Text you set a size on keeps its own.	Les nouveaux messages, les réponses et les transferts sont écrits dans cette taille. Le texte auquel vous donnez une taille garde la sienne.
 	Clean up old items	Nettoyer les anciens éléments
 	Clean up old items…	Nettoyer les anciens éléments…
 	Move old mail to an archive file on this computer, out of the mailbox.	Déplacer les anciens messages de la boîte aux lettres vers un fichier d'archive sur cet ordinateur.
@@ -2035,7 +2042,6 @@ count	occurrences	occurrences
 	Names	Noms
 	AutoArchive settings	Paramètres d'archivage automatique
 	From a mailing list.	D'une liste de diffusion.
-	Unsubscribe	Se désabonner
 	Unsubscribing from junk mail tells its sender that your address is read	Se désabonner d'un courrier indésirable indique à son expéditeur que votre adresse est lue
 	Unsubscribe from this list?	Se désabonner de cette liste ?
 	A message asking to leave it goes to {address}, from your account.	Un message demandant à la quitter part vers {address}, depuis votre compte.
@@ -2386,3 +2392,174 @@ count	occurrences	occurrences
 	Write rule	Écrire la règle
 	Written by {model}	Écrite par {model}
 	gets a yes from MailCraft's AI to “{question}”	reçoit un oui de l’IA de MailCraft à « {question} »
+	Sort by	Trier par
+	First name	Prénom
+	Last name	Nom
+	Open a repeating event	Ouvrir un événement périodique
+	Open this occurrence	Ouvrir cette occurrence
+	Open the series	Ouvrir la série
+	Changes apply to this occurrence alone.	Les modifications ne s’appliquent qu’à cette occurrence.
+	Your other filters on the server (“{name}”) run first, and are left as they are.	Vos autres filtres sur le serveur (« {name} ») s’exécutent d’abord, et restent tels quels.
+	Found: {url}	Trouvé : {url}
+	Task list	Liste de tâches
+	Task lists	Listes de tâches
+	All task lists	Toutes les listes de tâches
+	This task is in a task list that can't be changed here.	Cette tâche se trouve dans une liste de tâches qui ne peut pas être modifiée ici.
+	Occurrences of this task were changed on their own elsewhere: change it there.	Des occurrences de cette tâche ont été modifiées séparément ailleurs : modifiez-la là-bas.
+	Everything with them…	Tout avec cette personne…
+	Everything with sender…	Tout avec l’expéditeur…
+	Everything with them	Tout avec cette personne
+	Search within everything with them	Rechercher dans tout ce qui concerne cette personne
+	Mail ({n})	Courrier ({n})
+	Files ({n})	Pièces jointes ({n})
+	Meetings ({n})	Réunions ({n})
+	Links ({n})	Liens ({n})
+	People ({n})	Contacts ({n})
+	Nothing here.	Rien ici.
+	Nothing here matches the search.	Rien ici ne correspond à la recherche.
+	Files and links come from the mail on this computer: {n} of these messages aren't downloaded.	Les pièces jointes et les liens viennent du courrier présent sur cet ordinateur : {n} de ces messages ne sont pas téléchargés.
+	Only the newest of the mail with them is shown.	Seul le courrier le plus récent avec cette personne est affiché.
+	In their signature	Dans sa signature
+	Add to their contact…	Ajouter à son contact…
+	Open the newest	Ouvrir le plus récent
+	Open (they sent it)	Ouvrir (envoyé par cette personne)
+	They organise it	Organisée par cette personne
+	They're invited	Cette personne est invitée
+	{n} messages	{n} messages
+	One message	Un message
+	Overview	Vue d’ensemble
+	Show all	Tout afficher
+	Find someone by name or address	Trouver quelqu’un par nom ou adresse
+	Delegate	Déléguer
+	Delegate meeting	Déléguer la réunion
+	Delegate…	Déléguer…
+	Delegated	Déléguée
+	Invite…	Inviter…
+	Name <address>	Nom <adresse>
+	Pick guests from the address book	Choisir des invités dans le carnet d’adresses
+	Someone else goes in your place: they get the invitation to answer, and the organizer is told.	Quelqu’un d’autre y va à votre place : il reçoit l’invitation pour y répondre, et l’organisateur est prévenu.
+	The whole series	Toute la série
+	This occurrence	Cette occurrence
+	Who goes instead of you	Qui y va à votre place
+	Who is “{name}”?	Qui est « {name} » ?
+	You asked {name} to go in your place.	Vous avez demandé à {name} d’y aller à votre place.
+	{name} asked you to go in their place.	{name} vous a demandé d’y aller à sa place.
+	{name} asked {delegate} to go in their place.	{name} a demandé à {delegate} d’y aller à sa place.
+	{name} (delegated to {delegate})	{name} (délégué à {delegate})
+	AI agents	Agents IA
+	Add MailCraft's MCP server to it: the command mailcraft-cli with the argument mcp	Ajoutez-lui le serveur MCP de MailCraft : la commande mailcraft-cli avec l’argument mcp
+	Agents run this command from now on without asking	Les agents exécutent désormais cette commande sans demander
+	Allow	Autoriser
+	Always allow	Toujours autoriser
+	An AI agent asks	Un agent IA demande
+	An AI agent wants to: {command}	Un agent IA veut : {command}
+	An AI assistant on this computer (Claude Desktop, Claude Code…) reads your mail, calendar, tasks and people through MailCraft's MCP server, and asks here before each command it wants to run. Off, it reaches nothing.	Un assistant IA sur cet ordinateur (Claude Desktop, Claude Code…) lit vos e-mails, votre calendrier, vos tâches et vos contacts par le serveur MCP de MailCraft, et demande ici avant chaque commande qu’il veut exécuter. Désactivé, il n’accède à rien.
+	Commands agents run without asking first	Commandes que les agents exécutent sans demander d’abord
+	Connect an assistant	Connecter un assistant
+	Deny	Refuser
+	Forget	Oublier
+	Let AI agents use MailCraft	Laisser les agents IA utiliser MailCraft
+	Nothing yet	Rien pour l’instant
+	Run without asking	Exécuter sans demander
+	What AI agents did	Ce qu’ont fait les agents IA
+	{n} more waiting	{n} autres en attente
+	Looked, changed nothing	Consulté, rien de modifié
+	Ran	Exécuté
+	You didn't allow it	Vous ne l'avez pas autorisé
+	Didn't run: {why}	Non exécuté : {why}
+	Let AI agents ask to run commands	Autoriser les agents IA à demander l'exécution de commandes
+	Sending, moving, answering an invitation… each asked about here first, unless you always allow it. Off, agents only read.	Envoyer, déplacer, répondre à une invitation… chacune vous est demandée ici d'abord, sauf si vous l'autorisez toujours. Désactivé, les agents ne font que lire.
+	Accounts AI agents read	Comptes lus par les agents IA
+	One turned off is left out of all they read, and they can't take pictures of the window	Un compte désactivé est exclu de tout ce qu'ils lisent, et ils ne peuvent pas prendre de captures de la fenêtre
+	… and {n} more characters	… et {n} caractères de plus
+	A copy installed from MailCraft's releases looks for a newer one and installs it as it closes	Une copie installée depuis les versions de MailCraft en cherche une plus récente et l'installe à sa fermeture
+	A notice under every message sent	Une mention sous chaque message envoyé
+	Accounts of {domains} only	Uniquement les comptes des domaines : {domains}
+	Encrypted connections only	Connexions chiffrées uniquement
+	Locked	Verrouillé
+	No certificate trusted by hand	Aucun certificat approuvé à la main
+	Not taken	Non retenu
+	Office	Bureau
+	Questions	Questions
+	Read from	Lu depuis
+	Releases only	Versions publiées uniquement
+	Set by your organisation	Défini par votre organisation
+	Set up for {organisation}	Configuré pour {organisation}
+	Update MailCraft by itself	Mettre à jour MailCraft tout seul
+	Your details for its signature	Vos coordonnées pour sa signature
+	Your organisation	Votre organisation
+	Your organisation doesn't allow trusting a certificate by hand.	Votre organisation n'autorise pas à approuver un certificat à la main.
+	Your organisation set up MailCraft on this computer. What it locked, you can't change.	Votre organisation a configuré MailCraft sur cet ordinateur. Ce qu'elle a verrouillé, vous ne pouvez pas le modifier.
+	Text size	Taille du texte
+	Everything in the window, larger or smaller. Ctrl and + or − change it too, and Ctrl+0 puts it back.	Tout ce qui est dans la fenêtre, en plus grand ou plus petit. Ctrl et + ou − la changent aussi, et Ctrl+0 la rétablit.
+	Text size: {percent}%	Taille du texte : {percent} %
+	{percent}%	{percent} %
+	A table, as it will be sent. Backspace after it takes it out.	Un tableau, tel qu’il sera envoyé. Retour arrière juste après le retire.
+	Attach messages	Joindre des messages
+	Attach 1 message	Joindre 1 message
+	Attach {n} messages	Joindre {n} messages
+	Move to To	Déplacer vers À
+	Move to Cc	Déplacer vers Cc
+	Move to Bcc	Déplacer vers Cci
+	Copy addresses	Copier les adresses
+	Mailing list:	Liste de diffusion :
+	Unsubscribe	Se désabonner
+	Show the message in its folder	Afficher le message dans son dossier
+	Buttons on a message in the list	Boutons sur un message de la liste
+	Shown when the pointer is over a message, up to {n}.	Affichés quand le pointeur survole un message, jusqu’à {n}.
+	Mark read or unread	Marquer comme lu ou non lu
+	Choose a date…	Choisir une date…
+	Pick a time in the future.	Choisissez une heure à venir.
+	In 1 minute	Dans 1 minute
+	In 1 day	Dans 1 jour
+	Proposal accepted: the meeting is at {when} now.	Proposition acceptée : la réunion a lieu maintenant le {when}.
+	Invitation: {summary}	Invitation : {summary}
+	Updated: {summary}	Mise à jour : {summary}
+	Cancelled: {summary}	Annulation : {summary}
+	Cancelled: {summary} ({when})	Annulation : {summary} ({when})
+	{summary} has been cancelled.	La réunion {summary} a été annulée.
+	{summary} on {when} has been cancelled.	La réunion {summary} du {when} a été annulée.
+	When: {when}	Quand : {when}
+	Where: {place}	Où : {place}
+	Fwd: {summary}	TR : {summary}
+	{who} forwarded you this meeting, organized by {organizer}.	{who} vous a transféré cette réunion, organisée par {organizer}.
+	{who} asked you to go to this meeting in their place. It's organized by {organizer}.	{who} vous demande d’aller à cette réunion à sa place. Elle est organisée par {organizer}.
+	Accepted: {summary}	Accepté : {summary}
+	Tentative: {summary}	Provisoire : {summary}
+	Declined: {summary}	Refusé : {summary}
+	Delegated: {summary}	Délégué : {summary}
+	{who} accepted the invitation to {summary}.	{who} a accepté l’invitation à la réunion {summary}.
+	{who} tentatively accepted the invitation to {summary}.	{who} a accepté provisoirement l’invitation à la réunion {summary}.
+	{who} declined the invitation to {summary}.	{who} a refusé l’invitation à la réunion {summary}.
+	{who} asked {delegate} to go to {summary} in their place.	{who} a demandé à {delegate} d’aller à la réunion {summary} à sa place.
+	New time proposed: {summary}	Nouvel horaire proposé : {summary}
+	{who} proposes a new time for {summary}: {when}.	{who} propose un nouvel horaire pour la réunion {summary} : {when}.
+	New time declined: {summary}	Nouvel horaire refusé : {summary}
+	The proposed new time for {summary} was declined. The meeting stays as it was.	Le nouvel horaire proposé pour la réunion {summary} a été refusé. La réunion reste telle qu’elle était.
+	Cancel meeting	Annuler la réunion
+	Cancel this occurrence	Annuler cette occurrence
+	Send cancellation	Envoyer l’annulation
+	Delete without sending	Supprimer sans envoyer
+	Message to your guests	Message aux participants
+	Your guests are sent a cancellation. Add a message to them, if you like.	Les participants reçoivent une annulation. Vous pouvez y ajouter un message pour eux.
+	MailCraft's automatic replies and rules on the server aren't running: another program made its own filters (“{name}”) the ones that run.	Les réponses automatiques et les règles de MailCraft sur le serveur ne s’exécutent pas : un autre programme a fait de ses propres filtres (« {name} ») ceux qui s’exécutent.
+	Off: another program's filters (“{name}”) run in place of MailCraft's	Désactivées : les filtres d’un autre programme (« {name} ») s’exécutent à la place de ceux de MailCraft
+	On, sent by your other filters on the server (“{name}”)	Activées, envoyées par vos autres filtres sur le serveur (« {name} »)
+	Run my rules again	Remettre mes règles en route
+	These are the replies your other filters on the server (“{name}”) send: change them in the program that made them. MailCraft's can be on only while those are off: the server sends one reply.	Ce sont les réponses qu’envoient vos autres filtres sur le serveur (« {name} ») : modifiez-les dans le programme qui les a créées. Celles de MailCraft ne peuvent être activées que lorsque celles-ci sont désactivées : le serveur n’envoie qu’une réponse.
+	These rules aren't running: another program made its own filters the ones that run. Run them again here, with that program's.	Ces règles ne s’exécutent pas : un autre programme a fait de ses propres filtres ceux qui s’exécutent. Remettez-les en route ici, avec ceux de ce programme.
+	Account: {email}	Compte : {email}
+	Details	Détails
+	Event: “{name}”, {when}	Événement : « {name} », {when}
+	Message: “{subject}”, from {from}	Message : « {subject} », envoyé par {from}
+	Task: “{name}”	Tâche : « {name} »
+	This occurrence: {when}	Cette occurrence : {when}
+	To: {who}	À : {who}
+	Asking their server…	Interrogation de leur serveur…
+	Click a time to move the meeting there	Cliquez sur une heure pour y déplacer la réunion
+	Hide Scheduling Assistant	Masquer l’Assistant Planification
+	Scheduling Assistant	Assistant Planification
+	The next time you and your guests are all free	Le prochain moment où vous et vos participants êtes tous libres
+	Their times can't be had: {why}	Leurs disponibilités sont introuvables : {why}
+	You	Vous
+	{free} of {all} free	{free} sur {all} libres

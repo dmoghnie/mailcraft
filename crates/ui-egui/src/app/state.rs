@@ -2,6 +2,7 @@
 //! and what of it is kept between runs.
 
 mod kept;
+mod organisation;
 
 use crate::*;
 
@@ -43,6 +44,8 @@ impl PaneSizes {
 
 #[derive(Default)]
 pub struct UiState {
+    /// What AI agents asked of the window, and the commands waiting for the user (issue #255).
+    pub(crate) agents: super::Agents,
     /// Where the main window, the last message window and the last compose window were.
     pub places: std::collections::BTreeMap<String, WindowPlace>,
     /// Closing was confirmed though it loses online-only accounts' unsent mail (issue #4); and
@@ -65,6 +68,8 @@ pub struct UiState {
     /// MailCraft's earlier Flatpak this start brought the mail over from, still installed: a bar
     /// says how to remove it until it's dismissed.
     pub(crate) old_flatpak: Option<&'static str>,
+    /// How the update installed as MailCraft last closed ended: a bar says so until it's dismissed.
+    pub(crate) update_outcome: Option<crate::UpdateOutcome>,
     /// What to do with the update as MailCraft closes was answered: closing asks no more.
     pub(crate) update_answered: bool,
     /// Restart now was chosen: the new version opens once installed, if the close goes ahead.
@@ -81,8 +86,14 @@ pub struct UiState {
     /// Whether MailCraft can keep running with its window closed (the desktop app), and what
     /// becomes of the window then; looked up at every frame.
     pub keeps_running: Option<KeptOnClose>,
+    /// Whether MailCraft starts as the user signs in, as the system has it (issue #87); none:
+    /// it can't be set from here.
+    pub(crate) at_sign_in: Option<bool>,
     /// The window was closed to the notification area and is hidden.
     pub(crate) in_tray: bool,
+    /// A notification's `mailcraft:` link handed over (issue #273): shown, as a click on it is,
+    /// in the next pass.
+    pub(crate) link_shows: Option<Option<mailcraft_engine::model::MessageKey>>,
     /// MailCraft minimized the window itself (closed to the Dock or the taskbar, or started put
     /// away), and whether it has lost the focus since (issue #169, [`MailApp::logic`]).
     pub(crate) minimized_away: Option<bool>,
@@ -94,6 +105,9 @@ pub struct UiState {
     pub pending_move: Option<PathBuf>,
     /// `None` follows the system.
     pub dark: Option<bool>,
+    /// The organisation's logo (issue #245), for File › About.
+    pub(crate) org_logo: Option<egui::ColorImage>,
+    pub(crate) org_logo_tex: Option<egui::TextureHandle>,
     pub tab: RibbonTab,
     pub search_text: String,
     pub(crate) focus_search: bool,
@@ -215,6 +229,8 @@ pub struct UiState {
     pub(crate) all_selected: Option<u64>,
     /// Signatures written as HTML code, laid out for the messages being written (issue #90).
     pub(crate) signature_cards: reading::SignatureCards,
+    /// The tables pasted into messages being written, laid out (issue #268).
+    pub(crate) table_cards: reading::TableCards,
     /// The recipient box showing suggestions, the highlighted one, and the text for which Escape
     /// hid them.
     pub(crate) suggest_field: Option<dialogs::Recipients>,
@@ -239,6 +255,8 @@ pub struct UiState {
     pub(crate) rtl_font: Option<Vec<u8>>,
     /// The language whose CJK font is loaded.
     pub(crate) cjk_loaded: Option<&'static str>,
+    /// The language the meeting mail is written in (`i18n::mail_words`, issue #235).
+    pub(crate) words_lang: Option<&'static str>,
     /// Shown text has Chinese characters none of the fonts has (`reading::han_missing`).
     pub(crate) han_missing: bool,
     /// Long message texts laid out by what's in view: their parts' heights, and their selection.
@@ -324,6 +342,10 @@ pub struct UiState {
     pub(crate) invite: Option<(MessageKey, u64, Option<mailcraft_engine::Invite>, Option<mailcraft_engine::InviteDay>)>,
     /// Files to drag out of the window (the app starts the system drag).
     pub(crate) drag_out: Vec<PathBuf>,
+    /// What each file opened in another app was written from (an attachment by its message and
+    /// index, a note's file by its note and index): one opened again while its app holds the
+    /// file is that file.
+    pub(crate) opened_files: HashMap<PathBuf, String>,
     /// The platform can drag files out.
     pub(crate) can_drag_out: bool,
     /// The account whose import's details are shown, beside the status bar.

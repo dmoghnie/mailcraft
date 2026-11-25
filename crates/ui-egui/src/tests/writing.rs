@@ -5,6 +5,7 @@ use super::*;
 
 mod bar;
 mod check_names;
+mod chips;
 mod files;
 mod fonts;
 mod form;
@@ -14,6 +15,7 @@ mod rewriting;
 mod sending;
 mod signatures;
 mod suggest;
+mod tables;
 mod templates;
 mod undo_send;
 

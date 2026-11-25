@@ -219,6 +219,8 @@ fn basics(ui: &mut Ui, f: &mut AccountForm, s: &Session, acts: &mut Vec<Action>)
             // How they're signed in to, as the settings say (NTLM; an outgoing server without).
             f.sign_in = SignInMethods { incoming: c.sign_in, outgoing: c.smtp_sign_in };
             f.found_oauth = c.oauth.clone().map(|p| (c.imap.host.clone(), p));
+            let dav = c.dav.clone().unwrap_or_default();
+            (f.found_caldav, f.found_carddav) = (dav.caldav, dav.carddav);
             f.found_for = Some(email.clone());
             f.found_source = Some(source.clone());
         }
@@ -296,13 +298,13 @@ fn server_settings(ui: &mut Ui, f: &mut AccountForm, s: &Session, t: &Tokens, ac
     ui.add_space(8.0);
     // Each server: where it is, then how it's signed in to.
     edited |= if pop {
-        server_row(ui, w, Server::Pop, "", &mut f.pop_host, &mut f.pop_port, &mut f.pop_security)
+        server_row(ui, w, Server::Pop, "", &mut f.pop_host, &mut f.pop_port, &mut f.pop_security, !s.org.require_encryption)
     } else {
-        server_row(ui, w, Server::Imap, "", &mut f.imap_host, &mut f.imap_port, &mut f.imap_security)
+        server_row(ui, w, Server::Imap, "", &mut f.imap_host, &mut f.imap_port, &mut f.imap_security, !s.org.require_encryption)
     };
     f.sign_in.incoming_ui(ui);
     ui.add_space(8.0);
-    edited |= server_row(ui, w, Server::Smtp, "", &mut f.smtp_host, &mut f.smtp_port, &mut f.smtp_security);
+    edited |= server_row(ui, w, Server::Smtp, "", &mut f.smtp_host, &mut f.smtp_port, &mut f.smtp_security, !s.org.require_encryption);
     f.sign_in.outgoing_ui(ui);
     // Its own user name only matters when it's signed in to.
     if f.sign_in.outgoing != mailcraft_engine::model::SignInMethod::None {

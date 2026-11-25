@@ -9,11 +9,15 @@ use crate::icons::{self, Icon};
 use crate::theme::{self, Tokens};
 use crate::{Action, widgets};
 
+mod cancelling;
 mod contact;
 mod date_pick;
 pub(crate) mod follow_up;
+mod guests;
 mod labels;
 mod online_meeting;
+pub(crate) use online_meeting::labels as meeting_labels;
+mod passing;
 mod pattern;
 mod propose;
 mod reminders;
@@ -24,16 +28,21 @@ pub(crate) use labels::{ICON_W, label_column};
 pub(crate) use pattern::form_day as pattern_day;
 mod repeat;
 mod showing;
+mod snooze;
 mod task;
 mod waiting;
+pub use cancelling::{CancelForm, cancel};
 pub use contact::{ContactForm, contact};
 pub use follow_up::{FollowUpForm, follow_up};
+pub use guests::NameAsk;
 pub use online_meeting::MeetingState;
 #[cfg(test)]
 pub(crate) use online_meeting::{add as online_meeting_add, remove as online_meeting_remove};
+pub use passing::{PassForm, Passing, pass};
 pub use propose::{ProposeForm, propose};
 pub use repeat::Repeat;
 use repeat::repeat_row;
+pub use snooze::{SnoozeForm, snooze};
 use task::category_chips;
 pub use task::{TaskForm, status_label, task};
 pub use waiting::{WaitingForm, waiting};
@@ -86,6 +95,8 @@ pub struct EventForm {
     /// The occurrence opened (its start), for deleting just that one.
     pub occurrence: Option<i64>,
     pub recurring: bool,
+    /// Opened as that occurrence on its own (issue #241): saved, deleted and answered, it alone.
+    pub this_occurrence: bool,
     /// The calendars that can take it: (account, calendar id, name).
     pub calendars: Vec<(String, String, String)>,
     pub calendar: usize,
@@ -120,16 +131,27 @@ pub struct EventForm {
     pub privacy: mailcraft_engine::model::ical::Privacy,
     pub show_as: mailcraft_engine::model::ical::ShowAs,
     pub organizer: Option<String>,
-    /// (who, their answer).
-    pub attendees: Vec<(String, String)>,
+    /// (who, their answer, whom they handed their place to).
+    pub attendees: Vec<(String, String, String)>,
     /// The guests, as typed (`Name <address>, …`): editable on the user's own events.
     pub guests: String,
+    /// Their box: the people suggested as a name is typed (issue #253).
+    pub guest_box: crate::look::people_box::PeopleBox,
+    /// Names Check Names found several people for, to pick from; and the directory's answers it
+    /// waits for, when it waits.
+    pub name_asks: Vec<NameAsk>,
+    pub names_pending: Option<u64>,
     /// The user can change the guests (a new event, or one they organize).
     pub can_invite: bool,
     /// The user was invited and hasn't answered.
     pub needs_reply: bool,
     /// Someone else's meeting, which they let be forwarded (issue #234).
     pub can_forward: bool,
+    /// Someone else's meeting the user is a guest of: their place can be handed on (issue #254).
+    pub can_delegate: bool,
+    /// The user's own meeting with guests, whose cancellation MailCraft sends: deleting it asks
+    /// how they're told (issue #235). Exchange, through Graph, sends its own.
+    pub asks_cancel: bool,
     pub read_only: bool,
     /// Its categories, and every category there is (name, colour) to pick from.
     pub categories: Vec<String>,
@@ -143,6 +165,11 @@ pub struct EventForm {
     pub reading_notes: bool,
     /// Its online meeting (issue #25): the rooms to add, and what Save asks.
     pub meeting: MeetingState,
+    /// The Scheduling Assistant opened (issue #277); the guests and day whose times were asked
+    /// for last; what Next free time said.
+    pub assist: bool,
+    pub assist_asked: Option<(String, i64)>,
+    pub assist_note: Option<String>,
     pub error: Option<String>,
 }
 
@@ -249,10 +276,22 @@ impl EventForm {
         f
     }
 
-    /// An existing event, opened at one of its occurrences.
+    /// An existing event, opened at one of its occurrences: a series as a whole.
     pub fn open(s: &Session, uid: &str, occurrence: i64) -> Option<EventForm> {
+        let e = &s.find_event(uid)?.1.event;
+        EventForm::of(s, uid, occurrence, e, false)
+    }
+
+    /// One occurrence of a series, opened on its own (issue #241, as Outlook's "this
+    /// occurrence"): its own time and details, and no repeat of its own.
+    pub fn open_occurrence(s: &Session, uid: &str, at: i64) -> Option<EventForm> {
+        let e = s.occurrence_event(uid, at)?;
+        EventForm::of(s, uid, at, &e, true)
+    }
+
+    /// The form for `e`, the event `uid` (its series, or its occurrence `occurrence` alone).
+    fn of(s: &Session, uid: &str, occurrence: i64, e: &mailcraft_engine::model::ical::CalEvent, this_occurrence: bool) -> Option<EventForm> {
         let (account, stored) = s.find_event(uid)?;
-        let e = &stored.event;
         let calendars = writable_calendars(s);
         let read_only = s.pim.get(account).is_some_and(|p| p.calendars.iter().any(|c| c.id == stored.calendar && c.read_only));
         // A recurring event is edited as a series: its first occurrence's dates.
@@ -261,6 +300,7 @@ impl EventForm {
         // As an address is written in a recipient box (a name with a comma quoted), so that the
         // guests read back as they were.
         let written = |a: &mailcraft_engine::model::ical::Attendee| mailcraft_engine::model::EmailAddress::new(&a.name, &a.email).to_string();
+        let shown = |a: &mailcraft_engine::model::ical::Attendee| if a.name.is_empty() { a.email.clone() } else { a.name.clone() };
         let links = e.links();
         let pattern = e.rrule.as_deref().and_then(|r| mailcraft_engine::model::ical::Pattern::read(r, s.clock.local_day(start)));
         let reminders = mailcraft_engine::model::ical::reminders_minutes(e);
@@ -272,6 +312,7 @@ impl EventForm {
             uid: Some(uid.to_string()),
             occurrence: Some(occurrence),
             recurring: e.rrule.is_some(),
+            this_occurrence,
             calendar: calendars.iter().position(|c| c.0 == account && c.1 == stored.calendar).unwrap_or(0),
             calendars,
             summary: e.summary.clone(),
@@ -294,12 +335,25 @@ impl EventForm {
             until_text,
             length: None,
             organizer: e.organizer.as_ref().map(written),
-            attendees: e.attendees.iter().map(|a| (if a.name.is_empty() { a.email.clone() } else { a.name.clone() }, a.partstat.clone())).collect(),
+            attendees: e
+                .attendees
+                .iter()
+                .map(|a| {
+                    let to = e.attendees.iter().find(|d| d.email.eq_ignore_ascii_case(&a.delegated_to)).filter(|d| !d.name.is_empty());
+                    (shown(a), a.partstat.clone(), to.map_or_else(|| a.delegated_to.clone(), shown))
+                })
+                .collect(),
             needs_reply: e.attendees.iter().any(|a| mine.contains(&a.email.to_ascii_lowercase()) && a.partstat == "NEEDS-ACTION"),
             guests: e.attendees.iter().map(written).collect::<Vec<_>>().join(", "),
             can_invite: e.organizer.as_ref().is_none_or(|o| mine.contains(&o.email.to_ascii_lowercase())),
             can_forward: e.organizer.as_ref().is_some_and(|o| !mine.contains(&o.email.to_ascii_lowercase()))
                 && mailcraft_engine::forwarding_allowed(e),
+            can_delegate: e.organizer.as_ref().is_some_and(|o| !mine.contains(&o.email.to_ascii_lowercase()))
+                && e.attendees.iter().any(|a| mine.contains(&a.email.to_ascii_lowercase()))
+                && s.delegates_from(account),
+            asks_cancel: e.organizer.as_ref().is_none_or(|o| mine.contains(&o.email.to_ascii_lowercase()))
+                && !e.attendees.is_empty()
+                && s.meeting_route(account, &e.uid) != mailcraft_engine::Route::Server,
             reading_notes: read_only || !links.is_empty(),
             links,
             join: s.join_link(e),
@@ -308,6 +362,7 @@ impl EventForm {
             categories: e.categories.clone(),
             all_categories: all_categories(s, &e.categories),
             error: None,
+            ..Default::default()
         })
     }
 
@@ -334,6 +389,15 @@ impl EventForm {
             p["attendees"] = json!(self.guests.trim());
         }
         online_meeting::param(self, &mut p);
+        // That occurrence alone: no rule of its own to say.
+        if self.this_occurrence
+            && let Some(at) = self.occurrence
+        {
+            p["occurrence"] = json!(at);
+            if let Some(o) = p.as_object_mut() {
+                o.remove("repeat");
+            }
+        }
         match &self.uid {
             Some(u) => p["uid"] = json!(u),
             None => {
@@ -364,6 +428,7 @@ fn partstat_label(p: &str) -> &'static str {
         "ACCEPTED" => "Accepted",
         "DECLINED" => "Declined",
         "TENTATIVE" => "Tentative",
+        "DELEGATED" => "Delegated",
         _ => "No answer yet",
     }
 }
@@ -529,7 +594,7 @@ pub(crate) fn end_follows_start(f: &mut EventForm, before: Option<i64>) {
     }
 }
 
-pub fn event(ui: &mut Ui, f: &mut EventForm, t: &Tokens, acts: &mut Vec<Action>) -> bool {
+pub fn event(ui: &mut Ui, f: &mut EventForm, s: &Session, t: &Tokens, acts: &mut Vec<Action>) -> bool {
     ui.set_width(540.0);
     form_header(ui, t, Ok(Icon::Calendar), if f.uid.is_some() { "Event" } else { "New event" });
     // An online meeting (Teams, Zoom…): Join, as Outlook has it, read-only calendar or not.
@@ -560,9 +625,12 @@ pub fn event(ui: &mut Ui, f: &mut EventForm, t: &Tokens, acts: &mut Vec<Action>)
                 ui.checkbox(&mut f.all_day, tl!("All day"));
             });
         });
-        repeat_row(ui, t, "event-repeat", &mut f.repeat);
-        pattern::follow_choice(f);
-        pattern::rows(ui, t, f);
+        // One occurrence on its own has no repeat of its own (issue #241).
+        if !f.this_occurrence {
+            repeat_row(ui, t, "event-repeat", &mut f.repeat);
+            pattern::follow_choice(f);
+            pattern::rows(ui, t, f);
+        }
         form_row(ui, t, true, Some(Icon::Clock), "Reminder", |ui| {
             ui.allocate_ui_with_layout(vec2(200.0, FIELD_H), egui::Layout::left_to_right(egui::Align::Center), |ui| {
                 let mut choices: Vec<Option<i64>> = std::iter::once(None).chain(REMINDER_CHOICES.iter().map(|m| Some(*m))).collect();
@@ -595,9 +663,8 @@ pub fn event(ui: &mut Ui, f: &mut EventForm, t: &Tokens, acts: &mut Vec<Action>)
             });
         }
         if f.can_invite {
-            form_row(ui, t, true, Some(Icon::People), "Invite", |ui| {
-                field(ui, &mut f.guests, tl!("Names <addresses>, separated by ; or ,"), f32::INFINITY);
-            });
+            guests::row(ui, t, f, acts);
+            guests::scheduling(ui, s, t, f, acts);
         }
         if f.uid.is_none() && f.calendars.len() > 1 {
             let name = f.calendars.get(f.calendar).map(|c| c.2.clone()).unwrap_or_default();
@@ -648,14 +715,16 @@ pub fn event(ui: &mut Ui, f: &mut EventForm, t: &Tokens, acts: &mut Vec<Action>)
     if f.recurring {
         ui.add_space(4.0);
         ui.label(RichText::new(tl!("Changes apply to every occurrence.")).color(t.faint).small());
+    } else if f.this_occurrence {
+        ui.add_space(4.0);
+        ui.label(RichText::new(tl!("Changes apply to this occurrence alone.")).color(t.faint).small());
     }
     if let Some(o) = &f.organizer {
         ui.add_space(4.0);
         ui.label(RichText::new(tf!("Organizer: {name}", name = o)).color(t.dim).small());
     }
     if !f.attendees.is_empty() {
-        let list: Vec<String> = f.attendees.iter().map(|(who, p)| format!("{who} ({})", tl!(partstat_label(p)))).collect();
-        ui.label(RichText::new(tf!("Attendees: {names}", names = list.join(", "))).color(t.dim).small());
+        ui.add(egui::Label::new(RichText::new(tf!("Attendees: {names}", names = guests::listed(&f.attendees))).color(t.dim).small()).wrap());
     }
     if f.needs_reply
         && let Some(uid) = &f.uid
@@ -665,18 +734,34 @@ pub fn event(ui: &mut Ui, f: &mut EventForm, t: &Tokens, acts: &mut Vec<Action>)
             ui.label(RichText::new(tl!("Your answer:")).color(t.text));
             for (label, code) in [("Accept", "accepted"), ("Tentative", "tentative"), ("Decline", "declined")] {
                 if ui.button(tl!(label)).clicked() {
-                    acts.push(Action::Submit("event.respond", json!({"uid": uid, "answer": code})));
+                    let mut p = json!({"uid": uid, "answer": code});
+                    if f.this_occurrence {
+                        p["occurrence"] = json!(f.occurrence);
+                    }
+                    acts.push(Action::Submit("event.respond", p));
                 }
             }
         });
     }
-    // Someone else's meeting, passed on to another (issue #234).
+    // Someone else's meeting, passed on to another (issue #234): this occurrence of a series, or
+    // all.
     if f.can_forward
         && let Some(uid) = &f.uid
     {
         ui.add_space(4.0);
         if ui.button(tl!("Forward meeting…")).clicked() {
-            acts.push(Action::Dialog(crate::Dialog::ForwardMeeting { uid: uid.clone(), summary: f.summary.clone(), to: String::new() }));
+            let occurrence = f.occurrence.filter(|_| f.recurring || f.this_occurrence);
+            acts.push(Action::Dialog(crate::Dialog::PassMeeting(PassForm::new(Passing::Forward, uid, &f.summary, occurrence))));
+        }
+    }
+    // Someone else goes in the user's place (issue #254): this occurrence of a series, or all.
+    if f.can_delegate
+        && let Some(uid) = &f.uid
+    {
+        ui.add_space(4.0);
+        if ui.button(tl!("Delegate…")).clicked() {
+            let occurrence = f.occurrence.filter(|_| f.recurring || f.this_occurrence);
+            acts.push(Action::Dialog(crate::Dialog::PassMeeting(PassForm::new(Passing::Delegate, uid, &f.summary, occurrence))));
         }
     }
     if let Some(e) = &f.error {
@@ -687,15 +772,24 @@ pub fn event(ui: &mut Ui, f: &mut EventForm, t: &Tokens, acts: &mut Vec<Action>)
     let mut keep = true;
     ui.horizontal(|ui| {
         if let Some(uid) = f.uid.clone().filter(|_| !f.read_only) {
-            if f.recurring {
+            // The user's own meeting with guests: how they're told is asked first (issue #235).
+            let asks = f.asks_cancel;
+            let mut delete = |occurrence: Option<i64>| {
+                acts.push(if asks {
+                    Action::Dialog(crate::Dialog::CancelMeeting(CancelForm::new(&uid, &f.summary, occurrence)))
+                } else {
+                    Action::Submit("event.delete", json!({"uid": uid, "occurrence": occurrence}))
+                });
+            };
+            if f.this_occurrence || f.recurring {
                 if ui.button(tl!("Delete this occurrence")).clicked() {
-                    acts.push(Action::Submit("event.delete", json!({"uid": uid, "occurrence": f.occurrence})));
+                    delete(f.occurrence);
                 }
-                if ui.button(tl!("Delete the series")).clicked() {
-                    acts.push(Action::Submit("event.delete", json!({"uid": uid})));
+                if !f.this_occurrence && ui.button(tl!("Delete the series")).clicked() {
+                    delete(None);
                 }
             } else if ui.button(tl!("Delete")).clicked() {
-                acts.push(Action::Submit("event.delete", json!({"uid": uid})));
+                delete(None);
             }
         }
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {

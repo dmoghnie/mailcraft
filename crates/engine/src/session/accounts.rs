@@ -139,6 +139,8 @@ impl Session {
         });
         self.save_accounts();
         self.move_to_sending_account();
+        // Its domain may bring its organisation's profile in (several institutions in one).
+        self.refresh_organisation();
         if config.oauth.is_some() {
             self.jobs.push(Job::SignIn { account: config });
         } else if config.has_server() {
@@ -157,6 +159,11 @@ impl Session {
         config.email = config.email.trim().to_string();
         if !addr::is_valid_email(&config.email) {
             return Err(CmdError::Params(format!("`{}` is not an email address", config.email)));
+        }
+        // The organisation's rules (issue #245): its domains, encrypted connections.
+        self.org_allows_account(&config.email).map_err(CmdError::Params)?;
+        if let Some(why) = self.org_refuses_servers(config) {
+            return Err(CmdError::Params(why.into()));
         }
         if self.accounts.iter().any(|a| a.config.email.eq_ignore_ascii_case(&config.email)) {
             return Err(CmdError::Params(format!("{} is already added", config.email)));
@@ -365,6 +372,7 @@ impl Session {
             return Err(CmdError::Params(format!("no account `{id}`")));
         };
         self.accounts.retain(|a| a.config.id != id);
+        self.refresh_organisation();
         self.forget_transfers(id);
         self.forget_archiving(id);
         self.cache.retain(|(a, _), _| a != id);
@@ -585,7 +593,16 @@ impl Session {
 
     pub fn update_account(&mut self, mut config: AccountConfig, password: Option<String>) -> CmdResult {
         config.migrate_signature();
+        if let Some(why) = self.org_refuses_servers(&config) {
+            return Err(CmdError::Params(why.into()));
+        }
         let id = config.id.clone();
+        // An account moved to another address is checked as a new one would be: else an
+        // organisation's account could be turned into one of any domain.
+        let moved = self.account(&id).is_some_and(|a| !a.config.email.eq_ignore_ascii_case(&config.email));
+        if moved {
+            self.org_allows_account(&config.email).map_err(CmdError::Params)?;
+        }
         let Some(a) = self.account_mut(&id) else { return Err(CmdError::Params(format!("no account `{id}`"))) };
         let reconnect = !a.config.same_connection(&config) || password.is_some();
         if config.online_only && !config.can_be_online_only() {
@@ -611,6 +628,10 @@ impl Session {
         }
         if reconnect && server {
             self.jobs.push(Job::Start { account: config, password: password.map(Secret) });
+        }
+        if moved {
+            // Its new domain may have a profile of its own.
+            self.refresh_organisation();
         }
         Ok(serde_json::json!({ "updated": id }))
     }
@@ -641,6 +662,11 @@ impl Session {
         let dav = mailcraft_model::DavSettings { caldav, carddav, username };
         let changed = config.dav.clone().unwrap_or_default() != dav || password.is_some();
         config.dav = (dav != mailcraft_model::DavSettings::default()).then_some(dav);
+        // Refused before its password is queued: else the account, unchanged, would be marked
+        // as needing encryption when the job is held back.
+        if let Some(why) = self.org_refuses_servers(&config) {
+            return Err(CmdError::Params(why.into()));
+        }
         let own = config.dav.as_ref().and_then(|d| d.username.as_ref()).is_some();
         if let (Some(pw), true) = (password, own) {
             self.jobs.push(Job::DavPassword { account: config.clone(), password: Secret(pw.to_string()) });
@@ -726,7 +752,7 @@ impl Session {
 /// A calendar or contacts address as typed: empty, or https (`posteo.de:8443` reads as
 /// `https://posteo.de:8443`); plain http only to this computer, so no password crosses the network
 /// in the clear.
-fn dav_address(given: &str) -> Result<String, CmdError> {
+pub(crate) fn dav_address(given: &str) -> Result<String, CmdError> {
     let g = given.trim();
     if g.is_empty() {
         return Ok(String::new());

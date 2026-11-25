@@ -285,6 +285,9 @@
 	Keep MailCraft running when its window is closed	Не завершать MailCraft при закрытии окна
 	Start MailCraft in the notification area	Запускать MailCraft в области уведомлений
 	Start MailCraft minimized	Запускать MailCraft свёрнутым
+	Start MailCraft when you sign in	Запускать MailCraft при входе в систему
+	It starts as you sign in to this computer and checks for mail. Its window comes up too, unless it's kept running when closed and started put away (below).	Запускается при входе в этот компьютер и проверяет почту. Окно тоже открывается, если только MailCraft не остаётся работать после закрытия и не запускается скрытым (ниже).
+	Starting MailCraft at sign-in couldn't be changed: {error}	Не удалось изменить запуск MailCraft при входе в систему: {error}
 	It checks for mail and announces it with its window put away, as when it's closed. Started to open a link or a file, it opens the window.	Он проверяет почту и сообщает о ней, пока окно убрано, как после закрытия. Запущенный, чтобы открыть ссылку или файл, он открывает окно.
 	Show the unread mail on its icon	Показывать непрочитанную почту на значке
 	How many unread messages the Inboxes have, in the corner of MailCraft's icon in the notification area	Сколько непрочитанных писем во входящих — в углу значка MailCraft в области уведомлений
@@ -1291,6 +1294,8 @@ date	December	декабря
 	MailCraft {version} is ready	MailCraft {version} готов
 	MailCraft {version} is ready. Restart now to install it, or it installs when you close MailCraft.	MailCraft {version} готов. Перезапустите сейчас, чтобы установить его, или он установится при закрытии MailCraft.
 	Restart MailCraft to install it now, or it installs when you close MailCraft.	Перезапустите MailCraft, чтобы установить его сейчас, или он установится при закрытии MailCraft.
+	MailCraft is updated to {version}.	MailCraft обновлён до версии {version}.
+	MailCraft {version} didn't install. It's offered again.	MailCraft {version} не установлен. Он будет предложен снова.
 	Restart now	Перезапустить сейчас
 	The update is downloaded and checked. It installs now, as MailCraft closes, which takes a moment; open MailCraft again when it's done.	Обновление загружено и проверено. Оно устанавливается сейчас, при закрытии MailCraft, это займёт немного времени; затем откройте MailCraft снова.
 	Update and close	Обновить и закрыть
@@ -1892,6 +1897,8 @@ count	occurrences	повторений
 	Default font	Шрифт по умолчанию
 	Font for new messages	Шрифт новых сообщений
 	New messages, replies and forwards are written in it. Text you set a font on keeps its own.	Новые сообщения, ответы и пересылки пишутся этим шрифтом. Текст, которому вы задали шрифт, сохраняет свой.
+	Font size for new messages	Размер шрифта новых сообщений
+	New messages, replies and forwards are written in it. Text you set a size on keeps its own.	Новые сообщения, ответы и пересылки пишутся этим размером шрифта. Текст, которому вы задали размер, сохраняет свой.
 	Clean up old items	Очистить старые элементы
 	Clean up old items…	Очистить старые элементы…
 	Move old mail to an archive file on this computer, out of the mailbox.	Перенести старую почту из почтового ящика в файл архива на этом компьютере.
@@ -2048,7 +2055,6 @@ count	occurrences	повторений
 	Names	Имена
 	AutoArchive settings	Параметры автоархивации
 	From a mailing list.	Из списка рассылки.
-	Unsubscribe	Отписаться
 	Unsubscribing from junk mail tells its sender that your address is read	Отписка от нежелательной почты сообщает отправителю, что ваш адрес читают
 	Unsubscribe from this list?	Отписаться от этой рассылки?
 	A message asking to leave it goes to {address}, from your account.	Письмо с просьбой отписать вас уйдёт на {address} с вашей учётной записи.
@@ -2399,3 +2405,174 @@ count	occurrences	повторений
 	Write rule	Написать правило
 	Written by {model}	Написано: {model}
 	gets a yes from MailCraft's AI to “{question}”	получает от ИИ MailCraft ответ «да» на «{question}»
+	Sort by	Сортировка
+	First name	Имя
+	Last name	Фамилия
+	Open a repeating event	Открыть повторяющееся событие
+	Open this occurrence	Открыть это повторение
+	Open the series	Открыть всю серию
+	Changes apply to this occurrence alone.	Изменения применяются только к этому повторению.
+	Your other filters on the server (“{name}”) run first, and are left as they are.	Ваши другие фильтры на сервере («{name}») выполняются первыми и остаются как есть.
+	Found: {url}	Найдено: {url}
+	Task list	Список задач
+	Task lists	Списки задач
+	All task lists	Все списки задач
+	This task is in a task list that can't be changed here.	Эта задача находится в списке задач, который здесь изменить нельзя.
+	Occurrences of this task were changed on their own elsewhere: change it there.	Отдельные повторения этой задачи изменены в другом месте: измените её там.
+	Everything with them…	Всё с этим человеком…
+	Everything with sender…	Всё с отправителем…
+	Everything with them	Всё с этим человеком
+	Search within everything with them	Поиск во всём, что связано с этим человеком
+	Mail ({n})	Почта ({n})
+	Files ({n})	Вложения ({n})
+	Meetings ({n})	Встречи ({n})
+	Links ({n})	Ссылки ({n})
+	People ({n})	Люди ({n})
+	Nothing here.	Здесь ничего нет.
+	Nothing here matches the search.	Здесь ничего не соответствует поиску.
+	Files and links come from the mail on this computer: {n} of these messages aren't downloaded.	Вложения и ссылки взяты из почты на этом компьютере: не загружено сообщений: {n}.
+	Only the newest of the mail with them is shown.	Показана только самая новая почта с этим человеком.
+	In their signature	В подписи
+	Add to their contact…	Добавить в контакт…
+	Open the newest	Открыть самое новое
+	Open (they sent it)	Открыть (отправлено этим человеком)
+	They organise it	Организует этот человек
+	They're invited	Этот человек приглашён
+	{n} messages	Сообщений: {n}
+	One message	Одно сообщение
+	Overview	Обзор
+	Show all	Показать всё
+	Find someone by name or address	Найти человека по имени или адресу
+	Delegate	Делегировать
+	Delegate meeting	Делегировать встречу
+	Delegate…	Делегировать…
+	Delegated	Делегировано
+	Invite…	Пригласить…
+	Name <address>	Имя <адрес>
+	Pick guests from the address book	Выбрать гостей в адресной книге
+	Someone else goes in your place: they get the invitation to answer, and the organizer is told.	Вместо вас пойдёт другой человек: он получит приглашение, чтобы ответить на него, а организатор будет уведомлён.
+	The whole series	Всю серию
+	This occurrence	Это повторение
+	Who goes instead of you	Кто пойдёт вместо вас
+	Who is “{name}”?	Кто такой «{name}»?
+	You asked {name} to go in your place.	Вы попросили {name} пойти вместо вас.
+	{name} asked you to go in their place.	{name} просит вас пойти вместо него или неё.
+	{name} asked {delegate} to go in their place.	{name} просит {delegate} пойти вместо него или неё.
+	{name} (delegated to {delegate})	{name} (делегировано: {delegate})
+	AI agents	ИИ-агенты
+	Add MailCraft's MCP server to it: the command mailcraft-cli with the argument mcp	Добавьте в него MCP-сервер MailCraft: команду mailcraft-cli с аргументом mcp
+	Agents run this command from now on without asking	Агенты теперь выполняют эту команду без вопроса
+	Allow	Разрешить
+	Always allow	Разрешать всегда
+	An AI agent asks	ИИ-агент спрашивает
+	An AI agent wants to: {command}	ИИ-агент хочет: {command}
+	An AI assistant on this computer (Claude Desktop, Claude Code…) reads your mail, calendar, tasks and people through MailCraft's MCP server, and asks here before each command it wants to run. Off, it reaches nothing.	ИИ-помощник на этом компьютере (Claude Desktop, Claude Code…) читает вашу почту, календарь, задачи и контакты через MCP-сервер MailCraft и спрашивает здесь перед каждой командой, которую хочет выполнить. Когда выключено, он ни к чему не имеет доступа.
+	Commands agents run without asking first	Команды, которые агенты выполняют без вопроса
+	Connect an assistant	Подключить помощника
+	Deny	Запретить
+	Forget	Забыть
+	Let AI agents use MailCraft	Разрешить ИИ-агентам использовать MailCraft
+	Nothing yet	Пока ничего
+	Run without asking	Выполнять без вопроса
+	What AI agents did	Что сделали ИИ-агенты
+	{n} more waiting	Ещё ждут: {n}
+	Looked, changed nothing	Просмотрено, ничего не изменено
+	Ran	Выполнено
+	You didn't allow it	Вы не разрешили
+	Didn't run: {why}	Не выполнено: {why}
+	Let AI agents ask to run commands	Разрешить ИИ-агентам просить выполнить команды
+	Sending, moving, answering an invitation… each asked about here first, unless you always allow it. Off, agents only read.	Отправка, перемещение, ответ на приглашение… о каждой команде сначала спрашивают здесь, если вы не разрешили её всегда. Выключено — агенты только читают.
+	Accounts AI agents read	Учётные записи, которые читают ИИ-агенты
+	One turned off is left out of all they read, and they can't take pictures of the window	Выключенная учётная запись не попадает ни во что, что они читают, и они не могут делать снимки окна
+	… and {n} more characters	… и ещё {n} символов
+	A copy installed from MailCraft's releases looks for a newer one and installs it as it closes	Копия, установленная из выпусков MailCraft, ищет более новую и устанавливает её при закрытии
+	A notice under every message sent	Примечание под каждым отправленным сообщением
+	Accounts of {domains} only	Только учётные записи {domains}
+	Encrypted connections only	Только зашифрованные подключения
+	Locked	Заблокировано
+	No certificate trusted by hand	Никаких сертификатов, отмеченных как надёжные вручную
+	Not taken	Не принято
+	Office	Офис
+	Questions	Вопросы
+	Read from	Прочитано из
+	Releases only	Только выпуски
+	Set by your organisation	Задано вашей организацией
+	Set up for {organisation}	Настроено для {organisation}
+	Update MailCraft by itself	Обновлять MailCraft самостоятельно
+	Your details for its signature	Ваши данные для её подписи
+	Your organisation	Ваша организация
+	Your organisation doesn't allow trusting a certificate by hand.	Ваша организация не разрешает доверять сертификату вручную.
+	Your organisation set up MailCraft on this computer. What it locked, you can't change.	Ваша организация настроила MailCraft на этом компьютере. То, что она заблокировала, изменить нельзя.
+	Text size	Размер текста
+	Everything in the window, larger or smaller. Ctrl and + or − change it too, and Ctrl+0 puts it back.	Всё в окне крупнее или мельче. Его меняют и Ctrl с + или −, а Ctrl+0 возвращает прежний.
+	Text size: {percent}%	Размер текста: {percent}%
+	{percent}%	{percent}%
+	A table, as it will be sent. Backspace after it takes it out.	Таблица в том виде, в каком она будет отправлена. Backspace сразу после неё удаляет её.
+	Attach messages	Вложить письма
+	Attach 1 message	Вложить 1 письмо
+	Attach {n} messages	Вложить письма: {n}
+	Move to To	Переместить в «Кому»
+	Move to Cc	Переместить в «Копия»
+	Move to Bcc	Переместить в «Скрытая копия»
+	Copy addresses	Копировать адреса
+	Mailing list:	Список рассылки:
+	Unsubscribe	Отписаться
+	Show the message in its folder	Показать письмо в его папке
+	Buttons on a message in the list	Кнопки на письме в списке
+	Shown when the pointer is over a message, up to {n}.	Видны при наведении указателя на письмо, не больше {n}.
+	Mark read or unread	Отметить как прочитанное или непрочитанное
+	Choose a date…	Выбрать дату…
+	Pick a time in the future.	Выберите время в будущем.
+	In 1 minute	Через 1 минуту
+	In 1 day	Через 1 день
+	Proposal accepted: the meeting is at {when} now.	Предложение принято: встреча теперь {when}.
+	Invitation: {summary}	Приглашение: {summary}
+	Updated: {summary}	Обновлено: {summary}
+	Cancelled: {summary}	Отменено: {summary}
+	Cancelled: {summary} ({when})	Отменено: {summary} ({when})
+	{summary} has been cancelled.	Встреча «{summary}» отменена.
+	{summary} on {when} has been cancelled.	Встреча «{summary}» ({when}) отменена.
+	When: {when}	Когда: {when}
+	Where: {place}	Где: {place}
+	Fwd: {summary}	Пересл.: {summary}
+	{who} forwarded you this meeting, organized by {organizer}.	{who} пересылает вам эту встречу. Организатор: {organizer}.
+	{who} asked you to go to this meeting in their place. It's organized by {organizer}.	{who} просит вас пойти на эту встречу вместо себя. Организатор: {organizer}.
+	Accepted: {summary}	Принято: {summary}
+	Tentative: {summary}	Под вопросом: {summary}
+	Declined: {summary}	Отклонено: {summary}
+	Delegated: {summary}	Делегировано: {summary}
+	{who} accepted the invitation to {summary}.	{who}: приглашение на «{summary}» принято.
+	{who} tentatively accepted the invitation to {summary}.	{who}: приглашение на «{summary}» принято под вопросом.
+	{who} declined the invitation to {summary}.	{who}: приглашение на «{summary}» отклонено.
+	{who} asked {delegate} to go to {summary} in their place.	{who}: вместо себя на «{summary}» пойдёт {delegate}.
+	New time proposed: {summary}	Предложено новое время: {summary}
+	{who} proposes a new time for {summary}: {when}.	{who} предлагает новое время для «{summary}»: {when}.
+	New time declined: {summary}	Новое время отклонено: {summary}
+	The proposed new time for {summary} was declined. The meeting stays as it was.	Предложенное новое время для «{summary}» отклонено. Встреча остаётся без изменений.
+	Cancel meeting	Отменить встречу
+	Cancel this occurrence	Отменить это повторение
+	Send cancellation	Отправить отмену
+	Delete without sending	Удалить без отправки
+	Message to your guests	Сообщение участникам
+	Your guests are sent a cancellation. Add a message to them, if you like.	Участники получат уведомление об отмене. При желании добавьте для них сообщение.
+	MailCraft's automatic replies and rules on the server aren't running: another program made its own filters (“{name}”) the ones that run.	Автоответы и правила MailCraft на сервере не выполняются: другая программа сделала выполняемыми свои фильтры («{name}»).
+	Off: another program's filters (“{name}”) run in place of MailCraft's	Выключены: вместо фильтров MailCraft выполняются фильтры другой программы («{name}»)
+	On, sent by your other filters on the server (“{name}”)	Включены, их отправляют ваши другие фильтры на сервере («{name}»)
+	Run my rules again	Снова запустить мои правила
+	These are the replies your other filters on the server (“{name}”) send: change them in the program that made them. MailCraft's can be on only while those are off: the server sends one reply.	Эти автоответы отправляют ваши другие фильтры на сервере («{name}»): измените их в программе, которая их создала. Автоответы MailCraft можно включить, только пока эти выключены: сервер отправляет один ответ.
+	These rules aren't running: another program made its own filters the ones that run. Run them again here, with that program's.	Эти правила не выполняются: другая программа сделала выполняемыми свои фильтры. Запустите их здесь снова вместе с фильтрами той программы.
+	Account: {email}	Учётная запись: {email}
+	Details	Подробности
+	Event: “{name}”, {when}	Событие: «{name}», {when}
+	Message: “{subject}”, from {from}	Сообщение: «{subject}», от {from}
+	Task: “{name}”	Задача: «{name}»
+	This occurrence: {when}	Это повторение: {when}
+	To: {who}	Кому: {who}
+	Asking their server…	Запрос к их серверу…
+	Click a time to move the meeting there	Щёлкните время, чтобы перенести туда встречу
+	Hide Scheduling Assistant	Скрыть помощника планирования
+	Scheduling Assistant	Помощник планирования
+	The next time you and your guests are all free	Ближайшее время, когда вы и все участники свободны
+	Their times can't be had: {why}	Их время недоступно: {why}
+	You	Вы
+	{free} of {all} free	Свободны: {free} из {all}

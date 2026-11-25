@@ -10,9 +10,9 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             .params(r#"{"account"?: string, "to"?: string (who it's to, "Name <address>")}"#)
             .when(has_account),
         // Home › Delete
-        CommandSpec::new("mail.delete", "Delete", "Home › Delete", delete).key("Delete").params(r#"{"permanent"?: bool}"#).when(has_selection),
-        CommandSpec::new("list.rowAction", "Delete, archive, flag or mark read", "Message list › row", row_action)
-            .params(r#"{"key": string, "action": "delete"|"archive"|"flag"|"read"} (that message alone, what's selected and open kept)"#),
+        CommandSpec::new("mail.delete", "Delete", "Home › Delete", delete).key("Delete").params(r#"{"permanent"?: bool}"#).on_selection(has_selection),
+        CommandSpec::new("list.rowAction", "A message's own button in the list", "Message list › row", row_action)
+            .params(r#"{"key": string, "action": "delete"|"archive"|"flag"|"read"|"pin"} (that message alone, what's selected and open kept)"#),
         // A new-mail notification's buttons, on the messages it told of wherever they are.
         CommandSpec::new("notice.act", "Mark read, archive or delete what a notification told of", "Notification", notice_act)
             .params(r#"{"action": "read"|"archive"|"delete", "keys": [string] (the messages' keys)}"#),
@@ -23,8 +23,8 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         .params(r#"{"key": string}"#),
         CommandSpec::new("mail.archive", "Archive", "Home › Delete", |s, _| s.move_selection(MoveTarget::Role(FolderRole::Archive)))
             .key("Backspace")
-            .when(has_selection),
-        CommandSpec::new("mail.ignore", "Ignore conversation", "Home › Delete", |s, _| s.ignore_selection()).when(has_selection),
+            .on_selection(has_selection),
+        CommandSpec::new("mail.ignore", "Ignore conversation", "Home › Delete", |s, _| s.ignore_selection()).on_selection(has_selection),
         CommandSpec::new("mail.cleanUp", "Clean up conversation", "Home › Delete › Clean Up", |s, _| {
             let sel = s.selected_shared();
             let keys: Vec<mailcraft_model::MessageKey> = sel.iter().map(|m| m.key.clone()).collect();
@@ -33,7 +33,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             folders.dedup();
             s.clean_up(&folders, Some(&keys))
         })
-        .when(has_selection),
+        .on_selection(has_selection),
         CommandSpec::new("folder.cleanUp", "Clean up folder", "Home › Delete › Clean Up", |s, v| {
             let folders = match p::str(v, "folder") {
                 Some(f) => {
@@ -108,7 +108,7 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.stop_sweep(p::req_str(v, "account")?, p::req_str(v, "folder")?, p::req_str(v, "sender")?)
         })
         .params(r#"{"account": string, "folder": string, "sender": string (an address)} (its mail there is no longer swept each day)"#),
-        CommandSpec::new("mail.junk", "Report junk", "Home › Delete", |s, _| s.move_selection(MoveTarget::Role(FolderRole::Junk))).when(has_selection),
+        CommandSpec::new("mail.junk", "Report junk", "Home › Delete", |s, _| s.move_selection(MoveTarget::Role(FolderRole::Junk))).on_selection(has_selection),
         CommandSpec::new("mail.notJunk", "Not junk", "Home › Delete", |s, v| {
             // "Always trust mail from this sender", as Outlook asks.
             if p::bool(v, "always").unwrap_or(false) {
@@ -118,16 +118,16 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.move_selection(MoveTarget::Role(FolderRole::Inbox))
         })
         .params(r#"{"always"?: bool}"#)
-        .when(has_selection),
+        .on_selection(has_selection),
         // Home › Delete › Junk
         CommandSpec::new("junk.blockSender", "Block sender", "Home › Delete › Junk", |s, _| s.junk_list_selection(JunkList::Blocked, false))
-            .when(has_selection),
+            .on_selection(has_selection),
         CommandSpec::new("junk.neverBlockSender", "Never block sender", "Home › Delete › Junk", |s, _| s.junk_list_selection(JunkList::Safe, false))
-            .when(has_selection),
+            .on_selection(has_selection),
         CommandSpec::new("junk.neverBlockDomain", "Never block sender's domain", "Home › Delete › Junk", |s, _| {
             s.junk_list_selection(JunkList::Safe, true)
         })
-        .when(has_selection),
+        .on_selection(has_selection),
         CommandSpec::new("junk.lists", "Junk Email options", "Home › Delete › Junk", |s, _| {
             Ok(json!({"blocked": s.prefs.blocked_senders, "safe": s.prefs.safe_senders}))
         }),
@@ -162,31 +162,31 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         CommandSpec::new("mail.move", "Move to", "Home › Move", move_to)
             .key("Mod+Shift+V")
             .params(r#"{"folder": string, "account"?: string (the folder's account, when it isn't the messages' own)}"#)
-            .when(has_selection),
+            .on_selection(has_selection),
         CommandSpec::new("mail.copy", "Copy to", "Home › Move", copy_to)
             .params(r#"{"folder": string, "account"?: string (the folder's account; else the messages' own)}"#)
-            .when(has_selection),
+            .on_selection(has_selection),
         // Home › Tags
-        CommandSpec::new("mail.markRead", "Mark as read", "Home › Tags", |s, _| s.flag_selection(Flag::Seen, Some(true))).key("Mod+Q").when(has_selection),
-        CommandSpec::new("mail.markUnread", "Mark as unread", "Home › Tags", |s, _| s.flag_selection(Flag::Seen, Some(false))).key("Mod+U").when(has_selection),
-        CommandSpec::new("mail.toggleRead", "Read / Unread", "Home › Tags", |s, _| s.flag_selection(Flag::Seen, None)).when(has_selection),
+        CommandSpec::new("mail.markRead", "Mark as read", "Home › Tags", |s, _| s.flag_selection(Flag::Seen, Some(true))).key("Mod+Q").on_selection(has_selection),
+        CommandSpec::new("mail.markUnread", "Mark as unread", "Home › Tags", |s, _| s.flag_selection(Flag::Seen, Some(false))).key("Mod+U").on_selection(has_selection),
+        CommandSpec::new("mail.toggleRead", "Read / Unread", "Home › Tags", |s, _| s.flag_selection(Flag::Seen, None)).on_selection(has_selection),
         CommandSpec::new("mail.flag", "Flag / Unflag", "Home › Tags", flag)
             .key("Insert")
             .params(r#"{"on"?: bool, "due"?: "today"|"tomorrow"|"thisWeek"|"nextWeek"|"none"|"YYYY-MM-DD" (Follow Up: flag, due then), "reminder"?: "YYYY-MM-DDTHH:MM"|"none" (Add Reminder: flag, remind then; a day alone at 09:00), "complete"?: true (Mark Complete: unflag, mark it done today; flagging again or "on": false clears that)}"#)
-            .when(has_selection),
+            .on_selection(has_selection),
         CommandSpec::new("mail.markAllRead", "Mark all as read", "Folder", mark_all_read)
             .params(r#"{"account"?: string, "folder"?: string} (that folder, all of it; none: the folder on view, or the mail another view lists)"#)
             .when(has_account),
         CommandSpec::new("mail.categorize", "Categorize", "Home › Tags", |s, v| s.categorize_selection(p::str(v, "category"), p::str(v, "keyword"), p::bool(v, "on")))
             .params(r#"{"category": string, "on"?: bool} | {"keyword": string (one not in the list, e.g. "$label6"), "on"?: bool}"#)
-            .when(has_selection),
-        CommandSpec::new("mail.pin", "Pin / Unpin", "Home › Tags", |s, v| s.pin_selection(p::bool(v, "on"))).params(r#"{"on"?: bool}"#).when(has_selection),
+            .on_selection(has_selection),
+        CommandSpec::new("mail.pin", "Pin / Unpin", "Home › Tags", |s, v| s.pin_selection(p::bool(v, "on"))).params(r#"{"on"?: bool}"#).on_selection(has_selection),
         CommandSpec::new("mail.snooze", "Snooze", "Home › Tags", snooze)
-            .params(r#"{"preset": "later"|"tomorrow"|"weekend"|"nextWeek"} | {"until": unix seconds}"#)
-            .when(has_selection),
-        CommandSpec::new("mail.unsnooze", "Unsnooze", "Home › Tags", |s, _| s.unsnooze_selection()).when(has_selection),
-        CommandSpec::new("mail.moveToFocused", "Move to Focused", "Home › Move", |s, _| s.set_focus_for_selection(true)).when(has_selection),
-        CommandSpec::new("mail.moveToOther", "Move to Other", "Home › Move", |s, _| s.set_focus_for_selection(false)).when(has_selection),
+            .params(r#"{"preset": "later"|"tomorrow"|"weekend"|"nextWeek"} | {"at": "YYYY-MM-DDTHH:MM" (local; a day alone: 8:00)} | {"until": unix seconds}"#)
+            .on_selection(has_selection),
+        CommandSpec::new("mail.unsnooze", "Unsnooze", "Home › Tags", |s, _| s.unsnooze_selection()).on_selection(has_selection),
+        CommandSpec::new("mail.moveToFocused", "Move to Focused", "Home › Move", |s, _| s.set_focus_for_selection(true)).on_selection(has_selection),
+        CommandSpec::new("mail.moveToOther", "Move to Other", "Home › Move", |s, _| s.set_focus_for_selection(false)).on_selection(has_selection),
         CommandSpec::new("mail.moveToGroup", "Always move to a group", "Home › Move", |s, v| {
             let code = p::req_str(v, "group")?;
             let group = crate::InboxGroup::from_code(code)
@@ -274,9 +274,17 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.import_rules(&bytes, p::bool(v, "replace").unwrap_or(false))
         })
         .params(r#"{"path": string, "replace"?: bool (in place of the rules here; else added after them)}"#),
-        // The rules an Exchange mailbox keeps on its server (issue #139).
-        CommandSpec::new("rules.server", "Rules on the server", "Home › Rules", |s, v| s.load_server_rules(p::req_str(v, "account")?))
-            .params(r#"{"account": string (an Exchange account)}"#),
+        // The rules an Exchange mailbox keeps on its server (issue #139), or MailCraft's in an IMAP
+        // server's Sieve (issue #243).
+        CommandSpec::new("rules.server", "Rules on the server", "Home › Rules", |s, v| {
+            let account = p::req_str(v, "account")?;
+            if p::bool(v, "refresh").unwrap_or(true) { s.load_server_rules(account) } else { Ok(s.server_rules_json(account)) }
+        })
+        .params(r#"{"account": string (an Exchange account, or an IMAP one whose server runs Sieve), "refresh"?: bool} (asks the server; call with refresh=false for the answer)"#),
+        CommandSpec::new("rules.serverResume", "Run my rules on the server again", "Home › Rules", |s, v| {
+            s.resume_server_rules(p::req_str(v, "account")?)
+        })
+        .params(r#"{"account": string} (an IMAP account whose server runs another program's filters instead: they run too, first)"#),
         CommandSpec::new("rules.serverSave", "Save a rule on the server", "Home › Rules", |s, v| {
             let rule = v.get("rule").cloned().ok_or_else(|| CmdError::Params("`rule` is required".into()))?;
             let rule = serde_json::from_value(rule).map_err(|e| CmdError::Params(format!("rule: {e}")))?;
@@ -354,21 +362,20 @@ fn notice_act(s: &mut Session, v: &Value) -> CmdResult {
 
 fn row_action(s: &mut Session, v: &Value) -> CmdResult {
     let key = key_param(s, v)?;
-    let action = p::req_str(v, "action")?;
-    if !matches!(action, "delete" | "archive" | "flag" | "read") {
-        return Err(CmdError::Params(format!("`{action}` isn't delete, archive, flag or read")));
-    }
+    let code = p::req_str(v, "action")?;
+    let action = crate::RowAction::from_code(code).ok_or_else(|| CmdError::Params(format!("`{code}` isn't delete, archive, flag, read or pin")))?;
     let selection = std::mem::replace(&mut s.selection, vec![key.clone()]);
     let (focus, anchor, reading) = (s.focus.take(), s.anchor.take(), s.reading.take());
     let done = match action {
-        "delete" => delete(s, &json!({})),
-        "archive" => s.move_selection(MoveTarget::Role(FolderRole::Archive)),
-        "flag" => flag(s, &json!({})),
-        _ => s.flag_selection(Flag::Seen, None),
+        crate::RowAction::Delete => delete(s, &json!({})),
+        crate::RowAction::Archive => s.move_selection(MoveTarget::Role(FolderRole::Archive)),
+        crate::RowAction::Flag => flag(s, &json!({})),
+        crate::RowAction::Read => s.flag_selection(Flag::Seen, None),
+        crate::RowAction::Pin => s.pin_selection(None),
     };
     // Put back as it was, but the message deleted or archived (the one it went to stays shown
     // when that was the one open).
-    let gone = matches!(action, "delete" | "archive") && done.is_ok();
+    let gone = matches!(action, crate::RowAction::Delete | crate::RowAction::Archive) && done.is_ok();
     let kept = |k: &Option<mailcraft_model::MessageKey>| if gone && k.as_ref() == Some(&key) { None } else { k.clone() };
     s.selection = selection.into_iter().filter(|k| !gone || *k != key).collect();
     s.focus = kept(&focus);
@@ -416,12 +423,19 @@ pub(super) fn move_to(s: &mut Session, v: &Value) -> CmdResult {
 }
 
 pub(super) fn snooze(s: &mut Session, v: &Value) -> CmdResult {
-    let until = match (p::str(v, "preset"), v.get("until").and_then(Value::as_i64)) {
-        (Some(code), _) => {
+    let until = match (p::str(v, "preset"), p::str(v, "at"), v.get("until").and_then(Value::as_i64)) {
+        (Some(code), _, _) => {
             mailcraft_model::organize::SnoozeUntil::from_code(code).ok_or_else(|| CmdError::Params(format!("unknown preset `{code}`")))?.at(&s.clock)
         }
-        (None, Some(t)) => t,
-        (None, None) => return Err(CmdError::Params("`preset` or `until` is required".into())),
+        // A time of the user's own (issue #274: Choose a date…), as the presets' a day alone is
+        // eight in its morning.
+        (None, Some(at), _) => match crate::session::pim::parse_local(at, &s.clock) {
+            Some((day, true)) => s.clock.utc(day.saturating_add(8 * 3600)),
+            Some((t, false)) => t,
+            None => return Err(CmdError::Params(format!("`at`: not a date and time (YYYY-MM-DDTHH:MM): `{at}`"))),
+        },
+        (None, None, Some(t)) => t,
+        (None, None, None) => return Err(CmdError::Params("`preset`, `at` or `until` is required".into())),
     };
     s.snooze_selection(until)
 }
@@ -515,10 +529,24 @@ pub(super) fn mark_all_read(s: &mut Session, v: &Value) -> CmdResult {
     for k in keys {
         by_account.entry(k.account.clone()).or_default().push(k);
     }
+    remember_unread(s, by_account.iter().map(|(a, keys)| (a.clone(), keys.clone())).collect());
     for (a, keys) in by_account {
         s.apply_op(&a, mailcraft_model::Op::SetFlag { keys, flag: Flag::Seen, on: true });
     }
     Ok(json!({"count": n}))
+}
+
+/// Mark all as read can be undone, as any marking read (issue #248: one click on it by mistake
+/// lost which mail was unread): Undo marks unread again the messages it marked, by account.
+fn remember_unread(s: &mut Session, unread: Vec<(String, Vec<mailcraft_model::MessageKey>)>) {
+    let ops: Vec<_> = unread
+        .into_iter()
+        .filter(|(_, keys)| !keys.is_empty())
+        .map(|(a, keys)| (a, vec![mailcraft_model::Op::SetFlag { keys, flag: Flag::Seen, on: false }]))
+        .collect();
+    if !ops.is_empty() {
+        s.remember(crate::session::Undo::Ops { ops });
+    }
 }
 
 /// Every message of a folder read: those kept here as any marked read, and on a server holding
@@ -529,6 +557,9 @@ fn mark_folder_read(s: &mut Session, account: &str, folder: &str) -> CmdResult {
     let remote = s.account(account).is_some_and(|a| !a.is_local() && a.config.pop.is_none());
     let n = keys.len().max(if remote { on_server } else { 0 });
     if !keys.is_empty() {
+        // Those kept here can be marked unread again; mail the server marks read past them
+        // (below) isn't known by name, so it stays read.
+        remember_unread(s, vec![(account.to_string(), keys.clone())]);
         s.apply_op(account, mailcraft_model::Op::SetFlag { keys: keys.clone(), flag: Flag::Seen, on: true });
     }
     if remote && on_server > keys.len() {

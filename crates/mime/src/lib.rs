@@ -12,6 +12,8 @@
 //! additionally fenced with `catch_unwind` and size caps, since mail is hostile input.
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
+mod clipboard;
+pub use clipboard::windows_clipboard_html;
 mod css;
 mod header;
 pub use header::{field_span, header_end, header_field, header_fields, report_type, without_line_end, written_message_id};
@@ -42,6 +44,8 @@ pub use smime::pgp;
 /// Outlook's RTF bodies for tests (`test-support`).
 #[cfg(any(test, feature = "test-support"))]
 pub use tnef::fixtures as tnef_fixtures;
+mod tables;
+pub use tables::{Pasted, PastedTable, TABLE_CELLS_MAX, TABLE_CLASS, TABLE_CODE_MAX, pasted_tables};
 mod trackers;
 pub use attachments::{
     AttachmentInfo, AttachmentKind, HtmlRefs, MAX_WANTED, PendingFile, TEXT_FIRST, attachment_data, attachment_out, attachment_text,
@@ -437,11 +441,17 @@ pub fn parse(raw: &[u8]) -> Option<Parsed> {
     };
     let (text, had_html) = shown_text(&m, real_html, &tnef_body, html.as_deref(), standing_in.as_deref(), ready.as_ref());
     let attachments = attached.into_iter().map(|a| a.info).collect();
+    // A mailing list's ways out, as it gives them; the one shown is its web page when it gives
+    // one (issue #272: opened as a link, asking there), else the first (a mail address).
     let unsubscribe_links: Vec<String> = m
         .list_unsubscribe()
         .map(|a| a.mailboxes().filter_map(|x| x.address()).map(|t| t.trim_matches(['<', '>']).to_string()).take(UNSUBSCRIBE_LINKS).collect())
         .unwrap_or_default();
-    let unsubscribe = unsubscribe_links.first().cloned();
+    let unsubscribe = unsubscribe_links
+        .iter()
+        .find(|w| w.to_ascii_lowercase().starts_with("https://") || w.to_ascii_lowercase().starts_with("http://"))
+        .or(unsubscribe_links.first())
+        .cloned();
     Some(Parsed {
         subject: fields::subject(&m),
         from: addrs(fields::from(&m)).into_iter().next().unwrap_or_default(),

@@ -29,9 +29,13 @@ pub(crate) fn add(s: &mut Session, args: &Args) -> Result<(), String> {
             p[key] = json!(v);
         }
     }
-    // No servers given: look them up (the domain's autoconfig, the ISP database, DNS).
-    if args.opt("--imap").is_none() && args.opt("--smtp").is_none() && args.opt("--jmap").is_none() {
-        match mailcraft_net::autoconfig::discover(&email, &mut mailcraft_net::answering::answering) {
+    // No servers given: the organisation's for its domain (issue #245; `account.add` puts them
+    // in), else look them up (the domain's autoconfig, the ISP database, DNS) the ways it allows.
+    let named = args.opt("--imap").is_some() || args.opt("--smtp").is_some() || args.opt("--jmap").is_some();
+    if !named && s.org_account_config(&email).is_some() {
+        errln!("settings: your organisation's");
+    } else if !named {
+        match mailcraft_net::autoconfig::discover_by(&email, &s.discover_rules(), &mut mailcraft_net::answering::answering) {
             // Only a JMAP server named.
             Some(f) if f.config.imap.host.is_empty() => {
                 errln!("settings found: {} (JMAP)", f.source);

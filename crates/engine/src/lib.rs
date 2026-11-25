@@ -11,8 +11,10 @@
 //! script the events directly.
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
+pub mod agents;
 pub mod backup;
 pub mod cmd;
+pub mod policy;
 pub mod sample;
 mod session;
 
@@ -25,30 +27,33 @@ pub use mailcraft_model as model;
 pub use mailcraft_pgp as pgp;
 pub use mailcraft_smime as smime;
 pub use mailcraft_store as store;
+pub use session::camel as setting_key;
 #[doc(hidden)]
 pub use session::run_script_against;
 pub use session::{
     ACCENTS, AI_LOG_KEPT, ARRANGE_HEADINGS, ASSISTANT_LINK, ASSISTANT_WIDTH, AboutKind, AboutMessage, AccountState, AgeUnit, AiLogEntry, AiPrefs,
-    AiProfile, AiReach, AiState, AiTask, AiTest, ArchiveRule, Arrange, Assistant, AssistantPane, AutoArchive, BodyWork, CONTEXT_AT_FIRST,
-    CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, CardSearch, Changes, Chat, ChatHead, ChatTurn, Compacting, Compaction, Compose, ContextItem, CtrlEnter,
-    Digest, DigestWhen, Drafted, Filed, FolderArchive, FolderDensity, FolderRef, HOME_BUTTONS, IDLE_AFTER_S, ImportState, Imports, InboxGroup,
-    IndexPass, KeptScript, KeySource, KnownCert, KnownKey, Leaving, ListFilter, Lock, McpServer, MoveTarget, NotesOrder, Notice, PANICS_CAUGHT,
-    PGP_DOC, PINNED_HEADING, PaneSection, PgpSettings, Picture, Prefs, PreparedBody, Quote, RIBBON_ADDED_MOST, RIBBON_MOST, RIBBON_ROW, Reach,
-    Reactions, ReadInPane, Reading, ReadingPane, RevocationCheck, Rewrite, RewriteHow, Row, RuleProposal, RunState, SMIME_DOC, SOURCE_SHOWN,
-    STEPS_MOST, Scheme, ScriptParam, Seal, SearchProgress, SearchScope, SearchStats, SearchWork, Security, SendBlock, SendCheck, SendReceive,
-    SenderAddresses, SenderMarks, ServerSearch, ServerTools, Session, SignInCheck, SignedBy, SmimeSettings, SourceView, StartIn, SwipeAction,
-    TEMPLATE_BYTES_MOST, TEMPLATE_NAME_MOST, TEMPLATES_MOST, Template, TemplateFile, ToolRun, TransferRow, TrustedCertificate, UNDO_SEND_MAX,
-    UndoHold, UpdateCheck, VacationState, View, accent_code, accent_rgb, ai_server, ai_url_is_local, assistant_message_link,
+    AiProfile, AiReach, AiState, AiTask, AiTest, ArchiveRule, Arrange, Assistant, AssistantPane, AutoArchive, BY_ORGANISATION, BodyWork,
+    CONTEXT_AT_FIRST, CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, CardSearch, Changes, Chat, ChatHead, ChatTurn, Compacting, Compaction, Compose,
+    ContextItem, CtrlEnter, DETAILS, Digest, DigestWhen, Drafted, Filed, FolderArchive, FolderDensity, FolderRef, HOME_BUTTONS, IDLE_AFTER_S,
+    ImportState, Imports, InboxGroup, IndexPass, KeptScript, KeySource, KnownCert, KnownKey, Leaving, ListFilter, Lock, McpServer, MoveTarget,
+    NORMAL_TEXT, NotesOrder, Notice, ORG_SETTINGS, PANICS_CAUGHT, PGP_DOC, PINNED_HEADING, PaneSection, PersonActivity, PersonFile, PersonLink,
+    PersonMeeting, PersonPeer, PersonThread, PgpSettings, Picture, Prefs, PreparedBody, Quote, RIBBON_ADDED_MOST, RIBBON_MOST, RIBBON_ROW,
+    ROW_ACTIONS_MAX, Reach, Reactions, ReadInPane, Reading, ReadingPane, RevocationCheck, Rewrite, RewriteHow, Row, RowAction, RuleProposal,
+    RunState, SMIME_DOC, SOURCE_SHOWN, STEPS_MOST, Scheme, ScriptParam, Seal, SearchProgress, SearchScope, SearchStats, SearchWork, Security,
+    SendBlock, SendCheck, SendReceive, SenderAddresses, SenderMarks, ServerSearch, ServerTools, Session, SignInCheck, SignedBy, SmimeSettings,
+    SourceView, StartIn, SwipeAction, TEMPLATE_BYTES_MOST, TEMPLATE_NAME_MOST, TEMPLATES_MOST, TEXT_SIZE_RANGE, TEXT_SIZES, Template, TemplateFile,
+    ToolRun, TransferRow, TrustedCertificate, UNDO_SEND_MAX, UndoHold, UpdateCheck, VacationState, View, accent_code, accent_rgb, ai_server,
+    ai_url_is_local, assistant_message_link,
     attached::{AttachedFile, FILES_MESSAGES_MOST, FILES_MOST, FileKind, FilesFilter},
-    invite::{AnsweredInvites, Fit, Invite, InviteDay, InviteProblem, Route, WaitingInvite, forwarding_allowed, proposals_allowed},
+    invite::{AnsweredInvites, Fit, Invite, InviteDay, InviteProblem, MailWords, Route, WaitingInvite, forwarding_allowed, proposals_allowed},
     junk::{JunkList, junk_entry},
     leaving_way, newer_release,
     no_answer::{NO_ANSWER_DAYS, NO_ANSWER_DAYS_MAX, NO_ANSWER_FOLDER},
     parse_key,
     pim::{
-        ACCOUNT_COLOR, AgendaItem, CalMode, DueReminder, EVENT_HITS_MAX, EventHit, EventWhen, FREE_LENGTHS, FreeBusyState, ListedTask, LocalEvents,
-        Module, NoteRef, Person, TASKS_CALENDAR, TODO_BAR_SPLIT, TODO_BAR_WIDTH, TaskRef, TasksOrder, TodoBar, TodoGroup, TodoItem, TodoWhat,
-        parse_local,
+        ACCOUNT_COLOR, AgendaItem, CalMode, DueReminder, EVENT_HITS_MAX, EventHit, EventWhen, FREE_LENGTHS, FreeBusyState, GuestTimes, ListedTask,
+        LocalEvents, Module, NoteRef, Person, TASKS_CALENDAR, TODO_BAR_SPLIT, TODO_BAR_WIDTH, TaskRef, TasksOrder, TodoBar, TodoGroup, TodoItem,
+        TodoWhat, parse_local,
     },
     quick_steps::QuickStep,
     search_folders::SearchFolder,
@@ -114,6 +119,12 @@ pub struct CommandSpec {
     /// list or the view without acting on the open message, or is about a data file (the window
     /// tells the idle policy how long it's been every half minute).
     pub leaves_body: bool,
+    /// The setting it changes, as the settings name it (`autoPictures`, or the field's own name,
+    /// `auto_pictures`); `""` for none. Locked by the organisation (issue #245), it's refused.
+    pub setting: &'static str,
+    /// It acts on the selected messages: `keys` (messages in the list shown) selects them first,
+    /// as clicks would (issue #255: an agent couldn't name the messages to delete).
+    pub on_selection: bool,
 }
 
 fn always(_: &Session) -> Option<&'static str> {
@@ -122,7 +133,7 @@ fn always(_: &Session) -> Option<&'static str> {
 
 impl CommandSpec {
     pub const fn new(id: &'static str, label: &'static str, location: &'static str, run: fn(&mut Session, &Value) -> CmdResult) -> Self {
-        CommandSpec { id, label, location, shortcut: "", params: "{}", enabled: always, run, leaves_body: false }
+        CommandSpec { id, label, location, shortcut: "", params: "{}", enabled: always, run, leaves_body: false, setting: "", on_selection: false }
     }
     pub const fn key(mut self, s: &'static str) -> Self {
         self.shortcut = s;
@@ -139,6 +150,17 @@ impl CommandSpec {
     }
     pub const fn when(mut self, f: fn(&Session) -> Option<&'static str>) -> Self {
         self.enabled = f;
+        self
+    }
+    /// It acts on the selected messages ([`CommandSpec::on_selection`]), enabled as `f` says.
+    pub const fn on_selection(mut self, f: fn(&Session) -> Option<&'static str>) -> Self {
+        self.enabled = f;
+        self.on_selection = true;
+        self
+    }
+    /// The setting it changes ([`CommandSpec::setting`]).
+    pub const fn setting(mut self, key: &'static str) -> Self {
+        self.setting = key;
         self
     }
 }
@@ -165,7 +187,13 @@ impl Registry {
         Value::Array(
             self.specs
                 .iter()
-                .map(|s| serde_json::json!({"id": s.id, "label": s.label, "location": s.location, "shortcut": s.shortcut, "params": s.params}))
+                .map(|s| {
+                    let mut d = serde_json::json!({"id": s.id, "label": s.label, "location": s.location, "shortcut": s.shortcut, "params": s.params});
+                    if s.on_selection {
+                        d["keys"] = serde_json::json!("the messages it acts on, in the list shown: [key]; else those selected");
+                    }
+                    d
+                })
                 .collect(),
         )
     }

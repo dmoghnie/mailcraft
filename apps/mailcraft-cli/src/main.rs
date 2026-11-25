@@ -18,18 +18,56 @@ use serde_json::{Value, json};
 
 // Output that a closed pipe can't turn into a panic (`mailcraft-cli list | head` closes it
 // early; `println!` panicked there).
+// What's printed is made printable first (`printable`): a subject, a sender, a folder's name or
+// a server's error can't drive the terminal.
 macro_rules! outln {
     ($($t:tt)*) => {{
-        let _ = writeln!(std::io::stdout(), $($t)*);
+        let _ = writeln!(std::io::stdout(), "{}", crate::printable(&format!($($t)*)));
     }};
 }
 macro_rules! errln {
     ($($t:tt)*) => {{
-        let _ = writeln!(std::io::stderr(), $($t)*);
+        let _ = writeln!(std::io::stderr(), "{}", crate::printable(&format!($($t)*)));
     }};
 }
 
+/// `text` as it's shown in a terminal: a control character in it (an escape, a lone carriage
+/// return, one of C1's) written as its escape (`\u{1b}`), so mail and what a server says can't
+/// move the cursor, change the colours, retitle the window or rewrite a line that was printed
+/// (a subject is a header anyone sends, and its encoded words decode to any character). Line
+/// ends and tabs stay. As figcraft's CLI does for its errors; the log does it too.
+pub(crate) fn printable(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut chars = text.chars().peekable();
+    while let Some(c) = chars.next() {
+        let kept = !c.is_control() || matches!(c, '\n' | '\t') || (c == '\r' && chars.peek() == Some(&'\n'));
+        if kept {
+            out.push(c);
+        } else {
+            out.extend(c.escape_default());
+        }
+    }
+    out
+}
+
 mod commands;
+mod mcp;
+
+/// The organisation's profile on this computer (issue #245), its Microsoft registrations taken.
+fn organisation() -> mailcraft_engine::policy::Organisation {
+    let o = mailcraft_engine::policy::sources::read(None);
+    for why in &o.ignored {
+        errln!("organisation's profile: {why}");
+    }
+    // Its Microsoft registrations, each for the accounts of its domains.
+    let apps = o.microsoft_apps().into_iter().map(|(domains, app)| mailcraft_net::oauth::OrganisationApp {
+        domains,
+        client_id: app.client_id,
+        tenant: app.tenant,
+    });
+    mailcraft_net::oauth::set_organisation_apps(apps.collect());
+    o
+}
 
 use commands::call;
 
@@ -263,14 +301,30 @@ fn run() -> Result<(), String> {
         outln!("{}", include_str!("help.txt"));
         return Ok(());
     }
-    let root =
-        args.opt("--data").map(std::path::PathBuf::from).or_else(mailcraft_engine::store::default_root).ok_or("no data folder: pass --data DIR")?;
+    let env_data = std::env::var_os("MAILCRAFT_DATA").filter(|d| !d.is_empty());
+    // A portable copy's own folder, beside it, as the app beside it keeps (issue #255: its MCP
+    // server looked in the user's folder, and found no window); a folder chosen comes first.
+    let portable = (args.opt("--data").is_none() && env_data.is_none())
+        .then(std::env::current_exe)
+        .and_then(Result::ok)
+        .and_then(|exe| exe.parent().and_then(mailcraft_engine::store::location::portable_data));
+    let root = args
+        .opt("--data")
+        .map(std::path::PathBuf::from)
+        .or_else(|| portable.clone())
+        .or_else(mailcraft_engine::store::default_root)
+        .ok_or("no data folder: pass --data DIR")?;
     // The same data files as the app: in Documents\MailCraft Files (or where they were moved),
-    // or beside a folder given with --data.
-    let files = match (args.opt("--data"), std::env::var_os("MAILCRAFT_DATA").filter(|d| !d.is_empty())) {
-        (None, None) => mailcraft_engine::store::location::files_dir(&root),
+    // or beside a folder given with --data, or a portable copy's.
+    let files = match (args.opt("--data"), env_data, portable) {
+        (None, None, None) => mailcraft_engine::store::location::files_dir(&root),
         _ => root.join(mailcraft_engine::store::location::FILES_FOLDER),
     };
+    // MailCraft's MCP server (issue #255): the open window's, else this data folder read here;
+    // the data files open only when it reads them itself.
+    if args.positional(0).as_deref() == Some("mcp") {
+        return mcp::serve(root, files);
+    }
     let store = open_store(&root, &files)?;
     tell_checks(&store);
     // Last out, however the command ends: the sync threads that hold the store are let go.
@@ -283,6 +337,8 @@ fn run() -> Result<(), String> {
         return Ok(());
     }
     let mut s = Session::open(Some(store.clone()), clock());
+    // The organisation's profile (issue #245): its rules for accounts hold here too.
+    s.set_organisation(organisation());
     // An account's data file the app has open can't be read here: say so, where its folders came
     // out empty (found testing issue #20).
     for a in &s.accounts {
@@ -418,6 +474,19 @@ mod tests {
 
     fn args(a: &[&str]) -> Args {
         Args { rest: a.iter().map(|s| s.to_string()).collect() }
+    }
+
+    /// What's printed can't drive the terminal: an escape (colours, the window's title, clearing
+    /// the screen), a bell, a lone carriage return (which rewrote the start of a From line) and
+    /// C1's one-byte escape are shown as escapes; text, line ends (CRLF too) and tabs as they are.
+    #[test]
+    fn printed_text_cant_drive_the_terminal() {
+        assert_eq!(printable("Re: Quarterly figures, 2026 \u{2014} Zoë"), "Re: Quarterly figures, 2026 \u{2014} Zoë");
+        assert_eq!(printable("one\ntwo\r\nthree\tfour"), "one\ntwo\r\nthree\tfour");
+        assert_eq!(printable("\u{1b}]0;pwned\u{7}\u{1b}[31mred"), "\\u{1b}]0;pwned\\u{7}\\u{1b}[31mred");
+        assert_eq!(printable("Riley\rSpoofed"), "Riley\\rSpoofed");
+        assert_eq!(printable("a\u{9b}2Jb\u{7f}c\0d"), "a\\u{9b}2Jb\\u{7f}c\\u{0}d");
+        assert_eq!(printable("ends with\r"), "ends with\\r");
     }
 
     /// Every option the CLI reads is in the help it prints (`--jmap`, `--cc` and `--timeout`

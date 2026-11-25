@@ -42,19 +42,34 @@ fn write(blocks: &[Block], text: &mut dyn FnMut(usize) -> String, n: &mut usize,
             }
             Block::Table(t) => {
                 let centred = if t.align == Align::Center { ";margin:0 auto" } else { "" };
+                let around = t.border.as_ref().map(|l| format!(";border:{}px solid {}", l.width, hex(l.color))).unwrap_or_default();
                 out.push_str(&format!(
-                    "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"{}{}{}{} style=\"border-collapse:collapse{centred}\">",
+                    "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"{}{}{}{} style=\"border-collapse:collapse{centred}{around}\">",
                     width(t.width),
                     align(t.align),
                     t.background.map(|c| format!(" bgcolor=\"{}\"", hex(c))).unwrap_or_default(),
                     t.background_image.as_deref().map(|s| format!(" background=\"{}\"", escaped(s))).unwrap_or_default(),
                 ));
-                for row in &t.rows {
+                // Written collapsed: a line two cells share once, as it's read again.
+                let shared = super::collapse::shared_lines(&t.rows);
+                for (row, row_lines) in t.rows.iter().zip(&shared) {
                     out.push_str("<tr>");
-                    for c in row {
+                    for (c, borders) in row.iter().zip(row_lines) {
                         let span = if c.span > 1 { format!(" colspan=\"{}\"", c.span) } else { String::new() };
+                        // Its room inside and the lines along its sides, as it has them (a table
+                        // pasted from Excel, issue #268, keeps its cells' lines).
+                        let room = match c.padding {
+                            None => "padding:6px".to_string(),
+                            Some([t, r, b, l]) if t == r && r == b && b == l => format!("padding:{t}px"),
+                            Some([t, r, b, l]) => format!("padding:{t}px {r}px {b}px {l}px"),
+                        };
+                        let lines: String = ["top", "right", "bottom", "left"]
+                            .iter()
+                            .zip(borders)
+                            .filter_map(|(side, l)| l.as_ref().map(|l| format!(";border-{side}:{}px solid {}", l.width, hex(l.color))))
+                            .collect();
                         out.push_str(&format!(
-                            "<td valign=\"top\"{}{span}{}{}{} style=\"padding:6px{}\">",
+                            "<td valign=\"top\"{}{span}{}{}{} style=\"{room}{lines}{}\">",
                             width(c.width),
                             c.background.map(|c| format!(" bgcolor=\"{}\"", hex(c))).unwrap_or_default(),
                             align(c.align),

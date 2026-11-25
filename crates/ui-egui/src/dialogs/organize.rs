@@ -171,6 +171,9 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
                         f.test = RuleTest::To;
                     }
                 }
+                // What the server can run: Exchange's rules say less than MailCraft's; Sieve's
+                // say what MailCraft's do (issue #243).
+                let exchange = f.server.as_ref().is_some_and(|t| s.account(&t.account).is_some_and(|a| a.config.ews.is_some()));
                 // Conditions combined in ways the editor can't show are said, and kept as they are.
                 if let Some(r) = f.original.as_ref().filter(|_| f.conditions_fixed()) {
                     ui.label(tl!("When mail"));
@@ -179,7 +182,7 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
                 } else {
                     let l = ui.label(tl!("When mail"));
                     let tests: Vec<RuleTest> =
-                        RuleTest::ALL.into_iter().filter(|x| (f.server.is_none() || x.on_server()) && (!f.sent || x.for_sent())).collect();
+                        RuleTest::ALL.into_iter().filter(|x| (!exchange || x.on_server()) && (!f.sent || x.for_sent())).collect();
                     let r = egui::ComboBox::from_id_salt("rule-test")
                         .width(300.0)
                         .selected_text(f.test.label())
@@ -199,7 +202,7 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, t: &Tokens, acts: &
                     }
                 }
                 let l = ui.label(tl!("Then"));
-                let actions: Vec<RuleDo> = RuleDo::ALL.into_iter().filter(|x| f.server.is_none() || x.on_server()).collect();
+                let actions: Vec<RuleDo> = RuleDo::ALL.into_iter().filter(|x| !exchange || x.on_server()).collect();
                 let r = egui::ComboBox::from_id_salt("rule-do")
                     .width(300.0)
                     .selected_text(f.action.label())

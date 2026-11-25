@@ -1,7 +1,7 @@
 # Fuzzing
 
 Every parser that reads network or disk input has a fuzz target here, because MailCraft must never
-crash on hostile input (see "Never crash" in [CLAUDE.md](../CLAUDE.md)). The targets live in a
+crash on hostile input (see "Never crash" in [AGENTS.md](../AGENTS.md)). The targets live in a
 workspace of their own, so the main build never needs a nightly toolchain.
 `.github/workflows/fuzz.yml` runs every target once a week.
 
@@ -88,5 +88,7 @@ The fuzzer keeps what it finds in `corpus/` and `artifacts/`. Git ignores both f
 | `pst_props` | HTML bodies and 8-bit strings in their code pages |
 | `pst_recurrence` | A recurrence pattern, read and written |
 | `pst_pim_text` | Contact and task text, exported and read back |
+| `sieve` | Another program's Sieve script, read for the automatic reply it sends |
 | `signature` | A signature as HTML code or a saved web page |
+| `signature_details` | A message's text read for the phone numbers and web addresses in its signature |
 | `tnef` | `winmail.dat` (TNEF): files, body, attached messages, compressed RTF |

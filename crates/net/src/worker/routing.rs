@@ -43,7 +43,7 @@ impl Pool {
             Job::Mcp { work } => self.mcp(work),
             Job::SignIn { account } => self.sign_in(account),
             Job::AllowDirectory { account } => self.allow_directory(account),
-            Job::Discover { email } => self.discover(email),
+            Job::Discover { email, rules } => self.discover(email, rules),
             Job::CheckSignIn { id, account, password, smtp_password } => self.check_sign_in(id, account, password, smtp_password),
             Job::ImportPst { account, path, resume } => self.import_pst(account, path, resume),
             Job::RereadDataFile { account, path } => self.reread_data_file(account, path),
@@ -202,7 +202,7 @@ impl Pool {
             Job::GetServerRules { account } | Job::SetServerRules { account, .. } if mail_offline => {
                 self.sink.emit(Event::ServerRules { account, rules: None, error: Some(OFFLINE.into()) });
             }
-            Job::FreeBusy { account, people, from, to } if mail_offline => {
+            Job::FreeBusy { account, people, from, to } if !running => {
                 let answers = people
                     .into_iter()
                     .map(|email| mailcraft_model::pim::free_busy::FreeBusyAnswer { email, error: Some(OFFLINE.into()), ..Default::default() })

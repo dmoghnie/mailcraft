@@ -134,7 +134,7 @@ fn sender_card(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut 
             f32::INFINITY,
             egui::TextStyle::Small,
         );
-        let side = if quick { date.size().x.max(quick_width(o)) } else { date.size().x };
+        let side = if quick { date.size().x.max(quick_width(s, o)) } else { date.size().x };
         let rest = ui.available_width() - side - 16.0;
         let beside = rest >= 200.0;
         let room = if beside { rest } else { ui.available_width() };
@@ -189,7 +189,7 @@ fn sender_card(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut 
                 if quick {
                     // Their own width, against the end, laid out from the start: Tab reaches
                     // them in the order they're seen.
-                    let size = vec2(quick_width(o), widgets::ACTION_ICON);
+                    let size = vec2(quick_width(s, o), widgets::ACTION_ICON);
                     ui.allocate_ui_with_layout(size, crate::bidi::row_from_start(egui::Align::Center), |ui| quick_actions(s, st, ui, o, acts));
                     drawn = true;
                 }
@@ -208,8 +208,8 @@ const PEOPLE_ROW: f32 = 18.0;
 const QUICK_GAP: f32 = 2.0;
 
 /// How wide [`quick_actions`] are: their icons and the room between them.
-fn quick_width(o: &Open<'_>) -> f32 {
-    let n = if reactable(o) { 5.0 } else { 4.0 };
+fn quick_width(s: &Session, o: &Open<'_>) -> f32 {
+    let n = 4.0 + f32::from(u8::from(reactable(o))) + f32::from(u8::from(snoozable(s)));
     n * widgets::ACTION_ICON + (n - 1.0) * QUICK_GAP
 }
 
@@ -226,7 +226,12 @@ fn reactable(o: &Open<'_>) -> bool {
     o.summary.is_none_or(|m| m.reaction.is_empty() && !m.bulk) && !o.p.bulk && o.r.security.as_ref().is_none_or(|sec| sec.lock.is_none())
 }
 
-/// React, Reply, Reply all, Forward and More as icons beside the sender.
+/// Whether Snooze is beside the message (issue #274): it snoozes what's selected, the message open.
+fn snoozable(s: &Session) -> bool {
+    !s.selection.is_empty()
+}
+
+/// React, Reply, Reply all, Forward, Snooze and More as icons beside the sender.
 fn quick_actions(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mut Vec<Action>) {
     let t = st.tokens;
     ui.spacing_mut().item_spacing.x = QUICK_GAP;
@@ -241,6 +246,10 @@ fn quick_actions(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, acts: &mu
     }
     if widgets::action_icon(ui, Icon::Forward, "Forward", &t).clicked() {
         acts.push(Action::Run("mail.forward", json!({})));
+    }
+    if snoozable(s) {
+        let snooze = widgets::action_icon(ui, Icon::Clock, "Snooze", &t);
+        egui::Popup::menu(&snooze).show(|ui| crate::organize::snooze_menu(ui, s, &t, acts));
     }
     let more = widgets::more_icon(ui, "More actions", &t);
     egui::Popup::menu(&more).show(|ui| {
@@ -415,6 +424,11 @@ fn action_bar(s: &Session, st: &UiState, ui: &mut Ui, o: &Open<'_>, beside: bool
             }
             if reactable(o) {
                 reactions::react_button(ui, &t, acts);
+            }
+            // Issue #274: Snooze beside the message, as the ribbon's.
+            if snoozable(s) {
+                let snooze = widgets::pill_button(ui, Icon::Clock, "Snooze", &t);
+                egui::Popup::menu(&snooze).show(|ui| crate::organize::snooze_menu(ui, s, &t, acts));
             }
             ui.add_space(6.0);
             if widgets::pill_button(ui, Icon::Print, "Print", &t).on_hover_text(tl!("Open as a PDF to print")).clicked() {

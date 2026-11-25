@@ -25,18 +25,18 @@ pub(super) fn inbox(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>
             ),
         ];
         for (i, (label, about, on, cmd)) in switches.into_iter().enumerate() {
-            switch_row(ui, t, i == 0, Switch { label, about, on, cmd }, acts);
+            switch_row(s, ui, t, i == 0, Switch { label, about, on, cmd }, acts);
             if cmd == "view.focused" && s.prefs.focused_inbox {
                 groups(s, t, ui, acts);
             }
             // With both on, Other's mail is announced only when asked (issue #199).
             if cmd == "view.focused" && s.prefs.focused_inbox && s.prefs.notify {
                 let (label, about) = (tl!("Notify of mail in Other too"), Some(tl!("Off, only mail that goes to Focused is announced")));
-                switch_row(ui, t, false, Switch { label, about, on: s.prefs.notify_other, cmd: "view.notifyOther" }, acts);
+                switch_row(s, ui, t, false, Switch { label, about, on: s.prefs.notify_other, cmd: "view.notifyOther" }, acts);
             }
             if cmd == "view.notifications" && s.prefs.notify {
                 let (label, about) = (tl!("Notify only of mail from VIPs"), Some(tl!("Other mail still arrives, without a notification")));
-                switch_row(ui, t, false, Switch { label, about, on: s.prefs.notify_vips_only, cmd: "view.notifyVipsOnly" }, acts);
+                switch_row(s, ui, t, false, Switch { label, about, on: s.prefs.notify_vips_only, cmd: "view.notifyVipsOnly" }, acts);
             }
         }
         answered_invites(s, t, ui, acts);
@@ -51,7 +51,7 @@ pub(super) fn inbox(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>
             ),
         ];
         for (label, about, on, cmd) in switches {
-            switch_row(ui, t, false, Switch { label, about, on, cmd }, acts);
+            switch_row(s, ui, t, false, Switch { label, about, on, cmd }, acts);
         }
     });
 }
@@ -62,17 +62,17 @@ fn groups(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
         tl!("Sort Other into Transactions, Updates and Promotions"),
         Some(tl!("Focused becomes Primary. Sorted on this computer, from each message's sender, subject and whether it was sent in bulk")),
     );
-    switch_row(ui, t, false, Switch { label, about, on: s.prefs.inbox_groups, cmd: "view.inboxGroups" }, acts);
+    switch_row(s, ui, t, false, Switch { label, about, on: s.prefs.inbox_groups, cmd: "view.inboxGroups" }, acts);
     if s.prefs.inbox_groups {
         let (label, about) = (tl!("Stack each sender's mail in one row"), Some(tl!("In Transactions, Updates and Promotions")));
-        switch_row(ui, t, false, Switch { label, about, on: s.prefs.group_digest, cmd: "view.groupDigest" }, acts);
+        switch_row(s, ui, t, false, Switch { label, about, on: s.prefs.group_digest, cmd: "view.groupDigest" }, acts);
     }
 }
 
 /// Sent mail nobody answered, brought back to the top of the Inbox after a few days.
 fn no_answer(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
     let (label, about) = (tl!("Bring back sent mail nobody answered"), Some(tl!("At the top of the Inbox, to follow up or dismiss")));
-    switch_row(ui, t, false, Switch { label, about, on: s.prefs.no_answer, cmd: "options.noAnswer" }, acts);
+    switch_row(s, ui, t, false, Switch { label, about, on: s.prefs.no_answer, cmd: "options.noAnswer" }, acts);
     if !s.prefs.no_answer {
         return;
     }
@@ -93,7 +93,9 @@ fn no_answer(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
 /// Issue #31: Outlook's "Delete meeting requests and notifications from Inbox after
 /// responding", with a folder of the user's as a third way; and guests' answers too.
 fn answered_invites(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
-    setting(
+    setting_by(
+        s,
+        "options.answeredInvites",
         ui,
         t,
         false,
@@ -114,7 +116,7 @@ fn answered_invites(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>
     if s.prefs.answered_invites == AnsweredInvites::Move {
         for a in &s.accounts {
             let label = tf!("Folder for {email}", email = a.config.email);
-            setting(ui, t, false, &label, None, |ui| {
+            setting_by(s, "options.answeredInvites", ui, t, false, &label, None, |ui| {
                 let chosen = s.prefs.answered_folders.get(&a.config.id);
                 let fits = |f: &&mailcraft_engine::model::Folder| {
                     f.selectable && !matches!(f.role, FolderRole::Inbox | FolderRole::Sent | FolderRole::Drafts)
@@ -145,7 +147,7 @@ fn answered_invites(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>
         }
     }
     if s.prefs.answered_invites != AnsweredInvites::Keep {
-        setting(ui, t, false, tl!("Guests' answers to my meetings go the same way, once recorded"), None, |ui| {
+        setting_by(s, "options.answeredInvites", ui, t, false, tl!("Guests' answers to my meetings go the same way, once recorded"), None, |ui| {
             let mut on = s.prefs.answered_replies;
             if widgets::switch(ui, t, &mut on, tl!("Guests' answers to my meetings go the same way, once recorded")).changed() {
                 acts.push(Action::Run("options.answeredInvites", json!({"replies": on})));

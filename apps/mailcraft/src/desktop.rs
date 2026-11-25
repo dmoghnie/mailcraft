@@ -4,12 +4,17 @@
 
 use super::*;
 
+pub(crate) mod agents;
 pub(crate) mod boot;
 pub(crate) mod fonts;
 mod lanes;
 pub(crate) mod launch;
 mod motion;
+// The buttons on new-mail notifications; Windows' toasts, MailCraft's own, have none yet.
+#[cfg(not(windows))]
 mod notices;
+pub(crate) mod notified;
+pub(crate) mod organisation;
 pub(crate) mod start;
 pub(crate) mod state_writer;
 pub(crate) mod tray;
@@ -41,8 +46,8 @@ pub(crate) struct Desktop {
     pub(crate) base: Option<PathBuf>,
     /// How a move carried out at this start went (told once).
     pub(crate) moved: Option<Result<PathBuf, String>>,
-    /// Portable mode (`portable.rs`): MailCraft's name isn't written to Windows' registry.
-    #[cfg(windows)]
+    /// Portable mode (`portable.rs`): MailCraft's name isn't written to Windows' registry, nor
+    /// is an entry that starts it at sign-in made.
     pub(crate) portable: bool,
     /// Test builds' updater (`self_update.rs`), when this one has it.
     pub(crate) updater: Option<self_update::Updater>,
@@ -63,7 +68,13 @@ pub(crate) struct Desktop {
     /// Wayland desktop too, where attachments drag out as on X11 itself.
     pub(crate) x11: bool,
     /// The buttons pressed on new-mail notifications, until the window takes them.
+    #[cfg(not(windows))]
     pub(crate) pressed: notices::Pressed,
+    /// A notification clicked, for the window's next frame (issue #273).
+    pub(crate) clicks: notified::Clicks,
+    /// The data folder this MailCraft runs on, which a launch hands what it opens to: a
+    /// notification's link reaches this one when it starts on it (issue #273).
+    pub(crate) root: Option<PathBuf>,
 }
 
 impl Desktop {
@@ -76,6 +87,18 @@ impl Desktop {
         }
     }
 
+    /// Shows a file dialog (`show`), on a Mac with the Edit menu its fields take their keys from.
+    #[cfg(target_os = "macos")]
+    fn modal<T>(show: impl FnOnce() -> T) -> T {
+        crate::platform::apple_events::with_edit_menu(show)
+    }
+
+    /// Shows a file dialog (`show`).
+    #[cfg(not(target_os = "macos"))]
+    fn modal<T>(show: impl FnOnce() -> T) -> T {
+        show()
+    }
+
     /// Notes where a dialog's answer was (a file's folder, or the folder picked); passes it on.
     fn used<T: AsRef<Path>>(&mut self, picked: Option<T>, is_folder: bool) -> Option<T> {
         if let Some(p) = &picked {
@@ -83,16 +106,6 @@ impl Desktop {
             self.last_dir = if is_folder { Some(p.to_path_buf()) } else { p.parent().map(Path::to_path_buf) }.or(self.last_dir.take());
         }
         picked
-    }
-
-    /// A portable copy (Windows): it writes nothing to the registry.
-    #[cfg(windows)]
-    fn portable(&self) -> bool {
-        self.portable
-    }
-    #[cfg(not(windows))]
-    fn portable(&self) -> bool {
-        false
     }
 }
 
@@ -133,7 +146,7 @@ impl Services for Desktop {
         self.motion.reduced() || self.look.reduced_motion()
     }
     fn pick_files(&mut self) -> Vec<PathBuf> {
-        let files = self.dialog("Attach files").pick_files().unwrap_or_default();
+        let files = Self::modal(|| self.dialog("Attach files").pick_files()).unwrap_or_default();
         self.used(files.first(), false);
         files
     }
@@ -154,7 +167,7 @@ impl Services for Desktop {
             };
             d = d.add_filter(kind, &[ext]).add_filter("All files", &["*"]);
         }
-        let saved = d.save_file();
+        let saved = Self::modal(|| d.save_file());
         self.used(saved, false)
     }
     fn open_path(&mut self, path: &Path) -> Result<(), String> {
@@ -162,6 +175,9 @@ impl Services for Desktop {
     }
     fn update_state(&mut self) -> mailcraft_ui_egui::UpdateState {
         self.updater.as_ref().map(self_update::Updater::state).unwrap_or_default()
+    }
+    fn update_outcome(&mut self) -> Option<mailcraft_ui_egui::UpdateOutcome> {
+        self.updater.as_ref().and_then(self_update::Updater::take_outcome)
     }
     fn restart_to_update(&mut self) -> bool {
         self.updater.as_ref().is_some_and(self_update::Updater::restart_after_close)
@@ -275,7 +291,7 @@ impl Services for Desktop {
             }
             candidates.push((PathBuf::from("/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf"), 0));
         }
-        candidates.iter().find_map(|(p, i)| std::fs::read(p).ok().map(|b| (b, *i)))
+        fonts::first_readable(candidates)
     }
     fn rtl_font(&mut self) -> Option<Vec<u8>> {
         // Fonts with both Arabic and Hebrew first.
@@ -297,13 +313,19 @@ impl Services for Desktop {
             .map(PathBuf::from)
             .into()
         };
-        candidates.iter().find_map(|p| std::fs::read(p).ok())
+        fonts::first_readable(candidates.into_iter().map(|p| (p, 0))).map(|(bytes, _)| bytes)
     }
     fn keeps_running(&self) -> Option<mailcraft_ui_egui::KeptOnClose> {
         tray::offered()
     }
     fn kept_on_close(&self) -> Option<mailcraft_ui_egui::KeptOnClose> {
         tray::kept_on_close()
+    }
+    fn starts_at_sign_in(&self) -> Option<bool> {
+        crate::platform::sign_in::offered(self.portable).then(crate::platform::sign_in::on)
+    }
+    fn set_start_at_sign_in(&mut self, on: bool) -> Result<(), String> {
+        crate::platform::sign_in::set(on)
     }
     fn can_drag_out(&self) -> bool {
         // Elsewhere, from a window on X11 only (a Wayland window isn't an X window). That's the
@@ -324,33 +346,38 @@ impl Services for Desktop {
         self.lanes.tend();
     }
     fn pick_folder(&mut self) -> Option<PathBuf> {
-        let folder = self.dialog("Save attachments to").pick_folder();
+        let folder = Self::modal(|| self.dialog("Save attachments to").pick_folder());
         self.used(folder, true)
     }
     fn pick_certificate(&mut self) -> Option<PathBuf> {
-        let file =
-            self.dialog("Import certificate").add_filter("Certificate with its key", &["p12", "pfx"]).add_filter("All files", &["*"]).pick_file();
+        let file = Self::modal(|| {
+            self.dialog("Import certificate").add_filter("Certificate with its key", &["p12", "pfx"]).add_filter("All files", &["*"]).pick_file()
+        });
         self.used(file, false)
     }
     fn pick_server_certificate(&mut self) -> Option<PathBuf> {
-        let file = self
-            .dialog("Trust a certificate file")
-            .add_filter("Certificate", &["pem", "crt", "cer", "der"])
-            .add_filter("All files", &["*"])
-            .pick_file();
+        let file = Self::modal(|| {
+            self.dialog("Trust a certificate file")
+                .add_filter("Certificate", &["pem", "crt", "cer", "der"])
+                .add_filter("All files", &["*"])
+                .pick_file()
+        });
         self.used(file, false)
     }
     fn pick_pgp_key(&mut self) -> Option<PathBuf> {
-        let file =
-            self.dialog("Import OpenPGP key").add_filter("OpenPGP key", &["asc", "gpg", "key", "pgp"]).add_filter("All files", &["*"]).pick_file();
+        let file = Self::modal(|| {
+            self.dialog("Import OpenPGP key").add_filter("OpenPGP key", &["asc", "gpg", "key", "pgp"]).add_filter("All files", &["*"]).pick_file()
+        });
         self.used(file, false)
     }
     fn pick_rules_file(&mut self) -> Option<PathBuf> {
-        let file = self.dialog("Import rules").add_filter("MailCraft rules", &["json"]).add_filter("All files", &["*"]).pick_file();
+        let file = Self::modal(|| self.dialog("Import rules").add_filter("MailCraft rules", &["json"]).add_filter("All files", &["*"]).pick_file());
         self.used(file, false)
     }
     fn pick_categories_file(&mut self) -> Option<PathBuf> {
-        let file = self.dialog("Import categories").add_filter("MailCraft categories", &["json"]).add_filter("All files", &["*"]).pick_file();
+        let file = Self::modal(|| {
+            self.dialog("Import categories").add_filter("MailCraft categories", &["json"]).add_filter("All files", &["*"]).pick_file()
+        });
         self.used(file, false)
     }
     fn pick_data_file(&mut self) -> Option<PathBuf> {
@@ -359,20 +386,23 @@ impl Services for Desktop {
         if let Some(dir) = self.data.as_ref().filter(|d| d.is_dir()) {
             d = d.set_directory(dir);
         }
-        d.set_title("Open data file")
-            .add_filter("Data files", &["pst", "mailcraft"])
-            .add_filter("Outlook data files", &["pst"])
-            .add_filter("MailCraft data files", &["mailcraft"])
-            .pick_file()
+        Self::modal(|| {
+            d.set_title("Open data file")
+                .add_filter("Data files", &["pst", "mailcraft"])
+                .add_filter("Outlook data files", &["pst"])
+                .add_filter("MailCraft data files", &["mailcraft"])
+                .pick_file()
+        })
     }
     fn pick_mail_file(&mut self) -> Option<PathBuf> {
-        let file = self.dialog("Open mail file").add_filter("Mail files", &["eml", "msg"]).add_filter("All files", &["*"]).pick_file();
+        let file =
+            Self::modal(|| self.dialog("Open mail file").add_filter("Mail files", &["eml", "msg"]).add_filter("All files", &["*"]).pick_file());
         self.used(file.as_ref(), false);
         file
     }
     fn pick_pictures(&mut self) -> Vec<PathBuf> {
-        let files =
-            self.dialog("Insert pictures").add_filter("Pictures", &["png", "jpg", "jpeg", "gif", "webp", "bmp"]).pick_files().unwrap_or_default();
+        let files = Self::modal(|| self.dialog("Insert pictures").add_filter("Pictures", &["png", "jpg", "jpeg", "gif", "webp", "bmp"]).pick_files())
+            .unwrap_or_default();
         self.used(files.first(), false);
         files
     }
@@ -392,7 +422,7 @@ impl Services for Desktop {
         // and quietly showed nothing, so sign-in pages never reached the browser.
         #[cfg(windows)]
         if url.starts_with("https://") || url.starts_with("http://") || url.starts_with("mailto:") {
-            return std::process::Command::new("rundll32.exe")
+            return std::process::Command::new(crate::windows_programs::path("rundll32.exe"))
                 .arg("url.dll,FileProtocolHandler")
                 .arg(url)
                 .spawn()
@@ -402,63 +432,51 @@ impl Services for Desktop {
         shell_open(std::ffi::OsStr::new(url))
     }
     fn notify(&mut self, title: &str, body: &str) {
-        let (title, body, portable) = (title.to_string(), body.to_string(), self.portable());
-        // Off the UI thread: the notification service can be slow, or missing.
+        self.notify_about(title, body, None);
+    }
+    fn notify_about(&mut self, title: &str, body: &str, opens: Option<mailcraft_engine::model::MessageKey>) {
+        let (title, body) = (title.to_string(), body.to_string());
+        let clicks = self.clicks.clone();
+        let sending = notified::Sending { portable: self.portable, root: self.root.clone() };
+        // Off the UI thread: the notification service can be slow, or missing. Clicked,
+        // MailCraft comes forward at the message (issue #273).
         off_thread(std::thread::Builder::new().name("notify".into()), "notification", move || {
-            if let Err(e) = notification(&title, &body, portable).show() {
-                log::warn!("notification: {e}");
-            }
+            notified::send(&title, &body, opens, &clicks, &sending, false);
         });
     }
+    fn notify_reminder(&mut self, title: &str, body: &str) {
+        let (title, body) = (title.to_string(), body.to_string());
+        let clicks = self.clicks.clone();
+        let sending = notified::Sending { portable: self.portable, root: self.root.clone() };
+        // With a sound, each one (issue #239); clicked, MailCraft comes forward.
+        off_thread(std::thread::Builder::new().name("notify".into()), "notification", move || {
+            notified::send(&title, &body, None, &clicks, &sending, true);
+        });
+    }
+    fn notification_clicked(&mut self) -> Option<Option<mailcraft_engine::model::MessageKey>> {
+        self.clicks.take()
+    }
+    /// A new-mail notification with buttons (Linux, the BSDs, macOS): a click on it shows its
+    /// message, as [`Services::notify_about`]'s does; a button pressed is kept for the window.
+    #[cfg(not(windows))]
     fn notify_mail(&mut self, wake: &egui::Context, notice: &mailcraft_ui_egui::MailNotice<'_>) {
-        // Past so many waiting for their buttons, one has none.
-        let Some(waiting) = notices::Waiting::new().filter(|_| !notice.buttons.is_empty()) else {
-            return self.notify(notice.title, notice.body);
+        let (title, body, opens) = (notice.title.to_string(), notice.body.to_string(), notice.opens.cloned());
+        let buttons = notified::Buttons {
+            notice: notice.id,
+            list: notice.buttons.iter().map(|(id, label)| ((*id).to_string(), (*label).to_string())).collect(),
+            more: notice.more.to_string(),
+            pressed: self.pressed.clone(),
+            wake: wake.clone(),
         };
-        let (title, body, more, portable) = (notice.title.to_string(), notice.body.to_string(), notice.more.to_string(), self.portable());
-        let buttons: Vec<(String, String)> = notice.buttons.iter().map(|(id, label)| ((*id).to_string(), (*label).to_string())).collect();
-        let (id, wake, pressed) = (notice.id, wake.clone(), self.pressed.clone());
+        let clicks = self.clicks.clone();
         off_thread(std::thread::Builder::new().name("notify".into()), "notification", move || {
-            let _waiting = waiting;
-            let mut n = notification(&title, &body, portable);
-            for (id, label) in &buttons {
-                n.action(id, label);
-            }
-            // Several go under one button there, which says this.
-            #[cfg(target_os = "macos")]
-            notify_rust::NsNotificationExt::actions_label(&mut n, &more);
-            #[cfg(not(target_os = "macos"))]
-            let _ = more;
-            match n.show() {
-                Ok(shown) => shown.wait_for_action(|answer| {
-                    if let Some(button) = notices::button_of(answer, &buttons) {
-                        notices::press(&pressed, id, button);
-                        wake.request_repaint();
-                    }
-                }),
-                Err(e) => log::warn!("notification: {e}"),
-            }
+            notified::send_with_buttons(&title, &body, opens, &clicks, &buttons);
         });
     }
+    #[cfg(not(windows))]
     fn notices_pressed(&mut self) -> Vec<(u64, String)> {
         notices::take(&self.pressed)
     }
-}
-
-/// A notification from MailCraft, made off the UI thread (Windows' app id may be registered the
-/// first time).
-fn notification(title: &str, body: &str, portable: bool) -> notify_rust::Notification {
-    let mut n = notify_rust::Notification::new();
-    n.summary(title).body(body).appname("MailCraft");
-    // Windows names a toast after its app id (PowerShell's when none is given). A portable copy
-    // writes nothing to the registry: it uses an installed MailCraft's.
-    #[cfg(windows)]
-    if (!portable && toast::registered()) || (portable && toast::installed()) {
-        n.app_id(toast::APP_ID);
-    }
-    #[cfg(not(windows))]
-    let _ = portable;
-    n
 }
 
 /// Windows' Fonts folder, in the Windows folder (`%WINDIR%`), which needn't be `C:\Windows`.
@@ -524,9 +542,18 @@ pub(crate) fn shell_open(target: &std::ffi::OsStr) -> Result<(), String> {
         // A folder opens in Explorer: ShellExec_RunDLL quietly does nothing with one (Options ›
         // Data files › Open folder never opened).
         if std::path::Path::new(target).is_dir() {
-            return std::process::Command::new("explorer.exe").arg(target).spawn().map(drop).map_err(|e| e.to_string());
+            return std::process::Command::new(crate::windows_programs::path("explorer.exe"))
+                .arg(target)
+                .spawn()
+                .map(drop)
+                .map_err(|e| e.to_string());
         }
-        std::process::Command::new("rundll32.exe").arg("shell32.dll,ShellExec_RunDLL").arg(target).spawn().map(drop).map_err(|e| e.to_string())
+        std::process::Command::new(crate::windows_programs::path("rundll32.exe"))
+            .arg("shell32.dll,ShellExec_RunDLL")
+            .arg(target)
+            .spawn()
+            .map(drop)
+            .map_err(|e| e.to_string())
     }
     #[cfg(not(windows))]
     {

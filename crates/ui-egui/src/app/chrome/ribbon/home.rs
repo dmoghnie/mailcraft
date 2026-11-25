@@ -12,7 +12,7 @@ use crate::*;
 pub(super) const GROUPS: [(&str, &[&str]); 7] = [
     ("New", &["mail.new"]),
     ("Delete", &["mail.delete", "mail.archive", "mail.junk"]),
-    ("Move", &["mail.move", "quickStep.run"]),
+    ("Move", &["mail.move", "quickStep.run", "rules.list"]),
     ("Respond", &["mail.reply", "mail.replyAll", "mail.forward"]),
     ("Tags", &["mail.toggleRead", "mail.flag", "mail.categorize", "mail.pin", "mail.snooze"]),
     ("Find", &["list.filter"]),
@@ -72,6 +72,7 @@ pub(super) fn name(s: &Session, id: &'static str) -> &'static str {
         "mail.junk" => "Report junk",
         "mail.move" => "Move to",
         "quickStep.run" => "Quick steps",
+        "rules.list" => "Rules",
         "mail.reply" => "Reply",
         "mail.replyAll" => "Reply all",
         "mail.forward" => "Forward",
@@ -94,14 +95,14 @@ fn home_button(id: &str) -> bool {
     mailcraft_engine::HOME_BUTTONS.contains(&id)
 }
 
-/// What pressing the button running `id` does; none: it opens a menu (Quick steps, Categorize,
-/// Snooze, Filter).
+/// What pressing the button running `id` does; none: it opens a menu (Quick steps, Rules,
+/// Categorize, Snooze, Filter).
 pub(super) fn act(s: &Session, id: &'static str) -> Option<Action> {
     Some(match id {
         "mail.junk" => Action::Run(if in_junk(s) { "mail.notJunk" } else { "mail.junk" }, json!({})),
         "mail.move" => Action::Dialog(Dialog::move_to()),
         "mail.pin" => Action::Run("mail.pin", json!({"on": !pinned(s)})),
-        "quickStep.run" | "mail.categorize" | "mail.snooze" | "list.filter" => return None,
+        "quickStep.run" | "rules.list" | "mail.categorize" | "mail.snooze" | "list.filter" => return None,
         // Written in the language the window is in.
         "mail.digest" => Action::Run(id, json!({"language": crate::i18n::current().code()})),
         // Delete is asked first when it's for good (`act_run`).
@@ -113,7 +114,7 @@ pub(super) fn act(s: &Session, id: &'static str) -> Option<Action> {
 pub(super) fn can(s: &Session, id: &'static str) -> bool {
     match id {
         "mail.junk" => enabled(s, if in_junk(s) { "mail.notJunk" } else { "mail.junk" }),
-        "quickStep.run" | "list.filter" => true,
+        "quickStep.run" | "rules.list" | "list.filter" => true,
         "mail.categorize" | "mail.pin" | "mail.snooze" => !s.selection.is_empty(),
         "mail.digest" => !s.prefs.ai.profiles.is_empty(),
         _ => enabled(s, id),
@@ -144,6 +145,7 @@ fn icon(s: &Session, id: &str) -> Icon {
         "mail.junk" => Icon::Junk,
         "mail.move" => Icon::Move,
         "quickStep.run" => Icon::Steps,
+        "rules.list" => Icon::Rules,
         "mail.reply" => Icon::Reply,
         "mail.replyAll" => Icon::ReplyAll,
         "mail.forward" => Icon::Forward,
@@ -202,6 +204,7 @@ pub(super) fn button(ui: &mut Ui, s: &Session, t: Tokens, id: &'static str, adde
 fn menu(ui: &mut Ui, s: &Session, t: Tokens, id: &str, acts: &mut Vec<Action>) {
     match id {
         "quickStep.run" => quick_steps_menu(ui, s, acts),
+        "rules.list" => rules_menu(ui, s, acts),
         "mail.categorize" => organize::categorize_menu(ui, s, &t, acts),
         "mail.snooze" => organize::snooze_menu(ui, s, &t, acts),
         // Show only some mail, as Outlook's Filter Email.
@@ -264,6 +267,19 @@ fn drop_down(ui: &mut Ui, s: &Session, t: Tokens, id: &str, acts: &mut Vec<Actio
             egui::Popup::menu(&r).show(|ui| organize::follow_up_menu(ui, s, &t, acts));
         }
         _ => {}
+    }
+}
+
+/// Rules (issue #243: Home had no way to them): one made from the message, or all of them.
+fn rules_menu(ui: &mut Ui, s: &Session, acts: &mut Vec<Action>) {
+    let sender = s.first_selected().map(|m| m.from.email.clone()).filter(|e| !e.is_empty());
+    if ui.add_enabled(sender.is_some(), egui::Button::new(tl!("Create rule…"))).clicked() {
+        acts.push(Action::Dialog(Dialog::rule_from(sender.as_deref().unwrap_or_default())));
+        ui.close();
+    }
+    if ui.button(tl!("Manage rules")).clicked() {
+        acts.push(Action::Dialog(Dialog::Rules));
+        ui.close();
     }
 }
 

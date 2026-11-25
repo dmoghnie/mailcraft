@@ -3,8 +3,12 @@
 //!
 //! ```text
 //! MAILCRAFT_REAL_EWS="http://127.0.0.1:18080/EWS/Exchange.asmx user@domain password" \
-//!   cargo test -p mailcraft-net real_ews -- --ignored --nocapture
+//!   cargo test -p mailcraft-net real_ews -- --ignored --nocapture --test-threads 1
 //! ```
+//!
+//! One at a time: they share the mailbox, and one's folders made meanwhile made another's count
+//! of what came before the calendar wrong (`real_ews_calendar_comes_with_the_inbox`, one run in
+//! two with them all at once).
 //!
 //! The mailbox's calendar holds `Budget review`, `Stand-up` (Monday, Wednesday and Friday),
 //! `Company holiday` (all day) and `Design sync`; its contacts, Ana Silva.
@@ -22,6 +26,39 @@ fn server() -> Option<(String, String, String)> {
     let v = std::env::var("MAILCRAFT_REAL_EWS").ok()?;
     let mut parts = v.split_whitespace().map(str::to_string);
     Some((parts.next()?, parts.next()?, parts.next()?))
+}
+
+/// Issue #249: signing in with NTLM over HTTPS to a server that checks the TLS channel's binding,
+/// as on-premises Exchange's Extended Protection does (on by default since Exchange 2019 CU14).
+/// Never a real account: a test server on this computer that answers GetFolder once signed in,
+/// with user `CORP\riley` and password `pw`, and checks the binding against its certificate (one
+/// made of Python's `http.server` and pyspnego's NTLM acceptor, given its channel bindings, was
+/// used), run by hand:
+///
+/// ```text
+/// SSL_CERT_FILE=<the test server's authority, PEM> \
+///   MAILCRAFT_REAL_EWS_NTLM=https://127.0.0.1:38443/EWS/Exchange.asmx \
+///   cargo test -p mailcraft-net real_ews_ntlm -- --ignored --nocapture
+/// ```
+///
+/// The test authority is trusted through `SSL_CERT_FILE`, as a company's is through its
+/// computers' store.
+#[test]
+#[ignore = "needs the EWS NTLM test server in MAILCRAFT_REAL_EWS_NTLM"]
+fn real_ews_ntlm_with_extended_protection() {
+    let Ok(url) = std::env::var("MAILCRAFT_REAL_EWS_NTLM") else {
+        eprintln!("MAILCRAFT_REAL_EWS_NTLM not set: skipped");
+        return;
+    };
+    assert!(std::env::var_os("SSL_CERT_FILE").is_some(), "SSL_CERT_FILE: the test server's ca.pem");
+    if let Err(e) = crate::ews::Client::connect(&url, "CORP\\riley", "pw", "riley@corp.test") {
+        panic!("the right password was refused: {e}");
+    }
+    match crate::ews::Client::connect(&url, "CORP\\riley", "wrong", "riley@corp.test") {
+        Err(crate::NetError::Auth(_)) => {}
+        Err(e) => panic!("a wrong password: {e}"),
+        Ok(_) => panic!("a wrong password was taken"),
+    }
 }
 
 /// The calendar and the contacts a real server holds are read, each whole.
@@ -158,20 +195,25 @@ fn real_ews_inbox_rules() {
         ..Default::default()
     };
     let ops = vec![ServerRuleOp::Create { now }];
-    let (after, error) = rules(&mut pool, Job::SetServerRules { account: "x1".into(), ops, drop_outlook_list: before.outlook_list });
+    let (after, error) =
+        rules(&mut pool, Job::SetServerRules { account: "x1".into(), ops, drop_outlook_list: before.outlook_list, keywords: Vec::new() });
     eprintln!("made: {after:?} {error:?}");
     assert_eq!(error, None);
     let made = after.unwrap().rules.into_iter().find(|r| r.name == "MailCraft test").expect("on the server");
     let back = made.rule.clone().expect("read back as MailCraft's own");
     assert_eq!((back.filter, back.actions, back.stop), (new.filter, new.actions, true), "its folder by its path");
     let now = ServerRule { name: "MailCraft test (off)".into(), enabled: false, ..made.clone() };
-    let (after, error) =
-        rules(&mut pool, Job::SetServerRules { account: "x1".into(), ops: vec![ServerRuleOp::Set { was: made, now }], drop_outlook_list: false });
+    let (after, error) = rules(
+        &mut pool,
+        Job::SetServerRules { account: "x1".into(), ops: vec![ServerRuleOp::Set { was: made, now }], drop_outlook_list: false, keywords: Vec::new() },
+    );
     assert_eq!(error, None);
     let off = after.unwrap().rules.into_iter().find(|r| r.name == "MailCraft test (off)").expect("renamed");
     assert!(!off.enabled);
-    let (after, error) =
-        rules(&mut pool, Job::SetServerRules { account: "x1".into(), ops: vec![ServerRuleOp::Delete { was: off }], drop_outlook_list: false });
+    let (after, error) = rules(
+        &mut pool,
+        Job::SetServerRules { account: "x1".into(), ops: vec![ServerRuleOp::Delete { was: off }], drop_outlook_list: false, keywords: Vec::new() },
+    );
     assert_eq!(error, None);
     assert_eq!(after.unwrap().rules.len(), before.rules.len(), "gone again");
 }

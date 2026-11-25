@@ -39,6 +39,16 @@ pub enum UpdateState {
     Ready { version: String, asks: InstallAsks },
 }
 
+/// How the install the updater started as MailCraft last closed ended, said at the next start
+/// (`apps/mailcraft/src/self_update.rs`).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum UpdateOutcome {
+    /// This is the version (`0.43.0`) it installed.
+    Updated { version: String },
+    /// That version didn't install: this one is still running, and it's offered again.
+    NotInstalled { version: String },
+}
+
 /// What the system asks as an update installs, for the window to say so first.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum InstallAsks {
@@ -134,6 +144,8 @@ pub struct MailNotice<'a> {
     pub body: &'a str,
     /// Its buttons, in order: each an id and its label.
     pub buttons: &'a [(&'a str, &'a str)],
+    /// The message a click on it shows (issue #273): the newest it tells of.
+    pub opens: Option<&'a mailcraft_engine::model::MessageKey>,
     /// What the button holding several is called, where the system puts them under one (macOS).
     pub more: &'a str,
 }
@@ -171,6 +183,11 @@ pub trait Services {
     fn update_state(&mut self) -> UpdateState {
         UpdateState::None
     }
+    /// How the update installed as MailCraft last closed ended, the first time it's asked after
+    /// (once). The default: nothing to say.
+    fn update_outcome(&mut self) -> Option<UpdateOutcome> {
+        None
+    }
     /// Install the waiting version as MailCraft closes, then open it. False when there's none.
     fn restart_to_update(&mut self) -> bool {
         false
@@ -179,10 +196,27 @@ pub trait Services {
     fn keep_update_for_later(&mut self) {}
     /// Show a desktop notification (new mail). The default does nothing.
     fn notify(&mut self, _title: &str, _body: &str) {}
+    /// [`Services::notify`] for new mail: clicked, MailCraft comes forward and shows `opens`
+    /// (issue #273), as [`Services::notification_clicked`] says. The default: a notification alone.
+    fn notify_about(&mut self, title: &str, body: &str, opens: Option<mailcraft_engine::model::MessageKey>) {
+        let _ = opens;
+        self.notify(title, body);
+    }
+    /// A calendar reminder on the desktop: a notification that sounds each time, as Outlook's
+    /// reminders do (issue #239: the second of two came silent). The default: as [`Services::notify`].
+    fn notify_reminder(&mut self, title: &str, body: &str) {
+        self.notify(title, body);
+    }
+    /// A notification clicked since last asked: the message it was about (`Some(None)`: nothing
+    /// in particular). The default: none ever is.
+    fn notification_clicked(&mut self) -> Option<Option<mailcraft_engine::model::MessageKey>> {
+        None
+    }
     /// Show a new-mail notification with buttons; `wake` is asked for a pass when one is
-    /// pressed (the window may be minimized or hidden). The default: one without buttons.
+    /// pressed (the window may be minimized or hidden); clicked, it shows `opens`, as
+    /// [`Services::notify_about`]'s does. The default: one without buttons.
     fn notify_mail(&mut self, _wake: &egui::Context, notice: &MailNotice<'_>) {
-        self.notify(notice.title, notice.body);
+        self.notify_about(notice.title, notice.body, notice.opens.cloned());
     }
     /// The buttons pressed on notifications since this was asked last: each notification's id
     /// and the button's.
@@ -319,6 +353,15 @@ pub trait Services {
     /// What a close does to the window now, with the option on (none: it closes).
     fn kept_on_close(&self) -> Option<KeptOnClose> {
         None
+    }
+    /// Whether MailCraft starts as the user signs in to the computer (issue #87), as the system
+    /// has it; none: it can't be set from here (the browser, a portable copy, a sandbox).
+    fn starts_at_sign_in(&self) -> Option<bool> {
+        None
+    }
+    /// MailCraft made to start as the user signs in, or not.
+    fn set_start_at_sign_in(&mut self, _on: bool) -> Result<(), String> {
+        Err("MailCraft can't start at sign-in from here".into())
     }
     /// Whether files can be dragged out of the window to other apps (see
     /// [`MailApp::take_drag_out`](crate::MailApp::take_drag_out)).

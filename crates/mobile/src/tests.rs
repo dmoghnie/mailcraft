@@ -169,7 +169,7 @@ fn an_answer_to_an_older_check_isnt_taken_for_this_one() {
 fn an_account_without_servers_is_looked_up_first() {
     let core = sample();
     let e = act(&core, r#"{"type":"addAccount","email":"zoe@example.org","password":"pw"}"#);
-    assert!(jobs(e).iter().any(|j| matches!(j, Job::Discover { email } if email == "zoe@example.org")));
+    assert!(jobs(e).iter().any(|j| matches!(j, Job::Discover { email, .. } if email == "zoe@example.org")));
     assert!(core.view().adding);
     assert_eq!(core.view().accounts.len(), 1, "nothing added before the answer");
 }

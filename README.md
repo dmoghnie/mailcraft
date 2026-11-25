@@ -64,6 +64,7 @@ apps/mailcraft-mobile/android/build.sh         # Android: the APK (see apps/mail
 - The CLI reads your password from `MAILCRAFT_PASSWORD`, or asks for it. It never stores it.
 - A build of your own offers **Sign in with Microsoft** or **Sign in with Google** only with an app you register with them: set `MAILCRAFT_MICROSOFT_CLIENT_ID`, or `MAILCRAFT_GOOGLE_CLIENT_ID` and `MAILCRAFT_GOOGLE_CLIENT_SECRET`, when you build or start it ([how](docs/oauth.md)). Without one, accounts sign in with passwords (an app password for Gmail), and Outlook.com accounts can't be added.
 - MailCraft keeps its data in `%APPDATA%\MailCraft` (Windows), `~/Library/Application Support/MailCraft` (macOS) or `~/.local/share/mailcraft` (Linux). To use another folder, pass `--data DIR` or set `MAILCRAFT_DATA`.
+- To back MailCraft up, copy two folders: that one (the account list and settings) and **MailCraft Files** in Documents, where each account's mail, contacts and calendar are in a `.mailcraft` file of its own. **File › Options › Data files** shows both, with **Open folder** for each; a portable copy has everything in `MailCraftData`. Copy them with MailCraft closed (**File › Exit**: closing the window can leave it running), or with a backup program that copies from a snapshot of the disk, as Time Machine does: a copy taken while MailCraft writes may not open. To bring a backup back, put both folders where they were, on that computer or another, before MailCraft starts; passwords aren't in them, so it asks for each again. **File › Open & Export › Export to Outlook data file** also saves an account as a `.pst` other mail programs open. MailCraft doesn't back itself up on a schedule.
 - To put the web build on your own site, see [hosting the web build](packaging/web/README.md).
 
 ## Documentation
@@ -79,12 +80,14 @@ apps/mailcraft-mobile/android/build.sh         # Android: the APK (see apps/mail
 - [How sync works](docs/sync.md)
 - [How test builds update themselves](docs/updates.md)
 - [Microsoft and Google sign-in](docs/oauth.md)
+- [AI assistants: MailCraft's MCP server](docs/mcp.md)
+- [MailCraft in an organisation: its profile](docs/organisations.md)
 - [Hosting the web build](packaging/web/README.md)
 
 ## Contribute
 
 - Start with [how MailCraft is built](docs/architecture.md).
-- Follow the project rules in [CLAUDE.md](CLAUDE.md): no crashes, no Microsoft assets, clean room.
+- Follow the project rules in [AGENTS.md](AGENTS.md): no crashes, no Microsoft assets, clean room.
 - Run `cargo xtask ci` before every commit.
 - To fuzz the parsers, see [fuzzing](fuzz/README.md).
 - The installer scripts live in [`packaging/`](packaging). The `Release` workflow (`release.yml`) runs them and publishes a release.

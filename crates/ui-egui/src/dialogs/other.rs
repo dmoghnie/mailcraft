@@ -218,25 +218,45 @@ pub(super) fn draw(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::r
             }
             !cancel
         }
-        Dialog::Event(f) => crate::pim_dialogs::event(ui, f, t, acts),
+        Dialog::Event(f) => crate::pim_dialogs::event(ui, f, s, t, acts),
         Dialog::Task(f) => crate::pim_dialogs::task(ui, f, t, acts),
         Dialog::FollowUp(f) => crate::pim_dialogs::follow_up(ui, f, t, acts),
+        Dialog::Snooze(f) => crate::pim_dialogs::snooze(ui, f, s, t, acts),
         Dialog::Propose(f) => crate::pim_dialogs::propose(ui, f, t, acts),
         Dialog::WaitingInvites(f) => crate::pim_dialogs::waiting(ui, f, s, t, acts),
-        // Forward a meeting (issue #234): to whom, as a recipient box takes them.
-        Dialog::ForwardMeeting { uid, summary, to } => {
+        // An occurrence of a repeating event (issue #241): it alone, or the series.
+        Dialog::OpenRecurring { uid, occurrence, summary } => {
             ui.set_width(420.0);
-            title(ui, t, "Forward meeting");
+            title(ui, t, "Open a repeating event");
             ui.add(egui::Label::new(RichText::new(summary.as_str()).color(t.dim)).truncate());
-            ui.add_space(6.0);
-            ui.label(tl!("To"));
-            ui.add(egui::TextEdit::singleline(to).hint_text(tl!("Names <addresses>, separated by ; or ,")).desired_width(f32::INFINITY));
-            let (ok, cancel) = buttons(ui, t, "Forward", !to.trim().is_empty());
-            if ok {
-                acts.push(Action::Submit("invite.forward", json!({"uid": uid, "to": to})));
-            }
-            !cancel
+            ui.add_space(4.0);
+            ui.label(RichText::new(mailcraft_engine::model::dates::full_time(*occurrence, &s.clock)).color(t.dim));
+            ui.add_space(12.0);
+            let mut keep = true;
+            ui.horizontal(|ui| {
+                if widgets::accent_button(ui, crate::icons::Icon::Calendar, "Open this occurrence", t, true).clicked() {
+                    if let Some(d) = Dialog::open_occurrence(s, uid, *occurrence) {
+                        acts.push(Action::Dialog(d));
+                    }
+                    keep = false;
+                }
+                if ui.button(tl!("Open the series")).clicked() {
+                    if let Some(d) = Dialog::open_event(s, uid, *occurrence) {
+                        acts.push(Action::Dialog(d));
+                    }
+                    keep = false;
+                }
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui.button(tl!("Cancel")).clicked() {
+                        keep = false;
+                    }
+                });
+            });
+            keep
         }
+        // Forward or delegate a meeting (issues #234, #254): to whom.
+        Dialog::PassMeeting(f) => crate::pim_dialogs::pass(ui, f, t, acts),
+        Dialog::CancelMeeting(f) => crate::pim_dialogs::cancel(ui, f, t, acts),
         Dialog::Contact(f) => crate::pim_dialogs::contact(ui, f, t, acts),
         // Every other kind is shown by its own group (`body`).
         _ => true,

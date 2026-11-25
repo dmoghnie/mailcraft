@@ -38,15 +38,24 @@ pub(crate) fn command(button: &str, keys: &[MessageKey]) -> Option<(&'static str
 }
 
 impl MailApp {
-    /// A notification of these messages, with its buttons, kept to answer them.
-    pub(crate) fn notify_mail(&mut self, ctx: &egui::Context, title: &str, body: &str, keys: Vec<MessageKey>, private: bool) {
+    /// A notification of these messages, with its buttons, kept to answer them; clicked, it
+    /// shows `opens`.
+    pub(crate) fn notify_mail(
+        &mut self,
+        ctx: &egui::Context,
+        title: &str,
+        body: &str,
+        keys: Vec<MessageKey>,
+        opens: Option<MessageKey>,
+        private: bool,
+    ) {
         let buttons = buttons(keys.len(), private);
         self.ui.notice_next = self.ui.notice_next.wrapping_add(1);
         let notice = self.ui.notice_next;
         self.ui.notices.push((notice, keys));
         let extra = self.ui.notices.len().saturating_sub(NOTICES_KEPT);
         self.ui.notices.drain(..extra);
-        let shown = MailNotice { id: notice, title, body, buttons: &buttons, more: tl!("Options") };
+        let shown = MailNotice { id: notice, title, body, buttons: &buttons, opens: opens.as_ref(), more: tl!("Options") };
         self.services.notify_mail(ctx, &shown);
     }
 

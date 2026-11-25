@@ -1,4 +1,4 @@
-//! What changed here, sent to the server: deletions, events and cards.
+//! What changed here, sent to the server: deletions, events, cards and tasks.
 
 use std::collections::BTreeMap;
 
@@ -7,9 +7,16 @@ use super::*;
 
 impl Run<'_> {
     /// Deletions made here. One the server doesn't allow (SOGo's roles) is given up and the
-    /// event read again, so it's back as it is there.
+    /// event read again, so it's back as it is there; so is one changed there since it was
+    /// read (412: another device's change, or a task moved to another list meanwhile), said so.
+    /// It was tried again at every sync, with the same version, refused each time.
+    ///
+    /// A deletion goes only while its own part's server is known: a contact's while the contacts'
+    /// home is, an event's or task's while the calendars' is. One server may hold both, and a part
+    /// not found there (or refused, Google's) waits until it's found again.
     pub(super) fn push_deletions(&self, out: &mut DavSync, refetch: &mut Vec<String>) -> Result<()> {
-        for t in self.pim.deleted.iter().filter(|t| self.ours(&t.href)) {
+        let known = (out.caldav_home.is_some(), out.carddav_home.is_some());
+        for t in self.pim.deleted.iter().filter(|t| self.ours(&t.href) && self.part_known(&t.href, known)) {
             match self.dav.remove(&t.href, &t.etag) {
                 Ok(Ok(())) => out.deleted.push(t.href.clone()),
                 Ok(Err(Refused::Forbidden)) => {
@@ -17,12 +24,42 @@ impl Run<'_> {
                     out.deleted.push(t.href.clone());
                     refetch.push(t.href.clone());
                 }
+                Ok(Err(Refused::Changed)) => {
+                    out.errors
+                        .push(format!("{} changed on the server meanwhile, so it wasn't deleted", t.href.rsplit('/').next().unwrap_or_default()));
+                    out.deleted.push(t.href.clone());
+                    refetch.push(t.href.clone());
+                }
                 Ok(Err(r)) => out.errors.push(r.to_string()),
-                Err(e @ NetError::Auth(_)) => return Err(e),
-                Err(e) => out.errors.push(e.to_string()),
+                // Google refusing the token this server (a sign-in that granted the calendars and
+                // not the contacts, or the other way): kept to delete, said once, and the rest
+                // syncs; what's refused is then dropped as when it isn't found.
+                Err(e) => match self.dav.permission_refused(&e) {
+                    Some(why) => {
+                        if !out.errors.contains(&why) {
+                            out.errors.push(why);
+                        }
+                    }
+                    None if matches!(e, NetError::Auth(_)) => return Err(e),
+                    None => out.errors.push(e.to_string()),
+                },
             }
         }
         Ok(())
+    }
+
+    /// Whether the server of the part an item at `href` is in is known this sync (`known`: the
+    /// calendars', the contacts'; see [`Run::push_deletions`]); an item of no collection kept here
+    /// goes as before.
+    fn part_known(&self, href: &str, (calendars, contacts): (bool, bool)) -> bool {
+        let under = |id: &str| !id.is_empty() && href.starts_with(id);
+        if self.pim.books.iter().any(|b| under(&b.id)) {
+            return contacts;
+        }
+        if self.pim.calendars.iter().any(|c| under(&c.id)) || self.pim.task_lists.iter().any(|l| under(&l.id)) {
+            return calendars;
+        }
+        true
     }
 
     /// Changes made here, per item (an event with its changed instances), in the calendar it's
@@ -129,6 +166,39 @@ impl Run<'_> {
                 Ok(new) => out.pushed_cards.push(StoredCard { href: url, etag: new, dirty: false, ..c.clone() }),
                 Err(e @ NetError::Auth(_)) => return Err(e),
                 Err(e) => out.errors.push(format!("{}: {e}", c.card.display())),
+            }
+        }
+        Ok(())
+    }
+}
+
+impl Run<'_> {
+    /// Tasks changed here, each in its task list (issue #201): a `VTODO` item of its own. One
+    /// the server refuses for good (a list the user may only read), or that changed there
+    /// meanwhile (412), gives way to the server's copy, read again in this sync.
+    pub(super) fn push_tasks(&self, out: &mut DavSync, refetch: &mut Vec<String>) -> Result<()> {
+        for t in self.pim.tasks.iter().filter(|t| t.dirty && !t.list.is_empty() && !t.partial) {
+            let url =
+                if t.href.is_empty() { format!("{}/{}", t.list.trim_end_matches('/'), resource_name(&t.task.uid, "ics")) } else { t.href.clone() };
+            if !self.ours(&url) {
+                continue;
+            }
+            let etag = (!t.href.is_empty()).then_some(t.etag.as_str());
+            let data = ical::write_calendar(&[], std::slice::from_ref(&t.task), self.now);
+            let what = if t.task.title.trim().is_empty() { "a task".to_string() } else { t.task.title.clone() };
+            match self.dav.store(&url, CALENDAR_DATA, &data, etag) {
+                Ok(Ok(new)) => out.pushed_tasks.push(StoredTask { href: url, etag: new, dirty: false, ..t.clone() }),
+                Ok(Err(r @ (Refused::Forbidden | Refused::Changed))) if !t.href.is_empty() => {
+                    out.errors.push(format!("{what}: {r}"));
+                    theirs_kept(&t.task.uid, t.href.clone(), out, refetch);
+                }
+                // New, and there's one by that name already: this task stored by a sync the
+                // engine hadn't taken in yet (a real Radicale, two syncs one after the other). It's
+                // read in this sync, and the engine sends the change over it, not again as new.
+                Ok(Err(Refused::Changed)) => refetch.push(url),
+                Ok(Err(r)) => out.errors.push(format!("{what}: {r}")),
+                Err(e @ NetError::Auth(_)) => return Err(e),
+                Err(e) => out.errors.push(format!("{what}: {e}")),
             }
         }
         Ok(())
