@@ -21,6 +21,9 @@ const NOT_READ: &str = "MailCraft closed before the message came";
 /// What a script says, read again, when MailCraft closed while it waited.
 const NOT_ENDED: &str = "MailCraft closed before the script ended";
 
+/// What a call to an MCP server says, read again, when MailCraft closed before its answer came.
+const NOT_SERVED: &str = "MailCraft closed before the server answered";
+
 /// What a script's question says, read again, when MailCraft closed before its answer came.
 const NOT_ANSWERED: &str = "MailCraft closed before the answer came";
 
@@ -42,6 +45,7 @@ fn left_off(chat: Chat) -> Chat {
                 let result = match r.tool.as_str() {
                     script::RUN_SCRIPT => NOT_ENDED,
                     script::ASK => NOT_ANSWERED,
+                    script::MCP => NOT_SERVED,
                     _ if scripts.contains(&r.call) => NOT_ENDED,
                     _ => NOT_READ,
                 };

@@ -2223,6 +2223,9 @@ count	occurrences	פעמים
 	Tools: {count}	כלים: {count}
 	List again	מנה שוב
 	Asked the model	שאל את המודל
+	Looked for tools	חיפש כלים
+	MCP tool	כלי MCP
+	Waiting for the server…	ממתין לשרת…
 	Waiting for the answer…	ממתין לתשובה…
 	The script	הסקריפט
 	Let it write and run scripts	לאפשר לו לכתוב ולהריץ סקריפטים

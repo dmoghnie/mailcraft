@@ -2224,6 +2224,9 @@ count	occurrences	次
 	Tools: {count}	工具：{count}
 	List again	重新列出
 	Asked the model	询问了模型
+	Looked for tools	查找了工具
+	MCP tool	MCP 工具
+	Waiting for the server…	正在等待服务器…
 	Waiting for the answer…	正在等待回答…
 	The script	脚本
 	Let it write and run scripts	允许编写并运行脚本

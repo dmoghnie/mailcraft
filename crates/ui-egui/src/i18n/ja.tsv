@@ -2224,6 +2224,9 @@ count	occurrences	回
 	Tools: {count}	ツール: {count}
 	List again	再度一覧表示
 	Asked the model	モデルに質問しました
+	Looked for tools	ツールを探しました
+	MCP tool	MCP ツール
+	Waiting for the server…	サーバーを待っています…
 	Waiting for the answer…	回答を待っています…
 	The script	スクリプト
 	Let it write and run scripts	スクリプトの作成と実行を許可

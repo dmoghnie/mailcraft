@@ -38,7 +38,7 @@ const MAP_MOST: usize = 10_000;
 const VARIABLES_MOST: usize = 1_000;
 const FUNCTIONS_MOST: usize = 200;
 
-/// A call the script made: a tool's name (or `ask`) and what it gave it.
+/// A call the script made: a tool's name (or `ask`, `find_tools`, `mcp`) and what it gave it.
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Call {
     pub name: String,
@@ -190,6 +190,19 @@ impl Runner {
                 Err(_) => to_json(&about).to_string(),
             };
             r.borrow_mut().call(Call { name: "ask".into(), input: json!({"question": q, "text": text}) })
+        });
+        let r = replay.clone();
+        engine.register_fn("find_tools", move |q: &str| r.borrow_mut().call(Call { name: "find_tools".into(), input: json!({"query": q}) }));
+        let r = replay.clone();
+        engine.register_fn("find_tools", move || r.borrow_mut().call(Call { name: "find_tools".into(), input: json!({"query": ""}) }));
+        let r = replay.clone();
+        engine.register_fn("mcp", move |server: &str, tool: &str, args: Map| {
+            r.borrow_mut()
+                .call(Call { name: "mcp".into(), input: json!({"server": server, "tool": tool, "args": to_json(&Dynamic::from_map(args))}) })
+        });
+        let r = replay.clone();
+        engine.register_fn("mcp", move |server: &str, tool: &str| {
+            r.borrow_mut().call(Call { name: "mcp".into(), input: json!({"server": server, "tool": tool, "args": {}}) })
         });
         engine.register_fn("now", move || now);
         strings::register(&mut engine, STRING_MOST);

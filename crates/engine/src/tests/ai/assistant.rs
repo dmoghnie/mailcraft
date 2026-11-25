@@ -14,6 +14,7 @@ mod ledger;
 mod pim_changes;
 mod script;
 mod script_asks;
+mod script_mcp;
 mod sent;
 mod waiting;
 

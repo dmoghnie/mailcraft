@@ -23,12 +23,12 @@ pub(super) enum Outcome {
     Proposed { what: String, messages: Vec<String> },
 }
 
-/// The tools `profile` is told of: [`tools`]; and, when it may run scripts, `run_script`,
-/// `keep_script` and the scripts `kept` that are on.
-pub(super) fn tools_for(profile: &AiProfile, kept: &[script::KeptScript]) -> Vec<AiTool> {
+/// The tools `profile` is told of: [`tools`]; and, when it may run scripts, `run_script` (its
+/// scripts calling the MCP servers `servers`), `keep_script` and the scripts `kept` that are on.
+pub(super) fn tools_for(profile: &AiProfile, kept: &[script::KeptScript], servers: &[String]) -> Vec<AiTool> {
     let mut all = tools();
     if profile.scripts {
-        all.push(script::tool(kept));
+        all.push(script::tool(kept, servers));
         all.push(script::keep_tool());
         all.extend(script::kept_tools(kept));
     }

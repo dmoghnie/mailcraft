@@ -2242,6 +2242,9 @@ count	occurrences	opakovaní
 	Tools: {count}	Nástroje: {count}
 	List again	Načítať znova
 	Asked the model	Opýtal sa modelu
+	Looked for tools	Hľadal nástroje
+	MCP tool	Nástroj MCP
+	Waiting for the server…	Čaká sa na server…
 	Waiting for the answer…	Čaká sa na odpoveď…
 	The script	Skript
 	Let it write and run scripts	Povoliť písať a spúšťať skripty

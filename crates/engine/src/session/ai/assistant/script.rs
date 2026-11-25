@@ -5,12 +5,15 @@
 //! go to), and each shows on the chat under the script's card. A change it calls for is
 //! proposed, as the model's own are: the script is told so, and the person approves it or not
 //! once the script ended. A read of a message still to download waits for it; the script then
-//! runs again from its start with what its calls were answered so far ([`run`]). A model runs
-//! scripts only when the person let it (File › Options › AI).
+//! runs again from its start with what its calls were answered so far ([`run`]). It finds and
+//! calls the tools of the MCP servers the person added, waiting for each answer as for a
+//! message; one that may change something is proposed ([`mcp`]). A model runs scripts only when
+//! the person let it (File › Options › AI).
 
 mod agents;
 mod asking;
 mod kept;
+mod mcp;
 mod run;
 mod strings;
 #[cfg(test)]
@@ -24,6 +27,8 @@ pub(super) use self::asking::ASK;
 pub(crate) use self::kept::commands as script_commands;
 pub(super) use self::kept::{KEEP_SCRIPT, keep_tool, kept_tools};
 pub use self::kept::{KeptScript, ScriptParam};
+use self::mcp::FIND_TOOLS;
+pub(super) use self::mcp::MCP;
 use self::run::{Answer, CALLS_MOST, Call, OPS_ALL, RHAI, Ran, Runner, With};
 use super::context::cut;
 use super::exchange::run_of;
@@ -59,13 +64,16 @@ let ids = unread.map(|m| m.id);
 if ids.len() > 0 { print(move_messages(#{ids: ids, folder: "archive"}).proposed); }
 ids.len()"#;
 
-/// The tool, as the model is told it, with the kept scripts named as functions.
-fn description(kept: &[KeptScript]) -> String {
+/// The tool, as the model is told it, with the kept scripts named as functions and the MCP
+/// servers `servers` its scripts may call.
+fn description(kept: &[KeptScript], servers: &[String]) -> String {
     let names: Vec<&str> = kept.iter().filter(|k| !k.off).map(|k| k.name.as_str()).collect();
-    if names.is_empty() {
-        return described();
+    let mut said = described();
+    if !names.is_empty() {
+        said.push_str(&format!(" The scripts kept are functions too, each taking one map, as their tools do: {}.", names.join(", ")));
     }
-    format!("{} The scripts kept are functions too, each taking one map, as their tools do: {}.", described(), names.join(", "))
+    said.push_str(&mcp::told(servers));
+    said
 }
 
 /// The tool, as the model is told it.
@@ -76,10 +84,10 @@ fn described() -> String {
 }
 
 /// `run_script`, as the model is told it.
-pub(super) fn tool(kept: &[KeptScript]) -> AiTool {
+pub(super) fn tool(kept: &[KeptScript], servers: &[String]) -> AiTool {
     AiTool {
         name: RUN_SCRIPT.into(),
-        description: description(kept),
+        description: description(kept, servers),
         schema: json!({"type": "object", "properties": {
             "script": {"type": "string", "description": "The script, in Rhai"},
             "what": {"type": "string", "description": "What it does, in a few words, for the person (\"Find who I haven't answered\")"}}, "required": ["script"]}),
@@ -108,6 +116,8 @@ pub(super) enum Wait {
     Message(MessageKey),
     /// The answer to question `q`, which it asked.
     Answer(u64),
+    /// What call `id` to an MCP server gives.
+    Mcp(u64),
 }
 
 /// What came for a script waiting.
@@ -116,6 +126,8 @@ pub(super) enum Came {
     Body { failed: Option<String> },
     /// The answer to its question (or why none came).
     Answer(Result<String, String>),
+    /// What its call to an MCP server gave (or why it failed).
+    Mcp(Result<Value, String>),
 }
 
 /// A script waiting: the call that waits, and for what.
@@ -219,8 +231,13 @@ impl Session {
         if call.name == ASK {
             return self.script_ask(chat, profile, script, made);
         }
+        if call.name == MCP {
+            return self.script_mcp(chat, profile, script, made);
+        }
         let proposed = chat.runs.iter().filter(|r| r.part_of.as_deref() == Some(script.call.id.as_str()) && !r.input.is_null()).count();
-        let outcome = if !script_tools().contains(&call.name) {
+        let outcome = if call.name == FIND_TOOLS {
+            self.script_find_tools(profile, &call.input)
+        } else if !script_tools().contains(&call.name) {
             Outcome::failed(&call.name, format!("a script can't call `{}`", call.name.chars().take(64).collect::<String>()))
         } else if proposed >= PROPOSALS_MOST && !reads(&call.name) {
             Outcome::failed(&call.name, format!("a script proposes at most {PROPOSALS_MOST} changes: propose the rest after it"))
@@ -281,6 +298,14 @@ impl Session {
                         Answer::Gave(Value::String(text.trim().to_string()))
                     }
                     Came::Answer(Err(e)) => Answer::Failed(format!("the model couldn't answer: {e}")),
+                    Came::Mcp(Ok(value)) => {
+                        if let Some(r) = chat.run_mut(&part) {
+                            r.state = RunState::Ran;
+                            r.result = cut(value.as_str().map_or_else(|| value.to_string(), str::to_string).trim(), VALUE_MOST);
+                        }
+                        Answer::Gave(value)
+                    }
+                    Came::Mcp(Err(e)) => Answer::Failed(format!("the MCP server couldn't answer: {e}")),
                 };
                 if let Answer::Failed(why) = &answer
                     && let Some(r) = chat.run_mut(&part)
@@ -309,29 +334,33 @@ impl Session {
         self.scripts_let_go(&chat.id);
         for r in chat.runs.iter_mut().filter(|r| r.part_of.is_some() && r.state == RunState::Waiting) {
             r.state = RunState::Failed;
-            r.result = if r.tool == ASK { "stopped before the answer came" } else { "stopped before the message came" }.into();
+            r.result = match r.tool.as_str() {
+                ASK => "stopped before the answer came",
+                MCP => "stopped before the server answered",
+                _ => "stopped before the message came",
+            }
+            .into();
         }
     }
 
-    /// Chat `id`'s scripts waiting are let go, and the questions they asked with them: their
-    /// answers are dropped as they come.
+    /// Chat `id`'s scripts waiting are let go, and the questions and calls to MCP servers they
+    /// made with them, and the calls approved: their answers are dropped as they come.
     pub(super) fn scripts_let_go(&mut self, id: &str) {
         let mine = |at: &(String, String)| at.0 == id;
-        let asked: Vec<u64> = self
-            .ai
-            .assistant
-            .scripts
-            .iter()
-            .filter(|(at, _)| mine(at))
-            .filter_map(|(_, p)| match p.on {
-                Wait::Answer(q) => Some(q),
-                Wait::Message(_) => None,
-            })
-            .collect();
+        let waits: Vec<Wait> = self.ai.assistant.scripts.iter().filter(|(at, _)| mine(at)).map(|(_, p)| p.on.clone()).collect();
         self.ai.assistant.scripts.retain(|at, _| !mine(at));
-        for q in asked {
-            self.ai.assistant.script_asks.remove(&q);
-            self.assistant_let_go(q);
+        self.ai.assistant.mcp_approved.retain(|_, at| !mine(at));
+        for on in waits {
+            match on {
+                Wait::Answer(q) => {
+                    self.ai.assistant.script_asks.remove(&q);
+                    self.assistant_let_go(q);
+                }
+                Wait::Mcp(call) => {
+                    self.ai.assistant.script_mcps.remove(&call);
+                }
+                Wait::Message(_) => {}
+            }
         }
     }
 }
@@ -357,6 +386,8 @@ pub(super) fn decided(chat: &Chat, call: &str) -> String {
                 RunState::Done => format!("approved. {}", r.result),
                 RunState::Declined => format!("the person declined: nothing changed. {}", r.result),
                 RunState::Proposed => "not decided".into(),
+                // A call to an MCP server approved, whose answer didn't come.
+                RunState::Waiting => "approved, but stopped before the server answered: it may have been done".into(),
                 _ => format!("couldn't be done: {}", r.result),
             };
             format!("- {}: {}", r.what, went.trim_end())

@@ -122,7 +122,15 @@ and `cargo xtask sizes` enforces them.
   what each listed (`mcp-tools.json`, read when first wanted), so tools are found without
   starting every server; `mcpServer.*` adds, changes, turns on and off, lists again and removes
   them. Adding or changing a server, or turning one on, starts a program: `mcp::PERSON_ONLY`
-  keeps those commands from every outside agent, even one let to act.
+  keeps those commands from every outside agent, even one let to act. A script calls them
+  (`script/mcp.rs`): `find_tools` searches what was listed, and `mcp(server, tool, args)` calls a
+  tool that says it changes nothing (`readOnlyHint`), the script waiting for its answer as for
+  a message (`Wait::Mcp`); any other is proposed, as a script's changes are, and called once
+  approved (`mcp_approve`), its card waiting for the answer and the chat going on after it. It
+  calls only a server every account the model reads lets its mail go to
+  (`AiPrefs::allows_server`: one elsewhere than this computer or its network only where mail
+  may go to any model). Each call is recorded as a question is: `MCP tool`, the server, the
+  tool and the sizes.
 - **The record.** Each question is recorded before it goes (`ai-log.json`, saved as the jobs are
   taken): when, what for, which profile and server, whose mail, and its sizes; never what it
   said. The newest 500 are kept.

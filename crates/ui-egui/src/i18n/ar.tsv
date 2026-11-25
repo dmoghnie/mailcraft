@@ -2223,6 +2223,9 @@ count	occurrences	مرات
 	Tools: {count}	الأدوات: {count}
 	List again	السرد مجددًا
 	Asked the model	سأل النموذج
+	Looked for tools	بحث عن أدوات
+	MCP tool	أداة MCP
+	Waiting for the server…	في انتظار الخادم…
 	Waiting for the answer…	في انتظار الإجابة…
 	The script	النص البرمجي
 	Let it write and run scripts	السماح له بكتابة نصوص برمجية وتشغيلها

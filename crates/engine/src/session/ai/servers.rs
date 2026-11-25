@@ -12,11 +12,14 @@ use mailcraft_model::{AiWork, Job, McpDone, McpTarget, McpTool, McpWork, Secret}
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
+use super::asking::{AiLogEntry, server_of};
 use super::commands::{KEY_MOST, address, text};
 use super::settings::local_url;
 use crate::{CmdError, CmdResult, CommandSpec, Session, p};
 
 const WHERE: &str = "File › Options › AI";
+/// What the record of what went where says a call to a server's tool was for.
+const PURPOSE: &str = "MCP tool";
 /// Where the servers' tools are kept, in the data folder.
 const TOOLS_DOC: &str = "mcp-tools.json";
 /// The most servers kept.
@@ -123,6 +126,33 @@ impl Session {
         self.jobs.push(Job::Mcp { work: McpWork::List { server: server.id, target: server.target, key } });
     }
 
+    /// Call `server`'s `tool` with `args`, for a chat holding the mail of `accounts`, recorded
+    /// as what MailCraft's AI sent (where, and its size, never what): the call's id.
+    pub(crate) fn mcp_call(&mut self, server: &McpServer, tool: &str, args: Value, accounts: Vec<String>) -> u64 {
+        let id = self.ai.next_id();
+        let sent = serde_json::to_vec(&args).map_or(0, |a| a.len());
+        let place = match &server.target {
+            McpTarget::Program { .. } => "this computer".to_string(),
+            McpTarget::Web { url } => server_of(url),
+        };
+        let line = self.ai_record(AiLogEntry {
+            at: self.clock.now,
+            purpose: PURPOSE.into(),
+            profile: server.name.clone(),
+            server: place,
+            model: tool.to_string(),
+            account: (!accounts.is_empty()).then(|| accounts.join(", ")),
+            sent: u64::try_from(sent).unwrap_or(u64::MAX),
+            received: 0,
+            outcome: "waiting".into(),
+        });
+        self.ai.mcp_calls.insert(id, line);
+        let key = server.has_key.then(|| server.key_name());
+        let work = McpWork::Call { id, server: server.id.clone(), target: server.target.clone(), key, tool: tool.to_string(), args };
+        self.jobs.push(Job::Mcp { work });
+        id
+    }
+
     /// What a server did.
     pub(crate) fn mcp_done(&mut self, done: McpDone) {
         match done {
@@ -139,8 +169,15 @@ impl Session {
                 }
                 self.mcp_tools_kept();
             }
-            // Nothing calls a server's tools yet: scripts do, next.
-            McpDone::Called { .. } => {}
+            McpDone::Called { id, result, error } => {
+                if let Some(line) = self.ai.mcp_calls.remove(&id) {
+                    let received = result.as_ref().and_then(|r| serde_json::to_vec(r).ok()).map_or(0, |r| r.len());
+                    let outcome = if result.is_some() { "answered" } else { "failed" };
+                    self.ai_settle(line, outcome, u64::try_from(received).unwrap_or(u64::MAX));
+                }
+                let came = result.ok_or_else(|| error.unwrap_or_else(|| "no answer came".into()));
+                self.script_mcp_came(id, came);
+            }
         }
     }
 }

@@ -127,6 +127,9 @@ fn answered(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, i: usize,
 
 /// The tool that runs a script the model wrote.
 const SCRIPT: &str = "run_script";
+/// A script's search of the MCP servers' tools, and its call to one.
+const FIND_TOOLS: &str = "find_tools";
+const MCP: &str = "mcp";
 /// A script's question to the model.
 const ASK: &str = "ask";
 /// The tool that proposes keeping a script.
@@ -187,8 +190,8 @@ fn card(ui: &mut Ui, t: &Tokens, chat: &Chat, run: &ToolRun, acts: &mut Vec<Acti
         if run.state == RunState::Failed && !run.result.is_empty() {
             ui.add(egui::Label::new(RichText::new(widgets::shorten(&run.result, 200)).small().color(t.faint)).wrap());
         }
-        // What the model answered a script.
-        if run.tool == ASK && run.state == RunState::Ran && !run.result.is_empty() {
+        // What the model, or an MCP server's tool, answered a script.
+        if (run.tool == ASK || run.tool == MCP) && matches!(run.state, RunState::Ran | RunState::Done) && !run.result.is_empty() {
             ui.add(egui::Label::new(RichText::new(widgets::shorten(&run.result, 200)).small().color(t.dim)).wrap());
         }
         if proposed {
@@ -204,12 +207,20 @@ fn card(ui: &mut Ui, t: &Tokens, chat: &Chat, run: &ToolRun, acts: &mut Vec<Acti
     });
 }
 
-/// What a run waiting waits for: the answer to a question, its own or its script's, or a
-/// message to download.
+/// What a run waiting waits for: the answer to a question or an MCP server's, its own or its
+/// script's, or a message to download.
 fn waiting_for(chat: &Chat, run: &ToolRun) -> &'static str {
-    let asking = |r: &ToolRun| r.tool == ASK && r.state == RunState::Waiting;
-    let script_asks = run.tool == SCRIPT && chat.runs.iter().any(|r| r.part_of.as_deref() == Some(run.call.as_str()) && asking(r));
-    if asking(run) || script_asks { tl!("Waiting for the answer…") } else { tl!("Downloading the message…") }
+    let waits = |r: &ToolRun, tool: &str| r.tool == tool && r.state == RunState::Waiting;
+    let its = |tool: &str| {
+        waits(run, tool) || (run.tool == SCRIPT && chat.runs.iter().any(|r| r.part_of.as_deref() == Some(run.call.as_str()) && waits(r, tool)))
+    };
+    if its(ASK) {
+        tl!("Waiting for the answer…")
+    } else if its(MCP) {
+        tl!("Waiting for the server…")
+    } else {
+        tl!("Downloading the message…")
+    }
 }
 
 /// What a tool is called on its card.
@@ -237,6 +248,8 @@ fn tool_title(tool: &str) -> &str {
         SCRIPT => tl!("Ran a script"),
         KEEP => tl!("Keep a script"),
         ASK => tl!("Asked the model"),
+        FIND_TOOLS => tl!("Looked for tools"),
+        MCP => tl!("MCP tool"),
         other => other,
     }
 }
@@ -244,7 +257,7 @@ fn tool_title(tool: &str) -> &str {
 fn tool_icon(tool: &str) -> Icon {
     match tool {
         "list_folders" => Icon::Folder,
-        "find_messages" => Icon::Search,
+        "find_messages" | FIND_TOOLS => Icon::Search,
         "read_message" | "selected_messages" => Icon::Read,
         "find_events" | "add_event" | "change_event" => Icon::Calendar,
         "find_people" | "add_person" | "change_person" => Icon::People,

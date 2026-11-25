@@ -2227,6 +2227,9 @@ count	occurrences	ripetizioni
 	Tools: {count}	Strumenti: {count}
 	List again	Elenca di nuovo
 	Asked the model	Ha chiesto al modello
+	Looked for tools	Ha cercato strumenti
+	MCP tool	Strumento MCP
+	Waiting for the server…	In attesa del server…
 	Waiting for the answer…	In attesa della risposta…
 	The script	Lo script
 	Let it write and run scripts	Lascia che scriva ed esegua script

@@ -2241,6 +2241,9 @@ count	occurrences	повторений
 	Tools: {count}	Инструменты: {count}
 	List again	Получить список снова
 	Asked the model	Спросил модель
+	Looked for tools	Поиск инструментов
+	MCP tool	Инструмент MCP
+	Waiting for the server…	Ожидание сервера…
 	Waiting for the answer…	Ожидание ответа…
 	The script	Скрипт
 	Let it write and run scripts	Разрешить писать и запускать скрипты

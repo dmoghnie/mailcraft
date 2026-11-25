@@ -2228,6 +2228,9 @@ count	occurrences	kez
 	Tools: {count}	Araçlar: {count}
 	List again	Yeniden listele
 	Asked the model	Modele sordu
+	Looked for tools	Araç aradı
+	MCP tool	MCP aracı
+	Waiting for the server…	Sunucu bekleniyor…
 	Waiting for the answer…	Yanıt bekleniyor…
 	The script	Betik
 	Let it write and run scripts	Betik yazıp çalıştırmasına izin ver

@@ -168,7 +168,7 @@ impl Session {
         self.kept_load();
         let asked = self.assistant_profile(&chat).and_then(|p| {
             let system = self.assistant_system(&p);
-            self.fitted(&chat, &p, system, tools_for(&p, self.kept_loaded())).map(|c| (p, c))
+            self.fitted(&chat, &p, system, tools_for(&p, self.kept_loaded(), &self.mcp_names(&p))).map(|c| (p, c))
         });
         let accounts = chat.accounts.clone();
         self.put_chat(Chat { answer_due: asked.is_ok(), ..chat });
@@ -193,7 +193,7 @@ impl Session {
     /// model first asked; none when `q` isn't a chat's, an error when `profile` can't hold it.
     pub(crate) fn assistant_refit(&self, q: u64, profile: &AiProfile) -> Option<Result<AiChat, CmdError>> {
         let chat = self.ai.assistant.asking.get(&q).and_then(|id| self.ai.assistant.chats.get(id))?;
-        Some(self.fitted(chat, profile, self.assistant_system(profile), tools_for(profile, self.kept_loaded())))
+        Some(self.fitted(chat, profile, self.assistant_system(profile), tools_for(profile, self.kept_loaded(), &self.mcp_names(profile))))
     }
 
     /// Question `q`'s answer came: put in its chat, its calls made, and the chat goes on.
@@ -285,7 +285,10 @@ impl Session {
     pub(super) fn assistant_go_on(&mut self, id: &str) {
         let Some(chat) = self.ai.assistant.chats.get(id) else { return };
         let open = chat.open_calls();
-        let waits = open.iter().any(|c| chat.run(&c.id).is_some_and(|r| r.state == RunState::Waiting)) || chat.waits_on_person();
+        let ids: HashSet<&str> = open.iter().map(|c| c.id.as_str()).collect();
+        // A call, or a change a script proposed that was approved and waits for its server.
+        let its = |r: &ToolRun| ids.contains(r.call.as_str()) || (!r.input.is_null() && r.part_of.as_deref().is_some_and(|p| ids.contains(p)));
+        let waits = chat.runs.iter().any(|r| r.state == RunState::Waiting && its(r)) || chat.waits_on_person();
         if open.is_empty() || waits || self.ai.assistant.asking(id).is_some() {
             return;
         }
@@ -390,7 +393,10 @@ impl Session {
         // so a change after its move would find it gone.
         open.sort_by_key(|c| matches!(c.name.as_str(), "move_messages" | "delete_messages"));
         for c in &open {
-            let (state, result, found) = if approve {
+            let (state, result, found) = if approve && c.name == script::MCP {
+                let (state, result) = self.mcp_approve(&chat, c);
+                (state, result, Vec::new())
+            } else if approve {
                 match self.change_of(&chat, &c.name, &c.input).and_then(|ch| self.apply_change(ch)) {
                     Ok((done, found)) => (RunState::Done, done, found),
                     Err(why) => (RunState::Failed, why, Vec::new()),

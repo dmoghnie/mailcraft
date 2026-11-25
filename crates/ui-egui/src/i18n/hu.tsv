@@ -2228,6 +2228,9 @@ count	occurrences	előfordulás
 	Tools: {count}	Eszközök: {count}
 	List again	Újra listázás
 	Asked the model	Megkérdezte a modellt
+	Looked for tools	Eszközöket keresett
+	MCP tool	MCP-eszköz
+	Waiting for the server…	Várakozás a kiszolgálóra…
 	Waiting for the answer…	Várakozás a válaszra…
 	The script	A szkript
 	Let it write and run scripts	Szkripteket írhat és futtathat

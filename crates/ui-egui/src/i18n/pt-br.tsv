@@ -2228,6 +2228,9 @@ count	occurrences	ocorrências
 	Tools: {count}	Ferramentas: {count}
 	List again	Listar de novo
 	Asked the model	Perguntou ao modelo
+	Looked for tools	Procurou ferramentas
+	MCP tool	Ferramenta MCP
+	Waiting for the server…	Aguardando o servidor…
 	Waiting for the answer…	Aguardando a resposta…
 	The script	O script
 	Let it write and run scripts	Deixar que escreva e execute scripts

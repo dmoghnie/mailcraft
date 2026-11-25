@@ -69,6 +69,9 @@ impl Session {
         if call.name == ASK {
             return Answer::Failed("a script run for an agent has no model of MailCraft's to ask".into());
         }
+        if call.name == super::mcp::MCP || call.name == super::mcp::FIND_TOOLS {
+            return Answer::Failed("a script run for an agent calls no MCP server: MailCraft's own AI's scripts do, as the person set it up".into());
+        }
         if !script_tools().contains(&call.name) {
             return Answer::Failed(format!("a script can't call `{name}`"));
         }

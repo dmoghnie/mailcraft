@@ -280,6 +280,10 @@ pub struct Assistant {
     scripts: HashMap<(String, String), script::Paused>,
     /// The questions scripts asked, by question: the chat and call of each.
     script_asks: HashMap<u64, (String, String)>,
+    /// The calls scripts made to MCP servers, by call: the chat and call of each.
+    script_mcps: HashMap<u64, (String, String)>,
+    /// The calls to MCP servers the person approved, by call: the chat and run of each.
+    mcp_approved: HashMap<u64, (String, String)>,
     /// The scripts kept, once read ([`Session::kept_load`]).
     kept: Option<Vec<script::KeptScript>>,
     /// How many tokens each chat's question was estimated at as it was sent, by question: set

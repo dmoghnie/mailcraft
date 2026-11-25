@@ -2227,6 +2227,9 @@ count	occurrences	회
 	Tools: {count}	도구: {count}
 	List again	다시 가져오기
 	Asked the model	모델에 질문함
+	Looked for tools	도구를 찾음
+	MCP tool	MCP 도구
+	Waiting for the server…	서버를 기다리는 중…
 	Waiting for the answer…	답변을 기다리는 중…
 	The script	스크립트
 	Let it write and run scripts	스크립트 작성 및 실행 허용

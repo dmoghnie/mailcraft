@@ -93,9 +93,17 @@ pub struct AiState {
     pub assistant: super::Assistant,
     /// What each MCP server's tools are known to be, by server, once read (`servers.rs`).
     pub mcp_tools: Option<BTreeMap<String, super::ServerTools>>,
+    /// The calls to MCP servers waiting, by call: the line of the record each is on.
+    pub(super) mcp_calls: HashMap<u64, u64>,
 }
 
 impl AiState {
+    /// A new id, for a question or a call to an MCP server.
+    pub(super) fn next_id(&mut self) -> u64 {
+        self.next = self.next.saturating_add(1);
+        self.next
+    }
+
     /// Questions waiting now.
     pub fn waiting(&self) -> usize {
         self.waiting.len()
@@ -200,7 +208,7 @@ impl Session {
         self.ai.waiting.insert(id, w);
     }
 
-    fn ai_record(&mut self, entry: AiLogEntry) -> u64 {
+    pub(super) fn ai_record(&mut self, entry: AiLogEntry) -> u64 {
         let line = self.ai.next_line;
         self.ai.next_line += 1;
         self.ai.log.push_back((line, entry));
@@ -211,7 +219,7 @@ impl Session {
         line
     }
 
-    fn ai_settle(&mut self, line: u64, outcome: &str, received: u64) {
+    pub(super) fn ai_settle(&mut self, line: u64, outcome: &str, received: u64) {
         if let Some((_, e)) = self.ai.log.iter_mut().find(|(l, _)| *l == line) {
             e.outcome = outcome.into();
             e.received = received;
