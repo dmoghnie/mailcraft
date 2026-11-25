@@ -13,6 +13,7 @@ mod drafting;
 mod facts;
 mod needs_me;
 mod rewriting;
+mod scheduling;
 mod servers;
 mod style;
 mod summary;

@@ -47,6 +47,8 @@ pub enum RewriteHow {
     FollowUp,
     /// An answer to the message it replies to, written with nothing said of what it says.
     Reply,
+    /// Times for a meeting proposed, from the person's free time (`scheduling.rs`).
+    Times,
 }
 
 impl RewriteHow {
@@ -60,11 +62,12 @@ impl RewriteHow {
             RewriteHow::FromWords => "fromWords",
             RewriteHow::FollowUp => "followUp",
             RewriteHow::Reply => "reply",
+            RewriteHow::Times => "times",
         }
     }
 
     fn from_code(code: &str) -> Option<RewriteHow> {
-        [RewriteHow::Shorter, RewriteHow::Warmer, RewriteHow::Formal, RewriteHow::Grammar, RewriteHow::FollowUp, RewriteHow::Reply]
+        [RewriteHow::Shorter, RewriteHow::Warmer, RewriteHow::Formal, RewriteHow::Grammar, RewriteHow::FollowUp, RewriteHow::Reply, RewriteHow::Times]
             .into_iter()
             .find(|h| h.code() == code)
     }
@@ -76,7 +79,7 @@ impl RewriteHow {
             RewriteHow::Warmer => "Make it warmer and friendlier, still courteous.",
             RewriteHow::Formal => "Make it more formal and polite.",
             RewriteHow::Grammar => "Fix its spelling, grammar and punctuation only; change nothing else.",
-            RewriteHow::FromWords | RewriteHow::FollowUp | RewriteHow::Reply => "",
+            RewriteHow::FromWords | RewriteHow::FollowUp | RewriteHow::Reply | RewriteHow::Times => "",
         }
     }
 }
@@ -139,7 +142,7 @@ impl Session {
             RewriteHow::Reply => ANSWER_IT,
             _ => words,
         };
-        let (system, question) = if matches!(how, RewriteHow::FromWords | RewriteHow::FollowUp | RewriteHow::Reply) {
+        let (system, question) = if matches!(how, RewriteHow::FromWords | RewriteHow::FollowUp | RewriteHow::Reply | RewriteHow::Times) {
             // The message it answers, forwards or follows up, as the person has it.
             let answered = source.and_then(|k| self.message_given(&k));
             let language = match (&answered, forward) {
@@ -253,11 +256,12 @@ fn shown(s: &Session) -> Value {
 pub(crate) fn commands() -> Vec<CommandSpec> {
     vec![
         CommandSpec::new("compose.rewrite", "Rewrite the message with MailCraft's AI", WHERE, |s, v| {
-            let how = p::str(v, "how").and_then(RewriteHow::from_code).ok_or_else(|| CmdError::Params("`how` is shorter, warmer, formal, grammar, followUp or reply".into()))?;
-            s.ask_rewrite(how, "", None)?;
+            let how = p::str(v, "how").and_then(RewriteHow::from_code).ok_or_else(|| CmdError::Params("`how` is shorter, warmer, formal, grammar, followUp, reply or times".into()))?;
+            let words = if how == RewriteHow::Times { s.times_asked(minutes_of(s, v)?)? } else { String::new() };
+            s.ask_rewrite(how, &words, p::str(v, "language"))?;
             Ok(shown(s))
         })
-        .params(r#"{"how": "shorter" | "warmer" | "formal" | "grammar" | "followUp" (a follow-up to the message it replies to, the person's own) | "reply" (an answer to the message it replies to, written for them)} (the text written so far, above the quoted original and the signature, goes to the model chat work goes to, as far as the account lets its mail; the text changes only with compose.useRewrite)"#),
+        .params(r#"{"how": "shorter" | "warmer" | "formal" | "grammar" | "followUp" (a follow-up to the message it replies to, the person's own) | "reply" (an answer to the message it replies to, written for them) | "times" (times proposed for a meeting, from the person's free time in their work hours over the next week), "minutes"?: number (times: the meeting's length, 15 to 480; the calendar's meeting length otherwise), "language"?: string (a language code, for a new message)} (the text written so far, above the quoted original and the signature, goes to the model chat work goes to, as far as the account lets its mail; the text changes only with compose.useRewrite)"#),
         CommandSpec::new("compose.writeFrom", "Write the message from a few words with MailCraft's AI", WHERE, |s, v| {
             let words: String = p::str(v, "words").map(str::trim).filter(|w| !w.is_empty()).ok_or_else(|| CmdError::Params("`words` (what it should say) is required".into()))?.chars().take(WORDS_MOST).collect();
             s.ask_rewrite(RewriteHow::FromWords, &words, p::str(v, "language"))?;
@@ -282,4 +286,17 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
         CommandSpec::new("compose.rewriting", "Show the rewrite of the message being written", WHERE, |s, _| Ok(shown(s)))
             .params(r#"{} (while it's written, what came so far)"#),
     ]
+}
+
+/// The length of a meeting `compose.rewrite` proposes times for: as asked, else the calendar's.
+fn minutes_of(s: &Session, v: &Value) -> Result<u16, CmdError> {
+    if s.compose.is_none() {
+        return Err(CmdError::Failed(NOT_WRITING.into()));
+    }
+    match p::u64(v, "minutes") {
+        None => Ok(s.prefs.free_time_minutes.clamp(15, 480)),
+        Some(m) => {
+            u16::try_from(m).ok().filter(|m| (15..=480).contains(m)).ok_or_else(|| CmdError::Params(format!("`minutes` is 15 to 480, not {m}")))
+        }
+    }
 }

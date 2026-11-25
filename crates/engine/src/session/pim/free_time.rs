@@ -34,7 +34,7 @@ impl Session {
     }
 
     /// `t` moved to the half hour at or after it (`up`), or at or before it, in local time.
-    fn on_the_half_hour(&self, t: i64, up: bool) -> i64 {
+    pub(crate) fn on_the_half_hour(&self, t: i64, up: bool) -> i64 {
         let past = self.clock.local(t).rem_euclid(STEP);
         if past == 0 {
             t

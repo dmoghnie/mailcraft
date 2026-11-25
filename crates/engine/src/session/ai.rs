@@ -12,6 +12,7 @@ mod digest;
 mod drafting;
 mod needs_me;
 mod rewriting;
+mod scheduling;
 mod servers;
 mod settings;
 mod style;

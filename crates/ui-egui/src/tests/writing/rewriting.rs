@@ -105,3 +105,13 @@ fn a_reply_is_written_from_nothing() {
     click_last(&ctx, &mut a, "Replace");
     assert!(body(&a).starts_with("Hello,\n\nYes, that works."), "{}", body(&a));
 }
+
+/// Propose meeting times, in the same menu: the model is asked to propose times from the
+/// person's free time.
+#[test]
+fn meeting_times_are_proposed_from_the_menu() {
+    let (mut a, ctx) = replying("rewrite-times", "");
+    click_last(&ctx, &mut a, "Rewrite with AI");
+    click_last(&ctx, &mut a, "Propose meeting times");
+    assert!(a.session.rewrite().is_some_and(|r| r.how == RewriteHow::Times && r.asking.is_some()), "asked");
+}

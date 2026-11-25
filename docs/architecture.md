@@ -243,7 +243,10 @@ and `cargo xtask sizes` enforces them.
   was put in. A follow-up to sent mail nobody answered (`mail.noAnswerFollowUp` with `write`)
   is the same, written from fixed words and the person's own message, as is a reply written
   from nothing (`compose.rewrite` with `reply`: it answers what the message asks, with gaps in
-  brackets for what only the person knows). The menu and the card
+  brackets for what only the person knows), and meeting times proposed (`times`,
+  `session/ai/scheduling.rs`): the person's free times over the next week, in their work hours
+  and around everything in their own calendars (never a colleague's), go with what's asked,
+  only when they ask. The menu and the card
   are `ui-egui/src/reading/compose/rewriting.rs`. Writing (not rewriting), the model is given
   the person's style (`session/ai/style.rs`, `style_said`): a few lines learned by the chat
   model from the newest sent mail of the accounts that may lend it (`ai.learnStyle`, what each

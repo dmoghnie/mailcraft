@@ -35,6 +35,10 @@ pub(super) fn menu(ui: &mut Ui, t: &Tokens, c: &Compose, words: &mut Option<(u64
             acts.push(Action::Run("compose.rewrite", json!({"how": "reply"})));
             ui.close();
         }
+        if ui.button(tl!("Propose meeting times")).on_hover_text(tl!("From your free time in your work hours over the next week")).clicked() {
+            acts.push(Action::Run("compose.rewrite", json!({"how": "times", "language": crate::i18n::current().code()})));
+            ui.close();
+        }
     });
 }
 
@@ -48,6 +52,7 @@ fn title(how: RewriteHow) -> &'static str {
         RewriteHow::FromWords => tl!("From a few words"),
         RewriteHow::FollowUp => tl!("Follow-up"),
         RewriteHow::Reply => tl!("Reply"),
+        RewriteHow::Times => tl!("Meeting times"),
     }
 }
 
