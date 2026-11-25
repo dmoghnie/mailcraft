@@ -7,7 +7,7 @@
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-use rhai::{AST, Dynamic, Engine, EvalAltResult, Map, Position};
+use rhai::{AST, Dynamic, Engine, EvalAltResult, Map, Position, Scope};
 use serde_json::{Value, json};
 
 use super::strings;
@@ -116,10 +116,20 @@ fn stop() -> Box<EvalAltResult> {
     Box::new(EvalAltResult::ErrorTerminated(Dynamic::UNIT, Position::NONE))
 }
 
+/// What a script runs with besides its own code.
+#[derive(Clone, Copy, Default)]
+pub(crate) struct With<'a> {
+    /// The kept scripts, as functions ([`super::kept::library`]).
+    pub library: &'a str,
+    /// What a kept script was called with: the constant `params`.
+    pub params: Option<&'a Value>,
+}
+
 /// A script compiled, with the engine that runs it again and again.
 pub(crate) struct Runner {
     engine: Engine,
     ast: AST,
+    params: Option<Value>,
     replay: Rc<RefCell<Replay>>,
     printed: Rc<RefCell<Printed>>,
     ops: Rc<Cell<u64>>,
@@ -130,6 +140,11 @@ impl Runner {
     /// as the tool takes its input) and `ask`; `now` is what `now()` gives (Unix seconds). Why
     /// it can't be, for the model.
     pub(crate) fn new(source: &str, tools: &[&str], now: i64) -> Result<Runner, String> {
+        Runner::with(source, With::default(), tools, now)
+    }
+
+    /// As [`Runner::new`], with the kept scripts' functions and what a kept one was called with.
+    pub(crate) fn with(source: &str, with: With<'_>, tools: &[&str], now: i64) -> Result<Runner, String> {
         let replay = Rc::new(RefCell::new(Replay::default()));
         let printed = Rc::new(RefCell::new(Printed::default()));
         let ops = Rc::new(Cell::new(0));
@@ -178,8 +193,16 @@ impl Runner {
         });
         engine.register_fn("now", move || now);
         strings::register(&mut engine, STRING_MOST);
-        let ast = engine.compile(source).map_err(|e| format!("the script doesn't compile: {e}. {RHAI}"))?;
-        Ok(Runner { engine, ast, replay, printed, ops })
+        let params = with.params.cloned();
+        let own = engine.compile_with_scope(&scope_of(params.as_ref()), source).map_err(|e| format!("the script doesn't compile: {e}. {RHAI}"))?;
+        // Their functions alone: what's outside one never runs.
+        let ast = if with.library.is_empty() {
+            own
+        } else {
+            let library = engine.compile(with.library).map_err(|e| format!("a kept script doesn't compile: {e}"))?;
+            library.clone_functions_only().merge(&own)
+        };
+        Ok(Runner { engine, ast, params, replay, printed, ops })
     }
 
     /// Run the script from its start against `log`, within `ops_left` operations: how it went,
@@ -190,7 +213,8 @@ impl Runner {
         self.ops.set(0);
         self.engine.set_max_operations(ops_left.clamp(1, OPS_RUN));
         let (engine, ast) = (&self.engine, &self.ast);
-        let went = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| engine.eval_ast::<Dynamic>(ast)));
+        let mut scope = scope_of(self.params.as_ref());
+        let went = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| engine.eval_ast_with_scope::<Dynamic>(&mut scope, ast)));
         let ops = self.ops.get();
         let replay = std::mem::take(&mut *self.replay.borrow_mut());
         let ran = if let Some(why) = replay.stopped {
@@ -206,6 +230,15 @@ impl Runner {
         };
         (ran, ops)
     }
+}
+
+/// What a script starts with: `params`, when a kept script was called with them.
+fn scope_of(params: Option<&Value>) -> Scope<'static> {
+    let mut scope = Scope::new();
+    if let Some(p) = params {
+        scope.push_constant("params", to_script(p));
+    }
+    scope
 }
 
 /// Why a run failed, and what it printed before.

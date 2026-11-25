@@ -23,11 +23,14 @@ pub(super) enum Outcome {
     Proposed { what: String, messages: Vec<String> },
 }
 
-/// The tools `profile` is told of: [`tools`], and `run_script` when it may run scripts.
-pub(super) fn tools_for(profile: &AiProfile) -> Vec<AiTool> {
+/// The tools `profile` is told of: [`tools`]; and, when it may run scripts, `run_script`,
+/// `keep_script` and the scripts `kept` that are on.
+pub(super) fn tools_for(profile: &AiProfile, kept: &[script::KeptScript]) -> Vec<AiTool> {
     let mut all = tools();
     if profile.scripts {
-        all.push(script::tool());
+        all.push(script::tool(kept));
+        all.push(script::keep_tool());
+        all.extend(script::kept_tools(kept));
     }
     all
 }
@@ -222,6 +225,11 @@ impl Session {
             "find_notes" => self.tool_find_notes(chat, profile, &input),
             "selected_messages" => self.tool_selected(chat, profile),
             script::RUN_SCRIPT => self.tool_run_script(chat, profile, call),
+            script::KEEP_SCRIPT if profile.scripts => match self.change_of(chat, script::KEEP_SCRIPT, &input) {
+                Ok(change) => Outcome::Proposed { what: change.what(self), messages: change.ids() },
+                Err(why) => Outcome::failed(script::KEEP_SCRIPT, why),
+            },
+            name if self.kept_on(name).is_some() => self.tool_run_kept(chat, profile, call),
             name if !reads(name) && tools().iter().any(|t| t.name == name) => match self.change_of(chat, name, &input) {
                 Ok(change) => Outcome::Proposed { what: change.what(self), messages: change.ids() },
                 Err(why) => Outcome::failed(name, why),

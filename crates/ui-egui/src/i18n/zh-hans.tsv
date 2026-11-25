@@ -2186,6 +2186,7 @@ count	occurrences	次
 	Longest answer, in tokens	最长回答（token 数）
 	Takes in at once, in tokens	一次能接收的量（token 数）
 	Ran a script	运行了脚本
+	Keep a script	保留脚本
 	Asked the model	询问了模型
 	Waiting for the answer…	正在等待回答…
 	The script	脚本

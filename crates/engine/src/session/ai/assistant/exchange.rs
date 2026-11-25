@@ -7,7 +7,7 @@ use mailcraft_model::{AiChat, AiRole, AiToolCall, AiToolResult, AiTurn, AiWork, 
 
 use super::context::{cut, estimate};
 use super::looking::said;
-use super::tools::{Outcome, reads, tools_for};
+use super::tools::{Outcome, tools_for};
 use super::*;
 use crate::session::ai::AiTask;
 use crate::{CmdError, Session};
@@ -165,9 +165,10 @@ impl Session {
     /// Ask chat `id`'s model about it as it is; why not, kept with the chat too.
     fn assistant_ask(&mut self, id: &str) -> Result<(), CmdError> {
         let chat = self.take_chat(id)?;
+        self.kept_load();
         let asked = self.assistant_profile(&chat).and_then(|p| {
             let system = self.assistant_system(&p);
-            self.fitted(&chat, &p, system, tools_for(&p)).map(|c| (p, c))
+            self.fitted(&chat, &p, system, tools_for(&p, self.kept_loaded())).map(|c| (p, c))
         });
         let accounts = chat.accounts.clone();
         self.put_chat(Chat { answer_due: asked.is_ok(), ..chat });
@@ -192,7 +193,7 @@ impl Session {
     /// model first asked; none when `q` isn't a chat's, an error when `profile` can't hold it.
     pub(crate) fn assistant_refit(&self, q: u64, profile: &AiProfile) -> Option<Result<AiChat, CmdError>> {
         let chat = self.ai.assistant.asking.get(&q).and_then(|id| self.ai.assistant.chats.get(id))?;
-        Some(self.fitted(chat, profile, self.assistant_system(profile), tools_for(profile)))
+        Some(self.fitted(chat, profile, self.assistant_system(profile), tools_for(profile, self.kept_loaded())))
     }
 
     /// Question `q`'s answer came: put in its chat, its calls made, and the chat goes on.
@@ -267,7 +268,8 @@ impl Session {
             .iter()
             .skip(start)
             .filter(|r| mine(r))
-            .any(|r| (reads(&r.tool) || r.tool == script::RUN_SCRIPT) && matches!(r.state, RunState::Ran | RunState::Waiting));
+            // A change never ran: what ran, or waits, reads (a script too, kept or not).
+            .any(|r| matches!(r.state, RunState::Ran | RunState::Waiting));
         if finding {
             for r in chat.runs.iter_mut().skip(start).filter(|r| mine(r) && r.state == RunState::Proposed) {
                 r.state = RunState::PutOff;
@@ -314,7 +316,8 @@ impl Session {
         let mut results = Vec::new();
         for c in &calls {
             // What became of the changes a script proposed comes after what it came to.
-            let proposed = if c.name == script::RUN_SCRIPT { script::decided(chat, &c.id) } else { String::new() };
+            let proposed = script::decided(chat, &c.id);
+            let scripting = self.ai.assistant.scripts.contains_key(&(chat.id.clone(), c.id.clone()));
             let Some(run) = chat.run_mut(&c.id) else {
                 results.push(AiToolResult { id: c.id.clone(), content: "not run".into(), error: true });
                 continue;
@@ -324,7 +327,7 @@ impl Session {
                     run.state = RunState::Declined;
                     run.result = not_decided.into();
                 }
-                RunState::Waiting if run.tool == script::RUN_SCRIPT => {
+                RunState::Waiting if scripting => {
                     run.state = RunState::Failed;
                     run.result = "stopped before the script ended".into();
                 }

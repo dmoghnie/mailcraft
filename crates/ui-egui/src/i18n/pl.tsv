@@ -2203,6 +2203,7 @@ count	occurrences	wystąpieniach
 	Longest answer, in tokens	Najdłuższa odpowiedź, w tokenach
 	Takes in at once, in tokens	Przyjmuje naraz, w tokenach
 	Ran a script	Uruchomił skrypt
+	Keep a script	Zachowaj skrypt
 	Asked the model	Zapytał model
 	Waiting for the answer…	Czekanie na odpowiedź…
 	The script	Skrypt

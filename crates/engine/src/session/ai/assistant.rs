@@ -279,6 +279,8 @@ pub struct Assistant {
     scripts: HashMap<(String, String), script::Paused>,
     /// The questions scripts asked, by question: the chat and call of each.
     script_asks: HashMap<u64, (String, String)>,
+    /// The scripts kept, once read ([`Session::kept_load`]).
+    kept: Option<Vec<script::KeptScript>>,
     /// How many tokens each chat's question was estimated at as it was sent, by question: set
     /// beside the server's count when the answer comes ([`Chat::counted`]).
     estimates: HashMap<u64, u64>,

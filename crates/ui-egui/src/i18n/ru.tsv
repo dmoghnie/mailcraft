@@ -2203,6 +2203,7 @@ count	occurrences	повторений
 	Longest answer, in tokens	Самый длинный ответ, в токенах
 	Takes in at once, in tokens	Вмещает за раз, в токенах
 	Ran a script	Запустил скрипт
+	Keep a script	Сохранить скрипт
 	Asked the model	Спросил модель
 	Waiting for the answer…	Ожидание ответа…
 	The script	Скрипт

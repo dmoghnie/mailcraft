@@ -2185,6 +2185,7 @@ count	occurrences	פעמים
 	Longest answer, in tokens	התשובה הארוכה ביותר, בטוקנים
 	Takes in at once, in tokens	קולט בבת אחת, בטוקנים
 	Ran a script	הריץ סקריפט
+	Keep a script	שמירת סקריפט
 	Asked the model	שאל את המודל
 	Waiting for the answer…	ממתין לתשובה…
 	The script	הסקריפט

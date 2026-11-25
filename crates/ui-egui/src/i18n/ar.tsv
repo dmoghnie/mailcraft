@@ -2185,6 +2185,7 @@ count	occurrences	مرات
 	Longest answer, in tokens	أطول إجابة، بالرموز المميّزة
 	Takes in at once, in tokens	ما يستوعبه دفعة واحدة، بالرموز المميّزة
 	Ran a script	شغّل نصًا برمجيًا
+	Keep a script	الاحتفاظ بنص برمجي
 	Asked the model	سأل النموذج
 	Waiting for the answer…	في انتظار الإجابة…
 	The script	النص البرمجي

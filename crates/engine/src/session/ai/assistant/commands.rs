@@ -11,7 +11,14 @@ const WHERE: &str = "AI assistant";
 /// The longest selected part pointed at, in bytes.
 pub const QUOTE_MOST: usize = 64 << 10;
 
+/// The assistant's commands, and its kept scripts' (`script.*`).
 pub(crate) fn commands() -> Vec<CommandSpec> {
+    let mut all = chats();
+    all.extend(script::script_commands());
+    all
+}
+
+fn chats() -> Vec<CommandSpec> {
     vec![
         CommandSpec::new("assistant.chats", "List the chats with MailCraft's AI", WHERE, |s, _| {
             s.assistant_load();

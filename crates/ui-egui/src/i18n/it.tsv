@@ -2189,6 +2189,7 @@ count	occurrences	ripetizioni
 	Longest answer, in tokens	Risposta più lunga, in token
 	Takes in at once, in tokens	Accoglie in una volta, in token
 	Ran a script	Ha eseguito uno script
+	Keep a script	Conserva uno script
 	Asked the model	Ha chiesto al modello
 	Waiting for the answer…	In attesa della risposta…
 	The script	Lo script

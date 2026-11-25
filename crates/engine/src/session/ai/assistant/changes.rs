@@ -23,12 +23,38 @@ const BODY_MOST: usize = 256 << 10;
 /// A change, checked. One to the calendar, the contacts, the tasks or the notes is said in its
 /// line as it's checked.
 pub(super) enum Change {
-    Move { keys: Vec<MessageKey>, to: MoveTarget },
-    Delete { keys: Vec<MessageKey> },
-    Mark { keys: Vec<MessageKey>, read: Option<bool>, flagged: Option<bool> },
-    Categorize { keys: Vec<MessageKey>, name: String, keyword: String, on: bool },
-    Write { to: String, cc: String, subject: String, body: String, reply_to: Option<MessageKey>, account: Option<String> },
-    Pim { what: String, change: Box<PimChange> },
+    Move {
+        keys: Vec<MessageKey>,
+        to: MoveTarget,
+    },
+    Delete {
+        keys: Vec<MessageKey>,
+    },
+    Mark {
+        keys: Vec<MessageKey>,
+        read: Option<bool>,
+        flagged: Option<bool>,
+    },
+    Categorize {
+        keys: Vec<MessageKey>,
+        name: String,
+        keyword: String,
+        on: bool,
+    },
+    Write {
+        to: String,
+        cc: String,
+        subject: String,
+        body: String,
+        reply_to: Option<MessageKey>,
+        account: Option<String>,
+    },
+    Pim {
+        what: String,
+        change: Box<PimChange>,
+    },
+    /// A script kept, to run again.
+    Keep(Box<script::KeptScript>),
 }
 
 impl Change {
@@ -39,7 +65,7 @@ impl Change {
                 keys.iter().map(MessageKey::to_id).collect()
             }
             Change::Write { reply_to, .. } => reply_to.iter().map(MessageKey::to_id).collect(),
-            Change::Pim { .. } => Vec::new(),
+            Change::Pim { .. } | Change::Keep(_) => Vec::new(),
         }
     }
 
@@ -78,6 +104,7 @@ impl Change {
                 format!("Write a message{to}{about}")
             }
             Change::Pim { what, .. } => what.clone(),
+            Change::Keep(k) => format!("Keep the script {}: {}", k.name, k.about.chars().take(80).collect::<String>()),
         }
     }
 }
@@ -130,6 +157,7 @@ impl Session {
                 Ok(Change::Categorize { keys, name: c.name.clone(), keyword: c.keyword.clone(), on: b("on").unwrap_or(true) })
             }
             "write_message" => self.write_of(chat, input),
+            script::KEEP_SCRIPT => self.keep_of(input).map(|k| Change::Keep(Box::new(k))),
             other => self
                 .pim_change_of(chat, other, input)
                 .unwrap_or_else(|| Err(format!("there's no tool `{}`", other.chars().take(64).collect::<String>()))),
@@ -229,6 +257,10 @@ impl Session {
             }
             Change::Write { to, cc, subject, body, reply_to, account } => self.write_named(to, cc, subject, body, reply_to, account),
             Change::Pim { change, .. } => return self.apply_pim(*change),
+            Change::Keep(k) => self
+                .kept_save(*k, None)
+                .map(|k| format!("Kept: {} is a tool of its own now, and a function of every script.", k.name))
+                .map_err(|e| said(&e)),
         };
         done.map(|done| (done, Vec::new()))
     }

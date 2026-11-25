@@ -154,7 +154,13 @@ and `cargo xtask sizes` enforces them.
   question of its own, without tools or the rest of the chat, its text cut to what the model
   takes in, recorded as `assistant script`; at most 20 a script. The script waits for the
   answer as for a download, and a chat stopped or deleted lets the question go. The model's
-  call ids never hold a `#`; the script's calls are `{script}#{n}`.
+  call ids never hold a `#`; the script's calls are `{script}#{n}`. Kept scripts
+  (`script/kept.rs`, `ai-scripts.json`, starting with MailCraft's own) are each a function's
+  body taking the map `params`: every script gets them as functions (compiled apart, their
+  functions alone merged in, so nothing outside one runs), and a model that may run scripts as
+  tools of their own, run as `run_script` is. Keeping one is a change (`keep_script`, checked:
+  a free name, code that compiles) made once the person approves its card; `script.*` lists,
+  changes, turns off and deletes them.
 - **Chats stay on this computer**: `assistant.json` lists them, each in `assistant-<id>.json`
   (read when first wanted, its file removed when it's deleted); never in the record or the log.
   They're written on the store's thread (`store/src/docs_later.rs`, read back as handed over,

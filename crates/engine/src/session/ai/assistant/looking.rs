@@ -109,6 +109,8 @@ impl Session {
             "subject": m.subject,
             "unread": !m.flags.seen,
             "flagged": Flag::Flagged.get(&m.flags),
+            "answered": m.flags.answered,
+            "bulk": m.bulk,
             "files": m.has_attachments,
             "categories": marks.collect::<Vec<_>>(),
             "preview": m.preview.split_whitespace().collect::<Vec<_>>().join(" ").chars().take(PREVIEW_CHARS).collect::<String>(),

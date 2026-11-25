@@ -9,6 +9,7 @@ const STORYBOARD: &str = "Storyboard review on Thursday";
 
 mod again;
 mod kept;
+mod kept_scripts;
 mod ledger;
 mod pim_changes;
 mod script;

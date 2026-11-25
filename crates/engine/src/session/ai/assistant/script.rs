@@ -9,6 +9,7 @@
 //! scripts only when the person let it (File › Options › AI).
 
 mod asking;
+mod kept;
 mod run;
 mod strings;
 #[cfg(test)]
@@ -19,7 +20,9 @@ use mailcraft_model::{AiTool, AiToolCall, MessageKey};
 use serde_json::{Value, json};
 
 pub(super) use self::asking::ASK;
-use self::run::{Answer, CALLS_MOST, Call, OPS_ALL, RHAI, Ran, Runner};
+pub(super) use self::kept::{KEEP_SCRIPT, keep_tool, kept_tools};
+pub(crate) use self::kept::{KeptScript, commands as script_commands};
+use self::run::{Answer, CALLS_MOST, Call, OPS_ALL, RHAI, Ran, Runner, With};
 use super::context::cut;
 use super::exchange::run_of;
 use super::looking::said;
@@ -54,28 +57,41 @@ let ids = unread.map(|m| m.id);
 if ids.len() > 0 { print(move_messages(#{ids: ids, folder: "archive"}).proposed); }
 ids.len()"#;
 
+/// The tool, as the model is told it, with the kept scripts named as functions.
+fn description(kept: &[KeptScript]) -> String {
+    let names: Vec<&str> = kept.iter().filter(|k| !k.off).map(|k| k.name.as_str()).collect();
+    if names.is_empty() {
+        return described();
+    }
+    format!("{} The scripts kept are functions too, each taking one map, as their tools do: {}.", described(), names.join(", "))
+}
+
 /// The tool, as the model is told it.
-fn description() -> String {
+fn described() -> String {
     format!(
-        "Run a script, in Rhai, that calls the tools as functions, to do in one step what would take many calls. Each tool takes ONE map, written #{{key: value}}, or nothing: find_messages(#{{query: \"is:unread\", limit: 50}}), move_messages(#{{ids: ids, folder: \"archive\"}}); read_message(id) takes an id. {RHAI} The tools give data (maps and arrays) rather than text, for example:\n{EXAMPLE}\nA message has id, account, folder, date, when, from, to, cc, subject, unread, flagged, files, categories and preview: from is #{{name, email}}, to and cc are arrays of those, and files says whether it has any (read_message's lists their names, and adds its text). Messages, events, people, tasks and notes have the ids the tools take; dates are Unix seconds, with `when` as the person reads them; now() is the time now. What it prints, and the value it ends with, come back to you. ask(question) or ask(question, text) asks the language model a question, about the text when given, and gives its answer as a string: for what code can't judge (does this message ask for a quote?); at most 20, each taking the model's time. A tool that fails throws an error (try/catch). A tool that changes (move_messages, add_task…) proposes the change and gives #{{proposed: what it does}}: nothing changes until the person approves it, after the script ended, and you're told what they decided. At most 100 calls and 20 changes; no files, network or modules."
+        "Run a script, in Rhai, that calls the tools as functions, to do in one step what would take many calls. Each tool takes ONE map, written #{{key: value}}, or nothing: find_messages(#{{query: \"is:unread\", limit: 50}}), move_messages(#{{ids: ids, folder: \"archive\"}}); read_message(id) takes an id. {RHAI} The tools give data (maps and arrays) rather than text, for example:\n{EXAMPLE}\nA message has id, account, folder, date, when, from, to, cc, subject, unread, flagged, answered, bulk, files, categories and preview: from is #{{name, email}}, to and cc are arrays of those, bulk says it came from a list or a mass sender, and files says whether it has any (read_message's lists their names, and adds its text). Messages, events, people, tasks and notes have the ids the tools take; dates are Unix seconds, with `when` as the person reads them; now() is the time now. What it prints, and the value it ends with, come back to you. ask(question) or ask(question, text) asks the language model a question, about the text when given, and gives its answer as a string: for what code can't judge (does this message ask for a quote?); at most 20, each taking the model's time. A tool that fails throws an error (try/catch). A tool that changes (move_messages, add_task…) proposes the change and gives #{{proposed: what it does}}: nothing changes until the person approves it, after the script ended, and you're told what they decided. At most 100 calls and 20 changes; no files, network or modules."
     )
 }
 
 /// `run_script`, as the model is told it.
-pub(super) fn tool() -> AiTool {
+pub(super) fn tool(kept: &[KeptScript]) -> AiTool {
     AiTool {
         name: RUN_SCRIPT.into(),
-        description: description(),
+        description: description(kept),
         schema: json!({"type": "object", "properties": {
             "script": {"type": "string", "description": "The script, in Rhai"},
             "what": {"type": "string", "description": "What it does, in a few words, for the person (\"Find who I haven't answered\")"}}, "required": ["script"]}),
     }
 }
 
-/// A script as it runs: its call, and what its calls were answered so far.
+/// A script as it runs: its call, what its card says it does, its code (and what it was called
+/// with, a kept script), and what its calls were answered so far.
 struct Script {
     chat: String,
     call: AiToolCall,
+    what: String,
+    source: String,
+    params: Option<Value>,
     /// What `now()` gives: the time it began.
     now: i64,
     log: Vec<(Call, Answer)>,
@@ -143,18 +159,29 @@ impl Session {
         if source.chars().count() > SOURCE_MOST {
             return Outcome::failed(&what, format!("a script is at most {SOURCE_MOST} characters"));
         }
-        let script = Script { chat: chat.id.clone(), call: call.clone(), now: self.clock.now, log: Vec::new(), ops: 0 };
+        let script = Script {
+            chat: chat.id.clone(),
+            call: call.clone(),
+            what,
+            source: source.to_string(),
+            params: None,
+            now: self.clock.now,
+            log: Vec::new(),
+            ops: 0,
+        };
         self.script_go(chat, profile, script)
     }
 
     /// Run `script` as far as it goes: to its end, or to a message one of its calls waits for
     /// (kept then, for [`Session::script_body`]).
     fn script_go(&mut self, chat: &mut Chat, profile: &AiProfile, mut script: Script) -> Outcome {
-        let what = what_of(&script.call.input);
-        let source = script.call.input.get("script").and_then(Value::as_str).unwrap_or_default();
+        let what = script.what.clone();
         let names = script_tools();
         let names: Vec<&str> = names.iter().map(String::as_str).collect();
-        let mut runner = match Runner::new(source, &names, script.now) {
+        self.kept_load();
+        let library = kept::library(self.kept_loaded());
+        let with = With { library: &library, params: script.params.as_ref() };
+        let mut runner = match Runner::with(&script.source, with, &names, script.now) {
             Ok(r) => r,
             Err(why) => return Outcome::failed(&what, why),
         };
@@ -236,7 +263,7 @@ impl Session {
         let outcome = match self.assistant_profile(&chat) {
             Err(e) => {
                 withdraw(&mut chat, &script.call.id);
-                Outcome::failed(&what_of(&script.call.input), said(&e))
+                Outcome::failed(&script.what, said(&e))
             }
             Ok(profile) => {
                 let answer = match came {

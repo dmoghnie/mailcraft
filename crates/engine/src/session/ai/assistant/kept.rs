@@ -32,6 +32,8 @@ const EXPIRE_EVERY: i64 = 3_600;
 fn left_off(chat: Chat) -> Chat {
     let waited = chat.runs.iter().any(|r| r.state == RunState::Waiting);
     let deciding = chat.runs.iter().any(|r| r.state == RunState::Proposed);
+    // A script, kept or not, made calls of its own.
+    let scripts: HashSet<String> = chat.runs.iter().filter_map(|r| r.part_of.clone()).collect();
     let runs = chat
         .runs
         .into_iter()
@@ -40,6 +42,7 @@ fn left_off(chat: Chat) -> Chat {
                 let result = match r.tool.as_str() {
                     script::RUN_SCRIPT => NOT_ENDED,
                     script::ASK => NOT_ANSWERED,
+                    _ if scripts.contains(&r.call) => NOT_ENDED,
                     _ => NOT_READ,
                 };
                 ToolRun { state: RunState::Failed, result: result.into(), ..r }

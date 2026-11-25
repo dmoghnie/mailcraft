@@ -116,7 +116,9 @@ fn answered(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, i: usize,
     for call in &turn.turn.calls {
         if let Some(run) = chat.run(&call.id).filter(|r| r.state != RunState::PutOff) {
             card(ui, t, chat, run, acts);
-            if run.tool == SCRIPT {
+            // A script, one kept called by its name, or one proposed to be kept.
+            let parts = chat.runs.iter().any(|r| r.part_of.as_deref() == Some(call.id.as_str()));
+            if run.tool == SCRIPT || run.tool == KEEP || parts {
                 script_parts(ui, t, chat, &call.id, call.input.get("script").and_then(|v| v.as_str()).unwrap_or_default(), acts);
             }
         }
@@ -127,6 +129,8 @@ fn answered(ui: &mut Ui, t: &Tokens, a: &mut AssistantUi, chat: &Chat, i: usize,
 const SCRIPT: &str = "run_script";
 /// A script's question to the model.
 const ASK: &str = "ask";
+/// The tool that proposes keeping a script.
+const KEEP: &str = "keep_script";
 
 /// A script's own, under its card: a card for each change it proposed, to decide on; and,
 /// folded, its code and a card for each read it made.
@@ -139,7 +143,9 @@ fn script_parts(ui: &mut Ui, t: &Tokens, chat: &Chat, call: &str, code: &str, ac
         egui::CollapsingHeader::new(RichText::new(tl!("The script")).small().color(t.dim)).id_salt(("assistant-script-code", &chat.id, call)).show(
             ui,
             |ui| {
-                ui.add(egui::Label::new(RichText::new(code).monospace().small().color(t.dim)).wrap().selectable(true));
+                if !code.is_empty() {
+                    ui.add(egui::Label::new(RichText::new(code).monospace().small().color(t.dim)).wrap().selectable(true));
+                }
                 for read in parts.iter().filter(|r| r.input.is_null()) {
                     card(ui, t, chat, read, acts);
                 }
@@ -229,6 +235,7 @@ fn tool_title(tool: &str) -> &str {
         "change_event" | "change_person" | "change_task" | "change_note" => tl!("Edit"),
         "delete_items" => tl!("Delete"),
         SCRIPT => tl!("Ran a script"),
+        KEEP => tl!("Keep a script"),
         ASK => tl!("Asked the model"),
         other => other,
     }

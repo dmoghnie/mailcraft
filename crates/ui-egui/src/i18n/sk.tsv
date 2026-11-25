@@ -2204,6 +2204,7 @@ count	occurrences	opakovaní
 	Longest answer, in tokens	Najdlhšia odpoveď, v tokenoch
 	Takes in at once, in tokens	Prijme naraz, v tokenoch
 	Ran a script	Spustil skript
+	Keep a script	Uchovať skript
 	Asked the model	Opýtal sa modelu
 	Waiting for the answer…	Čaká sa na odpoveď…
 	The script	Skript

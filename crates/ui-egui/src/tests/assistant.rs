@@ -363,3 +363,26 @@ fn a_failed_question_is_tried_again_from_the_pane() {
     let t = texts(&ctx, &mut a);
     assert!(has(&t, "Try again") && !has(&t, "So far"), "{t:?}");
 }
+
+/// A script the model proposes to keep has its card, to approve, with its code under it; kept,
+/// it's listed.
+#[test]
+fn a_script_proposed_to_be_kept_is_approved_from_its_card() {
+    let (mut a, ctx) = ready("assistant-keep-script");
+    let id = a.session.prefs.ai.profiles[0].id.clone();
+    a.run(
+        "ai.saveProfile",
+        json!({"id": id, "name": "Local", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small", "scripts": true}),
+    );
+    a.run("assistant.pane", json!({"on": true}));
+    a.run("assistant.send", json!({"text": "Keep that"}));
+    let chat = a.ui.assistant.chat.clone().expect("the pane shows the chat begun");
+    let keep = json!({"name": "unread_count", "about": "How many messages are unread", "script": "find_messages(#{query: \"is:unread\"}).total"});
+    answers(&mut a, &chat, "", &[("keep_script", keep)]);
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "Keep a script") && has(&t, "The script") && has(&t, "Approve"), "{t:?}");
+    click_named(&ctx, &mut a, "Approve");
+    frame(&ctx, &mut a, vec![]);
+    let kept = a.session.run("script.list", &json!({})).unwrap();
+    assert!(kept["scripts"].as_array().unwrap().iter().any(|k| k["name"] == "unread_count"), "{kept}");
+}

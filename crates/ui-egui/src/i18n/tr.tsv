@@ -2190,6 +2190,7 @@ count	occurrences	kez
 	Longest answer, in tokens	En uzun yanıt, token olarak
 	Takes in at once, in tokens	Bir seferde alabildiği, token olarak
 	Ran a script	Bir betik çalıştırdı
+	Keep a script	Betiği sakla
 	Asked the model	Modele sordu
 	Waiting for the answer…	Yanıt bekleniyor…
 	The script	Betik

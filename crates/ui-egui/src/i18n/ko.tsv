@@ -2189,6 +2189,7 @@ count	occurrences	회
 	Longest answer, in tokens	가장 긴 답변(토큰)
 	Takes in at once, in tokens	한 번에 받는 양(토큰)
 	Ran a script	스크립트를 실행함
+	Keep a script	스크립트 보관
 	Asked the model	모델에 질문함
 	Waiting for the answer…	답변을 기다리는 중…
 	The script	스크립트

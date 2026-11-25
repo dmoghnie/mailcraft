@@ -2190,6 +2190,7 @@ count	occurrences	Terminen
 	Longest answer, in tokens	Längste Antwort, in Token
 	Takes in at once, in tokens	Nimmt auf einmal auf, in Token
 	Ran a script	Skript ausgeführt
+	Keep a script	Skript behalten
 	Asked the model	Das Modell gefragt
 	Waiting for the answer…	Wartet auf die Antwort…
 	The script	Das Skript
