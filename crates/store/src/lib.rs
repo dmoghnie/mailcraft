@@ -29,7 +29,7 @@ pub use packed::growth as data_file_growth;
 #[doc(hidden)]
 pub use packed::{fuzz_data_file, fuzz_data_folder};
 
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -196,6 +196,8 @@ pub struct Store {
     removals: Arc<RwLock<HashMap<String, u64>>>,
     /// Read marks kept on a thread of their own ([`Store::mark_later`]).
     marking: Arc<marking::Marking>,
+    /// Documents written on a thread of their own ([`Store::save_doc_later`]).
+    docs: Arc<docs_later::DocsLater>,
     /// The folder layout's folders lease, held while any clone lives (`leases.rs`): another
     /// copy's data files don't bring its folders in meanwhile.
     _folders: Option<Arc<leases::Lease>>,
@@ -230,6 +232,7 @@ impl Store {
             search_writers: Arc::default(),
             removals: Arc::default(),
             marking: Arc::default(),
+            docs: Arc::default(),
             _folders: folders,
         }
     }
@@ -293,7 +296,15 @@ impl Store {
     /// A small document at the top of the data folder (`rules.json`, `snoozes.json`); empty when
     /// missing or damaged. `name` is a plain file name.
     pub fn load_doc<T: DeserializeOwned + Default>(&self, name: &str) -> Result<T> {
-        self.read_json(&self.root.join(safe_doc(name)))
+        // One handed over to be written ([`Store::save_doc_later`]) is as it was handed.
+        match self.doc_handed(name) {
+            Some(Some(bytes)) => Ok(serde_json::from_slice(&bytes).unwrap_or_else(|e| {
+                log::warn!("{name}, as it was handed over to be written, can't be read as asked: {e}");
+                T::default()
+            })),
+            Some(None) => Ok(T::default()),
+            None => self.read_json(&self.root.join(safe_doc(name))),
+        }
     }
 
     pub fn save_doc<T: Serialize + ?Sized>(&self, name: &str, value: &T) -> Result<()> {
@@ -303,9 +314,16 @@ impl Store {
     /// The names of the documents at the top of the data folder ([`Store::save_doc`]) that begin
     /// with `prefix`, sorted.
     pub fn doc_names(&self, prefix: &str) -> Vec<String> {
-        let mut names: Vec<String> = self.files.list(&self.root).into_iter().map(|(n, _)| n).filter(|n| n.starts_with(prefix)).collect();
-        names.sort();
-        names
+        let mut names: BTreeSet<String> = self.files.list(&self.root).into_iter().map(|(n, _)| n).filter(|n| n.starts_with(prefix)).collect();
+        // As they will be once what was handed over to be written is.
+        for (name, kept) in self.docs_handed().into_iter().filter(|(n, _)| n.starts_with(prefix)) {
+            if kept {
+                names.insert(name);
+            } else {
+                names.remove(&name);
+            }
+        }
+        names.into_iter().collect()
     }
 
     /// A document at the top of the data folder ([`Store::save_doc`]) removed; one not there is
@@ -473,6 +491,7 @@ mod accounts;
 mod beside;
 mod bodies;
 mod compacting;
+mod docs_later;
 mod files;
 mod folders;
 mod marking;

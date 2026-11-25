@@ -5,6 +5,7 @@
 
 use mailcraft_model::{AiChat, AiRole, AiToolCall, AiToolResult, AiTurn, AiWork, Job, MessageKey};
 
+use super::context::cut;
 use super::looking::said;
 use super::tools::{Outcome, reads, tools_for};
 use super::*;
@@ -123,7 +124,7 @@ impl Session {
     /// What the person said put in `chat`, after what its open calls came to (those not
     /// decided are declined: the person went on).
     fn assistant_said(&mut self, chat: &mut Chat, text: &str, context: &[ContextItem], profile: Option<Option<String>>) -> Result<(), CmdError> {
-        if chat.turns.len() >= TURNS_MOST {
+        if chat.turns.len() >= TURNS_MOST || chat.size() >= CHAT_SIZE_MOST {
             return Err(CmdError::Disabled("this chat is as long as a chat gets: begin another".into()));
         }
         if let Some(p) = profile {
@@ -333,6 +334,10 @@ impl Session {
                 _ => format!("{}{proposed}", run.result),
             };
             results.push(AiToolResult { id: c.id.clone(), content, error: run.state == RunState::Failed });
+            // The model's copy, whole, is the turn's now; the card shows the start of it.
+            if run.state == RunState::Ran {
+                run.result = cut(&run.result, RUN_RESULT_KEPT);
+            }
         }
         self.scripts_stopped(chat);
         results
@@ -488,6 +493,10 @@ fn own_ids(chat: &Chat, calls: Vec<AiToolCall>) -> Vec<AiToolCall> {
         })
         .collect()
 }
+
+/// The most of what a tool gave kept on its card, in characters: the whole is in the turn the
+/// model is sent, and a read kept twice made a long chat twice as long.
+const RUN_RESULT_KEPT: usize = 1_000;
 
 /// A call's run, as it went.
 pub(super) fn run_of(call: &AiToolCall, outcome: Outcome) -> ToolRun {

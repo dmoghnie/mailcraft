@@ -4,7 +4,7 @@
 
 use super::*;
 use crate::{CmdError, Session};
-use mailcraft_store::Store;
+use mailcraft_store::{Store, StoreError};
 
 /// The list of chats kept.
 const HEADS_DOC: &str = "assistant.json";
@@ -155,14 +155,16 @@ impl Session {
         let changed = std::mem::take(&mut a.changed);
         let heads = std::mem::take(&mut a.heads_changed);
         let Some(store) = self.store.clone() else { return };
+        // On the store's thread: written whole and flushed to the disk, a long chat held the
+        // window's frame at every step.
         for id in changed {
             if let Some(chat) = self.ai.assistant.chats.get(&id)
-                && let Err(e) = store.save_doc(&chat_doc(&id), chat)
+                && let Err(e) = store.save_doc_later(&chat_doc(&id), chat)
             {
                 log::warn!("a chat with MailCraft's AI couldn't be kept: {e}");
             }
         }
-        if heads && let Err(e) = store.save_doc(HEADS_DOC, &self.ai.assistant.heads) {
+        if heads && let Err(e) = store.save_doc_later(HEADS_DOC, &self.ai.assistant.heads) {
             log::warn!("the list of MailCraft's AI chats couldn't be kept: {e}");
         }
     }
@@ -185,10 +187,11 @@ impl Session {
         }
         self.scripts_let_go(id);
         if let Some(store) = &self.store {
-            // Its copy set aside as damaged too: it holds mail as well.
-            for doc in [chat_doc(id), format!("{}.bad", chat_doc(id))] {
-                store.remove_doc(&doc).map_err(|e| CmdError::Failed(format!("the chat couldn't be deleted: {e}")))?;
-            }
+            // After any copy of it still to be written; and its copy set aside as damaged too
+            // (never written later): it holds mail as well.
+            let failed = |e: StoreError| CmdError::Failed(format!("the chat couldn't be deleted: {e}"));
+            store.remove_doc_later(&chat_doc(id)).map_err(failed)?;
+            store.remove_doc(&format!("{}.bad", chat_doc(id))).map_err(failed)?;
         }
         Ok(())
     }
@@ -205,7 +208,7 @@ impl Session {
         if let Some(store) = &self.store {
             let left = store.doc_names(CHAT_DOC).into_iter().chain(store.doc_names(&format!("{HEADS_DOC}.bad")));
             for doc in left {
-                store.remove_doc(&doc).map_err(|e| CmdError::Failed(format!("a chat couldn't be deleted: {e}")))?;
+                store.remove_doc_later(&doc).map_err(|e| CmdError::Failed(format!("a chat couldn't be deleted: {e}")))?;
             }
         }
         Ok(ids.len())

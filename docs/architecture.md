@@ -154,6 +154,9 @@ and `cargo xtask sizes` enforces them.
   call ids never hold a `#`; the script's calls are `{script}#{n}`.
 - **Chats stay on this computer**: `assistant.json` lists them, each in `assistant-<id>.json`
   (read when first wanted, its file removed when it's deleted); never in the record or the log.
+  They're written on the store's thread (`store/src/docs_later.rs`, read back as handed over,
+  waited for at closing); a card keeps the first thousand characters of what a tool gave, the
+  turn keeps it whole; a chat takes no more past 8 MB.
 - **The pane** (`ui-egui/src/panes/assistant/`) shows the chat from the session, never a copy:
   what the person says and decides goes through `assistant.*` commands. An answer is Markdown
   (`egui_commonmark`) with each picture made a link, so nothing is fetched; its links open as a

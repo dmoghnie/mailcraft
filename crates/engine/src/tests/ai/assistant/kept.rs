@@ -12,6 +12,7 @@ fn chats_are_kept_on_this_computer_and_deleted_whole() {
     answer(&mut s, q, "Remembered.");
     s.take_jobs();
     let store = s.store.clone().unwrap();
+    store.flush_docs();
     let file = store.root().join(format!("assistant-{c}.json"));
     assert!(file.exists());
     let mut again = Session::open(Some(store.clone()), mailcraft_model::dates::Clock::new(NOW, 0));
@@ -23,6 +24,7 @@ fn chats_are_kept_on_this_computer_and_deleted_whole() {
     assert!(!log.contains("Remember"), "the record holds no chat: {log}");
     again.run("assistant.delete", &json!({"chat": c})).unwrap();
     again.take_jobs();
+    store.flush_docs();
     assert!(!file.exists());
     let again = Session::open(Some(store), mailcraft_model::dates::Clock::new(NOW, 0)).run("assistant.chats", &json!({})).unwrap();
     assert_eq!(again["chats"], json!([]));
@@ -44,6 +46,7 @@ fn a_damaged_list_of_chats_is_made_again_from_their_files() {
         .collect();
     s.take_jobs();
     let store = s.store.clone().unwrap();
+    store.flush_docs();
     std::fs::write(store.root().join("assistant.json"), b"{ damaged").unwrap();
     let mut again = Session::open(Some(store.clone()), mailcraft_model::dates::Clock::new(NOW, 0));
     let list = again.run("assistant.chats", &json!({})).unwrap();
@@ -87,6 +90,7 @@ fn a_chat_cut_short_by_closing_says_so_when_read_again() {
     assert!(chat(&mut open(), &c)["chat"]["error"].is_null(), "answered: nothing cut short");
     // A read that waited for its message as MailCraft closed: failed, and the chat says so.
     let file = format!("assistant-{c}.json");
+    store.flush_docs();
     let kept: crate::Chat = store.load_doc(&file).unwrap();
     let call = AiToolCall { id: "call_0".into(), name: "read_message".into(), input: json!({"id": "m1"}) };
     let turn = crate::ChatTurn {
@@ -126,6 +130,7 @@ fn deleting_chats_leaves_no_copy_of_them() {
     answer(&mut s, q, "Kept.");
     s.take_jobs();
     let store = s.store.clone().unwrap();
+    store.flush_docs();
     let root = store.root().to_path_buf();
     std::fs::write(root.join(format!("assistant-{c}.json.bad")), b"{ mail").unwrap();
     s.run("assistant.delete", &json!({"chat": c})).unwrap();
@@ -139,6 +144,44 @@ fn deleting_chats_leaves_no_copy_of_them() {
     }
     assert_eq!(s.run("assistant.deleteAll", &json!({})).unwrap()["deleted"], 1);
     s.take_jobs();
+    store.flush_docs();
     let files: Vec<String> = std::fs::read_dir(&root).unwrap().flatten().map(|e| e.file_name().to_string_lossy().into_owned()).collect();
     assert!(files.iter().all(|f| !f.starts_with("assistant") || f == "assistant.json"), "{d}: {files:?}");
+}
+
+/// What a read gave is kept once: whole in the turn the model is sent, its start on the card.
+#[test]
+fn what_a_read_gave_is_kept_once() {
+    let mut s = ready("assistant-kept-once");
+    let c = send(&mut s, None, "Read the storyboard mail");
+    let (q, _) = question(&mut s);
+    calls(&mut s, q, "", &[("find_messages", json!({"query": "", "limit": 50}))]);
+    let (_, asked) = question(&mut s);
+    let whole = &asked.turns.last().unwrap().results[0].content;
+    assert!(whole.chars().count() > 1_000, "a long result: {}", whole.len());
+    let v = chat(&mut s, &c);
+    let card = v["chat"]["runs"][0]["result"].as_str().unwrap();
+    assert!(card.chars().count() < 1_100 && whole.starts_with(card.split("\n[… cut here").next().unwrap()), "{card}");
+}
+
+/// A chat that holds as much as a chat gets takes no more: another is begun.
+#[test]
+fn a_chat_as_big_as_a_chat_gets_takes_no_more() {
+    let mut s = ready("assistant-big");
+    let c = send(&mut s, None, "Begin");
+    let (q, _) = question(&mut s);
+    answer(&mut s, q, "Begun.");
+    s.take_jobs();
+    let store = s.store.clone().unwrap();
+    store.flush_docs();
+    let file = format!("assistant-{c}.json");
+    let kept: crate::Chat = store.load_doc(&file).unwrap();
+    let mut turns = kept.turns.clone();
+    turns[1].turn.text = "x".repeat(9 << 20);
+    store.save_doc(&file, &crate::Chat { turns, ..kept }).unwrap();
+    let mut again = Session::open(Some(store), mailcraft_model::dates::Clock::new(NOW, 0));
+    again.run("ai.allow", &json!({"account": "sample", "reach": "local"})).unwrap();
+    local(&mut again, "Local");
+    let e = again.run("assistant.send", &json!({"chat": c, "text": "More"})).unwrap_err().to_string();
+    assert!(e.contains("as long as a chat gets"), "{e}");
 }

@@ -48,6 +48,9 @@ pub const STEPS_MOST: u32 = 24;
 const TURNS_MOST: usize = 2000;
 /// The longest thing the person says in a turn, in bytes.
 const SAID_MOST: usize = 64 << 10;
+/// The most a chat holds, in bytes of its turns, before it takes no more (each step of an
+/// answer writes it whole): a few hundred long messages read.
+const CHAT_SIZE_MOST: usize = 8 << 20;
 
 /// A chat with MailCraft's AI, kept on this computer. Its `Debug` form gives only its size: it
 /// holds mail.
@@ -107,6 +110,11 @@ impl Chat {
     pub fn can_ask_again(&self) -> bool {
         let owed = self.turns.last().is_some_and(|t| t.turn.role == AiRole::User || t.stopped);
         owed && self.proposals().is_empty() && !self.runs.iter().any(|r| r.state == RunState::Waiting)
+    }
+
+    /// How much it holds, in bytes: its turns, with their thinking and what was pointed at.
+    pub fn size(&self) -> usize {
+        self.turns.iter().map(|t| t.turn.size().saturating_add(t.thinking.len()).saturating_add(t.context_text.len())).fold(0, usize::saturating_add)
     }
 
     /// Whether it waits on the person: a change proposed, not decided yet.
@@ -213,7 +221,8 @@ pub struct ToolRun {
     /// The events and people it found.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub found: Vec<Found>,
-    /// What it gave back to the model.
+    /// What it gave back to the model: once the model has it (whole, in the chat's turns), its
+    /// first thousand characters, what a card shows.
     #[serde(default)]
     pub result: String,
     /// The script whose call it is (its call), shown under it: none, the model's own.
