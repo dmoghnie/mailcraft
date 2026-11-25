@@ -40,6 +40,7 @@ pub use context::{CONTEXT_AT_FIRST, ContextItem, ITEMS_MOST as CONTEXT_ITEMS_MOS
 pub use links::{Found, LINK as ASSISTANT_LINK, Linked, message_link as assistant_message_link};
 #[doc(hidden)]
 pub use script::run_script_against;
+pub use script::{KeptScript, ScriptParam};
 pub use window::{ASSISTANT_WIDTH, AssistantPane};
 
 /// The most of steps (answers with tool calls) the assistant takes for one thing the person
@@ -290,6 +291,11 @@ impl Assistant {
     /// The chats kept, newest first.
     pub fn heads(&self) -> impl Iterator<Item = &ChatHead> {
         self.heads.iter().rev()
+    }
+
+    /// The scripts kept, once read ([`Session::assistant_scripts`] reads them).
+    pub fn kept_scripts(&self) -> &[KeptScript] {
+        self.kept.as_deref().unwrap_or_default()
     }
 
     /// Chat `id`, if it's been read ([`Session::assistant_shown`] reads it).

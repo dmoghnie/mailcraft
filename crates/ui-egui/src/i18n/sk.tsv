@@ -2205,6 +2205,18 @@ count	occurrences	opakovaní
 	Takes in at once, in tokens	Prijme naraz, v tokenoch
 	Ran a script	Spustil skript
 	Keep a script	Uchovať skript
+	Scripts	Skripty
+	Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval	Skripty, ktoré si AI MailCraftu ponechala na opätovné spustenie, a skripty samotného MailCraftu. Model, ktorému povolíte písať a spúšťať skripty, ich môže spúšťať; zmena, o ktorú niektorý žiada, čaká na vaše schválenie
+	Add a script	Pridať skript
+	Written in Rhai, as MailCraft's AI writes them	Písané v Rhai, ako ich píše AI MailCraftu
+	Change a script	Zmeniť skript
+	Lower-case letters, digits and _: other scripts call it by this name	Malé písmená, číslice a _: iné skripty ho volajú týmto názvom
+	What it does	Čo robí
+	MailCraft's AI reads this to know when to run it	AI MailCraftu z toho vie, kedy ho spustiť
+	What it takes	Čo prijíma
+	One a line: its name, then what it is. The script reads each from params, as params.days	Jedno na riadok: názov, potom čo to je. Skript číta každé z params, napríklad params.days
+	Code, in Rhai	Kód, v Rhai
+	On: MailCraft's AI can run it	Zapnutý: AI MailCraftu ho môže spustiť
 	Asked the model	Opýtal sa modelu
 	Waiting for the answer…	Čaká sa na odpoveď…
 	The script	Skript

@@ -2186,6 +2186,18 @@ count	occurrences	keer
 	Takes in at once, in tokens	Neemt in één keer op, in tokens
 	Ran a script	Script uitgevoerd
 	Keep a script	Script bewaren
+	Scripts	Scripts
+	Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval	Scripts die de AI van MailCraft heeft bewaard om opnieuw uit te voeren, en die van MailCraft zelf. Een model dat scripts mag schrijven en uitvoeren kan ze uitvoeren; een wijziging die er een vraagt wacht op je goedkeuring
+	Add a script	Script toevoegen
+	Written in Rhai, as MailCraft's AI writes them	Geschreven in Rhai, zoals de AI van MailCraft ze schrijft
+	Change a script	Script wijzigen
+	Lower-case letters, digits and _: other scripts call it by this name	Kleine letters, cijfers en _: andere scripts roepen het met deze naam aan
+	What it does	Wat het doet
+	MailCraft's AI reads this to know when to run it	De AI van MailCraft leest dit om te weten wanneer het uit te voeren
+	What it takes	Wat het krijgt
+	One a line: its name, then what it is. The script reads each from params, as params.days	Eén per regel: de naam, dan wat het is. Het script leest elk uit params, zoals params.days
+	Code, in Rhai	Code, in Rhai
+	On: MailCraft's AI can run it	Aan: de AI van MailCraft kan het uitvoeren
 	Asked the model	Het model gevraagd
 	Waiting for the answer…	Wacht op het antwoord…
 	The script	Het script

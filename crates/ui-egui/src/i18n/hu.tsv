@@ -2191,6 +2191,18 @@ count	occurrences	előfordulás
 	Takes in at once, in tokens	Egyszerre befogad, tokenben
 	Ran a script	Szkriptet futtatott
 	Keep a script	Szkript megtartása
+	Scripts	Szkriptek
+	Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval	A MailCraft MI-je által újrafuttatásra megtartott szkriptek, és a MailCraft sajátjai. Az a modell, amely szkripteket írhat és futtathat, futtathatja őket; az általuk kért változtatás a jóváhagyására vár
+	Add a script	Szkript hozzáadása
+	Written in Rhai, as MailCraft's AI writes them	Rhai nyelven írva, ahogy a MailCraft MI-je írja őket
+	Change a script	Szkript módosítása
+	Lower-case letters, digits and _: other scripts call it by this name	Kisbetűk, számjegyek és _: más szkriptek ezen a néven hívják
+	What it does	Mit csinál
+	MailCraft's AI reads this to know when to run it	A MailCraft MI-je ebből tudja, mikor futtassa
+	What it takes	Mit kap
+	One a line: its name, then what it is. The script reads each from params, as params.days	Soronként egy: a neve, majd hogy mi az. A szkript mindegyiket a params-ból olvassa, például params.days
+	Code, in Rhai	Kód, Rhai nyelven
+	On: MailCraft's AI can run it	Be: a MailCraft MI-je futtathatja
 	Asked the model	Megkérdezte a modellt
 	Waiting for the answer…	Várakozás a válaszra…
 	The script	A szkript

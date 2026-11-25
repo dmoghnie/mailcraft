@@ -20,8 +20,9 @@ use mailcraft_model::{AiTool, AiToolCall, MessageKey};
 use serde_json::{Value, json};
 
 pub(super) use self::asking::ASK;
+pub(crate) use self::kept::commands as script_commands;
 pub(super) use self::kept::{KEEP_SCRIPT, keep_tool, kept_tools};
-pub(crate) use self::kept::{KeptScript, commands as script_commands};
+pub use self::kept::{KeptScript, ScriptParam};
 use self::run::{Answer, CALLS_MOST, Call, OPS_ALL, RHAI, Ran, Runner, With};
 use super::context::cut;
 use super::exchange::run_of;

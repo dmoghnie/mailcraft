@@ -2187,6 +2187,18 @@ count	occurrences	回
 	Takes in at once, in tokens	一度に受け取れる量 (トークン数)
 	Ran a script	スクリプトを実行しました
 	Keep a script	スクリプトを保存
+	Scripts	スクリプト
+	Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval	MailCraft の AI が再び実行するために保存したスクリプトと、MailCraft 自身のスクリプトです。スクリプトの作成と実行を許可したモデルが実行できます。スクリプトが求める変更はあなたの承認を待ちます
+	Add a script	スクリプトを追加
+	Written in Rhai, as MailCraft's AI writes them	MailCraft の AI と同じく Rhai で書かれます
+	Change a script	スクリプトを変更
+	Lower-case letters, digits and _: other scripts call it by this name	英小文字、数字、_ のみ: 他のスクリプトはこの名前で呼び出します
+	What it does	何をするか
+	MailCraft's AI reads this to know when to run it	MailCraft の AI はこれを読んで、いつ実行するかを判断します
+	What it takes	受け取るもの
+	One a line: its name, then what it is. The script reads each from params, as params.days	1 行に 1 つ: 名前、続けてその内容。スクリプトは params.days のように params から読み取ります
+	Code, in Rhai	コード (Rhai)
+	On: MailCraft's AI can run it	オン: MailCraft の AI が実行できます
 	Asked the model	モデルに質問しました
 	Waiting for the answer…	回答を待っています…
 	The script	スクリプト

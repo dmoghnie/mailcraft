@@ -160,7 +160,7 @@ and `cargo xtask sizes` enforces them.
   functions alone merged in, so nothing outside one runs), and a model that may run scripts as
   tools of their own, run as `run_script` is. Keeping one is a change (`keep_script`, checked:
   a free name, code that compiles) made once the person approves its card; `script.*` lists,
-  changes, turns off and deletes them.
+  changes, turns off and deletes them, as Options' Scripts card does.
 - **Chats stay on this computer**: `assistant.json` lists them, each in `assistant-<id>.json`
   (read when first wanted, its file removed when it's deleted); never in the record or the log.
   They're written on the store's thread (`store/src/docs_later.rs`, read back as handed over,

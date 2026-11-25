@@ -2204,6 +2204,18 @@ count	occurrences	повторений
 	Takes in at once, in tokens	Вмещает за раз, в токенах
 	Ran a script	Запустил скрипт
 	Keep a script	Сохранить скрипт
+	Scripts	Скрипты
+	Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval	Скрипты, которые ИИ MailCraft сохранил, чтобы запускать снова, и собственные скрипты MailCraft. Их может запускать модель, которой разрешено писать и запускать скрипты; изменение, которого требует скрипт, ждёт вашего одобрения
+	Add a script	Добавить скрипт
+	Written in Rhai, as MailCraft's AI writes them	Пишутся на Rhai, как их пишет ИИ MailCraft
+	Change a script	Изменить скрипт
+	Lower-case letters, digits and _: other scripts call it by this name	Строчные латинские буквы, цифры и _: другие скрипты вызывают его по этому имени
+	What it does	Что делает
+	MailCraft's AI reads this to know when to run it	ИИ MailCraft читает это, чтобы знать, когда его запускать
+	What it takes	Что принимает
+	One a line: its name, then what it is. The script reads each from params, as params.days	По одному в строке: имя, затем что это. Скрипт читает каждое из params, например params.days
+	Code, in Rhai	Код на Rhai
+	On: MailCraft's AI can run it	Включён: ИИ MailCraft может его запускать
 	Asked the model	Спросил модель
 	Waiting for the answer…	Ожидание ответа…
 	The script	Скрипт

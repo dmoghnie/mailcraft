@@ -2186,6 +2186,18 @@ count	occurrences	مرات
 	Takes in at once, in tokens	ما يستوعبه دفعة واحدة، بالرموز المميّزة
 	Ran a script	شغّل نصًا برمجيًا
 	Keep a script	الاحتفاظ بنص برمجي
+	Scripts	النصوص البرمجية
+	Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval	نصوص برمجية احتفظ بها ذكاء MailCraft الاصطناعي ليشغّلها مجددًا، ونصوص MailCraft نفسه. يمكن للنموذج الذي تسمح له بكتابة النصوص البرمجية وتشغيلها أن يشغّلها؛ وأي تغيير يطلبه أحدها ينتظر موافقتك
+	Add a script	إضافة نص برمجي
+	Written in Rhai, as MailCraft's AI writes them	مكتوبة بلغة Rhai، كما يكتبها ذكاء MailCraft الاصطناعي
+	Change a script	تغيير نص برمجي
+	Lower-case letters, digits and _: other scripts call it by this name	أحرف إنجليزية صغيرة وأرقام و_: تستدعيه النصوص الأخرى بهذا الاسم
+	What it does	ماذا يفعل
+	MailCraft's AI reads this to know when to run it	يقرأ ذكاء MailCraft الاصطناعي هذا ليعرف متى يشغّله
+	What it takes	ما يأخذه
+	One a line: its name, then what it is. The script reads each from params, as params.days	واحد في كل سطر: اسمه، ثم ما هو. يقرأ النص البرمجي كلًّا منها من params، مثل params.days
+	Code, in Rhai	الشيفرة، بلغة Rhai
+	On: MailCraft's AI can run it	مُفعّل: يمكن لذكاء MailCraft الاصطناعي تشغيله
 	Asked the model	سأل النموذج
 	Waiting for the answer…	في انتظار الإجابة…
 	The script	النص البرمجي

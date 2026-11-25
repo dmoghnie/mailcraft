@@ -30,6 +30,13 @@ impl Session {
         self.ai.assistant.heads().cloned().collect()
     }
 
+    /// The scripts MailCraft's AI keeps, read from this computer the first time (MailCraft's
+    /// own when none were kept).
+    pub fn assistant_scripts(&mut self) -> &[KeptScript] {
+        self.kept_load();
+        self.ai.assistant.kept_scripts()
+    }
+
     /// Chat `id` as it stands, read from this computer if it isn't yet: none when there's no
     /// such chat or its file couldn't be read.
     pub fn assistant_shown(&mut self, id: &str) -> Option<&Chat> {

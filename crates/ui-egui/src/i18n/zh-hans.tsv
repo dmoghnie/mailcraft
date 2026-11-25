@@ -2187,6 +2187,18 @@ count	occurrences	次
 	Takes in at once, in tokens	一次能接收的量（token 数）
 	Ran a script	运行了脚本
 	Keep a script	保留脚本
+	Scripts	脚本
+	Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval	MailCraft 的 AI 为再次运行而保留的脚本，以及 MailCraft 自带的脚本。允许编写并运行脚本的模型可以运行它们；脚本要求的更改会等待你的批准
+	Add a script	添加脚本
+	Written in Rhai, as MailCraft's AI writes them	用 Rhai 编写，与 MailCraft 的 AI 编写的方式相同
+	Change a script	更改脚本
+	Lower-case letters, digits and _: other scripts call it by this name	小写字母、数字和 _：其他脚本用这个名称调用它
+	What it does	它做什么
+	MailCraft's AI reads this to know when to run it	MailCraft 的 AI 据此判断何时运行它
+	What it takes	它接收什么
+	One a line: its name, then what it is. The script reads each from params, as params.days	每行一个：名称，然后说明它是什么。脚本从 params 读取每一项，例如 params.days
+	Code, in Rhai	代码（Rhai）
+	On: MailCraft's AI can run it	开启：MailCraft 的 AI 可以运行它
 	Asked the model	询问了模型
 	Waiting for the answer…	正在等待回答…
 	The script	脚本

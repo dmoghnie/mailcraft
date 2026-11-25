@@ -44,8 +44,8 @@ pub use accounts::{Changes, ImportState, Imports, SignInCheck, TrustedCertificat
 pub use ai::run_script_against;
 pub use ai::{
     AI_LOG_KEPT, ASSISTANT_LINK, ASSISTANT_WIDTH, AiLogEntry, AiPrefs, AiProfile, AiReach, AiState, AiTask, AiTest, Assistant, AssistantPane,
-    CONTEXT_AT_FIRST, CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, Chat, ChatHead, ChatTurn, ContextItem, RunState, STEPS_MOST, ToolRun, ai_server,
-    ai_url_is_local, assistant_message_link,
+    CONTEXT_AT_FIRST, CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, Chat, ChatHead, ChatTurn, ContextItem, KeptScript, RunState, STEPS_MOST, ScriptParam,
+    ToolRun, ai_server, ai_url_is_local, assistant_message_link,
 };
 pub(crate) use ai::{ai_commands, assistant_commands};
 use changing::Batch;

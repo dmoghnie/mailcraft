@@ -2190,6 +2190,18 @@ count	occurrences	次
 	Takes in at once, in tokens	一次能接收的量（token 數）
 	Ran a script	執行了指令碼
 	Keep a script	保留指令碼
+	Scripts	指令碼
+	Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval	MailCraft 的 AI 為再次執行而保留的指令碼，以及 MailCraft 內建的指令碼。允許編寫並執行指令碼的模型可以執行它們；指令碼要求的變更會等待你的核准
+	Add a script	新增指令碼
+	Written in Rhai, as MailCraft's AI writes them	以 Rhai 編寫，與 MailCraft 的 AI 編寫的方式相同
+	Change a script	變更指令碼
+	Lower-case letters, digits and _: other scripts call it by this name	小寫字母、數字和 _：其他指令碼以這個名稱呼叫它
+	What it does	它做什麼
+	MailCraft's AI reads this to know when to run it	MailCraft 的 AI 據此判斷何時執行它
+	What it takes	它接收什麼
+	One a line: its name, then what it is. The script reads each from params, as params.days	每行一個：名稱，然後說明它是什麼。指令碼從 params 讀取每一項，例如 params.days
+	Code, in Rhai	程式碼（Rhai）
+	On: MailCraft's AI can run it	開啟：MailCraft 的 AI 可以執行它
 	Asked the model	詢問了模型
 	Waiting for the answer…	正在等待回答…
 	The script	指令碼

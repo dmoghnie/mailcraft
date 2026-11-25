@@ -113,3 +113,42 @@ fn how_long_chats_are_kept_is_shown_on_options() {
     assert!(has(&drawn_strings(&ctx, &mut a, TALL), "For 30 days"));
     assert_eq!(a.session.prefs.ai.chats_days, 30);
 }
+
+/// File › Options › AI lists the scripts MailCraft's AI keeps once there's a model: one turned
+/// off by its switch, one changed in its dialog (code that doesn't compile refused there), and
+/// deleted, each button named by its script.
+#[test]
+fn kept_scripts_are_turned_off_changed_and_deleted_on_options() {
+    let _tall = crate::tests::windows::layout::Dressed::new(TALL, "");
+    let (mut a, ctx) = options("ai-options-scripts");
+    assert!(!has(&drawn_strings(&ctx, &mut a, TALL), "waiting_on_me"), "no model yet: no scripts");
+    a.run("ai.saveProfile", json!({"name": "Ollama", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small"}));
+    frame(&ctx, &mut a, vec![]);
+    let texts = drawn_strings(&ctx, &mut a, TALL);
+    assert!(["Scripts", "waiting_on_me", "today", "tidy"].iter().all(|w| has(&texts, w)), "{texts:?}");
+    let switch = crate::tests::named(&ctx, &mut a, TALL)
+        .into_iter()
+        .find(|n| n.role == egui::accesskit::Role::CheckBox && n.label.as_deref() == Some("tidy"))
+        .and_then(|n| n.centre())
+        .expect("tidy's switch");
+    crate::tests::click(&ctx, &mut a, switch);
+    let kept = |a: &mut MailApp| a.session.run("script.list", &json!({})).unwrap()["scripts"].as_array().unwrap().clone();
+    assert!(kept(&mut a).iter().any(|k| k["name"] == "tidy" && k["off"] == true), "turned off");
+    click_named(&ctx, &mut a, "today: Change…");
+    let Some(Dialog::Script(f)) = a.ui.dialog.as_mut() else { panic!("the script's dialog: {:?}", a.ui.dialog) };
+    assert_eq!(f.was.as_deref(), Some("today"));
+    f.name = "the_day".into();
+    f.code = "let x = ;".into();
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "Save");
+    let Some(Dialog::Script(f)) = a.ui.dialog.as_mut() else { panic!("kept open: {:?}", a.ui.dialog) };
+    assert!(f.error.as_deref().is_some_and(|e| e.contains("compile")), "{:?}", f.error);
+    f.code = "find_tasks(#{}).total".into();
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "Save");
+    assert!(a.ui.dialog.is_none(), "saved: {:?}", a.ui.dialog);
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "the_day: Delete");
+    let names: Vec<serde_json::Value> = kept(&mut a).iter().map(|k| k["name"].clone()).collect();
+    assert_eq!(names, ["waiting_on_me", "waiting_on_them", "person_history", "tidy"]);
+}

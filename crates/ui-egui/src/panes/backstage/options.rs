@@ -31,6 +31,7 @@ pub(super) fn options(s: &Session, st: &UiState, ui: &mut Ui, acts: &mut Vec<Act
     safety::privacy(s, &t, ui, acts);
     ai::models(s, &t, ui, acts);
     ai::accounts(s, &t, ui, acts);
+    ai::scripts(s, &t, ui, acts);
     ai::record(s, &t, ui);
 }
 

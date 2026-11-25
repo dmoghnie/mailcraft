@@ -2191,6 +2191,18 @@ count	occurrences	kez
 	Takes in at once, in tokens	Bir seferde alabildiği, token olarak
 	Ran a script	Bir betik çalıştırdı
 	Keep a script	Betiği sakla
+	Scripts	Betikler
+	Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval	MailCraft yapay zekâsının yeniden çalıştırmak için sakladığı betikler ve MailCraft'ın kendi betikleri. Betik yazıp çalıştırmasına izin verdiğiniz bir model bunları çalıştırabilir; birinin istediği değişiklik onayınızı bekler
+	Add a script	Betik ekle
+	Written in Rhai, as MailCraft's AI writes them	MailCraft yapay zekâsının yazdığı gibi Rhai ile yazılır
+	Change a script	Betiği değiştir
+	Lower-case letters, digits and _: other scripts call it by this name	Küçük harfler, rakamlar ve _: diğer betikler onu bu adla çağırır
+	What it does	Ne yapar
+	MailCraft's AI reads this to know when to run it	MailCraft yapay zekâsı onu ne zaman çalıştıracağını bundan anlar
+	What it takes	Ne alır
+	One a line: its name, then what it is. The script reads each from params, as params.days	Her satıra bir tane: adı, ardından ne olduğu. Betik her birini params içinden okur, örneğin params.days
+	Code, in Rhai	Kod (Rhai)
+	On: MailCraft's AI can run it	Açık: MailCraft yapay zekâsı onu çalıştırabilir
 	Asked the model	Modele sordu
 	Waiting for the answer…	Yanıt bekleniyor…
 	The script	Betik

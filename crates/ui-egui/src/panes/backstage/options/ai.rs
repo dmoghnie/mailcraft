@@ -1,11 +1,11 @@
 //! Options' AI cards: the models MailCraft's own AI may ask, how far each account's mail may go
-//! to them, and the record of what went where. Nothing is sent until a model is added and an
+//! to them, the scripts it keeps, and the record of what went where. Nothing is sent until a model is added and an
 //! account's mail let go to it.
 
 use super::*;
-use crate::dialogs::AiModelForm;
+use crate::dialogs::{AiModelForm, ScriptForm};
 use mailcraft_engine::model::dates;
-use mailcraft_engine::{AiProfile, AiReach, AiTask, AiTest};
+use mailcraft_engine::{AiProfile, AiReach, AiTask, AiTest, KeptScript};
 
 /// The newest questions the record shows.
 const RECORD_SHOWN: usize = 20;
@@ -94,24 +94,63 @@ fn profile(s: &Session, t: &Tokens, ui: &mut Ui, p: &AiProfile, acts: &mut Vec<A
     }
     let about = lines.join("\n");
     setting(ui, t, false, &p.name, Some(&about), |ui| {
-        if button(ui, p, tl!("Remove"), true).clicked() {
+        if button(ui, &p.name, tl!("Remove"), true).clicked() {
             acts.push(Action::Run("ai.removeProfile", json!({"id": p.id})));
         }
-        if button(ui, p, tl!("Change…"), true).clicked() {
+        if button(ui, &p.name, tl!("Change…"), true).clicked() {
             acts.push(Action::Dialog(Dialog::AiModel(Box::new(AiModelForm::of(p)))));
         }
-        if button(ui, p, tl!("Test"), !testing).clicked() {
+        if button(ui, &p.name, tl!("Test"), !testing).clicked() {
             acts.push(Action::Run("ai.test", json!({"profile": p.id})));
         }
     });
 }
 
-/// One of a model's buttons, named to a screen reader with the model first (`Ollama: Test`):
-/// each model's row has the same ones.
-fn button(ui: &mut Ui, p: &AiProfile, label: &str, enabled: bool) -> egui::Response {
+/// One of a model's or a script's buttons, named to a screen reader with whose it is first
+/// (`Ollama: Test`): each row has the same ones.
+fn button(ui: &mut Ui, whose: &str, label: &str, enabled: bool) -> egui::Response {
     let resp = ui.add_enabled(enabled, egui::Button::new(label));
-    widgets::named(ui, &resp, &format!("{}: {label}", p.name), enabled, None);
+    widgets::named(ui, &resp, &format!("{whose}: {label}"), enabled, None);
     resp
+}
+
+/// The scripts MailCraft's AI keeps, MailCraft's own among them, once there's a model: each
+/// turned on or off, changed or deleted; and one added.
+pub(super) fn scripts(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
+    if s.prefs.ai.profiles.is_empty() {
+        return;
+    }
+    let about = tl!(
+        "Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval"
+    );
+    let kept = s.ai.assistant.kept_scripts();
+    card(ui, t, tl!("Scripts"), Some(about), |ui| {
+        for (i, k) in kept.iter().enumerate() {
+            kept_script(t, ui, i == 0, k, acts);
+        }
+        let more = tl!("Written in Rhai, as MailCraft's AI writes them");
+        setting(ui, t, kept.is_empty(), tl!("Add a script"), Some(more), |ui| {
+            if ui.button(tl!("Add…")).clicked() {
+                acts.push(Action::Dialog(Dialog::Script(Box::default())));
+            }
+        });
+    });
+}
+
+/// A kept script: its name and what it does, its buttons, and the switch that turns it on.
+fn kept_script(t: &Tokens, ui: &mut Ui, first: bool, k: &KeptScript, acts: &mut Vec<Action>) {
+    setting(ui, t, first, &k.name, Some(&k.about), |ui| {
+        if button(ui, &k.name, tl!("Delete"), true).clicked() {
+            acts.push(Action::Run("script.delete", json!({"name": k.name})));
+        }
+        if button(ui, &k.name, tl!("Change…"), true).clicked() {
+            acts.push(Action::Dialog(Dialog::Script(Box::new(ScriptForm::of(k)))));
+        }
+        let mut on = !k.off;
+        if widgets::switch(ui, t, &mut on, &k.name).changed() {
+            acts.push(Action::Run("script.turn", json!({"name": k.name, "on": on})));
+        }
+    });
 }
 
 /// Which model does each kind of work: the first one, unless another is chosen.

@@ -254,7 +254,7 @@ impl Session {
 
     /// The kept scripts, as read so far.
     pub(in crate::session::ai::assistant) fn kept_loaded(&self) -> &[KeptScript] {
-        self.ai.assistant.kept.as_deref().unwrap_or_default()
+        self.ai.assistant.kept_scripts()
     }
 
     /// The kept script named `name` that's on.

@@ -2191,6 +2191,18 @@ count	occurrences	occurrences
 	Takes in at once, in tokens	Prend en une fois, en jetons
 	Ran a script	A exécuté un script
 	Keep a script	Conserver un script
+	Scripts	Scripts
+	Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval	Les scripts que l'IA de MailCraft a gardés pour les exécuter à nouveau, et ceux de MailCraft. Un modèle que vous laissez écrire et exécuter des scripts peut les exécuter ; une modification demandée par l'un d'eux attend votre accord
+	Add a script	Ajouter un script
+	Written in Rhai, as MailCraft's AI writes them	Écrits en Rhai, comme les écrit l'IA de MailCraft
+	Change a script	Modifier un script
+	Lower-case letters, digits and _: other scripts call it by this name	Lettres minuscules, chiffres et _ : les autres scripts l'appellent par ce nom
+	What it does	Ce qu'il fait
+	MailCraft's AI reads this to know when to run it	L'IA de MailCraft lit ceci pour savoir quand l'exécuter
+	What it takes	Ce qu'il reçoit
+	One a line: its name, then what it is. The script reads each from params, as params.days	Un par ligne : son nom, puis ce que c'est. Le script lit chacun dans params, comme params.days
+	Code, in Rhai	Code, en Rhai
+	On: MailCraft's AI can run it	Activé : l'IA de MailCraft peut l'exécuter
 	Asked the model	A interrogé le modèle
 	Waiting for the answer…	En attente de la réponse…
 	The script	Le script

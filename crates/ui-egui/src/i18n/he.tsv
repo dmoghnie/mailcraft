@@ -2186,6 +2186,18 @@ count	occurrences	פעמים
 	Takes in at once, in tokens	קולט בבת אחת, בטוקנים
 	Ran a script	הריץ סקריפט
 	Keep a script	שמירת סקריפט
+	Scripts	סקריפטים
+	Scripts MailCraft's AI kept to run again, and MailCraft's own. A model you let write and run scripts can run them; a change one calls for waits for your approval	סקריפטים שה-AI של MailCraft שמר כדי להריץ שוב, ואלה של MailCraft עצמו. מודל שהרשית לו לכתוב ולהריץ סקריפטים יכול להריץ אותם; שינוי שאחד מהם מבקש ממתין לאישורך
+	Add a script	הוספת סקריפט
+	Written in Rhai, as MailCraft's AI writes them	כתובים ב-Rhai, כפי שה-AI של MailCraft כותב אותם
+	Change a script	שינוי סקריפט
+	Lower-case letters, digits and _: other scripts call it by this name	אותיות לטיניות קטנות, ספרות ו-_: סקריפטים אחרים קוראים לו בשם הזה
+	What it does	מה הוא עושה
+	MailCraft's AI reads this to know when to run it	ה-AI של MailCraft קורא זאת כדי לדעת מתי להריץ אותו
+	What it takes	מה הוא מקבל
+	One a line: its name, then what it is. The script reads each from params, as params.days	אחד בכל שורה: שמו, ואחריו מה הוא. הסקריפט קורא כל אחד מ-params, כמו params.days
+	Code, in Rhai	קוד, ב-Rhai
+	On: MailCraft's AI can run it	פעיל: ה-AI של MailCraft יכול להריץ אותו
 	Asked the model	שאל את המודל
 	Waiting for the answer…	ממתין לתשובה…
 	The script	הסקריפט
