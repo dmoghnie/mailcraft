@@ -409,7 +409,8 @@ impl MailApp {
             | "compose.writeFrom"
             | "mail.digest"
             | "mail.facts"
-            | "mail.summarizeAttachment" => {
+            | "mail.summarizeAttachment"
+            | "ai.learnStyle" => {
                 if let Err(mailcraft_engine::CmdError::Disabled(m)) = self.ran(id, &p) {
                     self.session.notice(m, true);
                 }

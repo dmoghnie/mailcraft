@@ -13,6 +13,7 @@ mod needs_me;
 mod rewriting;
 mod servers;
 mod settings;
+mod style;
 
 pub(crate) use about::commands as about_commands;
 pub use about::{AboutKind, AboutMessage, FactAmount, FactEvent, FactTask, FactTracking, Facts, ai_reads_file, facts_from};
@@ -33,3 +34,5 @@ pub use rewriting::{Rewrite, RewriteHow};
 pub(crate) use servers::commands as mcp_server_commands;
 pub use servers::{McpServer, ServerTools};
 pub use settings::{AiPrefs, AiProfile, AiReach, AiTask, local_url as ai_url_is_local};
+pub use style::STYLE_MOST;
+pub(crate) use style::commands as style_commands;

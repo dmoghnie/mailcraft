@@ -5,7 +5,7 @@
 use super::*;
 use crate::dialogs::{AiModelForm, ScriptForm, ServerForm};
 use mailcraft_engine::model::{McpTarget, dates};
-use mailcraft_engine::{AiProfile, AiReach, AiTask, AiTest, DigestWhen, KeptScript, McpServer, ServerTools};
+use mailcraft_engine::{AiProfile, AiReach, AiTask, AiTest, DigestWhen, KeptScript, McpServer, STYLE_MOST, ServerTools};
 
 /// The newest questions the record shows.
 const RECORD_SHOWN: usize = 20;
@@ -50,8 +50,46 @@ pub(super) fn models(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action
             };
             switch_row(ui, t, false, needs_me, acts);
             digest_when(t, ui, ai.digest, acts);
+            style(s, t, ui, acts);
         }
         keep_chats(t, ui, ai.chats_days, acts);
+    });
+}
+
+/// How the person writes, given with each email MailCraft's AI writes for them: learned from
+/// their sent mail when they ask, and theirs to change (kept as it's left).
+fn style(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
+    let about =
+        tl!("How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like");
+    setting(ui, t, false, tl!("Your writing style"), Some(about), |ui| {
+        ui.vertical(|ui| {
+            let id = egui::Id::unique("ai-style");
+            let saved = s.prefs.ai.style.clone();
+            let mut text: String = ui.data_mut(|d| d.get_temp::<String>(id)).unwrap_or_else(|| saved.clone());
+            let edit = egui::TextEdit::multiline(&mut text).hint_text(tl!("None yet")).desired_width(320.0).desired_rows(4).char_limit(STYLE_MOST);
+            let r = ui.add(edit);
+            if r.lost_focus() && text.trim() != saved {
+                acts.push(Action::Run("ai.setStyle", json!({"text": text.trim()})));
+            }
+            // Kept while it's typed in; the saved style shows again after.
+            if r.has_focus() {
+                ui.data_mut(|d| d.insert_temp(id, text));
+            } else {
+                ui.data_mut(|d| d.remove::<String>(id));
+            }
+            let shown = s.style_shown();
+            if shown["learning"].as_bool() == Some(true) {
+                ui.horizontal(|ui| {
+                    ui.spinner();
+                    ui.label(RichText::new(tl!("Learning from your sent mail…")).color(t.dim));
+                });
+            } else if ui.button(tl!("Learn from my sent mail")).clicked() {
+                acts.push(Action::Run("ai.learnStyle", json!({})));
+            }
+            if let Some(e) = shown["error"].as_str() {
+                ui.label(RichText::new(tf!("It couldn't be learned: {error}", error = e)).small().color(t.danger));
+            }
+        });
     });
 }
 

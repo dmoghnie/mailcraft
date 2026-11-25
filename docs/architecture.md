@@ -242,7 +242,11 @@ and `cargo xtask sizes` enforces them.
   own text (`rich::splice`, its look plain), and Undo puts the text back while it's still as it
   was put in. A follow-up to sent mail nobody answered (`mail.noAnswerFollowUp` with `write`)
   is the same, written from fixed words and the person's own message. The menu and the card
-  are `ui-egui/src/reading/compose/rewriting.rs`.
+  are `ui-egui/src/reading/compose/rewriting.rs`. Writing (not rewriting), the model is given
+  the person's style (`session/ai/style.rs`, `style_said`): a few lines learned by the chat
+  model from the newest sent mail of the accounts that may lend it (`ai.learnStyle`, what each
+  message quotes left out, at most 30 of them), kept with the settings (`AiPrefs::style`, at
+  most 2,000 characters) and theirs to change (`ai.setStyle`).
 - **Links** (`session/ai/assistant/links.rs`): the tools name each message by `m` and ten hex
   digits of its id's FNV-1a hash, since an id holds its folder's name (spaces and all) and a
   Markdown link can't; events (`e`, `find_events`), people (`p`, `find_people`), tasks (`t`)

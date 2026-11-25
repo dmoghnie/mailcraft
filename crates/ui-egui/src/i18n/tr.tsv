@@ -2351,3 +2351,9 @@ count	occurrences	kez
 	Reading the file…	Dosya okunuyor…
 	The file couldn't be read: {error}	Dosya okunamadı: {error}
 	Close the file's summary	Dosya özetini kapat
+	Your writing style	Yazma tarzınız
+	How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like	Nasıl yazdığınız; MailCraft'ın yapay zekâsının sizin için yazdığı her e-postayla verilir. İstediğinizde gönderdiğiniz postalardan öğrenilir; dilediğiniz gibi değiştirin
+	None yet	Henüz yok
+	Learn from my sent mail	Gönderdiğim postalardan öğren
+	Learning from your sent mail…	Gönderdiğiniz postalardan öğreniliyor…
+	It couldn't be learned: {error}	Öğrenilemedi: {error}

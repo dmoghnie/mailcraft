@@ -80,6 +80,7 @@ pub const READS: &[&str] = &[
     "mail.digestShown",
     "mail.factsFound",
     "mail.attachmentSummary",
+    "ai.style",
     "mail.needsMe",
     "mail.summary",
     "mail.translation",

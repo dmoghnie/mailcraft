@@ -2364,3 +2364,9 @@ count	occurrences	повторений
 	Reading the file…	Чтение файла…
 	The file couldn't be read: {error}	Не удалось прочитать файл: {error}
 	Close the file's summary	Закрыть сводку файла
+	Your writing style	Ваш стиль письма
+	How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like	Как вы пишете — передаётся с каждым письмом, которое ИИ MailCraft пишет за вас. Изучается по отправленной почте по вашему запросу; меняйте как хотите
+	None yet	Пока нет
+	Learn from my sent mail	Изучить мою отправленную почту
+	Learning from your sent mail…	Изучается ваша отправленная почта…
+	It couldn't be learned: {error}	Не удалось изучить: {error}

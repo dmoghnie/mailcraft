@@ -133,6 +133,9 @@ pub struct AiPrefs {
     pub digest: super::DigestWhen,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub digest_language: Option<String>,
+    /// How the person writes, given with each email written for them (`style.rs`).
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub style: String,
 }
 
 impl AiPrefs {

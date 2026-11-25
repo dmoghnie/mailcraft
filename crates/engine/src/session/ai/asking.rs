@@ -108,6 +108,8 @@ pub struct AiState {
     pub(super) needs_me: super::needs_me::NeedsMe,
     /// The digest (`digest.rs`).
     pub(super) digest: super::digest::DigestState,
+    /// The person's writing style being learned (`style.rs`).
+    pub(super) style: super::style::StyleState,
 }
 
 impl AiState {
@@ -287,6 +289,7 @@ impl Session {
                     || self.rewrite_came(id, &w.profile, &result)
                     || self.needs_me_came(id, &result)
                     || self.digest_came(id, &w.profile, &result)
+                    || self.style_came(id, &result)
                 {
                     return;
                 }

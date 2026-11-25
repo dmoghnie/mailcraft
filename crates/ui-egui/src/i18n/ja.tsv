@@ -2347,3 +2347,9 @@ count	occurrences	回
 	Reading the file…	ファイルを読み取っています…
 	The file couldn't be read: {error}	ファイルを読み取れませんでした: {error}
 	Close the file's summary	ファイルの要約を閉じる
+	Your writing style	あなたの文体
+	How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like	あなたの書き方。MailCraft の AI があなたの代わりに書くメールごとに伝えます。求めたときに送信済みメールから学習し、自由に変更できます
+	None yet	まだありません
+	Learn from my sent mail	送信済みメールから学習
+	Learning from your sent mail…	送信済みメールから学習しています…
+	It couldn't be learned: {error}	学習できませんでした: {error}

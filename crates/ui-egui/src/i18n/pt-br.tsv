@@ -2351,3 +2351,9 @@ count	occurrences	ocorrências
 	Reading the file…	Lendo o arquivo…
 	The file couldn't be read: {error}	Não foi possível ler o arquivo: {error}
 	Close the file's summary	Fechar o resumo do arquivo
+	Your writing style	Seu estilo de escrita
+	How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like	Como você escreve, informado a cada e-mail que a IA do MailCraft escreve por você. Aprendido dos seus e-mails enviados quando você pede; altere como quiser
+	None yet	Nenhum ainda
+	Learn from my sent mail	Aprender com meus e-mails enviados
+	Learning from your sent mail…	Aprendendo com seus e-mails enviados…
+	It couldn't be learned: {error}	Não foi possível aprender: {error}

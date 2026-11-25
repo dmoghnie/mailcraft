@@ -2351,3 +2351,9 @@ count	occurrences	Terminen
 	Reading the file…	Datei wird gelesen…
 	The file couldn't be read: {error}	Die Datei konnte nicht gelesen werden: {error}
 	Close the file's summary	Zusammenfassung der Datei schließen
+	Your writing style	Ihr Schreibstil
+	How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like	Wie Sie schreiben, mitgegeben bei jeder E-Mail, die die KI von MailCraft für Sie schreibt. Auf Wunsch aus Ihren gesendeten E-Mails gelernt; ändern Sie ihn nach Belieben
+	None yet	Noch keiner
+	Learn from my sent mail	Aus meinen gesendeten E-Mails lernen
+	Learning from your sent mail…	Lernt aus Ihren gesendeten E-Mails…
+	It couldn't be learned: {error}	Er konnte nicht gelernt werden: {error}

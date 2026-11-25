@@ -59,7 +59,7 @@ pub use session::{
     sweep::{SWEEP_DAYS, StandingSweep, SweepChoice, SweepOf},
     vips::{VIP_FOLDER, VIPS_MAX},
 };
-pub use session::{FactAmount, FactEvent, FactTask, FactTracking, Facts, ai_reads_file, facts_from};
+pub use session::{FactAmount, FactEvent, FactTask, FactTracking, Facts, STYLE_MOST, ai_reads_file, facts_from};
 
 /// What `--version` prints for the program `name` (`mailcraft`, `mailcraft-cli`): its version,
 /// plus the commit and date of release builds (packaging/common.sh).

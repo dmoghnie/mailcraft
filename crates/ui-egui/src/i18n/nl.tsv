@@ -2346,3 +2346,9 @@ count	occurrences	keer
 	Reading the file…	Bestand wordt gelezen…
 	The file couldn't be read: {error}	Het bestand kon niet worden gelezen: {error}
 	Close the file's summary	Samenvatting van het bestand sluiten
+	Your writing style	Uw schrijfstijl
+	How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like	Hoe u schrijft, meegegeven bij elke e-mail die de AI van MailCraft voor u schrijft. Op verzoek geleerd uit uw verzonden mail; pas het aan zoals u wilt
+	None yet	Nog geen
+	Learn from my sent mail	Leren van mijn verzonden mail
+	Learning from your sent mail…	Leert van uw verzonden mail…
+	It couldn't be learned: {error}	Kon niet worden geleerd: {error}

@@ -2350,3 +2350,9 @@ count	occurrences	次
 	Reading the file…	正在讀取檔案…
 	The file couldn't be read: {error}	無法讀取檔案：{error}
 	Close the file's summary	關閉檔案摘要
+	Your writing style	你的寫作風格
+	How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like	你的寫作方式，MailCraft 的 AI 為你寫的每封郵件都會參考。在你要求時從寄件備份中學習，可隨意修改
+	None yet	尚無
+	Learn from my sent mail	從我的寄件備份中學習
+	Learning from your sent mail…	正在從你的寄件備份中學習…
+	It couldn't be learned: {error}	無法學習：{error}

@@ -2346,3 +2346,9 @@ count	occurrences	مرات
 	Reading the file…	جارٍ قراءة الملف…
 	The file couldn't be read: {error}	تعذّرت قراءة الملف: {error}
 	Close the file's summary	إغلاق ملخص الملف
+	Your writing style	أسلوبك في الكتابة
+	How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like	طريقتك في الكتابة، تُعطى مع كل رسالة يكتبها لك ذكاء MailCraft الاصطناعي. تُتعلَّم من بريدك المرسل عندما تطلب ذلك، ويمكنك تغييرها كما تشاء
+	None yet	لا شيء بعد
+	Learn from my sent mail	التعلم من بريدي المرسل
+	Learning from your sent mail…	جارٍ التعلم من بريدك المرسل…
+	It couldn't be learned: {error}	تعذّر التعلم: {error}

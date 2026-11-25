@@ -515,3 +515,23 @@ fn a_file_is_summed_up_from_its_menu() {
     frame(&ctx, &mut a, vec![]);
     assert!(a.session.about_message(&key, AboutKind::Attachment(index)).is_none(), "let go");
 }
+
+/// The writing style in File › Options › AI: Learn from my sent mail asks the model, said while
+/// it's learned; the style kept shows in its box.
+#[test]
+fn the_writing_style_is_learned_from_options() {
+    // Tall enough for the whole Options page.
+    let _tall = windows::layout::Dressed::new(egui::vec2(1280.0, 8000.0), "");
+    let (mut a, ctx) = ready("assistant-style");
+    a.ui.backstage = Some(crate::backstage::Backstage::new(crate::backstage::Page::Options));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    assert!(has(&texts(&ctx, &mut a), "Your writing style"));
+    click_last(&ctx, &mut a, "Learn from my sent mail");
+    assert_eq!(a.session.style_shown()["learning"], true);
+    assert!(has(&texts(&ctx, &mut a), "Learning from your sent mail…"));
+    a.run("ai.setStyle", json!({"text": "Warm, brief."}));
+    frame(&ctx, &mut a, vec![]);
+    assert!(texts(&ctx, &mut a).iter().any(|s| s.contains("Warm, brief.")), "the style in its box");
+}

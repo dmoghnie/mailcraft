@@ -2365,3 +2365,9 @@ count	occurrences	opakovaní
 	Reading the file…	Číta sa súbor…
 	The file couldn't be read: {error}	Súbor sa nepodarilo prečítať: {error}
 	Close the file's summary	Zavrieť zhrnutie súboru
+	Your writing style	Váš štýl písania
+	How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like	Ako píšete – odovzdáva sa s každým e-mailom, ktorý za vás píše AI MailCraftu. Na požiadanie sa naučí z odoslanej pošty; meňte ho, ako chcete
+	None yet	Zatiaľ žiadny
+	Learn from my sent mail	Naučiť sa z mojej odoslanej pošty
+	Learning from your sent mail…	Učí sa z vašej odoslanej pošty…
+	It couldn't be learned: {error}	Nepodarilo sa naučiť: {error}

@@ -2346,3 +2346,9 @@ count	occurrences	פעמים
 	Reading the file…	קורא את הקובץ…
 	The file couldn't be read: {error}	לא ניתן היה לקרוא את הקובץ: {error}
 	Close the file's summary	סגירת סיכום הקובץ
+	Your writing style	סגנון הכתיבה שלך
+	How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like	איך אתה כותב, נמסר עם כל הודעה שה-AI של MailCraft כותב עבורך. נלמד מהדואר ששלחת כשתבקש; שנה אותו כרצונך
+	None yet	עדיין אין
+	Learn from my sent mail	ללמוד מהדואר שלי שנשלח
+	Learning from your sent mail…	לומד מהדואר ששלחת…
+	It couldn't be learned: {error}	לא ניתן היה ללמוד: {error}

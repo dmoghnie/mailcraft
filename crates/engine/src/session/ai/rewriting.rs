@@ -152,7 +152,7 @@ impl Session {
                 };
                 q.push_str(&format!("\n\n{what}:\n{a}"));
             }
-            (format!("{WRITE} Write in {language}."), q)
+            (format!("{WRITE} Write in {language}.{}", self.style_said()), q)
         } else {
             if own.is_empty() {
                 return Err(CmdError::Failed("there's no text to rewrite yet".into()));

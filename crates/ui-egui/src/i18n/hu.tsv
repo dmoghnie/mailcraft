@@ -2351,3 +2351,9 @@ count	occurrences	előfordulás
 	Reading the file…	A fájl olvasása…
 	The file couldn't be read: {error}	A fájlt nem sikerült beolvasni: {error}
 	Close the file's summary	A fájl összefoglalójának bezárása
+	Your writing style	Az írásstílusod
+	How you write, given with each email MailCraft's AI writes for you. Learned from your sent mail when you ask; change it as you like	Ahogyan írsz – a MailCraft MI minden neked írt levélhez megkapja. Kérésre az elküldött leveleidből tanulja meg; tetszés szerint módosíthatod
+	None yet	Még nincs
+	Learn from my sent mail	Tanulás az elküldött leveleimből
+	Learning from your sent mail…	Tanulás az elküldött leveleidből…
+	It couldn't be learned: {error}	Nem sikerült megtanulni: {error}

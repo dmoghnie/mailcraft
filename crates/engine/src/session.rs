@@ -40,6 +40,7 @@ pub(crate) use accounts::RuleChange;
 pub(crate) use accounts::data_file_path;
 pub use accounts::{AgeUnit, ArchiveRule, AutoArchive, Compacting, Compaction, FolderArchive, IDLE_AFTER_S};
 pub use accounts::{Changes, ImportState, Imports, SignInCheck, TrustedCertificate};
+pub use ai::STYLE_MOST;
 #[doc(hidden)]
 pub use ai::run_script_against;
 pub use ai::{
@@ -48,7 +49,9 @@ pub use ai::{
     FactAmount, FactEvent, FactTask, FactTracking, Facts, KeptScript, McpServer, Rewrite, RewriteHow, RunState, STEPS_MOST, ScriptParam, ServerTools,
     ToolRun, ai_reads_file, ai_server, ai_url_is_local, assistant_message_link, facts_from,
 };
-pub(crate) use ai::{about_commands, ai_commands, assistant_commands, digest_commands, mcp_server_commands, needs_me_commands, rewriting_commands};
+pub(crate) use ai::{
+    about_commands, ai_commands, assistant_commands, digest_commands, mcp_server_commands, needs_me_commands, rewriting_commands, style_commands,
+};
 use changing::Batch;
 pub(crate) use changing::NoticeAct;
 use changing::keys_by_account;
