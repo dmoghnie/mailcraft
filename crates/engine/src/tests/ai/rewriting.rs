@@ -129,3 +129,34 @@ fn an_empty_text_is_not_rewritten() {
     assert!(matches!(s.run("compose.rewrite", &json!({"how": "shorter"})), Err(CmdError::Failed(_))));
     assert!(asked(&mut s).is_empty());
 }
+
+/// A follow-up to sent mail nobody answered: the reply to everyone it went to begins with its
+/// text being written, from the person's own message and in its language, a proposal as any
+/// rewrite is; where the account's mail may not go, the reply begins all the same, unwritten.
+#[test]
+fn a_follow_up_is_written_for_sent_mail_nobody_answered() {
+    let mut s = ready("ai-follow-up");
+    s.run("mail.new", &json!({})).unwrap();
+    let mine = json!({"to": "ana@soundlab.example", "subject": "Mix notes?", "body": "Could you send the mix notes by Friday?\n"});
+    s.run("compose.update", &mine).unwrap();
+    s.run("compose.send", &json!({})).unwrap();
+    s.run("folder.open", &json!({"account": "sample", "folder": "Sent"})).unwrap();
+    let key = s.list.iter().find(|m| m.subject == "Mix notes?").map(|m| m.key.to_id()).unwrap();
+    s.take_jobs();
+    let v = s.run("mail.noAnswerFollowUp", &json!({"key": key, "write": true})).unwrap();
+    assert_eq!(v["writing"], true, "{v}");
+    let (_, _, _, chat) = asked(&mut s).pop().expect("a question");
+    assert!(chat.system.contains("the language their message is written in"), "{}", chat.system);
+    let q = &chat.turns[0].text;
+    assert!(q.contains("nobody has answered yet") && q.contains("mix notes by Friday"), "{q}");
+    assert_eq!(rewriting(&mut s)["how"], "followUp");
+    let before = body(&s);
+    assert!(!before.contains("had a chance"), "nothing put in by itself");
+    s.run("compose.rewrite", &json!({"how": "followUp"})).unwrap();
+    assert_eq!(asked(&mut s).len(), 1, "asked again, as Try again does");
+    s.run("compose.discard", &json!({})).unwrap();
+    s.run("ai.allow", &json!({"account": "sample", "reach": "off"})).unwrap();
+    let v = s.run("mail.noAnswerFollowUp", &json!({"key": key, "write": true})).unwrap();
+    assert_eq!(v["writing"], false, "{v}");
+    assert!(s.compose.is_some() && asked(&mut s).is_empty(), "begun, nothing sent");
+}

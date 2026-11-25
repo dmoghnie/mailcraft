@@ -74,9 +74,17 @@ pub(super) fn commands() -> Vec<CommandSpec> {
         })
         .when(|s| (!s.prefs.no_answer).then_some("turned off in File › Options › Mail")),
         CommandSpec::new("mail.noAnswerFollowUp", "Write a follow-up", "Inbox › No answer yet", |s, v| {
-            s.follow_up_no_answer(&parse_key(v).ok_or_else(|| CmdError::Params("key: a message you sent".into()))?)
+            let mut began = s.follow_up_no_answer(&parse_key(v).ok_or_else(|| CmdError::Params("key: a message you sent".into()))?)?;
+            // Its text written by MailCraft's AI, as a proposal, where the account's mail may go.
+            if p::bool(v, "write") == Some(true) {
+                let writing = s.write_follow_up();
+                if let Some(o) = began.as_object_mut() {
+                    o.insert("writing".into(), json!(writing));
+                }
+            }
+            Ok(began)
         })
-        .params(r#"{"key": string (a message you sent)} (shows it and begins a reply to all of its recipients)"#),
+        .params(r#"{"key": string (a message you sent), "write"?: bool (MailCraft's AI writes its text too, to put in with compose.useRewrite, where the account's mail may go to a model)} (shows it and begins a reply to all of its recipients)"#),
         CommandSpec::new("mail.noAnswerDismiss", "Dismiss", "Inbox › No answer yet", |s, v| {
             s.dismiss_no_answer(&parse_key(v).ok_or_else(|| CmdError::Params("key: a message you sent".into()))?)
         })

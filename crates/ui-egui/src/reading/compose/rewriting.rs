@@ -40,6 +40,7 @@ fn title(how: RewriteHow) -> &'static str {
         RewriteHow::Formal => tl!("More formal"),
         RewriteHow::Grammar => tl!("Fix spelling and grammar"),
         RewriteHow::FromWords => tl!("From a few words"),
+        RewriteHow::FollowUp => tl!("Follow-up"),
     }
 }
 

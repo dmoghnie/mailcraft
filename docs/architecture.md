@@ -215,7 +215,9 @@ and `cargo xtask sizes` enforces them.
   rule and the signature's `-- `), and, written from a few words, the message it answers. One
   rewrite at a time, for one message; it's a proposal until Replace splices it in place of the
   own text (`rich::splice`, its look plain), and Undo puts the text back while it's still as it
-  was put in. The menu and the card are `ui-egui/src/reading/compose/rewriting.rs`.
+  was put in. A follow-up to sent mail nobody answered (`mail.noAnswerFollowUp` with `write`)
+  is the same, written from fixed words and the person's own message. The menu and the card
+  are `ui-egui/src/reading/compose/rewriting.rs`.
 - **Links** (`session/ai/assistant/links.rs`): the tools name each message by `m` and ten hex
   digits of its id's FNV-1a hash, since an id holds its folder's name (spaces and all) and a
   Markdown link can't; events (`e`, `find_events`), people (`p`, `find_people`), tasks (`t`)

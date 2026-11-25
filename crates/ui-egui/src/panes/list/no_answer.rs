@@ -73,7 +73,10 @@ fn item(s: &Session, t: &theme::Tokens, ui: &mut Ui, m: &Summary, acts: &mut Vec
     if shown {
         acts.push(Action::Run("list.open", json!({"key": key})));
     }
+    // A follow-up's text is written by MailCraft's AI too, once a model is set up (where the
+    // account's mail may go to it): a proposal, put in from its card.
+    let write = !s.prefs.ai.profiles.is_empty();
     if let Some(id) = act {
-        acts.push(Action::Run(id, json!({"key": key})));
+        acts.push(Action::Run(id, json!({"key": key, "write": write && id == "mail.noAnswerFollowUp"})));
     }
 }

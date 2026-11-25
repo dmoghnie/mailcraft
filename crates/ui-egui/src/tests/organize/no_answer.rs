@@ -50,4 +50,32 @@ fn unanswered_mail_comes_back_over_the_inbox() {
     frame(&ctx, &mut a, vec![]);
     let subject = a.session.compose.as_ref().map(|c| c.subject.clone()).unwrap_or_default();
     assert!(subject.starts_with("Re: "), "{subject:?}");
+    assert!(a.session.rewrite().is_none(), "no model set up: its text isn't written");
+}
+
+/// With a model the account's mail may go to, a follow-up's text is written too: a proposal in
+/// its card, the reply's text unchanged until it's put in.
+#[test]
+fn a_follow_up_is_written_by_the_ai_with_a_model() {
+    let _screen = windows::layout::Dressed::new(SCREEN, "");
+    let (mut a, _) = app("no-answer-ai");
+    let ctx = egui::Context::default();
+    ctx.enable_accesskit();
+    a.run("ai.allow", json!({"account": "sample", "reach": "local"}));
+    a.run("ai.saveProfile", json!({"name": "Local", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small"}));
+    a.run("mail.new", json!({}));
+    a.run("compose.update", json!({"to": "ana@soundlab.example", "subject": "Budget for the mix?"}));
+    a.run("compose.send", json!({}));
+    a.run("folder.open", json!({"account": "sample", "folder": "INBOX"}));
+    a.services = Box::new(NullServices(NOW + 3 * 86_400));
+    for _ in 0..60 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    click_button(&ctx, &mut a, "Write a follow-up");
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    let r = a.session.rewrite().expect("its text asked for");
+    assert!(r.how == mailcraft_engine::RewriteHow::FollowUp && r.asking.is_some());
+    assert!(names_of(&ctx, &mut a).iter().any(|n| n == "Close the rewrite"), "its card, over the reply");
 }
