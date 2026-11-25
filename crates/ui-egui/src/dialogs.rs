@@ -11,7 +11,7 @@ use crate::theme::{self, Tokens};
 use crate::{Action, Icon, widgets};
 
 mod accounts;
-mod ai_model;
+mod ai;
 mod archiving;
 mod backup;
 mod categories;
@@ -32,7 +32,7 @@ mod writing;
 pub use accounts::*;
 use accounts::{addresses, dav, trust};
 pub use addresses::AddressForm;
-pub use ai_model::AiModelForm;
+pub use ai::AiModelForm;
 pub use archiving::{ArchiveForm, AutoArchiveForm, FolderArchiveForm, FolderMode};
 pub use backup::RestoreForm;
 pub use dav::DavForm;
@@ -762,7 +762,7 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         Dialog::TrustCertificate { .. } => trust::draw(ui, d, s, t, acts),
         Dialog::Signature(..) | Dialog::Vacation(..) => mailbox::draw(ui, d, s, t, acts),
         Dialog::Dav(f) => dav::draw(ui, f, t, acts),
-        Dialog::AiModel(f) => ai_model::draw(ui, f, s, t, acts),
+        Dialog::AiModel(f) => ai::draw_model(ui, f, s, t, acts),
         Dialog::Address(f) => addresses::draw(ui, f, s, t, acts),
         Dialog::Backup(..) | Dialog::Restore(..) => backup::draw(ui, d, t, acts),
         Dialog::Archive(..) | Dialog::AutoArchive(..) | Dialog::AutoArchiveDue => archiving::draw(ui, d, s, t, acts),

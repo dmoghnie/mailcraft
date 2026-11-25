@@ -93,7 +93,7 @@ impl AiModelForm {
     }
 }
 
-pub(super) fn draw(ui: &mut Ui, f: &mut AiModelForm, s: &Session, t: &Tokens, acts: &mut Vec<Action>) -> bool {
+pub(crate) fn draw(ui: &mut Ui, f: &mut AiModelForm, s: &Session, t: &Tokens, acts: &mut Vec<Action>) -> bool {
     ui.set_width(500.0);
     title(ui, t, if f.id.is_some() { "Change a model" } else { "Add a model" });
     if f.id.is_none() {
