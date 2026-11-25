@@ -351,7 +351,7 @@ impl MailApp {
             .registry()
             .all()
             .iter()
-            .filter(|c| !c.id.starts_with("options.agents"))
+            .filter(|c| self.session.agent_command(c.id).is_ok())
             .filter(|c| s.is_empty() || [c.id, c.label, c.location].iter().any(|x| x.to_lowercase().contains(&s)))
             .map(|c| {
                 let why = (c.enabled)(&self.session);

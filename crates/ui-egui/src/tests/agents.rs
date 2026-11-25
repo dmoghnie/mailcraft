@@ -59,16 +59,24 @@ fn agents_wait_for_the_user_before_running_a_command() {
     a.run("view.calendar", json!({}));
     assert!(matches!(a.agent_request("engine.execute", &json!({"command": "view.mail"})), AgentAnswer::Now(Ok(_))));
     assert_eq!(a.session.module, mailcraft_engine::Module::Mail);
-    // Their own settings, a command there isn't, params that aren't an object: refused at once.
+    // Their own settings, a command that starts a program, one there isn't, params that aren't
+    // an object: refused at once.
     for (cmd, params) in [
         ("options.agents", json!({"on": false})),
         ("options.agentsAlways", json!({"allow": "mail.send"})),
+        ("mcpServer.save", json!({"name": "x", "command": "rm"})),
         ("no.such", json!({})),
         ("view.mail", json!(3)),
     ] {
         let answer = a.agent_request("engine.execute", &json!({"command": cmd, "params": params}));
         assert!(matches!(answer, AgentAnswer::Now(Err(_))), "{cmd}: {answer:?}");
     }
+    assert!(a.session.prefs.ai.mcp.is_empty(), "no server added");
+    // Nor listed to them: only what they may ask for.
+    let AgentAnswer::Now(Ok(listed)) = a.agent_request("engine.commands", &json!({"search": "mcpServer"})) else { panic!("listed") };
+    let ids: Vec<&str> = listed.as_array().unwrap().iter().filter_map(|c| c["id"].as_str()).collect();
+    assert!(ids.contains(&"mcpServer.list"), "{ids:?}");
+    assert!(!ids.iter().any(|id| mailcraft_engine::agents::PERSON_ONLY.contains(id)), "{ids:?}");
     assert!(a.session.prefs.agents);
     // The sample's account kept from agents: what the window shows of it isn't told, and no
     // picture is taken (the window could show it).

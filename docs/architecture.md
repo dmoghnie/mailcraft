@@ -129,7 +129,8 @@ and `cargo xtask sizes` enforces them.
   what each listed (`mcp-tools.json`, read when first wanted), so tools are found without
   starting every server; `mcpServer.*` adds, changes, turns on and off, lists again and removes
   them, and `mcpServer.signIn` signs in to one. Adding or changing a server, or turning one on,
-  starts a program, and signing in uses the person's own account: the person's to do alone.
+  starts a program, and signing in uses the person's own account: the person's to do alone,
+  never an AI agent's, even one let to ask to run commands (`agents::PERSON_ONLY`).
   A script calls them
   (`script/mcp.rs`): `find_tools` searches what was listed, and `mcp(server, tool, args)` calls a
   tool that says it changes nothing (`readOnlyHint`), the script waiting for its answer as for

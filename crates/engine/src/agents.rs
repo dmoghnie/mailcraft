@@ -23,6 +23,14 @@ const DAYS_MAX: i64 = 366;
 /// The most people one answer lists.
 const PEOPLE_MAX: usize = 50;
 
+/// Commands an agent never runs, even let to ask, nor has run without asking: adding or changing
+/// an MCP server, or turning one on, starts a program on the person's computer, and signing in
+/// to one uses their own account.
+pub const PERSON_ONLY: [&str; 3] = ["mcpServer.save", "mcpServer.turn", "mcpServer.signIn"];
+
+/// Why an agent can't run one of [`PERSON_ONLY`].
+const PERSON_ONLY_SAID: &str = "Only the person using MailCraft adds an MCP server, turns one on or signs in to one (File › Options › AI): it starts a program on their computer, or uses their own account";
+
 /// A tool: its name, title, what it does, and its arguments (a JSON schema).
 pub struct AgentTool {
     pub name: &'static str,
@@ -176,13 +184,17 @@ fn text<'a>(args: &'a Value, name: &str) -> Option<&'a str> {
 
 impl Session {
     /// Whether agents may ask to run the command `id` at all (the window asks the user about
-    /// each, unless the user always allows it): one there is, and not one of the agents' own
-    /// settings, which only the user changes. Its label, to ask about it by.
+    /// each, unless the user always allows it): one there is, not one of the agents' own
+    /// settings, which only the user changes, nor one of [`PERSON_ONLY`]. Its label, to ask
+    /// about it by.
     pub fn agent_command(&self, id: &str) -> Result<&'static str, String> {
         let registry = self.registry();
         let label = registry.get(id).map(|spec| spec.label).ok_or_else(|| format!("no command `{id}` (list_commands has them)"))?;
         if id.starts_with("options.agents") {
             return Err("agents' own settings are the user's to change, in File › Options".into());
+        }
+        if PERSON_ONLY.contains(&id) {
+            return Err(PERSON_ONLY_SAID.into());
         }
         Ok(label)
     }

@@ -1,6 +1,6 @@
 //! MCP servers the person adds: checked as they're saved, listed once on, their tools kept
 //! across sessions, closed and forgotten with their key; signed in to, the sign-in kept while
-//! the address stays; and never an outside agent's to add, turn on or sign in to.
+//! the address stays; and never an AI agent's to add, turn on or sign in to.
 
 use mailcraft_model::{AiWork, Event, Job, McpDone, McpOAuth, McpTarget, McpTool, McpWork};
 use serde_json::{Value, json};
@@ -67,6 +67,26 @@ fn servers_are_added_listed_and_removed() {
     assert!(jobs.iter().any(|j| matches!(j, Job::Ai { work: AiWork::SaveKey { name, key: None } } if name == "mcp-m1")));
     assert_eq!(listed(&mut s).len(), 1);
 }
+/// Adding a server, changing one or turning it on starts a program, and signing in to one uses
+/// the person's own account: an AI agent never runs them, even let to ask to run commands, nor
+/// has them run without asking. It may list them.
+#[test]
+fn an_agent_never_adds_or_turns_on_a_server() {
+    let mut s = sample_session("mcp-servers-agents");
+    s.run("options.agentsRun", &json!({"on": true})).unwrap();
+    for (id, params) in [
+        ("mcpServer.save", json!({"name": "x", "command": "rm"})),
+        ("mcpServer.turn", json!({"id": "m1", "on": true})),
+        ("mcpServer.signIn", json!({"id": "m1"})),
+    ] {
+        let refused = s.agent_may_run(id, &params).unwrap_err();
+        assert!(refused.contains("Only the person using MailCraft"), "{id}: {refused}");
+        assert!(s.run("options.agentsAlways", &json!({"allow": id})).is_err(), "{id}: never without asking");
+    }
+    assert!(s.prefs.agents_always.is_empty());
+    assert!(s.agent_may_run("mcpServer.list", &json!({})).is_ok());
+}
+
 /// A server on the web is signed in to: the sign-in's work names its address and the key the
 /// sign-in is kept under; once signed in, it's listed with that key, and saving it again at the
 /// same address keeps the sign-in, which another address, or a key given, replaces. A program
