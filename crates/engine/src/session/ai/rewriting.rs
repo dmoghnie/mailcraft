@@ -24,6 +24,9 @@ const ANSWER_TOKENS: u32 = 4_000;
 /// The most of what to say taken, in characters.
 const WORDS_MOST: usize = 2_000;
 const NOT_WRITING: &str = "no message is being written";
+/// What an answer written with nothing said of it should say (`reply`, and the replies drafted
+/// for mail that needs the person: `drafting.rs`).
+pub(super) const ANSWER_IT: &str = "a reply that answers what the message below asks, as far as the message itself tells you; wherever only the person can know something (a decision, a date, a price, a yes or a no), leave a short gap in square brackets saying what goes there";
 /// What a follow-up should say.
 const FOLLOW_UP: &str = "a short, polite follow-up to their message below, which nobody has answered yet: ask whether the people it went to had a chance to look at it, and offer to help if anything is unclear; don't repeat the message";
 
@@ -42,6 +45,8 @@ pub enum RewriteHow {
     FromWords,
     /// A follow-up to the person's own message nobody answered, written for them.
     FollowUp,
+    /// An answer to the message it replies to, written with nothing said of what it says.
+    Reply,
 }
 
 impl RewriteHow {
@@ -54,11 +59,12 @@ impl RewriteHow {
             RewriteHow::Grammar => "grammar",
             RewriteHow::FromWords => "fromWords",
             RewriteHow::FollowUp => "followUp",
+            RewriteHow::Reply => "reply",
         }
     }
 
     fn from_code(code: &str) -> Option<RewriteHow> {
-        [RewriteHow::Shorter, RewriteHow::Warmer, RewriteHow::Formal, RewriteHow::Grammar, RewriteHow::FollowUp]
+        [RewriteHow::Shorter, RewriteHow::Warmer, RewriteHow::Formal, RewriteHow::Grammar, RewriteHow::FollowUp, RewriteHow::Reply]
             .into_iter()
             .find(|h| h.code() == code)
     }
@@ -70,7 +76,7 @@ impl RewriteHow {
             RewriteHow::Warmer => "Make it warmer and friendlier, still courteous.",
             RewriteHow::Formal => "Make it more formal and polite.",
             RewriteHow::Grammar => "Fix its spelling, grammar and punctuation only; change nothing else.",
-            RewriteHow::FromWords | RewriteHow::FollowUp => "",
+            RewriteHow::FromWords | RewriteHow::FollowUp | RewriteHow::Reply => "",
         }
     }
 }
@@ -127,8 +133,13 @@ impl Session {
         let (to, subject, source, forward) = (c.to.clone(), c.subject.clone(), c.source.clone(), c.mode == Some(mailcraft_mime::ReplyMode::Forward));
         let profile = self.ai_route(AiTask::Chat, Some(&account)).map_err(CmdError::Disabled)?.id.clone();
         let follow_up = how == RewriteHow::FollowUp;
-        let words = if follow_up { FOLLOW_UP } else { words };
-        let (system, question) = if how == RewriteHow::FromWords || follow_up {
+        let words = match how {
+            RewriteHow::FollowUp => FOLLOW_UP,
+            RewriteHow::Reply if source.is_none() || forward => return Err(CmdError::Failed("it answers no message".into())),
+            RewriteHow::Reply => ANSWER_IT,
+            _ => words,
+        };
+        let (system, question) = if matches!(how, RewriteHow::FromWords | RewriteHow::FollowUp | RewriteHow::Reply) {
             // The message it answers, forwards or follows up, as the person has it.
             let answered = source.and_then(|k| self.message_given(&k));
             let language = match (&answered, forward) {
@@ -242,11 +253,11 @@ fn shown(s: &Session) -> Value {
 pub(crate) fn commands() -> Vec<CommandSpec> {
     vec![
         CommandSpec::new("compose.rewrite", "Rewrite the message with MailCraft's AI", WHERE, |s, v| {
-            let how = p::str(v, "how").and_then(RewriteHow::from_code).ok_or_else(|| CmdError::Params("`how` is shorter, warmer, formal, grammar or followUp".into()))?;
+            let how = p::str(v, "how").and_then(RewriteHow::from_code).ok_or_else(|| CmdError::Params("`how` is shorter, warmer, formal, grammar, followUp or reply".into()))?;
             s.ask_rewrite(how, "", None)?;
             Ok(shown(s))
         })
-        .params(r#"{"how": "shorter" | "warmer" | "formal" | "grammar" | "followUp" (a follow-up to the message it replies to, the person's own)} (the text written so far, above the quoted original and the signature, goes to the model chat work goes to, as far as the account lets its mail; the text changes only with compose.useRewrite)"#),
+        .params(r#"{"how": "shorter" | "warmer" | "formal" | "grammar" | "followUp" (a follow-up to the message it replies to, the person's own) | "reply" (an answer to the message it replies to, written for them)} (the text written so far, above the quoted original and the signature, goes to the model chat work goes to, as far as the account lets its mail; the text changes only with compose.useRewrite)"#),
         CommandSpec::new("compose.writeFrom", "Write the message from a few words with MailCraft's AI", WHERE, |s, v| {
             let words: String = p::str(v, "words").map(str::trim).filter(|w| !w.is_empty()).ok_or_else(|| CmdError::Params("`words` (what it should say) is required".into()))?.chars().take(WORDS_MOST).collect();
             s.ask_rewrite(RewriteHow::FromWords, &words, p::str(v, "language"))?;

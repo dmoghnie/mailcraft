@@ -4,6 +4,7 @@
 //! then), Undo while nothing was typed since, and Close.
 
 use egui::{Margin, RichText, Sense, Ui, vec2};
+use mailcraft_engine::mime::ReplyMode;
 use mailcraft_engine::{Compose, RewriteHow, Session};
 use serde_json::json;
 
@@ -29,6 +30,11 @@ pub(super) fn menu(ui: &mut Ui, t: &Tokens, c: &Compose, words: &mut Option<(u64
             *words = Some((c.id, String::new()));
             ui.close();
         }
+        // An answer, written with nothing said of it: only to a message it replies to.
+        if c.source.is_some() && c.mode != Some(ReplyMode::Forward) && ui.button(tl!("Write a reply for me")).clicked() {
+            acts.push(Action::Run("compose.rewrite", json!({"how": "reply"})));
+            ui.close();
+        }
     });
 }
 
@@ -41,6 +47,7 @@ fn title(how: RewriteHow) -> &'static str {
         RewriteHow::Grammar => tl!("Fix spelling and grammar"),
         RewriteHow::FromWords => tl!("From a few words"),
         RewriteHow::FollowUp => tl!("Follow-up"),
+        RewriteHow::Reply => tl!("Reply"),
     }
 }
 

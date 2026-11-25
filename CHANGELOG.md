@@ -75,6 +75,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - **Summarize with AI** in a file's menu tells what's in it: a picture described by a model that sees pictures (File › Options › AI › Model for pictures, else the model for questions); a text file, a PDF or a Word, Excel or PowerPoint file summed up from its text (`mail.summarizeAttachment`).
 - **Your writing style** in File › Options › AI: MailCraft's AI learns how you write from your sent mail when you ask (**Learn from my sent mail**), keeps it as a few lines you can change, and writes replies and follow-ups in it (`ai.learnStyle`, `ai.setStyle`).
 - **Draft replies**, beside each account in File › Options › AI: mail that Needs me marks gets a reply written by MailCraft's AI in your style, kept in Drafts for you to check and send, never sent by it (`ai.autoDrafts`).
+- **Write a reply for me**, in Rewrite with AI over a reply: MailCraft's AI answers the message with nothing typed, in your style, leaving gaps in brackets for what only you know (`compose.rewrite` with `reply`).
 
 ### Changed
 

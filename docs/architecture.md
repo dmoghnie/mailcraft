@@ -241,7 +241,9 @@ and `cargo xtask sizes` enforces them.
   rewrite at a time, for one message; it's a proposal until Replace splices it in place of the
   own text (`rich::splice`, its look plain), and Undo puts the text back while it's still as it
   was put in. A follow-up to sent mail nobody answered (`mail.noAnswerFollowUp` with `write`)
-  is the same, written from fixed words and the person's own message. The menu and the card
+  is the same, written from fixed words and the person's own message, as is a reply written
+  from nothing (`compose.rewrite` with `reply`: it answers what the message asks, with gaps in
+  brackets for what only the person knows). The menu and the card
   are `ui-egui/src/reading/compose/rewriting.rs`. Writing (not rewriting), the model is given
   the person's style (`session/ai/style.rs`, `style_said`): a few lines learned by the chat
   model from the newest sent mail of the accounts that may lend it (`ai.learnStyle`, what each

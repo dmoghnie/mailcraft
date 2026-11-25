@@ -11,7 +11,7 @@ use mailcraft_model::{AiAnswer, AiChat, Job, MessageKey};
 use serde_json::{Value, json};
 
 use super::AiTask;
-use super::rewriting::WRITE;
+use super::rewriting::{ANSWER_IT, WRITE};
 use crate::session::{AccountState, Reading};
 use crate::{CmdError, CommandSpec, Session, p};
 
@@ -27,9 +27,6 @@ const WAITING_MOST: usize = 50;
 const DONE_KEPT: usize = 2_000;
 /// Said when a draft is kept.
 const DRAFTED: &str = "MailCraft's AI drafted a reply: it's in Drafts";
-
-/// What the reply says, as the person would have it.
-const WHAT: &str = "a reply that answers what the message below asks, as far as the message itself tells you; wherever only the person can know something (a decision, a date, a price, a yes or a no), leave a short gap in square brackets saying what goes there";
 
 /// Messages to draft for, in turn, and those being.
 #[derive(Default)]
@@ -89,7 +86,7 @@ impl Session {
         }
         let Some(given) = self.message_given(&key) else { return };
         let system = format!("{WRITE} Write in the language the message it answers is written in.{}", self.style_said());
-        let question = format!("What it should say: {WHAT}\nTo: {}\nSubject: {}\n\nThe message it answers:\n{given}", m.from, m.subject);
+        let question = format!("What it should say: {ANSWER_IT}\nTo: {}\nSubject: {}\n\nThe message it answers:\n{given}", m.from, m.subject);
         let chat = AiChat::ask(&system, &question, ANSWER_TOKENS);
         if let Ok(id) = self.ai_ask(AiTask::Chat, Some(&key.account), PURPOSE, chat, false) {
             self.ai.drafting.asking.insert(id, key);

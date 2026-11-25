@@ -160,3 +160,29 @@ fn a_follow_up_is_written_for_sent_mail_nobody_answered() {
     assert_eq!(v["writing"], false, "{v}");
     assert!(s.compose.is_some() && asked(&mut s).is_empty(), "begun, nothing sent");
 }
+
+/// A reply written with nothing said of it: the message it answers goes, with what's asked of
+/// the answer; a new message or a forward answers nothing and is refused.
+#[test]
+fn a_reply_is_written_from_nothing() {
+    let mut s = ready("ai-write-reply");
+    replying(&mut s, "");
+    let v = s.run("compose.rewrite", &json!({"how": "reply"})).unwrap();
+    assert_eq!(v["rewrite"]["how"], "reply", "{v}");
+    let (id, _, _, chat) = asked(&mut s).pop().expect("a question");
+    assert!(chat.system.contains("the language the message it answers is written in"), "{}", chat.system);
+    let q = &chat.turns[0].text;
+    assert!(q.contains("leave a short gap in square brackets") && q.contains("The proof for order 4471"), "{q}");
+    answer(&mut s, id, "Hello,\n\nApproved.\n\nThanks");
+    s.run("compose.useRewrite", &json!({})).unwrap();
+    assert!(body(&s).starts_with("Hello,\n\nApproved.") && body(&s).contains("The proof for order 4471"));
+    s.compose = None;
+    s.run("mail.new", &json!({})).unwrap();
+    assert!(matches!(s.run("compose.rewrite", &json!({"how": "reply"})), Err(CmdError::Failed(_))), "answers nothing");
+    s.compose = None;
+    let k = key_of(&s, PROOF);
+    s.run("list.open", &k).unwrap();
+    s.run("mail.forward", &json!({})).unwrap();
+    assert!(matches!(s.run("compose.rewrite", &json!({"how": "reply"})), Err(CmdError::Failed(_))), "a forward answers nothing");
+    assert!(asked(&mut s).is_empty());
+}

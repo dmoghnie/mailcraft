@@ -91,3 +91,17 @@ fn a_reply_is_written_from_a_few_words_typed_over_it() {
     assert!(a.session.rewrite().is_some_and(|r| r.how == RewriteHow::FromWords && r.asking.is_some()), "asked from the words typed");
     assert!(a.ui.rewrite_words.is_none(), "the box goes once they're sent");
 }
+
+/// Write a reply for me, in the menu over a reply: asked with nothing typed. A new message has
+/// no such item: it answers nothing.
+#[test]
+fn a_reply_is_written_from_nothing() {
+    let (mut a, ctx) = replying("rewrite-reply", "");
+    click_last(&ctx, &mut a, "Rewrite with AI");
+    click_last(&ctx, &mut a, "Write a reply for me");
+    assert!(a.session.rewrite().is_some_and(|r| r.how == RewriteHow::Reply && r.asking.is_some()), "asked");
+    answers(&mut a, "Hello,\n\nYes, that works.\n\nThanks");
+    frame(&ctx, &mut a, vec![]);
+    click_last(&ctx, &mut a, "Replace");
+    assert!(body(&a).starts_with("Hello,\n\nYes, that works."), "{}", body(&a));
+}
