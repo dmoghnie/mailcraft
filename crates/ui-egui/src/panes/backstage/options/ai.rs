@@ -39,6 +39,17 @@ pub(super) fn models(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action
         if ai.profiles.len() > 1 {
             uses(s, t, ui, acts);
         }
+        if !ai.profiles.is_empty() {
+            let needs_me = Switch {
+                label: tl!("Mark mail that needs me"),
+                about: Some(tl!(
+                    "Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you"
+                )),
+                on: ai.needs_me,
+                cmd: "ai.needsMe",
+            };
+            switch_row(ui, t, false, needs_me, acts);
+        }
         keep_chats(t, ui, ai.chats_days, acts);
     });
 }

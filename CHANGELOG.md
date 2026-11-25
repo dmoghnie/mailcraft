@@ -69,6 +69,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - **Write a follow-up**, under the Inbox's No answer yet, has MailCraft's AI write the nudge too, once a model may have the account's mail: a short, polite follow-up in the language of your message, in its card over the reply until you put it in (`mail.noAnswerFollowUp` with `write`).
 - **A model's temperature and thinking**, in its dialog under File › Options › AI: a temperature, and how much a model that thinks before it answers does (off, low, medium or high), told each server in its own words; left alone, the model's own.
 - **A model's monthly budget**, in tokens, in its dialog: File › Options › AI shows what each model used this month, and once one has used its budget, questions go to the model it falls back to, or aren't asked.
+- **Needs me**: turned on in File › Options › AI, mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and tagged Needs me on its row when it asks something of you; replying takes the tag off, and so does Doesn't need me on the row's menu.
 
 ### Changed
 

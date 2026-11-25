@@ -2321,3 +2321,7 @@ count	occurrences	ocorrências
 	It has used its {budget} tokens this month: questions go to the model it falls back to	Usou seus {budget} tokens este mês: as perguntas vão para o modelo reserva
 	{used} of {budget} tokens used this month	{used} de {budget} tokens usados este mês
 	{used} tokens used this month	{used} tokens usados este mês
+	Needs me	Precisa de mim
+	Doesn't need me	Não precisa de mim
+	Mark mail that needs me	Marcar os e-mails que precisam de mim
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Os e-mails que chegam à Caixa de Entrada são lidos pelo modelo para decisões rápidas, onde os e-mails da conta podem ir, e marcados como Precisa de mim quando pedem algo a você

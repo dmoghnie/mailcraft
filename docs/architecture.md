@@ -148,6 +148,10 @@ and `cargo xtask sizes` enforces them.
   (`session/ai/budget.rs`, `ai-usage.json`); a profile that has used it is passed over in
   routing (`AiPrefs::route` takes the ones spent) for its fallback, and the assistant's chat
   that names it is refused.
+- **Needs me** (`session/ai/needs_me.rs`): once turned on, mail arriving in an Inbox
+  (`note_new_mail`, past blocking and rules; never bulk mail) waits its turn for the decision
+  model, four questions at a time, and is marked by its YES or NO (`ai-needs-me.json`, the
+  newest 2,000). A message answered no longer needs the person; nothing goes to the server.
 - **Keys stay out of errors.** What a server says is quoted with the key blanked out, before it's
   cut short; an error of the network layer that quotes a server's words (a status line it
   couldn't read) and holds the key, or the start of it, says less instead.

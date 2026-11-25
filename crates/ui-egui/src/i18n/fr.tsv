@@ -2321,3 +2321,7 @@ count	occurrences	occurrences
 	It has used its {budget} tokens this month: questions go to the model it falls back to	Il a utilisé ses {budget} jetons ce mois-ci : les questions vont au modèle de repli
 	{used} of {budget} tokens used this month	{used} jetons sur {budget} utilisés ce mois-ci
 	{used} tokens used this month	{used} jetons utilisés ce mois-ci
+	Needs me	Me concerne
+	Doesn't need me	Ne me concerne pas
+	Mark mail that needs me	Marquer le courrier qui me concerne
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Le courrier qui arrive dans la boîte de réception est lu par le modèle pour les décisions rapides, là où le courrier du compte peut aller, et marqué « Me concerne » quand il vous demande quelque chose

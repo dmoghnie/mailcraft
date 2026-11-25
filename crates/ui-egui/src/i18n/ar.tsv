@@ -2316,3 +2316,7 @@ count	occurrences	مرات
 	It has used its {budget} tokens this month: questions go to the model it falls back to	استهلك {budget} رمزًا هذا الشهر: تذهب الأسئلة إلى النموذج الاحتياطي
 	{used} of {budget} tokens used this month	استُخدم {used} من {budget} رمز هذا الشهر
 	{used} tokens used this month	استُخدم {used} رمز هذا الشهر
+	Needs me	يحتاجني
+	Doesn't need me	لا يحتاجني
+	Mark mail that needs me	تمييز البريد الذي يحتاجني
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	يقرأ نموذج القرارات السريعة البريد الوارد إلى البريد الوارد، حيث يُسمح بإرسال بريد الحساب، ويُميَّز بـ«يحتاجني» عندما يطلب منك شيئًا

@@ -2334,3 +2334,7 @@ count	occurrences	wystąpieniach
 	It has used its {budget} tokens this month: questions go to the model it falls back to	Wykorzystał w tym miesiącu swoje {budget} tokenów: pytania trafiają do modelu zapasowego
 	{used} of {budget} tokens used this month	Wykorzystano {used} z {budget} tokenów w tym miesiącu
 	{used} tokens used this month	Wykorzystano {used} tokenów w tym miesiącu
+	Needs me	Wymaga mnie
+	Doesn't need me	Nie wymaga mnie
+	Mark mail that needs me	Oznaczaj pocztę, która wymaga mnie
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Poczta przychodząca do Skrzynki odbiorczej jest czytana przez model do szybkich decyzji, tam gdzie poczta konta może trafić, i oznaczana jako Wymaga mnie, gdy czegoś od Ciebie chce

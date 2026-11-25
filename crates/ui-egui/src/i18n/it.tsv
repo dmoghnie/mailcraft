@@ -2320,3 +2320,7 @@ count	occurrences	ripetizioni
 	It has used its {budget} tokens this month: questions go to the model it falls back to	Ha usato i suoi {budget} token questo mese: le domande vanno al modello di riserva
 	{used} of {budget} tokens used this month	{used} token su {budget} usati questo mese
 	{used} tokens used this month	{used} token usati questo mese
+	Needs me	Mi riguarda
+	Doesn't need me	Non mi riguarda
+	Mark mail that needs me	Segna la posta che mi riguarda
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	La posta in arrivo nella Posta in arrivo viene letta dal modello per le decisioni rapide, dove la posta dell'account può andare, e segnata «Mi riguarda» quando ti chiede qualcosa

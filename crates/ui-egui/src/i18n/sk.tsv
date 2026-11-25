@@ -2335,3 +2335,7 @@ count	occurrences	opakovaní
 	It has used its {budget} tokens this month: questions go to the model it falls back to	Tento mesiac minul svojich {budget} tokenov: otázky idú záložnému modelu
 	{used} of {budget} tokens used this month	Tento mesiac použitých {used} z {budget} tokenov
 	{used} tokens used this month	Tento mesiac použitých {used} tokenov
+	Needs me	Potrebuje ma
+	Doesn't need me	Nepotrebuje ma
+	Mark mail that needs me	Označovať poštu, ktorá ma potrebuje
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Pošta prichádzajúca do priečinka Doručená pošta sa číta modelom na rýchle rozhodnutia, kam môže pošta účtu ísť, a označí sa Potrebuje ma, keď od vás niečo žiada

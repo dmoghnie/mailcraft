@@ -2320,3 +2320,7 @@ count	occurrences	회
 	It has used its {budget} tokens this month: questions go to the model it falls back to	이번 달 {budget} 토큰을 모두 썼습니다. 질문은 대체 모델로 갑니다
 	{used} of {budget} tokens used this month	이번 달 {budget} 토큰 중 {used} 사용
 	{used} tokens used this month	이번 달 {used} 토큰 사용
+	Needs me	내 조치 필요
+	Doesn't need me	조치 필요 없음
+	Mark mail that needs me	내 조치가 필요한 메일 표시
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	받은 편지함에 도착한 메일을, 그 계정의 메일을 보낼 수 있는 경우 빠른 판단용 모델이 읽고, 나에게 무언가를 요청하면 '내 조치 필요'로 표시합니다

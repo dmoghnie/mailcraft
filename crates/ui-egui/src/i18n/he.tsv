@@ -2316,3 +2316,7 @@ count	occurrences	פעמים
 	It has used its {budget} tokens this month: questions go to the model it falls back to	הוא ניצל החודש את {budget} הטוקנים שלו: השאלות עוברות למודל החלופי
 	{used} of {budget} tokens used this month	נוצלו החודש {used} מתוך {budget} טוקנים
 	{used} tokens used this month	נוצלו החודש {used} טוקנים
+	Needs me	דורש אותי
+	Doesn't need me	לא דורש אותי
+	Mark mail that needs me	סימון דואר שדורש אותי
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	דואר שמגיע לתיבת הדואר הנכנס נקרא על ידי המודל להחלטות מהירות, היכן שדואר החשבון רשאי להגיע אליו, ומסומן „דורש אותי” כשהוא מבקש ממך משהו

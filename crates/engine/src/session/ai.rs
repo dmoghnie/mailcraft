@@ -8,6 +8,7 @@ mod asking;
 mod assistant;
 mod budget;
 mod commands;
+mod needs_me;
 mod rewriting;
 mod servers;
 mod settings;
@@ -23,6 +24,7 @@ pub use assistant::{
     ContextItem, KeptScript, RunState, STEPS_MOST, ScriptParam, ToolRun, assistant_message_link,
 };
 pub(crate) use commands::commands as ai_commands;
+pub(crate) use needs_me::commands as needs_me_commands;
 pub(crate) use rewriting::commands as rewriting_commands;
 pub use rewriting::{Rewrite, RewriteHow};
 pub(crate) use servers::commands as mcp_server_commands;

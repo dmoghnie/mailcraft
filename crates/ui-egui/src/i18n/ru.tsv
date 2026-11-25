@@ -2334,3 +2334,7 @@ count	occurrences	повторений
 	It has used its {budget} tokens this month: questions go to the model it falls back to	В этом месяце израсходованы все {budget} токенов: вопросы идут запасной модели
 	{used} of {budget} tokens used this month	Использовано {used} из {budget} токенов в этом месяце
 	{used} tokens used this month	Использовано {used} токенов в этом месяце
+	Needs me	Ждёт меня
+	Doesn't need me	Не ждёт меня
+	Mark mail that needs me	Отмечать письма, которые ждут меня
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Письма, приходящие во «Входящие», читает модель для быстрых решений, если почте учётной записи можно к ней попадать, и отмечает «Ждёт меня», когда от вас что-то просят

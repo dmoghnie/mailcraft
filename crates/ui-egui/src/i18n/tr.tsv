@@ -2321,3 +2321,7 @@ count	occurrences	kez
 	It has used its {budget} tokens this month: questions go to the model it falls back to	Bu ay {budget} tokenını kullandı: sorular yedek modele gider
 	{used} of {budget} tokens used this month	Bu ay {budget} tokendan {used} kullanıldı
 	{used} tokens used this month	Bu ay {used} token kullanıldı
+	Needs me	Beni bekliyor
+	Doesn't need me	Beni beklemiyor
+	Mark mail that needs me	Beni bekleyen postaları işaretle
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Gelen Kutusu'na gelen postalar, hesabın postasının gidebildiği yerde hızlı kararlar modeli tarafından okunur ve sizden bir şey istediğinde Beni bekliyor olarak işaretlenir

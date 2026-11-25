@@ -2321,3 +2321,7 @@ count	occurrences	Terminen
 	It has used its {budget} tokens this month: questions go to the model it falls back to	Es hat diesen Monat seine {budget} Tokens verbraucht: Fragen gehen an das Ersatzmodell
 	{used} of {budget} tokens used this month	{used} von {budget} Tokens diesen Monat verbraucht
 	{used} tokens used this month	{used} Tokens diesen Monat verbraucht
+	Needs me	Braucht mich
+	Doesn't need me	Braucht mich nicht
+	Mark mail that needs me	E-Mails markieren, die mich brauchen
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Eingehende E-Mails im Posteingang werden vom Modell für schnelle Entscheidungen gelesen, soweit die E-Mails des Kontos dorthin dürfen, und mit „Braucht mich“ markiert, wenn sie etwas von Ihnen wollen

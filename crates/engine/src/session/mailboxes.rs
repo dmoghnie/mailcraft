@@ -330,6 +330,11 @@ impl Session {
         quiet.extend(self.run_rules(&rest));
         // Mail older than a day (a resync after a long time away) isn't "new" any more.
         let cutoff = self.clock.now.saturating_sub(86_400);
+        // What's left in the Inbox is read for whether it needs the person, when they asked.
+        if role == Some(FolderRole::Inbox) {
+            let left = arrived.iter().filter(|m| m.when() >= cutoff && !quiet.contains(&m.key)).cloned().collect();
+            self.needs_me_arrived(left);
+        }
         // With the Focused Inbox on, Other's mail comes in quietly unless asked for (issue #199):
         // the newsletters it holds are what Focused is for.
         // Only VIPs' mail, when that's asked for.

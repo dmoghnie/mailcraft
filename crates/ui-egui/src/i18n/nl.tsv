@@ -2316,3 +2316,7 @@ count	occurrences	keer
 	It has used its {budget} tokens this month: questions go to the model it falls back to	Het heeft deze maand zijn {budget} tokens gebruikt: vragen gaan naar het terugvalmodel
 	{used} of {budget} tokens used this month	{used} van {budget} tokens gebruikt deze maand
 	{used} tokens used this month	{used} tokens gebruikt deze maand
+	Needs me	Vraagt om mij
+	Doesn't need me	Vraagt niet om mij
+	Mark mail that needs me	Mail markeren die om mij vraagt
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Mail die in het Postvak IN binnenkomt wordt gelezen door het model voor snelle beslissingen, waar de mail van het account heen mag, en gemarkeerd met Vraagt om mij als het iets van u vraagt

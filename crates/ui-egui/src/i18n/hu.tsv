@@ -2321,3 +2321,7 @@ count	occurrences	előfordulás
 	It has used its {budget} tokens this month: questions go to the model it falls back to	Ebben a hónapban elhasználta a(z) {budget} tokenjét: a kérdések a tartalékmodellhez kerülnek
 	{used} of {budget} tokens used this month	Ebben a hónapban {used} / {budget} token elhasználva
 	{used} tokens used this month	Ebben a hónapban {used} token elhasználva
+	Needs me	Engem vár
+	Doesn't need me	Nem vár engem
+	Mark mail that needs me	Az engem váró levelek megjelölése
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	A Beérkezett üzenetek mappába érkező leveleket a gyors döntések modellje olvassa el, ahol a fiók levelei eljuthatnak hozzá, és „Engem vár” jelölést kapnak, ha kérnek tőled valamit

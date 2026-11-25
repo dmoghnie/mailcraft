@@ -2321,3 +2321,7 @@ count	occurrences	repeticiones
 	It has used its {budget} tokens this month: questions go to the model it falls back to	Ha usado sus {budget} tokens este mes: las preguntas van al modelo de respaldo
 	{used} of {budget} tokens used this month	{used} de {budget} tokens usados este mes
 	{used} tokens used this month	{used} tokens usados este mes
+	Needs me	Me necesita
+	Doesn't need me	No me necesita
+	Mark mail that needs me	Marcar el correo que me necesita
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	El modelo para decisiones rápidas lee el correo que llega a la Bandeja de entrada, cuando el correo de su cuenta puede ir a él, y lo marca con «Me necesita» cuando te pide algo

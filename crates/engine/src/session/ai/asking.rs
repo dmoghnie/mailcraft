@@ -104,6 +104,8 @@ pub struct AiState {
     /// What each profile used this month (`budget.rs`), and whether it changed since saved.
     pub(super) usage: super::budget::AiUsage,
     pub(super) usage_changed: bool,
+    /// Which mail arriving needs the person (`needs_me.rs`).
+    pub(super) needs_me: super::needs_me::NeedsMe,
 }
 
 impl AiState {
@@ -279,7 +281,7 @@ impl Session {
                     self.ai.tests.insert(w.profile.clone(), test);
                     return;
                 }
-                if self.about_came(id, &w.profile, &result) || self.rewrite_came(id, &w.profile, &result) {
+                if self.about_came(id, &w.profile, &result) || self.rewrite_came(id, &w.profile, &result) || self.needs_me_came(id, &result) {
                     return;
                 }
                 if self.ai.answers.len() >= ANSWERS_KEPT

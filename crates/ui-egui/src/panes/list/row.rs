@@ -40,6 +40,8 @@ struct MessageRow<'a> {
     selected: bool,
     hovered: bool,
     marks: mailcraft_engine::SenderMarks,
+    /// MailCraft's AI found it asks something of the person.
+    needs_me: bool,
     /// Where the text starts (past the avatar) and ends, and the top of its first line.
     x: f32,
     right: f32,
@@ -89,6 +91,7 @@ pub(super) fn message_row(s: &Session, t: &theme::Tokens, ui: &mut Ui, of: RowOf
         selected,
         hovered,
         marks,
+        needs_me: !sent_view && s.needs_me(m),
         x: r.min.x + 14.0 + if compact { 0.0 } else { 44.0 },
         right: r.max.x - 14.0,
         line1: r.min.y + first_line,
@@ -127,6 +130,7 @@ impl MessageRow<'_> {
             spoken.insert(0, tl!("[Draft]").to_string());
         }
         for (on, word) in [
+            (self.needs_me, "Needs me"),
             (marks.warning, "Check who sent it"),
             (!self.sent_view && s.is_vip(&m.from.email), "VIP"),
             (marks.external, "External"),
@@ -210,6 +214,17 @@ impl MessageRow<'_> {
             if fits(tw, fw) {
                 p.galley(egui::pos2(mr.start(right - tw - 10.0 - fw, fw), line1 + 2.0), fg, quiet);
                 tw += fw + 10.0;
+            }
+        }
+        // Asks something of the person, as MailCraft's AI found: a tag in the accent colour.
+        if self.needs_me {
+            let ng = p.layout_no_wrap(tl!("Needs me").to_string(), theme::regular(11.0), t.accent);
+            let nw = ng.size().x + 10.0;
+            if fits(tw, nw) {
+                let nr = mr.rect(Rect::from_min_size(egui::pos2(right - tw - 10.0 - nw, line1), vec2(nw, 17.0)));
+                p.rect_stroke(nr, 4.0, egui::Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);
+                p.galley(nr.center() - ng.size() / 2.0, ng, t.accent);
+                tw += nw + 10.0;
             }
         }
         // From outside the organisation: a small tag before the time.
@@ -458,6 +473,9 @@ impl MessageRow<'_> {
                 let keys = if s.selection.contains(key) { s.selection.as_slice() } else { std::slice::from_ref(key) };
                 let items = keys.iter().map(|k| mailcraft_engine::ContextItem::Message { id: k.to_id() }).collect();
                 item(ui, acts, tl!("Ask AI"), Action::AskAi(items));
+            }
+            if self.needs_me {
+                item(ui, acts, tl!("Doesn't need me"), Action::Run("mail.notNeeded", json!({"key": key.to_id()})));
             }
             ui.separator();
             // One of several selected: answering and printing are for one message (they failed, or

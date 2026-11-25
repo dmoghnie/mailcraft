@@ -2320,3 +2320,7 @@ count	occurrences	次
 	It has used its {budget} tokens this month: questions go to the model it falls back to	本月已用完 {budget} 個權杖：問題會轉給備用模型
 	{used} of {budget} tokens used this month	本月已用 {used} / {budget} 個權杖
 	{used} tokens used this month	本月已用 {used} 個權杖
+	Needs me	需要我處理
+	Doesn't need me	不需要我處理
+	Mark mail that needs me	標記需要我處理的郵件
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	到達收件匣的郵件會在其帳戶的郵件可以傳送給模型時，由快速決策模型閱讀；需要你做某事時標記為「需要我處理」

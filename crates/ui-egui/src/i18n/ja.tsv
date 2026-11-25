@@ -2317,3 +2317,7 @@ count	occurrences	回
 	It has used its {budget} tokens this month: questions go to the model it falls back to	今月の {budget} トークンを使い切りました。質問は予備のモデルに送られます
 	{used} of {budget} tokens used this month	今月は {budget} トークン中 {used} を使用
 	{used} tokens used this month	今月は {used} トークンを使用
+	Needs me	要対応
+	Doesn't need me	対応不要
+	Mark mail that needs me	対応が必要なメールに印を付ける
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	受信トレイに届いたメールを、そのアカウントのメールを送れる場合に素早い判断用のモデルが読み、あなたに何かを求めているときは「要対応」の印を付けます

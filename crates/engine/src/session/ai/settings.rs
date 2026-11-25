@@ -121,6 +121,10 @@ pub struct AiPrefs {
     /// The MCP servers whose tools its scripts may call (`servers.rs`).
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub mcp: Vec<super::McpServer>,
+    /// Mail arriving in an Inbox is read by the model for quick decisions and marked when it
+    /// needs the person (`needs_me.rs`).
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub needs_me: bool,
 }
 
 impl AiPrefs {
