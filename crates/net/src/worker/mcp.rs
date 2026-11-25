@@ -79,13 +79,23 @@ impl Pool {
             let mut slot = lock(&slot);
             let done = slot.work(&target, key.as_deref(), creds.as_ref(), work).unwrap_or_else(|e| {
                 slot.conn = None;
-                fail(e.to_string())
+                fail(said(&e))
             });
             sink.emit(Event::Mcp { done });
         });
         if let Err(e) = spawned {
             self.sink.emit(Event::Mcp { done: failed(e.to_string()) });
         }
+    }
+}
+
+/// Why a piece of work failed, for the person: what the client said as it is, without the
+/// "unexpected server response" its kind of error puts before it (a program that couldn't be
+/// started isn't a server's answer).
+fn said(e: &crate::NetError) -> String {
+    match e {
+        crate::NetError::Protocol(why) => why.clone(),
+        e => e.to_string(),
     }
 }
 

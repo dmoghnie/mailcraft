@@ -54,3 +54,17 @@ fn a_servers_tools_are_listed_and_called_on_one_connection() {
     let seen = events_until(&p, "no key", |s| called(s, 3).is_some());
     assert!(called(&seen, 3).is_some_and(|r| r.is_err_and(|e| e.contains("no key is kept"))), "{seen:?}");
 }
+
+/// A program that can't be started says so, in its own words: it's not a server's answer.
+#[test]
+fn a_program_that_cant_be_started_says_so() {
+    let mut p = Pool::new(crate::fake::store("mcp-no-program"), Arc::new(MemoryCredentials::default()));
+    let target = McpTarget::Program { command: "/no/such/mcp-program".into(), args: Vec::new(), key_env: None };
+    p.submit(Job::Mcp { work: McpWork::List { server: "m1".into(), target, key: None } });
+    let seen = events_until(&p, "the failure", |s| s.iter().any(|e| matches!(e, Event::Mcp { .. })));
+    let error = seen.iter().find_map(|e| match e {
+        Event::Mcp { done: McpDone::Listed { error, .. } } => error.clone(),
+        _ => None,
+    });
+    assert!(error.as_deref().is_some_and(|e| e.starts_with("the program couldn't be started")), "{error:?}");
+}
