@@ -81,7 +81,7 @@ fn a_chat_cut_short_by_closing_says_so_when_read_again() {
     local(&mut again, "Local");
     send(&mut again, Some(&c), "Again?");
     let (q, asked) = question(&mut again);
-    assert_eq!(asked.turns.first().map(|t| t.text.as_str()), Some("Anything new?"));
+    assert!(asked.turns.first().is_some_and(|t| t.text.ends_with(")\n\nAnything new?")), "{:?}", asked.turns.first().map(|t| &t.text));
     answer(&mut again, q, "Nothing.");
     again.take_jobs();
     assert!(chat(&mut open(), &c)["chat"]["error"].is_null(), "answered: nothing cut short");

@@ -48,14 +48,15 @@ impl Session {
         ai.allowed_for_all(first, &chat.accounts).cloned().ok_or_else(|| off(first))
     }
 
-    /// What the model is told: who it is, today's date, and the accounts it may read.
+    /// What the model is told: who it is, and the accounts it may read. Never the time, which
+    /// would change it every minute, and a server reads again a prompt that changed (each step
+    /// of a task, a whole chat): the time goes with what the person says ([`ChatTurn::sent`]).
     fn assistant_system(&self, profile: &AiProfile) -> String {
         let accounts: Vec<String> =
             self.readable_accounts(profile).iter().map(|a| format!("- {}: {} <{}>", a.config.id, a.config.name, a.config.email)).collect();
         let accounts = if accounts.is_empty() { "none".to_string() } else { accounts.join("\n") };
         format!(
-            "{SYSTEM}\n\nNow is {}.\n\nThe accounts whose mail you may read:\n{accounts}",
-            mailcraft_model::dates::full_time(self.clock.now, &self.clock)
+            "{SYSTEM}\n\nWhat the person says begins with when they sent it: the latest is about now.\n\nThe accounts whose mail you may read:\n{accounts}"
         )
     }
 

@@ -121,7 +121,8 @@ impl Session {
         let answer = usize::try_from(profile.max_tokens.max(1)).unwrap_or(usize::MAX);
         let tool_room: usize = tools.iter().map(|t| tokens(t.description.len().saturating_add(t.schema.to_string().len()))).sum();
         let room = context.saturating_sub(answer).saturating_sub(ROOM_KEPT).saturating_sub(tool_room).saturating_sub(tokens(system.len()));
-        let mut turns: Vec<AiTurn> = chat.turns.iter().map(ChatTurn::sent).collect();
+        let when = |at| mailcraft_model::dates::full_time(at, &self.clock);
+        let mut turns: Vec<AiTurn> = chat.turns.iter().map(|t| t.sent(&when)).collect();
         let size = |turns: &[AiTurn]| turns.iter().map(|t| tokens(t.size())).sum::<usize>();
         // What tools gave back, oldest first, but the last turn's.
         let last = turns.len().saturating_sub(1);

@@ -11,6 +11,7 @@ mod kept;
 mod pim_changes;
 mod script;
 mod script_asks;
+mod sent;
 mod waiting;
 
 /// A sample session whose mail may go to a model on this computer, which is the one asked.
@@ -79,7 +80,8 @@ fn the_assistant_reads_at_once_and_leaves_the_window_alone() {
     let names: Vec<&str> = asked.tools.iter().map(|t| t.name.as_str()).collect();
     assert!(names.contains(&"find_messages") && names.contains(&"move_messages"), "{names:?}");
     assert!(asked.system.contains("- sample:"), "the accounts it may read");
-    assert_eq!(asked.turns.last().map(|t| t.text.as_str()), Some("What does Zoe want for Thursday?"));
+    let said = &asked.turns.last().unwrap().text;
+    assert!(said.starts_with("(Sent ") && said.ends_with(")\n\nWhat does Zoe want for Thursday?"), "{said}");
     calls(&mut s, q, "Let me look.", &[("find_messages", json!({"query": "from:zoe storyboard"}))]);
     let (q, asked) = question(&mut s);
     let found = &asked.turns.last().unwrap().results[0];
@@ -416,7 +418,7 @@ fn it_stops_after_its_steps_and_goes_on_when_told() {
     send(&mut s, Some(&c), "Go on");
     let (_, asked) = question(&mut s);
     let last = asked.turns.last().unwrap();
-    assert_eq!((last.role, last.text.as_str()), (AiRole::User, "Go on"));
+    assert_eq!((last.role, last.text.ends_with(")\n\nGo on")), (AiRole::User, true), "{}", last.text);
     assert_eq!(last.results.len(), 1, "said with what the last call gave");
 }
 

@@ -16,7 +16,7 @@ use super::AiProfile;
 use mailcraft_model::SharedSummary;
 use std::fmt;
 
-use mailcraft_model::{AiToolCall, AiTurn};
+use mailcraft_model::{AiRole, AiToolCall, AiTurn};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -150,13 +150,17 @@ pub struct ChatTurn {
 }
 
 impl ChatTurn {
-    /// The turn as the model is sent it: what was pointed at, then what was said.
-    fn sent(&self) -> AiTurn {
-        if self.context_text.is_empty() {
-            return self.turn.clone();
+    /// The turn as the model is sent it: when the person sent it (`when` writes the time), what
+    /// they pointed at, then what they said. The time is the turn's own, so a turn is sent the
+    /// same each time, and a server can reuse what it read.
+    fn sent(&self, when: &dyn Fn(i64) -> String) -> AiTurn {
+        let parts: Vec<&str> = [self.context_text.as_str(), self.turn.text.as_str()].into_iter().filter(|p| !p.is_empty()).collect();
+        let text = parts.join("\n\n");
+        // Not a turn that only gives back what the tools gave, nor one kept before the time was.
+        if self.turn.role != AiRole::User || text.is_empty() || self.at == 0 {
+            return AiTurn { text, ..self.turn.clone() };
         }
-        let text = if self.turn.text.is_empty() { self.context_text.clone() } else { format!("{}\n\n{}", self.context_text, self.turn.text) };
-        AiTurn { text, ..self.turn.clone() }
+        AiTurn { text: format!("(Sent {})\n\n{text}", when(self.at)), ..self.turn.clone() }
     }
 }
 
