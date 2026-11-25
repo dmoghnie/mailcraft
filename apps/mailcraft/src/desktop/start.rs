@@ -71,6 +71,7 @@ pub(crate) fn commands(app: &mut MailApp, args: &[String]) {
             }
             "ui.signature" => app.ui.dialog = mailcraft_ui_egui::Dialog::signature(&app.session),
             "ui.categories" => app.ui.dialog = Some(mailcraft_ui_egui::Dialog::Categories),
+            "ui.rules" => app.ui.dialog = Some(mailcraft_ui_egui::Dialog::Rules),
             "ui.commands" => app.ui.dialog = Some(mailcraft_ui_egui::Dialog::commands("")),
             "ui.sweep" => app.ui.dialog = mailcraft_ui_egui::Dialog::sweep(&app.session),
             "ui.nameKeyword" => {
@@ -110,5 +111,13 @@ mod tests {
         assert_eq!(f.kind, mailcraft_ui_egui::AccountKind::Pop);
         cmd(&mut a, "ui.about");
         assert!(a.ui.backstage.is_some(), "no params: as `{{}}`");
+    }
+
+    /// The Rules dialog opens at start-up, for looking at it (what a model wrote from words).
+    #[test]
+    fn ui_rules_opens_the_rules_dialog() {
+        let mut a = app();
+        cmd(&mut a, "ui.rules");
+        assert!(matches!(a.ui.dialog, Some(mailcraft_ui_egui::Dialog::Rules)));
     }
 }
