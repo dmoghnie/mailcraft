@@ -37,7 +37,7 @@ pub use dates::zone;
 pub use encoding::path;
 pub use encoding::{base64, utf7};
 pub use job::{
-    AiAnswer, AiApi, AiChat, AiDone, AiEffort, AiEndpoint, AiRole, AiTool, AiToolCall, AiToolResult, AiTurn, AiWork, DirectoryPerson, Event,
+    AiAnswer, AiApi, AiChat, AiDone, AiEffort, AiEndpoint, AiImage, AiRole, AiTool, AiToolCall, AiToolResult, AiTurn, AiWork, DirectoryPerson, Event,
     FailureKind, FollowUpDay, HeldKey, Job, LOCAL_CERTIFICATE, McpDone, McpOAuth, McpTarget, McpTool, McpWork, Op, PgpSignature, PgpWork, Private,
     REMOTE_CERTIFICATE, Revocation, Secret, SignInFailure, SyncStatus, UntrustedCertificate,
 };

@@ -2358,3 +2358,9 @@ count	occurrences	повторений
 	Due {date}	Срок {date}
 	Amounts	Суммы
 	Tracking numbers	Трек-номера
+	Model for pictures	Модель для изображений
+	Pictures in mail: a model that sees them. None chosen, the model for questions	Изображения в почте: модель, которая их видит. Если не выбрана, модель для вопросов
+	The model for questions	Модель для вопросов
+	Reading the file…	Чтение файла…
+	The file couldn't be read: {error}	Не удалось прочитать файл: {error}
+	Close the file's summary	Закрыть сводку файла

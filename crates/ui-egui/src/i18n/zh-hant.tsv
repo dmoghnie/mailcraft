@@ -2344,3 +2344,9 @@ count	occurrences	次
 	Due {date}	到期 {date}
 	Amounts	金額
 	Tracking numbers	貨件追蹤號碼
+	Model for pictures	用於圖片的模型
+	Pictures in mail: a model that sees them. None chosen, the model for questions	郵件中的圖片：能看懂圖片的模型。未選擇時，使用用於提問的模型
+	The model for questions	用於提問的模型
+	Reading the file…	正在讀取檔案…
+	The file couldn't be read: {error}	無法讀取檔案：{error}
+	Close the file's summary	關閉檔案摘要

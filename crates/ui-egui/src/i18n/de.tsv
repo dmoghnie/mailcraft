@@ -2345,3 +2345,9 @@ count	occurrences	Terminen
 	Due {date}	Fällig {date}
 	Amounts	Beträge
 	Tracking numbers	Sendungsnummern
+	Model for pictures	Modell für Bilder
+	Pictures in mail: a model that sees them. None chosen, the model for questions	Bilder in E-Mails: ein Modell, das sie sieht. Ist keines gewählt, das Modell für Fragen
+	The model for questions	Das Modell für Fragen
+	Reading the file…	Datei wird gelesen…
+	The file couldn't be read: {error}	Die Datei konnte nicht gelesen werden: {error}
+	Close the file's summary	Zusammenfassung der Datei schließen

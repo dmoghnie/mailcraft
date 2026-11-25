@@ -2341,3 +2341,9 @@ count	occurrences	回
 	Due {date}	期限 {date}
 	Amounts	金額
 	Tracking numbers	追跡番号
+	Model for pictures	画像用のモデル
+	Pictures in mail: a model that sees them. None chosen, the model for questions	メールの画像: 画像を認識できるモデル。選ばなければ質問用のモデル
+	The model for questions	質問用のモデル
+	Reading the file…	ファイルを読み取っています…
+	The file couldn't be read: {error}	ファイルを読み取れませんでした: {error}
+	Close the file's summary	ファイルの要約を閉じる

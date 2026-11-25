@@ -38,8 +38,8 @@ pub(super) fn request(base: &str, endpoint: &AiEndpoint, key: Option<&str>, chat
     post(format!("{base}/messages"), &headers, &body)
 }
 
-/// A turn as a message: its text alone, or blocks: a user's tool results before what they said,
-/// an assistant's words before the tools it called.
+/// A turn as a message: its text alone, or blocks: a user's tool results and pictures before what
+/// they said, an assistant's words before the tools it called.
 fn message(t: &AiTurn) -> Value {
     let role = match t.role {
         AiRole::User => "user",
@@ -47,7 +47,7 @@ fn message(t: &AiTurn) -> Value {
     };
     // No content may be empty or blank, but the last: an answer that came with none (an empty
     // end of turn, thinking cut at the longest answer) is said to have been so.
-    if t.calls.is_empty() && t.results.is_empty() {
+    if t.calls.is_empty() && t.results.is_empty() && t.images.is_empty() {
         let text = if t.text.trim().is_empty() { NO_TEXT } else { t.text.as_str() };
         return json!({"role": role, "content": text});
     }
@@ -63,6 +63,7 @@ fn message(t: &AiTurn) -> Value {
                 }
                 b
             })
+            .chain(t.images.iter().map(|i| json!({"type": "image", "source": {"type": "base64", "media_type": i.media_type, "data": i.base64}})))
             .chain(text)
             .collect(),
         AiRole::Assistant => text.into_iter().chain(t.calls.iter().map(tool_use)).collect(),

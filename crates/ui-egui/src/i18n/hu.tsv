@@ -2345,3 +2345,9 @@ count	occurrences	előfordulás
 	Due {date}	Határidő: {date}
 	Amounts	Összegek
 	Tracking numbers	Nyomkövetési számok
+	Model for pictures	Modell képekhez
+	Pictures in mail: a model that sees them. None chosen, the model for questions	Képek a levelekben: egy modell, amely látja őket. Ha nincs kiválasztva, a kérdésekhez használt modell
+	The model for questions	A kérdésekhez használt modell
+	Reading the file…	A fájl olvasása…
+	The file couldn't be read: {error}	A fájlt nem sikerült beolvasni: {error}
+	Close the file's summary	A fájl összefoglalójának bezárása

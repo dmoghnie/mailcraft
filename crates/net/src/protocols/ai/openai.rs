@@ -38,13 +38,14 @@ pub(super) fn request(base: &str, endpoint: &AiEndpoint, key: Option<&str>, chat
     post(format!("{base}/chat/completions"), &headers, &body)
 }
 
-/// A turn's messages: a user's tool results (a message each, `tool`) before what they said; an
-/// assistant's words with the tools it called.
+/// A turn's messages: a user's tool results (a message each, `tool`) before what they said (with
+/// its pictures, as parts of its content); an assistant's words with the tools it called.
 fn messages(t: &AiTurn) -> Vec<Value> {
     match t.role {
         AiRole::User => {
             let results = t.results.iter().map(|r| json!({"role": "tool", "tool_call_id": r.id, "content": r.content}));
-            let said = (!t.text.is_empty() || t.results.is_empty()).then(|| json!({"role": "user", "content": t.text}));
+            let said =
+                (!t.text.is_empty() || t.results.is_empty() || !t.images.is_empty()).then(|| json!({"role": "user", "content": user_content(t)}));
             results.chain(said).collect()
         }
         AiRole::Assistant if t.calls.is_empty() => vec![json!({"role": "assistant", "content": t.text})],
@@ -167,4 +168,13 @@ fn tool_call(b: &mut Building, n: usize, c: &Value) {
         Some(v @ Value::Object(_)) => p.input.push_str(&v.to_string()),
         _ => {}
     }
+}
+
+/// What a user said: its text, or with pictures, its text and each picture as a part.
+fn user_content(t: &AiTurn) -> Value {
+    if t.images.is_empty() {
+        return Value::String(t.text.clone());
+    }
+    let pictures = t.images.iter().map(|i| json!({"type": "image_url", "image_url": {"url": format!("data:{};base64,{}", i.media_type, i.base64)}}));
+    Value::Array(std::iter::once(json!({"type": "text", "text": t.text})).chain(pictures).collect())
 }

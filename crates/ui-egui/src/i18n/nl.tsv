@@ -2340,3 +2340,9 @@ count	occurrences	keer
 	Due {date}	Vervalt {date}
 	Amounts	Bedragen
 	Tracking numbers	Trackingnummers
+	Model for pictures	Model voor afbeeldingen
+	Pictures in mail: a model that sees them. None chosen, the model for questions	Afbeeldingen in mail: een model dat ze ziet. Als er geen is gekozen, het model voor vragen
+	The model for questions	Het model voor vragen
+	Reading the file…	Bestand wordt gelezen…
+	The file couldn't be read: {error}	Het bestand kon niet worden gelezen: {error}
+	Close the file's summary	Samenvatting van het bestand sluiten

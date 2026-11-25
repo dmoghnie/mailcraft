@@ -2341,3 +2341,9 @@ count	occurrences	次
 	Due {date}	截止 {date}
 	Amounts	金额
 	Tracking numbers	快递单号
+	Model for pictures	用于图片的模型
+	Pictures in mail: a model that sees them. None chosen, the model for questions	邮件中的图片：能看懂图片的模型。未选择时，使用用于提问的模型
+	The model for questions	用于提问的模型
+	Reading the file…	正在读取文件…
+	The file couldn't be read: {error}	无法读取文件：{error}
+	Close the file's summary	关闭文件摘要

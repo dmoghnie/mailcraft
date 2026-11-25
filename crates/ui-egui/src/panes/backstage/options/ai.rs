@@ -274,9 +274,10 @@ fn uses(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
     for (task, label, about) in [
         (AiTask::Chat, tl!("Model for questions"), tl!("Answers, summaries and drafts")),
         (AiTask::Decision, tl!("Model for quick decisions"), tl!("Short choices about mail: a small, fast model is enough")),
+        (AiTask::Vision, tl!("Model for pictures"), tl!("Pictures in mail: a model that sees them. None chosen, the model for questions")),
     ] {
         let chosen = ai.uses.get(&task).and_then(|id| ai.profile(id));
-        let first = tl!("The first model");
+        let first = if task == AiTask::Vision { tl!("The model for questions") } else { tl!("The first model") };
         let shown = chosen.map_or(first, |p| p.name.as_str());
         setting(ui, t, false, label, Some(about), |ui| {
             egui::ComboBox::from_id_salt(("ai-use", task.code())).width(220.0).selected_text(shown).show_ui(ui, |ui| {

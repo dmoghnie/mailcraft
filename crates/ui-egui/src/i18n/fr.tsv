@@ -2345,3 +2345,9 @@ count	occurrences	occurrences
 	Due {date}	Échéance {date}
 	Amounts	Montants
 	Tracking numbers	Numéros de suivi
+	Model for pictures	Modèle pour les images
+	Pictures in mail: a model that sees them. None chosen, the model for questions	Images dans les e-mails : un modèle qui les voit. Si aucun n’est choisi, le modèle pour les questions
+	The model for questions	Le modèle pour les questions
+	Reading the file…	Lecture du fichier…
+	The file couldn't be read: {error}	Le fichier n’a pas pu être lu : {error}
+	Close the file's summary	Fermer le résumé du fichier

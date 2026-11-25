@@ -75,9 +75,24 @@ pub enum AiRole {
     Assistant,
 }
 
-/// One turn of a conversation with a model: what was said, the tools the model called in it (an
-/// assistant's), and what they gave back (a user's, answering the turn before). Its `Debug`
-/// form gives only its size: it holds mail.
+/// A picture sent with a turn, to a model that sees them: its type (`image/png`) and its bytes
+/// in base64. It holds mail: its `Debug` form gives only its type and size.
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AiImage {
+    pub media_type: String,
+    pub base64: String,
+}
+
+impl fmt::Debug for AiImage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "AiImage({}, <{} bytes>)", self.media_type, self.base64.len())
+    }
+}
+
+/// One turn of a conversation with a model: what was said, the pictures with it (a user's), the
+/// tools the model called in it (an assistant's), and what they gave back (a user's, answering
+/// the turn before). Its `Debug` form gives only its size: it holds mail.
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AiTurn {
@@ -87,22 +102,25 @@ pub struct AiTurn {
     pub calls: Vec<AiToolCall>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub results: Vec<AiToolResult>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub images: Vec<AiImage>,
 }
 
 impl AiTurn {
     pub fn user(text: &str) -> AiTurn {
-        AiTurn { role: AiRole::User, text: text.into(), calls: Vec::new(), results: Vec::new() }
+        AiTurn { role: AiRole::User, text: text.into(), calls: Vec::new(), results: Vec::new(), images: Vec::new() }
     }
 
     pub fn assistant(text: &str) -> AiTurn {
-        AiTurn { role: AiRole::Assistant, text: text.into(), calls: Vec::new(), results: Vec::new() }
+        AiTurn { role: AiRole::Assistant, text: text.into(), calls: Vec::new(), results: Vec::new(), images: Vec::new() }
     }
 
     /// Its bytes, as the record counts them.
     pub fn size(&self) -> usize {
         let calls = self.calls.iter().map(AiToolCall::size).sum::<usize>();
         let results = self.results.iter().map(|r| r.content.len()).sum::<usize>();
-        self.text.len().saturating_add(calls).saturating_add(results)
+        let images = self.images.iter().map(|i| i.base64.len()).sum::<usize>();
+        self.text.len().saturating_add(calls).saturating_add(results).saturating_add(images)
     }
 }
 

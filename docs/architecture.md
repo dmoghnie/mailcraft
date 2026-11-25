@@ -228,7 +228,10 @@ and `cargo xtask sizes` enforces them.
   a message (`about/facts.rs`, `mail.facts`) is asked for as JSON; the answer is read as
   hostile input (`facts_from`, fuzzed as `ai_facts`): dates checked, lists and texts capped.
   Its card (`panes/assistant/facts.rs`) opens a New event or New task filled in from what was
-  found, so nothing is made until the person saves it.
+  found, so nothing is made until the person saves it. What's in a file
+  (`about/attachment.rs`, `mail.summarizeAttachment`, kept by the file's index): a picture goes
+  as one (`AiImage`, in each server's own format) to the model for pictures (`AiTask::Vision`,
+  else the one for questions), at most 5 MB; a text file's text to the chat model.
 - **Rewriting** (`session/ai/rewriting.rs`, `compose.rewrite`, `compose.writeFrom`): only the
   person's own text of the message being written goes (`own_text`: above the quoted original's
   rule and the signature's `-- `), and, written from a few words, the message it answers. One

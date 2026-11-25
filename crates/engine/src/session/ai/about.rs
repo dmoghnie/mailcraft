@@ -1,6 +1,6 @@
 //! What MailCraft's AI writes about a message for the reading pane: its conversation summed up
-//! (`summary.rs`), the message translated (`translation.rs`), or what's to act on in it found
-//! (`facts.rs`). Each is one question to the
+//! (`summary.rs`), the message translated (`translation.rs`), what's to act on in it found
+//! (`facts.rs`), or what's in a file attached to it (`attachment.rs`). Each is one question to the
 //! model chat work goes to ([`Session::ai_ask`]): only as far as the message's account lets its
 //! mail go, recorded by what it was for, and streamed, so what came so far shows while it's
 //! written. The newest are kept, by message and kind; an answer to one asked for again or closed
@@ -10,6 +10,7 @@ use std::collections::HashMap;
 
 use mailcraft_model::{AiAnswer, AiChat, MessageKey};
 
+pub use attachment::ai_reads_file;
 pub use facts::{FactAmount, FactEvent, FactTask, FactTracking, Facts, facts_from};
 use serde_json::{Value, json};
 
@@ -17,6 +18,7 @@ use super::settings::AiTask;
 use super::{ai_server, assistant};
 use crate::{CmdError, CommandSpec, Session, p};
 
+mod attachment;
 mod facts;
 mod summary;
 #[cfg(test)]
@@ -39,6 +41,8 @@ pub enum AboutKind {
     Translation,
     /// Its dates, tasks, amounts and tracking numbers found.
     Facts,
+    /// What's in its file of this index.
+    Attachment(usize),
 }
 
 impl AboutKind {
@@ -48,6 +52,7 @@ impl AboutKind {
             AboutKind::Summary => "summary",
             AboutKind::Translation => "translation",
             AboutKind::Facts => "facts",
+            AboutKind::Attachment(_) => "attachment",
         }
     }
 }
@@ -110,9 +115,23 @@ impl Session {
 
     /// Ask `q` about message `key`, for `kind`: what was written of it before is replaced.
     fn about_ask(&mut self, key: &MessageKey, kind: AboutKind, q: Question) -> Result<(), CmdError> {
-        let profile = self.ai_route(AiTask::Chat, Some(&key.account)).map_err(CmdError::Disabled)?.id.clone();
-        let id = self.ai_ask(AiTask::Chat, Some(&key.account), kind.purpose(), AiChat::ask(&q.system, &q.text, q.tokens), true)?;
-        let written = AboutMessage { profile, messages: q.messages, left_out: q.left_out, ..AboutMessage::default() };
+        let chat = AiChat::ask(&q.system, &q.text, q.tokens);
+        self.about_ask_chat(key, kind, AiTask::Chat, chat, (q.messages, q.left_out))
+    }
+
+    /// Ask `chat` about message `key`, for `kind`, of the model for `task`; with it went
+    /// `messages`, and others were left out for room.
+    fn about_ask_chat(
+        &mut self,
+        key: &MessageKey,
+        kind: AboutKind,
+        task: AiTask,
+        chat: AiChat,
+        (messages, left_out): (usize, usize),
+    ) -> Result<(), CmdError> {
+        let profile = self.ai_route(task, Some(&key.account)).map_err(CmdError::Disabled)?.id.clone();
+        let id = self.ai_ask(task, Some(&key.account), kind.purpose(), chat, true)?;
+        let written = AboutMessage { profile, messages, left_out, ..AboutMessage::default() };
         self.ai.about.keep(key.clone(), kind, written, id);
         Ok(())
     }
@@ -187,5 +206,6 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
     let mut all = summary::commands();
     all.extend(translation::commands());
     all.extend(facts::commands());
+    all.extend(attachment::commands());
     all
 }

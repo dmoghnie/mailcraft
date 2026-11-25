@@ -2345,3 +2345,9 @@ count	occurrences	kez
 	Due {date}	Son tarih {date}
 	Amounts	Tutarlar
 	Tracking numbers	Takip numaraları
+	Model for pictures	Resimler için model
+	Pictures in mail: a model that sees them. None chosen, the model for questions	Postalardaki resimler: onları görebilen bir model. Seçilmezse sorular için olan model
+	The model for questions	Sorular için olan model
+	Reading the file…	Dosya okunuyor…
+	The file couldn't be read: {error}	Dosya okunamadı: {error}
+	Close the file's summary	Dosya özetini kapat

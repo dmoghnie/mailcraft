@@ -403,7 +403,13 @@ impl MailApp {
             },
             // A conversation summed up, a message translated or rewritten: no model it may go
             // to, said (one that fails on the way says why in its card).
-            "mail.summarize" | "mail.translate" | "compose.rewrite" | "compose.writeFrom" | "mail.digest" | "mail.facts" => {
+            "mail.summarize"
+            | "mail.translate"
+            | "compose.rewrite"
+            | "compose.writeFrom"
+            | "mail.digest"
+            | "mail.facts"
+            | "mail.summarizeAttachment" => {
                 if let Err(mailcraft_engine::CmdError::Disabled(m)) = self.ran(id, &p) {
                     self.session.notice(m, true);
                 }

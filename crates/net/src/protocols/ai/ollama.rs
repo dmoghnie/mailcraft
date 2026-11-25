@@ -60,7 +60,13 @@ fn messages(t: &AiTurn, names: &HashMap<&str, &str>) -> Vec<Value> {
                 let name = names.get(r.id.as_str()).copied().unwrap_or_default();
                 json!({"role": "tool", "content": r.content, "tool_name": name, "tool_call_id": r.id})
             });
-            let said = (!t.text.is_empty() || t.results.is_empty()).then(|| json!({"role": "user", "content": t.text}));
+            let said = (!t.text.is_empty() || t.results.is_empty() || !t.images.is_empty()).then(|| {
+                let mut m = json!({"role": "user", "content": t.text});
+                if !t.images.is_empty() {
+                    m["images"] = t.images.iter().map(|i| Value::String(i.base64.clone())).collect();
+                }
+                m
+            });
             results.chain(said).collect()
         }
         AiRole::Assistant if t.calls.is_empty() => vec![json!({"role": "assistant", "content": t.text})],

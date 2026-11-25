@@ -6,6 +6,7 @@ use crate::{AI_LOG_KEPT, AiProfile, AiTest};
 use mailcraft_model::{AiAnswer, AiApi, AiDone, AiEndpoint, AiWork};
 
 mod assistant;
+mod attachments;
 mod budget;
 mod digest;
 mod facts;

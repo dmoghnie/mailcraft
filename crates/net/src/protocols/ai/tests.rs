@@ -2,6 +2,7 @@ use super::*;
 use crate::fakes::fake_ai::ModelServer;
 
 mod ollama;
+mod pictures;
 mod streaming;
 mod tools;
 mod tuning;

@@ -2344,3 +2344,9 @@ count	occurrences	회
 	Due {date}	기한 {date}
 	Amounts	금액
 	Tracking numbers	운송장 번호
+	Model for pictures	사진용 모델
+	Pictures in mail: a model that sees them. None chosen, the model for questions	메일의 사진: 사진을 볼 수 있는 모델. 선택하지 않으면 질문용 모델
+	The model for questions	질문용 모델
+	Reading the file…	파일을 읽는 중…
+	The file couldn't be read: {error}	파일을 읽지 못했습니다: {error}
+	Close the file's summary	파일 요약 닫기

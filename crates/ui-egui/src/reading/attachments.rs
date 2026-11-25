@@ -175,6 +175,12 @@ pub(super) fn attachment_card(
             acts.push(Action::OpenInCraft(a.index, cmd));
             ui.close();
         }
+        // What's in it, told by MailCraft's AI, once a model is set up and it reads the kind.
+        if !s.prefs.ai.profiles.is_empty() && mailcraft_engine::ai_reads_file(&a.mime, &a.name) && ui.button(tl!("Summarize with AI")).clicked() {
+            let p = json!({"key": key.to_id(), "index": a.index, "language": crate::i18n::current().code()});
+            acts.push(Action::Run("mail.summarizeAttachment", p));
+            ui.close();
+        }
         // Someone's OpenPGP key: kept, to check their signatures and encrypt to them.
         if pgp_key && ui.button(tl!("Import OpenPGP key")).clicked() {
             acts.push(Action::Run("pgp.importAttached", json!({"index": a.index})));

@@ -40,7 +40,7 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
         })
         .params(r#"{"id": string}"#),
         CommandSpec::new("ai.use", "Choose the model for a kind of work", WHERE, use_profile)
-            .params(r#"{"task": "chat"|"decision", "profile": string ("": the first profile)}"#),
+            .params(r#"{"task": "chat"|"decision"|"vision", "profile": string ("": the first profile; for vision, the one for questions)}"#),
         CommandSpec::new("ai.allow", "Choose how far an account's mail may go to a model", WHERE, allow)
             .params(r#"{"account": string, "reach": "off"|"local"|"any" (local: models on this computer or its network alone)}"#),
         CommandSpec::new("ai.localOnly", "Use models on this computer or its network alone", WHERE, |s, v| {

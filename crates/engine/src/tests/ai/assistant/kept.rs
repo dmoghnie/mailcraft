@@ -94,7 +94,7 @@ fn a_chat_cut_short_by_closing_says_so_when_read_again() {
     let kept: crate::Chat = store.load_doc(&file).unwrap();
     let call = AiToolCall { id: "call_0".into(), name: "read_message".into(), input: json!({"id": "m1"}) };
     let turn = crate::ChatTurn {
-        turn: mailcraft_model::AiTurn { role: AiRole::Assistant, text: String::new(), calls: vec![call], results: Vec::new() },
+        turn: mailcraft_model::AiTurn { role: AiRole::Assistant, text: String::new(), calls: vec![call], results: Vec::new(), images: Vec::new() },
         thinking: String::new(),
         context: Vec::new(),
         context_text: String::new(),

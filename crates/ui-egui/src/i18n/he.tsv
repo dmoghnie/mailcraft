@@ -2340,3 +2340,9 @@ count	occurrences	פעמים
 	Due {date}	תאריך יעד {date}
 	Amounts	סכומים
 	Tracking numbers	מספרי מעקב
+	Model for pictures	מודל לתמונות
+	Pictures in mail: a model that sees them. None chosen, the model for questions	תמונות בדואר: מודל שרואה אותן. אם לא נבחר מודל, המודל לשאלות
+	The model for questions	המודל לשאלות
+	Reading the file…	קורא את הקובץ…
+	The file couldn't be read: {error}	לא ניתן היה לקרוא את הקובץ: {error}
+	Close the file's summary	סגירת סיכום הקובץ

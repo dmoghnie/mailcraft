@@ -16,15 +16,18 @@ pub enum AiTask {
     Chat,
     /// Small, quick choices: triage, routing, whether a message needs an answer.
     Decision,
+    /// Pictures: a model that sees them. None chosen, the one for questions (many see them).
+    Vision,
 }
 
 impl AiTask {
-    pub const ALL: [AiTask; 2] = [AiTask::Chat, AiTask::Decision];
+    pub const ALL: [AiTask; 3] = [AiTask::Chat, AiTask::Decision, AiTask::Vision];
 
     pub fn code(self) -> &'static str {
         match self {
             AiTask::Chat => "chat",
             AiTask::Decision => "decision",
+            AiTask::Vision => "vision",
         }
     }
 
@@ -202,7 +205,8 @@ impl AiPrefs {
         if self.reach(account).is_none() {
             return Err("MailCraft's AI is off for this account: File › Options › AI lets its mail go to a model".into());
         }
-        let first = self.uses.get(&task).and_then(|id| self.profile(id)).or_else(|| self.profiles.first());
+        let chosen = |task| self.uses.get(&task).and_then(|id| self.profile(id));
+        let first = chosen(task).or_else(|| (task == AiTask::Vision).then(|| chosen(AiTask::Chat)).flatten()).or_else(|| self.profiles.first());
         let Some(first) = first else { return Err("no model is set up: add one in File › Options › AI".into()) };
         self.allowed_from(first, account, spent).ok_or_else(|| {
             if spent.contains(&first.id) {

@@ -2358,3 +2358,9 @@ count	occurrences	wystąpieniach
 	Due {date}	Termin {date}
 	Amounts	Kwoty
 	Tracking numbers	Numery przesyłek
+	Model for pictures	Model do obrazów
+	Pictures in mail: a model that sees them. None chosen, the model for questions	Obrazy w poczcie: model, który je widzi. Jeśli żaden nie jest wybrany, model do pytań
+	The model for questions	Model do pytań
+	Reading the file…	Czytam plik…
+	The file couldn't be read: {error}	Nie udało się odczytać pliku: {error}
+	Close the file's summary	Zamknij podsumowanie pliku

@@ -2359,3 +2359,9 @@ count	occurrences	opakovaní
 	Due {date}	Termín {date}
 	Amounts	Sumy
 	Tracking numbers	Čísla zásielok
+	Model for pictures	Model pre obrázky
+	Pictures in mail: a model that sees them. None chosen, the model for questions	Obrázky v pošte: model, ktorý ich vidí. Ak nie je vybraný, model pre otázky
+	The model for questions	Model pre otázky
+	Reading the file…	Číta sa súbor…
+	The file couldn't be read: {error}	Súbor sa nepodarilo prečítať: {error}
+	Close the file's summary	Zavrieť zhrnutie súboru

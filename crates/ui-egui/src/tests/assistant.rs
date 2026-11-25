@@ -491,3 +491,27 @@ fn dates_and_tasks_are_found_from_more_actions() {
     frame(&ctx, &mut a, vec![]);
     assert!(a.session.about_message(&key, AboutKind::Facts).is_none(), "let go");
 }
+
+/// A file summed up from its menu: a card named after the file shows what's written about it;
+/// Close lets it go.
+#[test]
+fn a_file_is_summed_up_from_its_menu() {
+    let (mut a, ctx) = ready("assistant-file");
+    let key = a.session.list.iter().find(|m| m.subject == "Storyboard review on Thursday").map(|m| m.key.clone()).unwrap();
+    a.run("list.open", json!({"key": key.to_id()}));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    click_last(&ctx, &mut a, "More options");
+    click_last(&ctx, &mut a, "Summarize with AI");
+    let index = a.session.reading.as_ref().and_then(|r| r.parsed.as_ref()).map(|p| p.attachments[0].index).unwrap();
+    let id = a.session.about_message(&key, AboutKind::Attachment(index)).and_then(|w| w.asking).expect("asked for, on its way");
+    let t = texts(&ctx, &mut a);
+    assert!(has(&t, "Reading the file…") && t.iter().filter(|s| s.as_str() == "colour-key.png").count() >= 2, "the chip and the card: {t:?}");
+    let answer = AiAnswer { text: "A colour key: four swatches.".into(), ..AiAnswer::default() };
+    a.session.apply(MailEvent::Ai { done: AiDone::Answered { id, answer: Some(answer), error: None } });
+    assert!(has(&texts(&ctx, &mut a), "A colour key: four swatches."));
+    click_last(&ctx, &mut a, "Close the file's summary");
+    frame(&ctx, &mut a, vec![]);
+    assert!(a.session.about_message(&key, AboutKind::Attachment(index)).is_none(), "let go");
+}

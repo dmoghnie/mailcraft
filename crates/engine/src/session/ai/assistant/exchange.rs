@@ -167,7 +167,7 @@ impl Session {
                 t.at = at;
             }
             _ => {
-                let turn = AiTurn { role: AiRole::User, text: text.to_string(), calls: Vec::new(), results };
+                let turn = AiTurn { role: AiRole::User, text: text.to_string(), calls: Vec::new(), results, images: Vec::new() };
                 chat.turns.push(ChatTurn { turn, thinking: String::new(), context: context.to_vec(), context_text, cut: false, stopped: false, at });
             }
         }
@@ -231,7 +231,7 @@ impl Session {
                     chat.counted = Some(Counted { estimated, read });
                 }
                 let calls = own_ids(&chat, a.calls);
-                let turn = AiTurn { role: AiRole::Assistant, text: a.text, calls, results: Vec::new() };
+                let turn = AiTurn { role: AiRole::Assistant, text: a.text, calls, results: Vec::new(), images: Vec::new() };
                 let at = self.clock.now;
                 chat.turns.push(ChatTurn {
                     turn,
@@ -307,7 +307,7 @@ impl Session {
         let stopped = chat.error.is_some();
         let Ok(mut chat) = self.take_chat(id) else { return };
         let results = self.settle_open(&mut chat, "");
-        let turn = AiTurn { role: AiRole::User, text: String::new(), calls: Vec::new(), results };
+        let turn = AiTurn { role: AiRole::User, text: String::new(), calls: Vec::new(), results, images: Vec::new() };
         let at = self.clock.now;
         chat.turns.push(ChatTurn { turn, thinking: String::new(), context: Vec::new(), context_text: String::new(), cut: false, stopped: false, at });
         self.put_chat(chat);
@@ -453,7 +453,7 @@ impl Session {
         let open = !chat.open_calls().is_empty();
         if open {
             let results = self.settle_open(&mut chat, "Stopped: nothing changed.");
-            let turn = AiTurn { role: AiRole::User, text: String::new(), calls: Vec::new(), results };
+            let turn = AiTurn { role: AiRole::User, text: String::new(), calls: Vec::new(), results, images: Vec::new() };
             let at = self.clock.now;
             chat.turns.push(ChatTurn {
                 turn,

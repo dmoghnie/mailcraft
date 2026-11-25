@@ -2345,3 +2345,9 @@ count	occurrences	ocorrências
 	Due {date}	Vence em {date}
 	Amounts	Valores
 	Tracking numbers	Códigos de rastreamento
+	Model for pictures	Modelo para imagens
+	Pictures in mail: a model that sees them. None chosen, the model for questions	Imagens nos e-mails: um modelo que as vê. Se nenhum for escolhido, o modelo para perguntas
+	The model for questions	O modelo para perguntas
+	Reading the file…	Lendo o arquivo…
+	The file couldn't be read: {error}	Não foi possível ler o arquivo: {error}
+	Close the file's summary	Fechar o resumo do arquivo

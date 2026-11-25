@@ -2344,3 +2344,9 @@ count	occurrences	ripetizioni
 	Due {date}	Scadenza {date}
 	Amounts	Importi
 	Tracking numbers	Numeri di tracciamento
+	Model for pictures	Modello per le immagini
+	Pictures in mail: a model that sees them. None chosen, the model for questions	Immagini nella posta: un modello che le vede. Se non ne scegli uno, il modello per le domande
+	The model for questions	Il modello per le domande
+	Reading the file…	Lettura del file…
+	The file couldn't be read: {error}	Impossibile leggere il file: {error}
+	Close the file's summary	Chiudi il riepilogo del file

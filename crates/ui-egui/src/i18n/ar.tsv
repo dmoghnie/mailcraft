@@ -2340,3 +2340,9 @@ count	occurrences	مرات
 	Due {date}	الاستحقاق {date}
 	Amounts	المبالغ
 	Tracking numbers	أرقام التتبع
+	Model for pictures	نموذج للصور
+	Pictures in mail: a model that sees them. None chosen, the model for questions	الصور في البريد: نموذج يراها. إن لم يُختر نموذج، فنموذج الأسئلة
+	The model for questions	نموذج الأسئلة
+	Reading the file…	جارٍ قراءة الملف…
+	The file couldn't be read: {error}	تعذّرت قراءة الملف: {error}
+	Close the file's summary	إغلاق ملخص الملف
