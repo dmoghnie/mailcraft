@@ -2193,6 +2193,9 @@ count	occurrences	次
 	Waiting for the answer…	正在等待回答…
 	The script	指令碼
 	Let it write and run scripts	允許編寫並執行指令碼
+	Keep chats	保留聊天
+	For {days} days	{days} 天
+	Chats hold what MailCraft's AI was given and said, mail included. Older ones are deleted from this computer	聊天保存了 MailCraft 的 AI 收到和說出的內容，包括郵件。較舊的聊天會從這台電腦上刪除
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	指令碼一步就能尋找並讀取郵件、行程、聯絡人、工作和筆記，不必分成許多步。它在 MailCraft 內執行，不使用檔案或網路，它要求的任何變更都會等待你的核准。
 	When it fails, ask	失敗時改問
 	No other model	不改問其他模型

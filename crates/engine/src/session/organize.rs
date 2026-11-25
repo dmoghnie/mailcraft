@@ -175,6 +175,7 @@ impl Session {
         // The sender check follows contacts saved, accounts and the directory (cheap when not).
         self.keep_senders_when(false);
         self.held_invitations_due();
+        self.assistant_expire(false);
         // A new day moves the list's date headings (before the snoozes' early return).
         self.follow_the_day();
         let now = self.clock.now;

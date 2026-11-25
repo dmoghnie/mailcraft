@@ -84,6 +84,9 @@ impl AiProfile {
     }
 }
 
+/// The longest the person can keep chats for, in days ([`AiPrefs::chats_days`]): a hundred years.
+pub const CHATS_DAYS_MOST: u32 = 36_500;
+
 /// MailCraft's AI as set up. Empty at first: nothing is asked until the person adds a model and
 /// lets an account's mail go to it.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -97,6 +100,10 @@ pub struct AiPrefs {
     /// Models on this computer or its network alone, whatever an account allows: nothing goes
     /// to a cloud provider, a test included.
     pub local_only: bool,
+    /// Chats with the assistant are deleted once they're this many days old (since they last
+    /// changed), with the mail they hold; 0: kept until the person deletes them.
+    #[serde(skip_serializing_if = "is_zero")]
+    pub chats_days: u32,
 }
 
 impl AiPrefs {

@@ -2208,6 +2208,9 @@ count	occurrences	opakovaní
 	Waiting for the answer…	Čaká sa na odpoveď…
 	The script	Skript
 	Let it write and run scripts	Povoliť písať a spúšťať skripty
+	Keep chats	Uchovávať konverzácie
+	For {days} days	{days} dní
+	Chats hold what MailCraft's AI was given and said, mail included. Older ones are deleted from this computer	Konverzácie obsahujú, čo AI MailCraftu dostala a povedala, vrátane pošty. Staršie sa z tohto počítača odstránia
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Skript nájde a prečíta poštu, udalosti, kontakty, úlohy a poznámky v jednom kroku namiesto mnohých. Beží v MailCrafte, bez súborov a siete, a každá zmena, o ktorú žiada, čaká na vaše schválenie.
 	When it fails, ask	Keď zlyhá, opýtať sa
 	No other model	Žiadny iný model

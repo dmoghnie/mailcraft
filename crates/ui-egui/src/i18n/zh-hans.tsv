@@ -2190,6 +2190,9 @@ count	occurrences	次
 	Waiting for the answer…	正在等待回答…
 	The script	脚本
 	Let it write and run scripts	允许编写并运行脚本
+	Keep chats	保留聊天
+	For {days} days	{days} 天
+	Chats hold what MailCraft's AI was given and said, mail included. Older ones are deleted from this computer	聊天保存了 MailCraft 的 AI 收到和说出的内容，包括邮件。更早的聊天会从这台电脑上删除
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	脚本一步就能查找并读取邮件、日程、联系人、任务和笔记，而不必分很多步。它在 MailCraft 内运行，不使用文件或网络，它要求的任何更改都会等待你的批准。
 	When it fails, ask	失败时改问
 	No other model	不改问其他模型

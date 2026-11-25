@@ -185,3 +185,59 @@ fn a_chat_as_big_as_a_chat_gets_takes_no_more() {
     let e = again.run("assistant.send", &json!({"chat": c, "text": "More"})).unwrap_err().to_string();
     assert!(e.contains("as long as a chat gets"), "{e}");
 }
+
+/// Chats are kept as long as the person says: older ones are deleted, files and all, looked
+/// for again as time passes; a chat its model is answering stays.
+#[test]
+fn chats_older_than_the_person_keeps_them_are_deleted() {
+    let mut s = ready("assistant-expire");
+    let old = send(&mut s, None, "An old chat");
+    let (q, _) = question(&mut s);
+    answer(&mut s, q, "Old.");
+    s.clock.now += 10 * 86_400;
+    let new = send(&mut s, None, "A new chat");
+    let (q, _) = question(&mut s);
+    answer(&mut s, q, "New.");
+    let answering = send(&mut s, None, "Still answering");
+    s.take_jobs();
+    let v = s.run("ai.keepChats", &json!({"days": 7})).unwrap();
+    assert_eq!(v["deleted"], 1, "the one ten days old goes at once");
+    s.clock.now += 5 * 86_400;
+    s.tick();
+    let ids = listed(&mut s);
+    assert!(!ids.contains(&old) && ids.contains(&new) && ids.contains(&answering), "five days old: kept: {ids:?}");
+    s.clock.now += 3 * 86_400;
+    s.tick();
+    let ids = listed(&mut s);
+    assert!(!ids.contains(&new) && ids.contains(&answering), "eight days old: gone, but the one answering: {ids:?}");
+    let store = s.store.clone().unwrap();
+    s.take_jobs();
+    store.flush_docs();
+    assert!(!store.root().join(format!("assistant-{old}.json")).exists());
+    assert!(s.run("ai.keepChats", &json!({"days": 40_000})).is_err());
+    assert_eq!(s.run("ai.keepChats", &json!({"days": 0})).unwrap()["deleted"], 0);
+}
+
+/// An account removed, the chats holding its mail go with it; the others stay.
+#[test]
+fn a_removed_accounts_chats_go_with_it() {
+    let mut s = ready("assistant-account-removed");
+    let story = id_of(&s, STORYBOARD);
+    let holds = s.run("assistant.send", &json!({"text": "What's this?", "context": [{"kind": "message", "id": story}]})).unwrap()["chat"]
+        .as_str()
+        .unwrap()
+        .to_string();
+    let (q, _) = question(&mut s);
+    answer(&mut s, q, "A review.");
+    let other = send(&mut s, None, "Hello");
+    let (q, _) = question(&mut s);
+    answer(&mut s, q, "Hi.");
+    s.run("account.remove", &json!({"account": "sample"})).unwrap();
+    assert_eq!(listed(&mut s), [other], "{holds} went");
+}
+
+/// The ids of the chats listed.
+fn listed(s: &mut Session) -> Vec<String> {
+    let v = s.run("assistant.chats", &json!({})).unwrap();
+    v["chats"].as_array().unwrap().iter().map(|c| c["id"].as_str().unwrap().to_string()).collect()
+}

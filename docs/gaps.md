@@ -232,6 +232,18 @@ Test builds update themselves ([how test builds update](updates.md)). These part
 - **Cause:** Each kind of item needs tools of its own, each change a proposal checked again when
   approved. A card's words are written by the engine, as the CLI and agents read them.
 
+### 20. Chats with MailCraft's AI: kept as plain files
+
+- **Impact:** A chat with MailCraft's AI keeps what the model was given and said, which can be
+  mail, contacts' details and summaries, in a file in the data folder (`assistant-<id>.json`),
+  not encrypted. A chat stays when its account's mail is later kept from models (**File ›
+  Options › AI**), until it's deleted.
+- **Workaround:** Delete chats one by one or all at once in the assistant's pane, or choose
+  **Keep chats** in **File › Options › AI** to delete chats older than 7, 30, 90 or 365 days.
+  Removing an account deletes the chats that hold its mail.
+- **Cause:** Chats are written as JSON, as MailCraft's other settings files are; encrypting them
+  needs a key kept in the system keychain for them, which isn't done yet.
+
 ## Not planned
 
 These are outside MailCraft's control, or accepted as they are.

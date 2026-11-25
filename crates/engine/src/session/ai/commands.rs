@@ -3,7 +3,7 @@
 use mailcraft_model::{AiApi, AiEndpoint, AiWork, Job, Secret};
 use serde_json::{Value, json};
 
-use super::{AiProfile, AiReach, AiTask, settings::local_url};
+use super::{AiProfile, AiReach, AiTask, settings::CHATS_DAYS_MOST, settings::local_url};
 use crate::{CmdError, CmdResult, CommandSpec, Session, p};
 
 const WHERE: &str = "File › Options › AI";
@@ -44,6 +44,16 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
             Ok(json!({"on": s.prefs.ai.local_only}))
         })
         .params(r#"{"on"?: bool (none: switch)}"#),
+        CommandSpec::new("ai.keepChats", "Choose how long chats with MailCraft's AI are kept", WHERE, |s, v| {
+            let days = p::u64(v, "days").ok_or_else(|| CmdError::Params("`days` (number) is required".into()))?;
+            let days = u32::try_from(days)
+                .ok()
+                .filter(|d| *d <= CHATS_DAYS_MOST)
+                .ok_or_else(|| CmdError::Params(format!("at most {CHATS_DAYS_MOST} days")))?;
+            s.prefs.ai.chats_days = days;
+            Ok(json!({"days": days, "deleted": s.assistant_expire(true)}))
+        })
+        .params(r#"{"days": number (0: kept until deleted; at most 36500)}"#),
         CommandSpec::new("ai.test", "Test a model", WHERE, |s, v| {
             let id = p::req_str(v, "profile")?.to_string();
             s.ai_test(&id)?;

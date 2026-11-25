@@ -2190,6 +2190,9 @@ count	occurrences	回
 	Waiting for the answer…	回答を待っています…
 	The script	スクリプト
 	Let it write and run scripts	スクリプトの作成と実行を許可
+	Keep chats	チャットの保存期間
+	For {days} days	{days} 日間
+	Chats hold what MailCraft's AI was given and said, mail included. Older ones are deleted from this computer	チャットには MailCraft の AI に渡された内容と回答が、メールも含めて残ります。古いものはこのコンピューターから削除されます
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	スクリプトは、メール、予定、連絡先、タスク、メモを何度にも分けず一度で検索して読みます。MailCraft の中で動き、ファイルやネットワークは使わず、求める変更はあなたの承認を待ちます。
 	When it fails, ask	失敗したときに使う
 	No other model	ほかのモデルを使わない

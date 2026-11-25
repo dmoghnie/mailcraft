@@ -250,6 +250,8 @@ pub struct Assistant {
     /// Every chat kept, newest last; read from this computer when first wanted.
     heads: Vec<ChatHead>,
     loaded: bool,
+    /// When old chats were last looked for ([`Session::assistant_expire`]).
+    expired_at: i64,
     /// The chats read so far, by id.
     chats: HashMap<String, Chat>,
     /// The chats changed since they were last kept, and whether the list changed.

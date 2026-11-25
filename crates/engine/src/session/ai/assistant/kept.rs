@@ -24,6 +24,9 @@ const NOT_ENDED: &str = "MailCraft closed before the script ended";
 /// What a script's question says, read again, when MailCraft closed before its answer came.
 const NOT_ANSWERED: &str = "MailCraft closed before the answer came";
 
+/// How often old chats are looked for, in seconds: a chat is a day old at the least.
+const EXPIRE_EVERY: i64 = 3_600;
+
 /// `chat` as the last run left it, read again: nothing is on its way now, so the answer or the
 /// message it waited for says it never came, and the person sends again to go on.
 fn left_off(chat: Chat) -> Chat {
@@ -194,6 +197,35 @@ impl Session {
             store.remove_doc(&format!("{}.bad", chat_doc(id))).map_err(failed)?;
         }
         Ok(())
+    }
+
+    /// The chats older than the person keeps them (File › Options › AI), deleted, but one its
+    /// model is answering: looked for once an hour at most, or at once when `now`. How many went.
+    pub(crate) fn assistant_expire(&mut self, now: bool) -> usize {
+        let days = self.prefs.ai.chats_days;
+        let at = self.clock.now;
+        if days == 0 || (!now && at.saturating_sub(self.ai.assistant.expired_at) < EXPIRE_EVERY) {
+            return 0;
+        }
+        self.ai.assistant.expired_at = at;
+        self.assistant_load();
+        let before = at.saturating_sub(i64::from(days).saturating_mul(86_400));
+        let a = &self.ai.assistant;
+        let old: Vec<String> = a.heads().filter(|h| h.updated < before && a.asking(&h.id).is_none()).map(|h| h.id.clone()).collect();
+        old.iter().filter(|id| self.assistant_delete(id).inspect_err(|e| log::warn!("an old chat couldn't be deleted: {e}")).is_ok()).count()
+    }
+
+    /// The chats holding mail of `account` deleted: the person removed it, and what its mail
+    /// said goes with it.
+    pub(crate) fn assistant_forget_account(&mut self, account: &str) {
+        self.assistant_load();
+        let ids: Vec<String> = self.ai.assistant.heads().map(|h| h.id.clone()).collect();
+        for id in ids {
+            let holds = self.assistant_chat(&id).is_ok_and(|c| c.accounts.iter().any(|a| a == account));
+            if holds && let Err(e) = self.assistant_delete(&id) {
+                log::warn!("a chat holding a removed account's mail couldn't be deleted: {e}");
+            }
+        }
     }
 
     /// Every chat deleted, and every chat file left with them: one never listed, a copy set

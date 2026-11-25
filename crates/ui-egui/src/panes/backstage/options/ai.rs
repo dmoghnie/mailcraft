@@ -11,6 +11,8 @@ use mailcraft_engine::{AiProfile, AiReach, AiTask, AiTest};
 const RECORD_SHOWN: usize = 20;
 /// The most of a test's answer shown, in characters.
 const ANSWER_SHOWN: usize = 120;
+/// How long chats can be kept, in days (0: until deleted).
+const KEEP_CHATS: [u32; 5] = [0, 7, 30, 90, 365];
 
 /// The models, and the switch that keeps every question on this computer or its network.
 pub(super) fn models(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
@@ -36,6 +38,33 @@ pub(super) fn models(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action
         });
         if ai.profiles.len() > 1 {
             uses(s, t, ui, acts);
+        }
+        keep_chats(t, ui, ai.chats_days, acts);
+    });
+}
+
+/// How long the chats with the assistant are kept: until deleted, or so many days.
+fn keep_chats(t: &Tokens, ui: &mut Ui, days: u32, acts: &mut Vec<Action>) {
+    let about = tl!("Chats hold what MailCraft's AI was given and said, mail included. Older ones are deleted from this computer");
+    let shown = |d: u32| if d == 0 { tl!("Always").to_string() } else { tf!("For {days} days", days = d) };
+    setting(ui, t, false, tl!("Keep chats"), Some(about), |ui| {
+        let r = egui::ComboBox::from_id_salt("ai-keep-chats")
+            .width(160.0)
+            .selected_text(shown(days))
+            .show_ui(ui, |ui| {
+                for d in KEEP_CHATS {
+                    if ui.selectable_label(d == days, shown(d)).clicked() && d != days {
+                        acts.push(Action::Run("ai.keepChats", json!({"days": d})));
+                    }
+                }
+            })
+            .response
+            // The setting's name is beside it in the row, which doesn't hand it on.
+            .accessible_name(tl!("Keep chats"));
+        let mut chosen = days;
+        crate::drop_down::keys(ui, &r, &mut chosen, &KEEP_CHATS);
+        if chosen != days {
+            acts.push(Action::Run("ai.keepChats", json!({"days": chosen})));
         }
     });
 }

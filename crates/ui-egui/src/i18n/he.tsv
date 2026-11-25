@@ -2189,6 +2189,9 @@ count	occurrences	פעמים
 	Waiting for the answer…	ממתין לתשובה…
 	The script	הסקריפט
 	Let it write and run scripts	לאפשר לו לכתוב ולהריץ סקריפטים
+	Keep chats	שמירת שיחות
+	For {days} days	למשך {days} ימים
+	Chats hold what MailCraft's AI was given and said, mail included. Older ones are deleted from this computer	שיחות מכילות את מה שה-AI של MailCraft קיבל ואמר, כולל דואר. ישנות יותר נמחקות מהמחשב הזה
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	סקריפט מוצא וקורא דואר, אירועים, אנשי קשר, משימות והערות בצעד אחד במקום רבים. הוא רץ בתוך MailCraft, בלי קבצים או רשת, וכל שינוי שהוא מבקש ממתין לאישורכם.
 	When it fails, ask	אם נכשל, לשאול את
 	No other model	בלי מודל אחר

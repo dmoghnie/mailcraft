@@ -2207,6 +2207,9 @@ count	occurrences	повторений
 	Waiting for the answer…	Ожидание ответа…
 	The script	Скрипт
 	Let it write and run scripts	Разрешить писать и запускать скрипты
+	Keep chats	Хранить чаты
+	For {days} days	{days} дн.
+	Chats hold what MailCraft's AI was given and said, mail included. Older ones are deleted from this computer	Чаты хранят то, что ИИ MailCraft получил и сказал, включая почту. Более старые удаляются с этого компьютера
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Скрипт находит и читает почту, события, контакты, задачи и заметки за один шаг вместо многих. Он работает внутри MailCraft, без файлов и сети, а любое изменение, которое он запрашивает, ждёт вашего одобрения.
 	When it fails, ask	Если не ответит, спросить
 	No other model	Никакую другую модель

@@ -2193,6 +2193,9 @@ count	occurrences	회
 	Waiting for the answer…	답변을 기다리는 중…
 	The script	스크립트
 	Let it write and run scripts	스크립트 작성 및 실행 허용
+	Keep chats	채팅 보관
+	For {days} days	{days}일 동안
+	Chats hold what MailCraft's AI was given and said, mail included. Older ones are deleted from this computer	채팅에는 MailCraft AI가 받은 내용과 답한 내용이 메일까지 포함해 남습니다. 오래된 채팅은 이 컴퓨터에서 삭제됩니다
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	스크립트는 메일, 일정, 연락처, 작업, 메모를 여러 단계가 아닌 한 단계로 찾아 읽습니다. MailCraft 안에서 실행되며 파일이나 네트워크를 쓰지 않고, 요청하는 변경은 승인을 기다립니다.
 	When it fails, ask	실패하면 물어볼 모델
 	No other model	다른 모델 없음

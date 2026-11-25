@@ -353,7 +353,10 @@ impl Session {
         if self.importing.keeping.contains_key(id) {
             return Err(CmdError::Failed("what was imported is being kept; remove the account once that's done".into()));
         }
-        self.drop_account(id, Leaves::DataFile)
+        let removed = self.drop_account(id, Leaves::DataFile)?;
+        // Not when an account is set up again under its id (signing in again), only removed.
+        self.assistant_forget_account(id);
+        Ok(removed)
     }
 
     /// An account gone, leaving what `leaves` says.

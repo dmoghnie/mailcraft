@@ -2194,6 +2194,9 @@ count	occurrences	repeticiones
 	Waiting for the answer…	Esperando la respuesta…
 	The script	El script
 	Let it write and run scripts	Dejar que escriba y ejecute scripts
+	Keep chats	Conservar los chats
+	For {days} days	Durante {days} días
+	Chats hold what MailCraft's AI was given and said, mail included. Older ones are deleted from this computer	Los chats guardan lo que la IA de MailCraft recibió y dijo, correo incluido. Los más antiguos se eliminan de este equipo
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Un script busca y lee correo, eventos, contactos, tareas y notas en un solo paso en vez de muchos. Se ejecuta dentro de MailCraft, sin archivos ni red, y cualquier cambio que pida espera su aprobación.
 	When it fails, ask	Si falla, preguntar a
 	No other model	Ningún otro modelo

@@ -2194,6 +2194,9 @@ count	occurrences	előfordulás
 	Waiting for the answer…	Várakozás a válaszra…
 	The script	A szkript
 	Let it write and run scripts	Szkripteket írhat és futtathat
+	Keep chats	Csevegések megőrzése
+	For {days} days	{days} napig
+	Chats hold what MailCraft's AI was given and said, mail included. Older ones are deleted from this computer	A csevegések tartalmazzák, amit a MailCraft MI-je kapott és mondott, a leveleket is. A régebbieket törli erről a számítógépről
 	A script finds and reads mail, events, contacts, tasks and notes in one step rather than many. It runs inside MailCraft, with no files or network, and a change it calls for waits for your approval.	Egy szkript egyetlen lépésben keres és olvas leveleket, eseményeket, névjegyeket, feladatokat és jegyzeteket, sok helyett. A MailCraftban fut, fájlok és hálózat nélkül, és minden módosítás, amelyet kér, jóváhagyásra vár.
 	When it fails, ask	Ha nem sikerül, ezt kérdezze
 	No other model	Nincs másik modell

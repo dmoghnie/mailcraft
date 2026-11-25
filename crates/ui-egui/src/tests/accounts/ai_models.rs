@@ -100,3 +100,16 @@ fn an_account_is_let_a_model_tested_and_the_record_shown() {
     let left: Vec<&str> = a.session.prefs.ai.profiles.iter().map(|p| p.name.as_str()).collect();
     assert_eq!(left, ["Ollama"]);
 }
+
+/// File › Options › AI says how long chats are kept: always at first, as the setting says after.
+#[test]
+fn how_long_chats_are_kept_is_shown_on_options() {
+    let _tall = crate::tests::windows::layout::Dressed::new(TALL, "");
+    let (mut a, ctx) = options("ai-options-keep-chats");
+    let texts = drawn_strings(&ctx, &mut a, TALL);
+    assert!(has(&texts, "Keep chats") && !has(&texts, "For 30 days"), "{texts:?}");
+    a.run("ai.keepChats", json!({"days": 30}));
+    frame(&ctx, &mut a, vec![]);
+    assert!(has(&drawn_strings(&ctx, &mut a, TALL), "For 30 days"));
+    assert_eq!(a.session.prefs.ai.chats_days, 30);
+}
