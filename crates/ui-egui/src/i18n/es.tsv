@@ -2325,3 +2325,12 @@ count	occurrences	repeticiones
 	Doesn't need me	No me necesita
 	Mark mail that needs me	Marcar el correo que me necesita
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	El modelo para decisiones rápidas lee el correo que llega a la Bandeja de entrada, cuando el correo de su cuenta puede ir a él, y lo marca con «Me necesita» cuando te pide algo
+	Digest	Resumen
+	Each morning	Cada mañana
+	Morning and evening	Por la mañana y por la tarde
+	Only when asked	Solo cuando se pida
+	Writing the digest…	Escribiendo el resumen…
+	The digest couldn't be written: {error}	No se pudo escribir el resumen: {error}
+	Your digest is ready	Tu resumen está listo
+	Close the digest	Cerrar el resumen
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	El correo que llegó, ordenado por la IA de MailCraft, al empezar tu horario laboral en los días laborables, y también al terminar si lo eliges. El horario laboral se configura en Calendario

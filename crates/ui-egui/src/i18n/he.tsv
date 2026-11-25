@@ -2320,3 +2320,12 @@ count	occurrences	פעמים
 	Doesn't need me	לא דורש אותי
 	Mark mail that needs me	סימון דואר שדורש אותי
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	דואר שמגיע לתיבת הדואר הנכנס נקרא על ידי המודל להחלטות מהירות, היכן שדואר החשבון רשאי להגיע אליו, ומסומן „דורש אותי” כשהוא מבקש ממך משהו
+	Digest	תקציר
+	Each morning	כל בוקר
+	Morning and evening	בוקר וערב
+	Only when asked	רק כשמבקשים
+	Writing the digest…	כותב את התקציר…
+	The digest couldn't be written: {error}	לא ניתן היה לכתוב את התקציר: {error}
+	Your digest is ready	התקציר שלך מוכן
+	Close the digest	סגירת התקציר
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	הדואר שהגיע, ממוין על ידי הבינה המלאכותית של MailCraft, בתחילת שעות העבודה בימי עבודה, וגם בסופן אם תבחר. שעות העבודה נקבעות תחת לוח שנה

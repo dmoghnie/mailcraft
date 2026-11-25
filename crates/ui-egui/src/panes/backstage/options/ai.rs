@@ -5,7 +5,7 @@
 use super::*;
 use crate::dialogs::{AiModelForm, ScriptForm, ServerForm};
 use mailcraft_engine::model::{McpTarget, dates};
-use mailcraft_engine::{AiProfile, AiReach, AiTask, AiTest, KeptScript, McpServer, ServerTools};
+use mailcraft_engine::{AiProfile, AiReach, AiTask, AiTest, DigestWhen, KeptScript, McpServer, ServerTools};
 
 /// The newest questions the record shows.
 const RECORD_SHOWN: usize = 20;
@@ -49,8 +49,27 @@ pub(super) fn models(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action
                 cmd: "ai.needsMe",
             };
             switch_row(ui, t, false, needs_me, acts);
+            digest_when(t, ui, ai.digest, acts);
         }
         keep_chats(t, ui, ai.chats_days, acts);
+    });
+}
+
+/// When the digest is made by itself: only when asked for, each work day's morning, or its
+/// morning and evening.
+fn digest_when(t: &Tokens, ui: &mut Ui, when: DigestWhen, acts: &mut Vec<Action>) {
+    let about = tl!(
+        "Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar"
+    );
+    setting(ui, t, false, tl!("Digest"), Some(about), |ui| {
+        let all = [DigestWhen::Off, DigestWhen::Mornings, DigestWhen::MorningsAndEvenings];
+        let labels = [tl!("Only when asked"), tl!("Each morning"), tl!("Morning and evening")];
+        let now = all.iter().position(|w| *w == when).unwrap_or(0);
+        if let Some(i) = widgets::segmented(ui, t, "digest-when", &labels, now)
+            && let Some(w) = all.get(i)
+        {
+            acts.push(Action::Run("ai.digestWhen", json!({"when": w.code(), "language": crate::i18n::current().code()})));
+        }
     });
 }
 

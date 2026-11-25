@@ -125,6 +125,11 @@ pub struct AiPrefs {
     /// needs the person (`needs_me.rs`).
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub needs_me: bool,
+    /// When the digest is made by itself (`digest.rs`), and the language it's written in.
+    #[serde(skip_serializing_if = "super::DigestWhen::is_off")]
+    pub digest: super::DigestWhen,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub digest_language: Option<String>,
 }
 
 impl AiPrefs {

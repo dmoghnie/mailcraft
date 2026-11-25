@@ -2321,3 +2321,12 @@ count	occurrences	回
 	Doesn't need me	対応不要
 	Mark mail that needs me	対応が必要なメールに印を付ける
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	受信トレイに届いたメールを、そのアカウントのメールを送れる場合に素早い判断用のモデルが読み、あなたに何かを求めているときは「要対応」の印を付けます
+	Digest	ダイジェスト
+	Each morning	毎朝
+	Morning and evening	朝と夕方
+	Only when asked	求めたときだけ
+	Writing the digest…	ダイジェストを作成中…
+	The digest couldn't be written: {error}	ダイジェストを作成できませんでした: {error}
+	Your digest is ready	ダイジェストができました
+	Close the digest	ダイジェストを閉じる
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	届いたメールを、勤務日の勤務時間の始めに（選べば終わりにも）MailCraft の AI が整理します。勤務時間は「予定表」で設定します

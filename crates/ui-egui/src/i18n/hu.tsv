@@ -2325,3 +2325,12 @@ count	occurrences	előfordulás
 	Doesn't need me	Nem vár engem
 	Mark mail that needs me	Az engem váró levelek megjelölése
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	A Beérkezett üzenetek mappába érkező leveleket a gyors döntések modellje olvassa el, ahol a fiók levelei eljuthatnak hozzá, és „Engem vár” jelölést kapnak, ha kérnek tőled valamit
+	Digest	Összefoglaló
+	Each morning	Minden reggel
+	Morning and evening	Reggel és este
+	Only when asked	Csak kérésre
+	Writing the digest…	Az összefoglaló készül…
+	The digest couldn't be written: {error}	Az összefoglalót nem sikerült megírni: {error}
+	Your digest is ready	Elkészült az összefoglalód
+	Close the digest	Összefoglaló bezárása
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	A beérkezett levelek a MailCraft MI rendezésében, munkanapokon a munkaidő kezdetén, és ha választod, a végén is. A munkaidőt a Naptár alatt állíthatod be

@@ -44,10 +44,11 @@ pub use accounts::{Changes, ImportState, Imports, SignInCheck, TrustedCertificat
 pub use ai::run_script_against;
 pub use ai::{
     AI_LOG_KEPT, ASSISTANT_LINK, ASSISTANT_WIDTH, AboutKind, AboutMessage, AiLogEntry, AiPrefs, AiProfile, AiReach, AiState, AiTask, AiTest,
-    Assistant, AssistantPane, CONTEXT_AT_FIRST, CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, Chat, ChatHead, ChatTurn, ContextItem, KeptScript, McpServer,
-    Rewrite, RewriteHow, RunState, STEPS_MOST, ScriptParam, ServerTools, ToolRun, ai_server, ai_url_is_local, assistant_message_link,
+    Assistant, AssistantPane, CONTEXT_AT_FIRST, CONTEXT_ITEMS_MOST, CONTEXT_QUOTE_MOST, Chat, ChatHead, ChatTurn, ContextItem, Digest, DigestWhen,
+    KeptScript, McpServer, Rewrite, RewriteHow, RunState, STEPS_MOST, ScriptParam, ServerTools, ToolRun, ai_server, ai_url_is_local,
+    assistant_message_link,
 };
-pub(crate) use ai::{about_commands, ai_commands, assistant_commands, mcp_server_commands, needs_me_commands, rewriting_commands};
+pub(crate) use ai::{about_commands, ai_commands, assistant_commands, digest_commands, mcp_server_commands, needs_me_commands, rewriting_commands};
 use changing::Batch;
 pub(crate) use changing::NoticeAct;
 use changing::keys_by_account;
@@ -653,6 +654,7 @@ impl Session {
             s.load_ai_log();
             s.load_ai_usage();
             s.load_needs_me();
+            s.load_digest();
             match store.load_doc(RULES_DOC) {
                 Ok(r) => s.rules = r,
                 Err(e) => {
@@ -748,6 +750,7 @@ impl Session {
         self.save_ai_log();
         self.save_ai_usage();
         self.save_needs_me();
+        self.save_digest();
         self.save_chats();
         std::mem::take(&mut self.jobs)
     }

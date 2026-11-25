@@ -2338,3 +2338,12 @@ count	occurrences	повторений
 	Doesn't need me	Не ждёт меня
 	Mark mail that needs me	Отмечать письма, которые ждут меня
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Письма, приходящие во «Входящие», читает модель для быстрых решений, если почте учётной записи можно к ней попадать, и отмечает «Ждёт меня», когда от вас что-то просят
+	Digest	Сводка
+	Each morning	Каждое утро
+	Morning and evening	Утром и вечером
+	Only when asked	Только по запросу
+	Writing the digest…	Составляется сводка…
+	The digest couldn't be written: {error}	Не удалось составить сводку: {error}
+	Your digest is ready	Ваша сводка готова
+	Close the digest	Закрыть сводку
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Пришедшая почта, разобранная ИИ MailCraft, в начале рабочего времени в рабочие дни, а по желанию и в конце. Рабочее время задаётся в разделе «Календарь»

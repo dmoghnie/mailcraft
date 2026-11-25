@@ -2320,3 +2320,12 @@ count	occurrences	keer
 	Doesn't need me	Vraagt niet om mij
 	Mark mail that needs me	Mail markeren die om mij vraagt
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Mail die in het Postvak IN binnenkomt wordt gelezen door het model voor snelle beslissingen, waar de mail van het account heen mag, en gemarkeerd met Vraagt om mij als het iets van u vraagt
+	Digest	Overzicht
+	Each morning	Elke ochtend
+	Morning and evening	Ochtend en avond
+	Only when asked	Alleen op verzoek
+	Writing the digest…	Overzicht wordt geschreven…
+	The digest couldn't be written: {error}	Het overzicht kon niet worden geschreven: {error}
+	Your digest is ready	Uw overzicht is klaar
+	Close the digest	Overzicht sluiten
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Binnengekomen mail, gesorteerd door de AI van MailCraft, aan het begin van uw werktijd op werkdagen, en desgewenst ook aan het eind. De werktijd stelt u in onder Agenda

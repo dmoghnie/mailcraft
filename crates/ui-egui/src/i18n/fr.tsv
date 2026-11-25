@@ -2325,3 +2325,12 @@ count	occurrences	occurrences
 	Doesn't need me	Ne me concerne pas
 	Mark mail that needs me	Marquer le courrier qui me concerne
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Le courrier qui arrive dans la boîte de réception est lu par le modèle pour les décisions rapides, là où le courrier du compte peut aller, et marqué « Me concerne » quand il vous demande quelque chose
+	Digest	Synthèse
+	Each morning	Chaque matin
+	Morning and evening	Matin et soir
+	Only when asked	Seulement sur demande
+	Writing the digest…	Rédaction de la synthèse…
+	The digest couldn't be written: {error}	La synthèse n’a pas pu être rédigée : {error}
+	Your digest is ready	Votre synthèse est prête
+	Close the digest	Fermer la synthèse
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Le courrier reçu, trié par l’IA de MailCraft, au début de vos heures de travail les jours ouvrés, et aussi à leur fin si vous le choisissez. Les heures de travail se règlent sous Calendrier

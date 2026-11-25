@@ -2324,3 +2324,12 @@ count	occurrences	次
 	Doesn't need me	不需要我處理
 	Mark mail that needs me	標記需要我處理的郵件
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	到達收件匣的郵件會在其帳戶的郵件可以傳送給模型時，由快速決策模型閱讀；需要你做某事時標記為「需要我處理」
+	Digest	摘要
+	Each morning	每天早上
+	Morning and evening	早上和晚上
+	Only when asked	僅在要求時
+	Writing the digest…	正在撰寫摘要…
+	The digest couldn't be written: {error}	無法撰寫摘要：{error}
+	Your digest is ready	你的摘要已準備好
+	Close the digest	關閉摘要
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	收到的郵件會在工作日的工作時間開始時（如果你選擇，結束時也會）由 MailCraft 的 AI 整理。工作時間在「行事曆」中設定

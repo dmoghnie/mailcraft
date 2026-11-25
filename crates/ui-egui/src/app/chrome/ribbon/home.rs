@@ -16,7 +16,7 @@ pub(super) const GROUPS: [(&str, &[&str]); 7] = [
     ("Respond", &["mail.reply", "mail.replyAll", "mail.forward"]),
     ("Tags", &["mail.toggleRead", "mail.flag", "mail.categorize", "mail.pin", "mail.snooze"]),
     ("Find", &["list.filter"]),
-    ("AI", &["assistant.pane"]),
+    ("AI", &["assistant.pane", "mail.digest"]),
 ];
 
 /// Where a command added to the ribbon lives, by the start of its id, and the icon its button
@@ -84,6 +84,7 @@ pub(super) fn name(s: &Session, id: &'static str) -> &'static str {
         "mail.snooze" => "Snooze",
         "list.filter" => "Filter",
         "assistant.pane" => "Ask AI",
+        "mail.digest" => "Digest",
         _ => s.registry().get(id).map_or(id, |c| c.label),
     }
 }
@@ -101,6 +102,8 @@ pub(super) fn act(s: &Session, id: &'static str) -> Option<Action> {
         "mail.move" => Action::Dialog(Dialog::move_to()),
         "mail.pin" => Action::Run("mail.pin", json!({"on": !pinned(s)})),
         "quickStep.run" | "mail.categorize" | "mail.snooze" | "list.filter" => return None,
+        // Written in the language the window is in.
+        "mail.digest" => Action::Run(id, json!({"language": crate::i18n::current().code()})),
         // Delete is asked first when it's for good (`act_run`).
         _ => Action::Run(id, json!({})),
     })
@@ -112,6 +115,7 @@ pub(super) fn can(s: &Session, id: &'static str) -> bool {
         "mail.junk" => enabled(s, if in_junk(s) { "mail.notJunk" } else { "mail.junk" }),
         "quickStep.run" | "list.filter" => true,
         "mail.categorize" | "mail.pin" | "mail.snooze" => !s.selection.is_empty(),
+        "mail.digest" => !s.prefs.ai.profiles.is_empty(),
         _ => enabled(s, id),
     }
 }
@@ -150,7 +154,7 @@ fn icon(s: &Session, id: &str) -> Icon {
         "mail.pin" => Icon::Pin,
         "mail.snooze" => Icon::Clock,
         "list.filter" => Icon::Funnel,
-        "assistant.pane" => Icon::Sparkle,
+        "assistant.pane" | "mail.digest" => Icon::Sparkle,
         _ => AREA_ICONS.iter().find(|(area, _)| id.starts_with(area)).map_or(Icon::Steps, |(_, icon)| *icon),
     }
 }

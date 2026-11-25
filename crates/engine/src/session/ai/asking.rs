@@ -106,6 +106,8 @@ pub struct AiState {
     pub(super) usage_changed: bool,
     /// Which mail arriving needs the person (`needs_me.rs`).
     pub(super) needs_me: super::needs_me::NeedsMe,
+    /// The digest (`digest.rs`).
+    pub(super) digest: super::digest::DigestState,
 }
 
 impl AiState {
@@ -281,7 +283,11 @@ impl Session {
                     self.ai.tests.insert(w.profile.clone(), test);
                     return;
                 }
-                if self.about_came(id, &w.profile, &result) || self.rewrite_came(id, &w.profile, &result) || self.needs_me_came(id, &result) {
+                if self.about_came(id, &w.profile, &result)
+                    || self.rewrite_came(id, &w.profile, &result)
+                    || self.needs_me_came(id, &result)
+                    || self.digest_came(id, &w.profile, &result)
+                {
                     return;
                 }
                 if self.ai.answers.len() >= ANSWERS_KEPT

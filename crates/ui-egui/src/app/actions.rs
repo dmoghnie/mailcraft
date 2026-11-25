@@ -236,6 +236,10 @@ impl MailApp {
             // RequestUserAttention: Windows keeps that highlight on the taskbar until focus returns.
             self.notify_mail(ctx, &title, &body, news.iter().map(|m| m.key.clone()).collect(), private);
         }
+        // A digest made by itself is written (each morning, as asked in File › Options › AI).
+        if self.session.take_digest_ready() {
+            self.notify_mail(ctx, tl!("Your digest is ready"), tl!("Open MailCraft to read it."), Vec::new(), false);
+        }
         let unread = self.session.inbox_unread();
         let view = match self.session.module {
             Module::Mail => view_title(&self.session),
@@ -399,7 +403,7 @@ impl MailApp {
             },
             // A conversation summed up, a message translated or rewritten: no model it may go
             // to, said (one that fails on the way says why in its card).
-            "mail.summarize" | "mail.translate" | "compose.rewrite" | "compose.writeFrom" => {
+            "mail.summarize" | "mail.translate" | "compose.rewrite" | "compose.writeFrom" | "mail.digest" => {
                 if let Err(mailcraft_engine::CmdError::Disabled(m)) = self.ran(id, &p) {
                     self.session.notice(m, true);
                 }

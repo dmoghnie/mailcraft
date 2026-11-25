@@ -2339,3 +2339,12 @@ count	occurrences	opakovaní
 	Doesn't need me	Nepotrebuje ma
 	Mark mail that needs me	Označovať poštu, ktorá ma potrebuje
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Pošta prichádzajúca do priečinka Doručená pošta sa číta modelom na rýchle rozhodnutia, kam môže pošta účtu ísť, a označí sa Potrebuje ma, keď od vás niečo žiada
+	Digest	Prehľad
+	Each morning	Každé ráno
+	Morning and evening	Ráno a večer
+	Only when asked	Len na požiadanie
+	Writing the digest…	Píše sa prehľad…
+	The digest couldn't be written: {error}	Prehľad sa nepodarilo napísať: {error}
+	Your digest is ready	Váš prehľad je pripravený
+	Close the digest	Zavrieť prehľad
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Pošta, ktorá prišla, roztriedená AI MailCraftu na začiatku pracovného času v pracovné dni, a ak chcete, aj na jeho konci. Pracovný čas sa nastavuje v časti Kalendár

@@ -2324,3 +2324,12 @@ count	occurrences	ripetizioni
 	Doesn't need me	Non mi riguarda
 	Mark mail that needs me	Segna la posta che mi riguarda
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	La posta in arrivo nella Posta in arrivo viene letta dal modello per le decisioni rapide, dove la posta dell'account può andare, e segnata «Mi riguarda» quando ti chiede qualcosa
+	Digest	Riepilogo
+	Each morning	Ogni mattina
+	Morning and evening	Mattina e sera
+	Only when asked	Solo su richiesta
+	Writing the digest…	Scrittura del riepilogo…
+	The digest couldn't be written: {error}	Impossibile scrivere il riepilogo: {error}
+	Your digest is ready	Il tuo riepilogo è pronto
+	Close the digest	Chiudi il riepilogo
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	La posta arrivata, ordinata dall'IA di MailCraft, all'inizio dell'orario di lavoro nei giorni lavorativi, e anche alla fine se lo scegli. L'orario di lavoro si imposta in Calendario

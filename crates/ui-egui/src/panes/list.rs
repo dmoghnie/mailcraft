@@ -14,6 +14,7 @@ use crate::theme;
 use crate::widgets;
 use crate::{Action, Dialog, UiState};
 
+mod digest;
 mod no_answer;
 mod row;
 mod swipe;
@@ -58,6 +59,7 @@ pub fn show(s: &Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action>) 
         // Against the right in a right-to-left interface (egui runs its rows from there too).
         ui.with_layout(crate::bidi::column(), |ui| list_head(s, &t, ui, acts));
     });
+    digest::section(s, &t, ui, acts);
     no_answer::section(s, &t, ui, acts);
     list_body(s, st, ui, acts);
 }

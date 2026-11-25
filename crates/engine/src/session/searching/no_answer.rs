@@ -67,6 +67,20 @@ impl Session {
         self.search_state.no_answer.found.iter().filter(|m| account.is_none_or(|a| m.key.account == a)).cloned().collect()
     }
 
+    /// All the sent mail nobody answered, newest first, whatever is on view: as last worked out,
+    /// or worked out now when it never was or is being (what's found so far is only part of it);
+    /// none when it's turned off.
+    pub(crate) fn no_answer_known(&mut self) -> Vec<SharedSummary> {
+        let na = &self.search_state.no_answer;
+        if !self.prefs.no_answer {
+            return Vec::new();
+        }
+        if na.at.is_none() || na.scan.is_some() {
+            return self.no_answer_now();
+        }
+        na.found.clone()
+    }
+
     /// Worked out again now, to the end (an agent's or the CLI's `mail.noAnswer`).
     pub fn no_answer_now(&mut self) -> Vec<SharedSummary> {
         self.start_no_answer();

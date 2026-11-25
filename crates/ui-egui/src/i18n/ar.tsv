@@ -2320,3 +2320,12 @@ count	occurrences	مرات
 	Doesn't need me	لا يحتاجني
 	Mark mail that needs me	تمييز البريد الذي يحتاجني
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	يقرأ نموذج القرارات السريعة البريد الوارد إلى البريد الوارد، حيث يُسمح بإرسال بريد الحساب، ويُميَّز بـ«يحتاجني» عندما يطلب منك شيئًا
+	Digest	الملخص اليومي
+	Each morning	كل صباح
+	Morning and evening	صباحًا ومساءً
+	Only when asked	عند الطلب فقط
+	Writing the digest…	جارٍ كتابة الملخص…
+	The digest couldn't be written: {error}	تعذّرت كتابة الملخص: {error}
+	Your digest is ready	ملخصك جاهز
+	Close the digest	إغلاق الملخص اليومي
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	البريد الوارد، مرتبًا بواسطة ذكاء MailCraft الاصطناعي، في بداية ساعات عملك في أيام العمل، وفي نهايتها أيضًا إن اخترت. تُضبط ساعات العمل تحت التقويم

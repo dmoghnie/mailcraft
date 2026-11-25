@@ -7,6 +7,7 @@ use mailcraft_model::{AiAnswer, AiApi, AiDone, AiEndpoint, AiWork};
 
 mod assistant;
 mod budget;
+mod digest;
 mod needs_me;
 mod rewriting;
 mod servers;

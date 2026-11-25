@@ -2324,3 +2324,12 @@ count	occurrences	회
 	Doesn't need me	조치 필요 없음
 	Mark mail that needs me	내 조치가 필요한 메일 표시
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	받은 편지함에 도착한 메일을, 그 계정의 메일을 보낼 수 있는 경우 빠른 판단용 모델이 읽고, 나에게 무언가를 요청하면 '내 조치 필요'로 표시합니다
+	Digest	요약 보고
+	Each morning	매일 아침
+	Morning and evening	아침과 저녁
+	Only when asked	요청할 때만
+	Writing the digest…	요약 보고를 작성하는 중…
+	The digest couldn't be written: {error}	요약 보고를 작성하지 못했습니다: {error}
+	Your digest is ready	요약 보고가 준비되었습니다
+	Close the digest	요약 보고 닫기
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	도착한 메일을 근무일의 근무 시간 시작에(선택하면 끝에도) MailCraft의 AI가 정리합니다. 근무 시간은 일정에서 설정합니다

@@ -527,7 +527,7 @@ impl SenderAddresses {
 }
 
 /// The ribbon's Home buttons, by the command each runs, in their order there.
-pub const HOME_BUTTONS: [&str; 16] = [
+pub const HOME_BUTTONS: [&str; 17] = [
     "mail.new",
     "mail.delete",
     "mail.archive",
@@ -544,6 +544,7 @@ pub const HOME_BUTTONS: [&str; 16] = [
     "mail.snooze",
     "list.filter",
     "assistant.pane",
+    "mail.digest",
 ];
 
 /// The simplified ribbon's buttons as it starts: the most used of Home's.

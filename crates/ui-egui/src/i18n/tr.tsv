@@ -2325,3 +2325,12 @@ count	occurrences	kez
 	Doesn't need me	Beni beklemiyor
 	Mark mail that needs me	Beni bekleyen postaları işaretle
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Gelen Kutusu'na gelen postalar, hesabın postasının gidebildiği yerde hızlı kararlar modeli tarafından okunur ve sizden bir şey istediğinde Beni bekliyor olarak işaretlenir
+	Digest	Özet
+	Each morning	Her sabah
+	Morning and evening	Sabah ve akşam
+	Only when asked	Yalnızca istendiğinde
+	Writing the digest…	Özet yazılıyor…
+	The digest couldn't be written: {error}	Özet yazılamadı: {error}
+	Your digest is ready	Özetiniz hazır
+	Close the digest	Özeti kapat
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Gelen postalar, iş günlerinde çalışma saatlerinizin başında, isterseniz sonunda da, MailCraft'ın yapay zekâsı tarafından sıralanır. Çalışma saatleri Takvim altında ayarlanır

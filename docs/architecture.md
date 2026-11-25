@@ -152,6 +152,11 @@ and `cargo xtask sizes` enforces them.
   (`note_new_mail`, past blocking and rules; never bulk mail) waits its turn for the decision
   model, four questions at a time, and is marked by its YES or NO (`ai-needs-me.json`, the
   newest 2,000). A message answered no longer needs the person; nothing goes to the server.
+- **The digest** (`session/ai/digest.rs`): the Inboxes' mail of the last hours (a line each:
+  sender, subject, its marks, its preview) and the sent mail nobody answered go to the chat
+  model, for the accounts it may read. Asked for, or made from `tick` on work days at the
+  work hours' start (and end), once, up to four hours late; the last one is kept
+  (`ai-digest.json`) and one made by itself is announced (`take_digest_ready`).
 - **Keys stay out of errors.** What a server says is quoted with the key blanked out, before it's
   cut short; an error of the network layer that quotes a server's words (a status line it
   couldn't read) and holds the key, or the start of it, says less instead.

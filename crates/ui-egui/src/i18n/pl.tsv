@@ -2338,3 +2338,12 @@ count	occurrences	wystąpieniach
 	Doesn't need me	Nie wymaga mnie
 	Mark mail that needs me	Oznaczaj pocztę, która wymaga mnie
 	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and marked Needs me when it asks something of you	Poczta przychodząca do Skrzynki odbiorczej jest czytana przez model do szybkich decyzji, tam gdzie poczta konta może trafić, i oznaczana jako Wymaga mnie, gdy czegoś od Ciebie chce
+	Digest	Przegląd
+	Each morning	Każdego ranka
+	Morning and evening	Rano i wieczorem
+	Only when asked	Tylko na żądanie
+	Writing the digest…	Piszę przegląd…
+	The digest couldn't be written: {error}	Nie udało się napisać przeglądu: {error}
+	Your digest is ready	Twój przegląd jest gotowy
+	Close the digest	Zamknij przegląd
+	Mail that came in, sorted by MailCraft's AI, at the start of your work hours on work days, and at their end too if you choose. Work hours are set under Calendar	Poczta, która przyszła, uporządkowana przez AI MailCraft na początku godzin pracy w dni robocze, a jeśli chcesz, także na ich końcu. Godziny pracy ustawia się w sekcji Kalendarz
