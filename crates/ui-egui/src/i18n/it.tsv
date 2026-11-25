@@ -2356,3 +2356,8 @@ count	occurrences	ripetizioni
 	Learn from my sent mail	Impara dalla mia posta inviata
 	Learning from your sent mail…	Apprendimento dalla posta inviata…
 	It couldn't be learned: {error}	Non è stato possibile apprenderlo: {error}
+	Draft replies	Prepara bozze di risposta
+	Mail that Needs me marks gets a reply written by the model, kept in Drafts for you to check and send. Nothing is sent by it	Per la posta segnata «Mi riguarda» il modello scrive una risposta e la mette nelle Bozze, perché tu la controlli e la invii. Non invia nulla da solo
+	Turn on Mark mail that needs me first	Attiva prima «Segna la posta che mi riguarda»
+	Let this account's mail go to a model first	Consenti prima che la posta di questo account vada a un modello
+	MailCraft's AI drafted a reply: it's in Drafts	L'IA di MailCraft ha preparato una risposta: è nelle Bozze

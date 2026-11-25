@@ -136,6 +136,9 @@ pub struct AiPrefs {
     /// How the person writes, given with each email written for them (`style.rs`).
     #[serde(skip_serializing_if = "String::is_empty")]
     pub style: String,
+    /// The accounts whose mail that needs the person gets replies drafted (`drafting.rs`).
+    #[serde(skip_serializing_if = "BTreeSet::is_empty")]
+    pub auto_drafts: BTreeSet<String>,
 }
 
 impl AiPrefs {

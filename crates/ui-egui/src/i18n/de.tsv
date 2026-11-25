@@ -2357,3 +2357,8 @@ count	occurrences	Terminen
 	Learn from my sent mail	Aus meinen gesendeten E-Mails lernen
 	Learning from your sent mail…	Lernt aus Ihren gesendeten E-Mails…
 	It couldn't be learned: {error}	Er konnte nicht gelernt werden: {error}
+	Draft replies	Antworten entwerfen
+	Mail that Needs me marks gets a reply written by the model, kept in Drafts for you to check and send. Nothing is sent by it	Für E-Mails, die „Braucht mich“ markiert, schreibt das Modell eine Antwort und legt sie in „Entwürfe“ ab, damit Sie sie prüfen und senden. Es wird nichts von selbst gesendet
+	Turn on Mark mail that needs me first	Schalten Sie zuerst „E-Mails markieren, die mich brauchen“ ein
+	Let this account's mail go to a model first	Erlauben Sie zuerst, dass die E-Mails dieses Kontos an ein Modell gehen
+	MailCraft's AI drafted a reply: it's in Drafts	Die KI von MailCraft hat eine Antwort entworfen: Sie liegt in „Entwürfe“

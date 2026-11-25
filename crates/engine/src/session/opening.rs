@@ -213,7 +213,7 @@ impl Session {
     }
 
     /// A parsed message as it's read (see [`Session::parse_for_reading`]).
-    fn for_reading(&self, key: &MessageKey, mut p: mime::Parsed) -> Arc<mime::Parsed> {
+    pub(crate) fn for_reading(&self, key: &MessageKey, mut p: mime::Parsed) -> Arc<mime::Parsed> {
         if p.date == 0
             && let Some(m) = self.summary(key)
         {

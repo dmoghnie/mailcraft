@@ -110,6 +110,8 @@ pub struct AiState {
     pub(super) digest: super::digest::DigestState,
     /// The person's writing style being learned (`style.rs`).
     pub(super) style: super::style::StyleState,
+    /// Replies being drafted (`drafting.rs`).
+    pub(super) drafting: super::drafting::Drafting,
 }
 
 impl AiState {
@@ -290,6 +292,7 @@ impl Session {
                     || self.needs_me_came(id, &result)
                     || self.digest_came(id, &w.profile, &result)
                     || self.style_came(id, &result)
+                    || self.drafting_came(id, &result)
                 {
                     return;
                 }

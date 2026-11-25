@@ -154,6 +154,7 @@ impl Session {
                 }
                 self.invitation_body(&key);
                 self.assistant_body(&key, None);
+                self.drafting_body(&key, false);
                 // Downloaded now, or read from the cache: a pass finds which. A local account's
                 // (a data file's) is always read from it, nothing new to index.
                 if !self.account(&key.account).is_none_or(AccountState::is_local) {
@@ -163,6 +164,7 @@ impl Session {
             Event::Filled { summary } => self.filled(*summary),
             Event::BodyFailed { key, error } => {
                 self.assistant_body(&key, Some(&error));
+                self.drafting_body(&key, true);
                 self.source_failed(&key, &error);
                 self.transfer_failed(&key, &error);
                 self.archive_source(&key, true);

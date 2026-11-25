@@ -9,6 +9,7 @@ mod assistant;
 mod attachments;
 mod budget;
 mod digest;
+mod drafting;
 mod facts;
 mod needs_me;
 mod rewriting;

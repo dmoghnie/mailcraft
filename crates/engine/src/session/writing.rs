@@ -435,6 +435,16 @@ impl Session {
 
     pub fn reply_compose(&mut self, mode: ReplyMode) -> CmdResult {
         let r = self.reading.clone().ok_or_else(|| CmdError::Disabled("open a message first".into()))?;
+        let (c, signature) = self.reply_to(r, mode)?;
+        let id = c.id;
+        self.open_compose(c);
+        self.style_signature(signature.as_ref());
+        self.made_now(id);
+        Ok(serde_json::json!({ "compose": id }))
+    }
+
+    /// An answer of `mode` to message `r`, not opened yet, and the signature it holds.
+    pub(crate) fn reply_to(&mut self, r: Reading, mode: ReplyMode) -> Result<(Compose, Option<mailcraft_model::Signature>), CmdError> {
         // The reply's own copy (the quote's pictures are put in it), the one shown left as it is.
         let mut parsed = Arc::unwrap_or_clone(r.parsed.ok_or_else(|| CmdError::Disabled("the message is still downloading".into()))?);
         // Forwarded, its files go with it: not before they've come.
@@ -472,7 +482,7 @@ impl Session {
                 }
             }
         }
-        self.open_compose(Compose {
+        let c = Compose {
             id,
             account,
             from,
@@ -496,10 +506,8 @@ impl Session {
             quote,
             font: self.prefs.compose_font.clone(),
             ..Default::default()
-        });
-        self.style_signature(signature.as_ref());
-        self.made_now(id);
-        Ok(serde_json::json!({ "compose": id }))
+        };
+        Ok((c, signature))
     }
 
     /// Note message `id` as it was just made ([`Compose::mark_made`]).

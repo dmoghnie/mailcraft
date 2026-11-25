@@ -535,3 +535,22 @@ fn the_writing_style_is_learned_from_options() {
     frame(&ctx, &mut a, vec![]);
     assert!(texts(&ctx, &mut a).iter().any(|s| s.contains("Warm, brief.")), "the style in its box");
 }
+
+/// Draft replies, beside each account's reach in File › Options › AI: only once Needs me is on;
+/// ticked, the account's mail that needs the person gets replies drafted.
+#[test]
+fn replies_are_drafted_for_an_account_from_options() {
+    // Tall enough for the whole Options page.
+    let _tall = windows::layout::Dressed::new(egui::vec2(1280.0, 8000.0), "");
+    let (mut a, ctx) = ready("assistant-drafting");
+    a.ui.backstage = Some(crate::backstage::Backstage::new(crate::backstage::Page::Options));
+    for _ in 0..3 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    click_last(&ctx, &mut a, "Draft replies");
+    assert!(a.session.prefs.ai.auto_drafts.is_empty(), "not before Needs me is on");
+    a.run("ai.needsMe", json!({"on": true}));
+    frame(&ctx, &mut a, vec![]);
+    click_last(&ctx, &mut a, "Draft replies");
+    assert!(a.session.prefs.ai.auto_drafts.contains("sample"));
+}

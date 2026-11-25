@@ -2371,3 +2371,8 @@ count	occurrences	opakovaní
 	Learn from my sent mail	Naučiť sa z mojej odoslanej pošty
 	Learning from your sent mail…	Učí sa z vašej odoslanej pošty…
 	It couldn't be learned: {error}	Nepodarilo sa naučiť: {error}
+	Draft replies	Pripravovať koncepty odpovedí
+	Mail that Needs me marks gets a reply written by the model, kept in Drafts for you to check and send. Nothing is sent by it	Na poštu označenú „Potrebuje ma“ model napíše odpoveď a uloží ju do Konceptov, aby ste ju skontrolovali a odoslali. Nič sa neodošle samo
+	Turn on Mark mail that needs me first	Najprv zapnite „Označovať poštu, ktorá ma potrebuje“
+	Let this account's mail go to a model first	Najprv povoľte, aby pošta tohto účtu išla do modelu
+	MailCraft's AI drafted a reply: it's in Drafts	AI MailCraftu pripravila koncept odpovede: je v Konceptoch

@@ -2356,3 +2356,8 @@ count	occurrences	次
 	Learn from my sent mail	從我的寄件備份中學習
 	Learning from your sent mail…	正在從你的寄件備份中學習…
 	It couldn't be learned: {error}	無法學習：{error}
+	Draft replies	起草回覆
+	Mail that Needs me marks gets a reply written by the model, kept in Drafts for you to check and send. Nothing is sent by it	對標記為「需要我處理」的郵件，模型會寫好回覆並儲存在草稿中，由你檢查後傳送。不會自動傳送任何內容
+	Turn on Mark mail that needs me first	請先開啟「標記需要我處理的郵件」
+	Let this account's mail go to a model first	請先允許此帳戶的郵件傳送給模型
+	MailCraft's AI drafted a reply: it's in Drafts	MailCraft 的 AI 起草了一封回覆：在草稿中

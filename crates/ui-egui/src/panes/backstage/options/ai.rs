@@ -357,9 +357,25 @@ pub(super) fn accounts(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Acti
                 {
                     acts.push(Action::Run("ai.allow", json!({"account": id, "reach": reach})));
                 }
+                draft_replies(s, ui, id, now != 0, acts);
             });
         }
     });
+}
+
+/// Whether account `id`'s mail that Needs me marks gets replies drafted: only where its mail may
+/// go to a model (`allowed`) and Needs me is on.
+fn draft_replies(s: &Session, ui: &mut Ui, id: &str, allowed: bool, acts: &mut Vec<Action>) {
+    let was = s.prefs.ai.auto_drafts.contains(id);
+    let mut on = was;
+    let about = tl!("Mail that Needs me marks gets a reply written by the model, kept in Drafts for you to check and send. Nothing is sent by it");
+    let why = if allowed { tl!("Turn on Mark mail that needs me first") } else { tl!("Let this account's mail go to a model first") };
+    ui.add_enabled(allowed && s.prefs.ai.needs_me, egui::Checkbox::new(&mut on, tl!("Draft replies")))
+        .on_hover_text(about)
+        .on_disabled_hover_text(why);
+    if on != was {
+        acts.push(Action::Run("ai.autoDrafts", json!({"account": id, "on": on})));
+    }
 }
 
 /// What went where: the newest questions, by when, what for, to which model, whose mail and how

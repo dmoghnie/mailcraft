@@ -74,6 +74,7 @@ Thanks to kzoli and kovadam69 for the Hungarian translation and dates written ye
 - **Find dates and tasks with AI** in a message's More actions lists the meetings and dates, the things you're asked to do, the amounts and the tracking numbers MailCraft's AI found in it; Add to calendar and Add to tasks open a new event or task filled in from them (`mail.facts`).
 - **Summarize with AI** in a file's menu tells what's in it: a picture described by a model that sees pictures (File › Options › AI › Model for pictures, else the model for questions); a text file, a PDF or a Word, Excel or PowerPoint file summed up from its text (`mail.summarizeAttachment`).
 - **Your writing style** in File › Options › AI: MailCraft's AI learns how you write from your sent mail when you ask (**Learn from my sent mail**), keeps it as a few lines you can change, and writes replies and follow-ups in it (`ai.learnStyle`, `ai.setStyle`).
+- **Draft replies**, beside each account in File › Options › AI: mail that Needs me marks gets a reply written by MailCraft's AI in your style, kept in Drafts for you to check and send, never sent by it (`ai.autoDrafts`).
 
 ### Changed
 

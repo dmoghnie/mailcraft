@@ -100,6 +100,9 @@ impl Session {
         let Some(key) = self.ai.needs_me.asking.remove(&id) else { return false };
         if let Some(needs) = result.as_ref().ok().and_then(|a| said(&a.text)) {
             self.needs_me_mark(&key, needs);
+            if needs {
+                self.draft_for(&key);
+            }
         }
         self.needs_me_next();
         true

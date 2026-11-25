@@ -2353,3 +2353,8 @@ count	occurrences	次
 	Learn from my sent mail	从我的已发送邮件中学习
 	Learning from your sent mail…	正在从你的已发送邮件中学习…
 	It couldn't be learned: {error}	无法学习：{error}
+	Draft replies	起草回复
+	Mail that Needs me marks gets a reply written by the model, kept in Drafts for you to check and send. Nothing is sent by it	对标记为“需要我处理”的邮件，模型会写好回复并保存在草稿中，由你检查后发送。不会自动发送任何内容
+	Turn on Mark mail that needs me first	请先打开“标记需要我处理的邮件”
+	Let this account's mail go to a model first	请先允许此账户的邮件发送给模型
+	MailCraft's AI drafted a reply: it's in Drafts	MailCraft 的 AI 起草了一封回复：在草稿中

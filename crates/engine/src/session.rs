@@ -50,7 +50,8 @@ pub use ai::{
     ToolRun, ai_reads_file, ai_server, ai_url_is_local, assistant_message_link, facts_from,
 };
 pub(crate) use ai::{
-    about_commands, ai_commands, assistant_commands, digest_commands, mcp_server_commands, needs_me_commands, rewriting_commands, style_commands,
+    about_commands, ai_commands, assistant_commands, digest_commands, drafting_commands, mcp_server_commands, needs_me_commands, rewriting_commands,
+    style_commands,
 };
 use changing::Batch;
 pub(crate) use changing::NoticeAct;

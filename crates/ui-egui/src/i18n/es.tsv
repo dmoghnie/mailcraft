@@ -2357,3 +2357,8 @@ count	occurrences	repeticiones
 	Learn from my sent mail	Aprender de mi correo enviado
 	Learning from your sent mail…	Aprendiendo de tu correo enviado…
 	It couldn't be learned: {error}	No se pudo aprender: {error}
+	Draft replies	Redactar respuestas
+	Mail that Needs me marks gets a reply written by the model, kept in Drafts for you to check and send. Nothing is sent by it	El modelo escribe una respuesta al correo que «Me necesita» marca y la guarda en Borradores para que la revises y la envíes. No se envía nada por sí solo
+	Turn on Mark mail that needs me first	Activa primero «Marcar el correo que me necesita»
+	Let this account's mail go to a model first	Permite primero que el correo de esta cuenta vaya a un modelo
+	MailCraft's AI drafted a reply: it's in Drafts	La IA de MailCraft redactó una respuesta: está en Borradores

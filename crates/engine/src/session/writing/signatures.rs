@@ -31,6 +31,16 @@ pub fn signature_parts(sig: &Signature) -> (String, mime::rich::Styles, Vec<mime
 /// `cid:` of this message's own (`tag`, from [`Session::signature_tag`]): one `cid:` in every
 /// message isn't unique, as RFC 2392 asks (#16). Pictures of a signature put in before and no
 /// longer in the text go.
+/// Signature `sig` in message `c`, named and styled as it was written (`tag`: its pictures').
+fn styled_signature(c: &mut Compose, sig: Option<&Signature>, tag: String) {
+    c.signature_name = sig.filter(|_| !c.signature.is_empty()).map(|s| s.name.clone()).unwrap_or_default();
+    c.signature_code = sig.filter(|_| !c.signature.is_empty()).map(|s| s.code.clone()).unwrap_or_default();
+    c.signature_tag = tag.clone();
+    let Some(sig) = sig else { return };
+    let (text, styles, pictures) = signature_parts(sig);
+    style_signature(c, &(text, styles), &pictures, &tag);
+}
+
 pub fn style_signature(c: &mut Compose, sig: &(String, mime::rich::Styles), pictures: &[mime::InlinePicture], tag: &str) {
     let (text, styles) = sig;
     if c.signature.is_empty() || styles.is_plain() {
@@ -218,12 +228,13 @@ impl Session {
     pub(super) fn style_signature(&mut self, sig: Option<&Signature>) {
         let tag = self.signature_tag();
         let Some(c) = self.compose.as_mut() else { return };
-        c.signature_name = sig.filter(|_| !c.signature.is_empty()).map(|s| s.name.clone()).unwrap_or_default();
-        c.signature_code = sig.filter(|_| !c.signature.is_empty()).map(|s| s.code.clone()).unwrap_or_default();
-        c.signature_tag = tag.clone();
-        let Some(sig) = sig else { return };
-        let (text, styles, pictures) = signature_parts(sig);
-        style_signature(c, &(text, styles), &pictures, &tag);
+        styled_signature(c, sig, tag);
+    }
+
+    /// Signature `sig`, in message `c` not opened yet, as it looks (see [`Session::style_signature`]).
+    pub(crate) fn style_signature_in(&mut self, c: &mut Compose, sig: Option<&Signature>) {
+        let tag = self.signature_tag();
+        styled_signature(c, sig, tag);
     }
 
     /// Put signature `sig` into the message being written (`None`: take out the one there).

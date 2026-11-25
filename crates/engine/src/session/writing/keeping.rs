@@ -236,6 +236,19 @@ impl Session {
         true
     }
 
+    /// Message `c`, not being written, filed in its account's Drafts (a reply MailCraft's AI
+    /// drafted): on the server, or on this computer for a local account.
+    pub(crate) fn file_draft(&mut self, c: &Compose) -> Result<(), CmdError> {
+        let (raw, folder, _) = self.draft_bytes(c)?;
+        if self.account(&c.account).is_none_or(AccountState::is_local) {
+            self.file_locally(&c.account, &folder, &raw, false)?;
+        } else {
+            let job = self.draft_job(c, raw, folder, None, false);
+            self.jobs.push(job);
+        }
+        Ok(())
+    }
+
     /// The job filing `c`'s draft `raw` in `folder` on the server (`keep`: kept on this computer
     /// first, as MailCraft closes): encrypted to the account's own certificate first when the
     /// message is to be encrypted.

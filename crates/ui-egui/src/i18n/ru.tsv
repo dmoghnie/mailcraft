@@ -2370,3 +2370,8 @@ count	occurrences	повторений
 	Learn from my sent mail	Изучить мою отправленную почту
 	Learning from your sent mail…	Изучается ваша отправленная почта…
 	It couldn't be learned: {error}	Не удалось изучить: {error}
+	Draft replies	Готовить черновики ответов
+	Mail that Needs me marks gets a reply written by the model, kept in Drafts for you to check and send. Nothing is sent by it	На письма с отметкой «Ждёт меня» модель пишет ответ и сохраняет его в черновиках, чтобы вы проверили и отправили. Сама она ничего не отправляет
+	Turn on Mark mail that needs me first	Сначала включите «Отмечать письма, которые ждут меня»
+	Let this account's mail go to a model first	Сначала разрешите передавать почту этой учётной записи модели
+	MailCraft's AI drafted a reply: it's in Drafts	ИИ MailCraft подготовил черновик ответа: он в черновиках

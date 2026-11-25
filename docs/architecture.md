@@ -247,6 +247,12 @@ and `cargo xtask sizes` enforces them.
   model from the newest sent mail of the accounts that may lend it (`ai.learnStyle`, what each
   message quotes left out, at most 30 of them), kept with the settings (`AiPrefs::style`, at
   most 2,000 characters) and theirs to change (`ai.setStyle`).
+- **Drafted replies** (`session/ai/drafting.rs`, `ai.autoDrafts`): in an account the person
+  turned it on for, a message Needs me marks gets a reply written as above (the message it
+  answers, the person's style, gaps in brackets for what only they know), built as Reply
+  builds one (`Session::reply_to`, not opened) and filed in Drafts (`file_draft`): never sent.
+  A server's message is downloaded first; one answered, the person's own or encrypted is
+  passed over; each message gets one draft.
 - **Links** (`session/ai/assistant/links.rs`): the tools name each message by `m` and ten hex
   digits of its id's FNV-1a hash, since an id holds its folder's name (spaces and all) and a
   Markdown link can't; events (`e`, `find_events`), people (`p`, `find_people`), tasks (`t`)

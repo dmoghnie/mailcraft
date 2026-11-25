@@ -2353,3 +2353,8 @@ count	occurrences	回
 	Learn from my sent mail	送信済みメールから学習
 	Learning from your sent mail…	送信済みメールから学習しています…
 	It couldn't be learned: {error}	学習できませんでした: {error}
+	Draft replies	返信の下書きを作成
+	Mail that Needs me marks gets a reply written by the model, kept in Drafts for you to check and send. Nothing is sent by it	「要対応」の印が付いたメールには、モデルが返信を書いて下書きに保存します。確認して送信するのはあなたです。自動では何も送信されません
+	Turn on Mark mail that needs me first	先に「対応が必要なメールに印を付ける」をオンにしてください
+	Let this account's mail go to a model first	先にこのアカウントのメールをモデルに送ることを許可してください
+	MailCraft's AI drafted a reply: it's in Drafts	MailCraft の AI が返信の下書きを作成しました: 下書きにあります

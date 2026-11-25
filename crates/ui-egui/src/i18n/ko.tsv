@@ -2356,3 +2356,8 @@ count	occurrences	회
 	Learn from my sent mail	보낸 메일에서 학습
 	Learning from your sent mail…	보낸 메일에서 학습하는 중…
 	It couldn't be learned: {error}	학습하지 못했습니다: {error}
+	Draft replies	답장 초안 작성
+	Mail that Needs me marks gets a reply written by the model, kept in Drafts for you to check and send. Nothing is sent by it	'내 조치 필요'로 표시된 메일에 모델이 답장을 작성해 임시 보관함에 저장합니다. 확인하고 보내는 것은 사용자입니다. 자동으로 보내지 않습니다
+	Turn on Mark mail that needs me first	먼저 '내 조치가 필요한 메일 표시'를 켜세요
+	Let this account's mail go to a model first	먼저 이 계정의 메일이 모델로 가도록 허용하세요
+	MailCraft's AI drafted a reply: it's in Drafts	MailCraft의 AI가 답장 초안을 작성했습니다: 임시 보관함에 있습니다
