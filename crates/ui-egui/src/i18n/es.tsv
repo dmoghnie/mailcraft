@@ -1960,10 +1960,6 @@ count	occurrences	repeticiones
 	It offers JMAP too.	También ofrece JMAP.
 	Use JMAP	Usar JMAP
 	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	Esta configuración procede de registros DNS, que pueden falsificarse, e indica servidores en {domain}. Tu contraseña se enviará allí: comprueba que {domain} gestiona tu correo.
-	Let AI agents control MailCraft	Permitir que agentes de IA controlen MailCraft
-	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	Una aplicación de IA conectada con el comando mailcraft mcp puede leer y buscar en tu correo. Actívalo solo para un agente en el que confíes
-	Let AI agents send, delete and change settings	Permitir que agentes de IA envíen, eliminen y cambien la configuración
-	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	Sin esto, un agente solo puede leer y buscar en tu correo. Con esto, puede ejecutar cualquier comando: enviar, responder, eliminar, mover y cambiar la configuración. Actívalo solo para un agente en el que confíes
 	Copy link	Copiar vínculo
 	Add people…	Agregar personas…
 	Add people to the group	Agregar personas al grupo

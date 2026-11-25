@@ -1,9 +1,7 @@
-//! A script run for an outside agent or the CLI (`script.run`): a kept script by its name, or
-//! code of the agent's own, run at once against what's on this computer. It reads every
-//! account, as the agent's own commands do (the person let agents in, File › Options › Safety),
-//! whatever MailCraft's AI may read. It only reads: an agent has no card to approve a change
-//! on, so a change it calls for fails, as a question to a model does; a message not downloaded
-//! yet is fetched, for the next run.
+//! A script run for the CLI (`script.run`): a kept script by its name, or code of its own, run
+//! at once against what's on this computer. It reads every account, whatever MailCraft's AI may
+//! read. It only reads: there's no card to approve a change on, so a change it calls for fails,
+//! as a question to a model does; a message not downloaded yet is fetched, for the next run.
 
 use mailcraft_model::AiToolCall;
 use serde_json::{Value, json};

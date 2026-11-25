@@ -1960,10 +1960,6 @@ count	occurrences	kez
 	It offers JMAP too.	JMAP da sunuluyor.
 	Use JMAP	JMAP kullan
 	These settings came from DNS records, which can be forged, and name servers at {domain}. Your password will be sent there: check that {domain} handles your mail.	Bu ayarlar sahtesi yapılabilen DNS kayıtlarından geldi ve {domain} üzerindeki sunucuları gösteriyor. Parolanız oraya gönderilecek: postanızın {domain} tarafından yönetildiğini denetleyin.
-	Let AI agents control MailCraft	Yapay zekâ ajanlarının MailCraft'ı denetlemesine izin ver
-	An AI app connected with the command mailcraft mcp can read and search your mail. Turn it on only for an agent you trust	mailcraft mcp komutuyla bağlanan bir yapay zekâ uygulaması postanızı okuyabilir ve arayabilir. Yalnızca güvendiğiniz bir ajan için açın
-	Let AI agents send, delete and change settings	Yapay zekâ ajanlarının göndermesine, silmesine ve ayarları değiştirmesine izin ver
-	Without this, an agent can only read and search your mail. With it, it can run any command: send, reply, delete, move and change settings. Turn it on only for an agent you trust	Bu kapalıyken bir ajan postanızı yalnızca okuyabilir ve arayabilir. Açıkken gönderme, yanıtlama, silme, taşıma ve ayarları değiştirme dahil her komutu çalıştırabilir. Yalnızca güvendiğiniz bir ajan için açın
 	Copy link	Bağlantıyı kopyala
 	Add people…	Kişi ekle…
 	Add people to the group	Gruba kişi ekle

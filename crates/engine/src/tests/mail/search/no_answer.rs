@@ -79,7 +79,6 @@ fn sent_mail_nobody_answered_comes_back_after_three_days() {
     s.run("folder.noAnswer", &json!({})).unwrap();
     let found: Vec<&str> = s.list.iter().map(|m| m.subject.as_str()).filter(|m| *m != SAMPLE_ORDER).collect();
     assert_eq!(found, ["Budget for the mix?"]);
-    assert!(crate::mcp::READS.contains(&"mail.noAnswer") && crate::mcp::READS.contains(&"folder.noAnswer"));
     // After the days the user chose.
     s.run("options.noAnswerDays", &json!({"days": 5})).unwrap();
     assert!(listed(&mut s).is_empty(), "five days asked for");

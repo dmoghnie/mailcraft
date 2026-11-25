@@ -39,7 +39,7 @@ of your mail on your computer, so it works offline.
 - **Calendar and people:** day, week and month views, meeting invitations, tasks, a To-Do Bar beside the mail, an address book, and CalDAV/CardDAV, with a mail account or on their own, from any such server (Nextcloud, Baïkal, SOGo, Radicale and others).
 - **Private and secure:** MailCraft talks only to your servers, always over TLS. Passwords stay in the system keychain. Remote pictures load only when you ask. S/MIME and OpenPGP sign and encrypt, and the message you're writing says whether everyone in it can receive it encrypted.
 - **Everywhere:** Windows, macOS, Linux and the browser (JMAP accounts only), in 18 interface languages.
-- **Scriptable:** every action is a command with an id. The ribbon, shortcuts, the CLI and `--cmd` all run the same commands, and so can an AI agent over MCP once you let it ([how](docs/mcp.md)).
+- **Scriptable:** every action is a command with an id. The ribbon, shortcuts, the CLI and `--cmd` all run the same commands.
 
 ## Install
 
@@ -79,7 +79,6 @@ apps/mailcraft-mobile/android/build.sh         # Android: the APK (see apps/mail
 - [How sync works](docs/sync.md)
 - [How test builds update themselves](docs/updates.md)
 - [Microsoft and Google sign-in](docs/oauth.md)
-- [Letting AI agents use MailCraft (MCP)](docs/mcp.md)
 - [Hosting the web build](packaging/web/README.md)
 
 ## Contribute

@@ -189,8 +189,8 @@ impl MailApp {
     }
 
     /// Run a command as the window does, what came of it shown where the window shows it (a
-    /// dialog, over the message being written, a toast), and the result whole: what an agent
-    /// runs (`mailcraft_engine::mcp`), which reads why one failed too.
+    /// dialog, over the message being written, a toast), and the result whole, which says why
+    /// one failed too.
     pub fn ran(&mut self, id: &str, params: &Value) -> mailcraft_engine::CmdResult {
         use mailcraft_engine::CmdError;
         let ran = self.session.run(id, params);
@@ -238,12 +238,6 @@ impl MailApp {
             Err(e) => self.session.notice(e.to_string(), true),
         }
         ran
-    }
-
-    /// An AI agent's message (`mailcraft mcp`): its answer, its commands run as the window's
-    /// own clicks are.
-    pub fn answer_agent(&mut self, message: &str) -> Option<String> {
-        mailcraft_engine::mcp::answer(self, message)
     }
 
     /// A `mailto:` link or a mail file the system handed MailCraft (as its mail app, or through
@@ -375,15 +369,5 @@ impl MailApp {
         for j in self.session.take_jobs() {
             self.backend.submit(j);
         }
-    }
-}
-
-/// The window runs an agent's commands as its own clicks are ([`MailApp::ran`]).
-impl mailcraft_engine::mcp::Runner for MailApp {
-    fn session(&self) -> &Session {
-        &self.session
-    }
-    fn run(&mut self, id: &str, params: &Value) -> mailcraft_engine::CmdResult {
-        self.ran(id, params)
     }
 }

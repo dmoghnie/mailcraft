@@ -67,32 +67,6 @@ fn servers_are_added_listed_and_removed() {
     assert!(jobs.iter().any(|j| matches!(j, Job::Ai { work: AiWork::SaveKey { name, key: None } } if name == "mcp-m1")));
     assert_eq!(listed(&mut s).len(), 1);
 }
-
-/// Adding a server, or turning one on, starts a program: an outside agent can't, even let to
-/// act; it may list them.
-#[test]
-fn an_agent_never_adds_or_turns_on_a_server() {
-    let mut s = sample_session("mcp-servers-agents");
-    s.prefs.agents = true;
-    s.prefs.agents_act = true;
-    let run = |s: &mut Session, id: &str, params: Value| {
-        let m =
-            json!({"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "run_command", "arguments": {"id": id, "params": params}}});
-        serde_json::from_str::<Value>(&crate::mcp::answer(s, &m.to_string()).unwrap()).unwrap()
-    };
-    let a = run(&mut s, "mcpServer.save", json!({"name": "x", "command": "rm"}));
-    assert_eq!(a["result"]["isError"], true, "{a}");
-    assert!(s.prefs.ai.mcp.is_empty());
-    s.run("mcpServer.save", &json!({"name": "notes", "command": "notes-mcp"})).unwrap();
-    assert_eq!(run(&mut s, "mcpServer.turn", json!({"id": "m1", "on": true}))["result"]["isError"], true);
-    assert!(!s.prefs.ai.mcp[0].on);
-    s.run("mcpServer.save", &json!({"name": "web", "url": "https://mcp.example/mcp"})).unwrap();
-    s.take_jobs();
-    assert_eq!(run(&mut s, "mcpServer.signIn", json!({"id": "m2"}))["result"]["isError"], true);
-    assert!(mcp_jobs(&mut s).is_empty(), "no sign-in begun");
-    assert_eq!(run(&mut s, "mcpServer.list", json!({}))["result"]["isError"], false);
-}
-
 /// A server on the web is signed in to: the sign-in's work names its address and the key the
 /// sign-in is kept under; once signed in, it's listed with that key, and saving it again at the
 /// same address keeps the sign-in, which another address, or a key given, replaces. A program

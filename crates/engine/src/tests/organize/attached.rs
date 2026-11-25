@@ -122,8 +122,6 @@ fn files_are_listed_from_every_account_and_filtered() {
     assert_eq!(s.files_shown().iter().map(|f| f.name.as_str()).collect::<Vec<_>>(), ["scan.pdf"]);
     s.run("files.filter", &json!({"kind": "all", "person": ""})).unwrap();
     assert!(s.files_shown().len() >= 5);
-    // An agent that may only read may list them.
-    assert!(crate::mcp::READS.contains(&"files.list"));
     assert!(matches!(s.run("files.list", &json!({"kind": "movie"})), Err(CmdError::Params(_))));
     assert!(matches!(s.run("files.filter", &json!({"kind": "movie"})), Err(CmdError::Params(_))));
 }

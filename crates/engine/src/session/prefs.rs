@@ -459,15 +459,6 @@ pub struct Prefs {
     /// signed mail is shown. Off at first: the authority learns whose mail is being read.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub check_revocation: bool,
-    /// AI agents may control MailCraft through MCP (`mailcraft mcp`, the engine's `mcp`): read
-    /// and search ([`crate::mcp::READS`]), and with [`Prefs::agents_act`] run any command. Off
-    /// unless the user turns it on.
-    #[serde(skip_serializing_if = "std::ops::Not::not")]
-    pub agents: bool,
-    /// Agents let in may also send, reply, delete, move and change settings: any command. Off
-    /// unless the user turns it on as well.
-    #[serde(skip_serializing_if = "std::ops::Not::not")]
-    pub agents_act: bool,
     /// MailCraft's own AI: the models it may ask, and how far each account's mail may go
     /// (`ai.rs`). Empty at first: nothing goes to a model until the person sets one up.
     #[serde(skip_serializing_if = "super::ai::AiPrefs::is_empty")]
@@ -683,8 +674,6 @@ impl Default for Prefs {
             clean_links: true,
             auto_pictures: false,
             check_revocation: false,
-            agents: false,
-            agents_act: false,
             ai: super::ai::AiPrefs::default(),
             sender_addresses: SenderAddresses::Strangers,
             external_tag: false,

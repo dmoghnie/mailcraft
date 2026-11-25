@@ -42,8 +42,6 @@ fn people_are_made_vips_and_taken_off() {
         let _ = s.run("people.vip", &json!({"address": format!("p{n}@x.example")}));
     }
     assert_eq!(s.vips().len(), VIPS_MAX);
-    // Listing them only reads: an agent that may only read may.
-    assert!(crate::mcp::READS.contains(&"people.vips") && crate::mcp::READS.contains(&"folder.vip"));
 }
 
 /// A second account, on a server, whose Inbox holds a message from Zoe.

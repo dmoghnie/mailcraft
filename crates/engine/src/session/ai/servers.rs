@@ -4,7 +4,7 @@
 //! lets its mail go (a program, or a server on this computer or its network, is local). A
 //! server's tools are listed when it's turned on, and kept (`mcp-tools.json`) so a script finds
 //! them without starting every server. Adding or changing one, or turning it on, starts a
-//! program: the person's to do alone, never an outside agent's (`crate::mcp::PERSON_ONLY`).
+//! program: the person's to do alone.
 
 use std::collections::BTreeMap;
 

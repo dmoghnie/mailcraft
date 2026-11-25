@@ -247,7 +247,6 @@ mod ai;
 mod calendar;
 mod directory;
 mod mail;
-mod mcp;
 mod opening;
 mod organize;
 mod photos;

@@ -129,8 +129,8 @@ and `cargo xtask sizes` enforces them.
   what each listed (`mcp-tools.json`, read when first wanted), so tools are found without
   starting every server; `mcpServer.*` adds, changes, turns on and off, lists again and removes
   them, and `mcpServer.signIn` signs in to one. Adding or changing a server, or turning one on,
-  starts a program, and signing in uses the person's own account: `mcp::PERSON_ONLY` keeps
-  those commands from every outside agent, even one let to act. A script calls them
+  starts a program, and signing in uses the person's own account: the person's to do alone.
+  A script calls them
   (`script/mcp.rs`): `find_tools` searches what was listed, and `mcp(server, tool, args)` calls a
   tool that says it changes nothing (`readOnlyHint`), the script waiting for its answer as for
   a message (`Wait::Mcp`); any other is proposed, as a script's changes are, and called once
@@ -205,8 +205,8 @@ and `cargo xtask sizes` enforces them.
   tools of their own, run as `run_script` is. Keeping one is a change (`keep_script`, checked:
   a free name, code that compiles) made once the person approves its card; `script.*` lists,
   changes, turns off and deletes them, as Options' Scripts card does; `script.run`
-  (`script/agents.rs`) runs one at once for an outside agent or the CLI, reading every account
-  as their commands do (`AiProfile::agent`) and changing nothing.
+  (`script/agents.rs`) runs one at once for the CLI, reading every account
+  (`AiProfile::agent`) and changing nothing.
 - **Chats stay on this computer**: `assistant.json` lists them, each in `assistant-<id>.json`
   (read when first wanted, its file removed when it's deleted); never in the record or the log.
   They're written on the store's thread (`store/src/docs_later.rs`, read back as handed over,
