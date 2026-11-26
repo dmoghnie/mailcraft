@@ -2614,3 +2614,18 @@ count	occurrences	kez
 	Sweep all but the newest	En yenisi dışında hepsini süpür
 	Read mail older than {days} days in {account}	{account} içinde {days} günden eski okunmuş postalar
 	Archive them	Arşivle
+	How the replies went…	Yanıtlar nasıl gitti…
+	How the replies went	Yanıtlar nasıl gitti
+	How each reply of MailCraft's AI went, never what was said: kept on this computer for {days} days	MailCraft yapay zekâsının her yanıtının nasıl gittiği, söylenenler asla: bu bilgisayarda {days} gün saklanır
+	No replies yet	Henüz yanıt yok
+	Still going	Hâlâ sürüyor
+	Stopped: too many tokens	Durdu: çok fazla token
+	Stopped: it took too long	Durdu: çok uzun sürdü
+	Stopped: too many steps	Durdu: çok fazla adım
+	Not finished	Bitmedi
+	Put off	Ertelendi
+	Questions: {n}	Sorular: {n}
+	Steps: {n}	Adımlar: {n}
+	Tokens read: {n}	Okunan token: {n}
+	Tokens written: {n}	Yazılan token: {n}
+	Seconds: {n}	Saniye: {n}

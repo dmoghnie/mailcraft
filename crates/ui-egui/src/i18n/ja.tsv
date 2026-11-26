@@ -2610,3 +2610,18 @@ count	occurrences	回
 	Sweep all but the newest	最新以外を一括削除
 	Read mail older than {days} days in {account}	{account} の {days} 日より前の既読メール
 	Archive them	アーカイブする
+	How the replies went…	応答の経過…
+	How the replies went	応答の経過
+	How each reply of MailCraft's AI went, never what was said: kept on this computer for {days} days	MailCraft の AI の各応答の経過で、話した内容は含みません。このコンピューターに {days} 日間保存されます
+	No replies yet	まだ応答はありません
+	Still going	進行中
+	Stopped: too many tokens	停止: トークンが多すぎます
+	Stopped: it took too long	停止: 時間がかかりすぎました
+	Stopped: too many steps	停止: ステップが多すぎます
+	Not finished	未完了
+	Put off	保留
+	Questions: {n}	質問: {n}
+	Steps: {n}	ステップ: {n}
+	Tokens read: {n}	読み取ったトークン: {n}
+	Tokens written: {n}	書き出したトークン: {n}
+	Seconds: {n}	秒: {n}

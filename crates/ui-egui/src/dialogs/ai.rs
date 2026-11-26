@@ -21,4 +21,7 @@ pub(super) use server::draw as draw_server;
 mod suggestions;
 pub use suggestions::SuggestionsForm;
 pub(super) use suggestions::draw as draw_suggestions;
+
+mod replies;
+pub(super) use replies::draw as draw_replies;
 pub(crate) use suggestions::suggestion_said;

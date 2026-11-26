@@ -554,3 +554,29 @@ fn replies_are_drafted_for_an_account_from_options() {
     click_last(&ctx, &mut a, "Draft replies");
     assert!(a.session.prefs.ai.auto_drafts.contains("sample"));
 }
+
+/// How the replies went, from the chats menu: the chat shown's replies, each with its model,
+/// its counts, its tools and how it ended.
+#[test]
+fn how_the_replies_went_is_shown_from_the_chats_menu() {
+    let (mut a, ctx) = ready("assistant-replies");
+    click_named(&ctx, &mut a, "Ask AI");
+    let sent = a.session.run("assistant.send", &json!({"text": "What does Zoe want?"})).unwrap();
+    let chat = sent["chat"].as_str().unwrap().to_string();
+    a.ui.assistant.chat = Some(chat.clone());
+    answers(&mut a, &chat, "Let me look.", &[("list_folders", json!({}))]);
+    answers(&mut a, &chat, "The revised frames.", &[]);
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "Chats");
+    frame(&ctx, &mut a, vec![]);
+    click_named(&ctx, &mut a, "How the replies went…");
+    assert!(matches!(&a.ui.dialog, Some(Dialog::Replies { chat: Some(c) }) if *c == chat), "{:?}", a.ui.dialog);
+    // A modal is sized in its first frame and drawn from the next.
+    for _ in 0..2 {
+        frame(&ctx, &mut a, vec![]);
+    }
+    let t = texts(&ctx, &mut a);
+    for line in ["How the replies went", "Answered", "Local · small", "Questions: 2 · Steps: 1", "list_folders: Ran"] {
+        assert!(has(&t, line), "{line}: {t:?}");
+    }
+}

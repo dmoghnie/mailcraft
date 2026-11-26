@@ -2613,3 +2613,18 @@ count	occurrences	次
 	Sweep all but the newest	清掃最新一封以外的全部郵件
 	Read mail older than {days} days in {account}	{account} 中超過 {days} 天的已讀郵件
 	Archive them	將其封存
+	How the replies went…	回覆的經過…
+	How the replies went	回覆的經過
+	How each reply of MailCraft's AI went, never what was said: kept on this computer for {days} days	MailCraft AI 每次回覆的經過，從不包含所說的內容：在這台電腦上保留 {days} 天
+	No replies yet	還沒有回覆
+	Still going	仍在進行
+	Stopped: too many tokens	已停止：權杖太多
+	Stopped: it took too long	已停止：耗時太長
+	Stopped: too many steps	已停止：步驟太多
+	Not finished	未完成
+	Put off	已延後
+	Questions: {n}	問題: {n}
+	Steps: {n}	步驟: {n}
+	Tokens read: {n}	讀取的權杖: {n}
+	Tokens written: {n}	寫出的權杖: {n}
+	Seconds: {n}	秒: {n}

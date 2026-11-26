@@ -178,8 +178,11 @@ and `cargo xtask sizes` enforces them.
   context (a token for every three bytes and a few for each message, raised up to threefold
   when the server counted more of the last question, `Chat::counted`) loses what tools read
   early on, what they found still named, then its oldest turns, what those asked, found and
-  decided said in a ledger made from the chat (`ledger.rs`). At most 24 steps for one thing
-  the person says. Stopped as it's written, what came of an answer is kept
+  decided said in a ledger made from the chat (`ledger.rs`). One reply to what the person says
+  takes at most 24 steps, 2,000,000 tokens and 15 minutes since they last said or decided
+  something; how each went (its questions, steps, tools by name and outcome, tokens, how it
+  ended), never what was said, is kept 30 days in `ai-trace.json` (`trace.rs`,
+  `assistant.trace`). Stopped as it's written, what came of an answer is kept
   (`ChatTurn::stopped`) until it's asked again.
 - **Scripts** (code mode, `session/ai/assistant/script/`): a model the person lets
   (`AiProfile::scripts`) gets `run_script`, a script in Rhai (MIT or Apache-2.0, through a fork

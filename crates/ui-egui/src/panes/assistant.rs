@@ -192,6 +192,11 @@ fn chats_menu(s: &Session, st: &mut UiState, ui: &mut Ui, acts: &mut Vec<Action>
         }
     });
     ui.separator();
+    // How the replies went: the chat shown's, or every chat's.
+    if ui.button(tl!("How the replies went…")).clicked() {
+        acts.push(Action::Dialog(crate::Dialog::Replies { chat: st.assistant.chat.clone() }));
+        ui.close();
+    }
     let label =
         if st.assistant.delete_all { tf!("Click again to delete all {n} chats", n = heads.len()) } else { tl!("Delete all chats").to_string() };
     if ui.button(label).clicked() {

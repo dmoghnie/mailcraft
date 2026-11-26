@@ -2614,3 +2614,18 @@ count	occurrences	Terminen
 	Sweep all but the newest	Alle bis auf die neueste aufräumen
 	Read mail older than {days} days in {account}	Gelesene E-Mails älter als {days} Tage in {account}
 	Archive them	Archivieren
+	How the replies went…	Wie die Antworten verliefen…
+	How the replies went	Wie die Antworten verliefen
+	How each reply of MailCraft's AI went, never what was said: kept on this computer for {days} days	Wie jede Antwort der KI von MailCraft verlief, nie, was gesagt wurde: {days} Tage auf diesem Computer aufbewahrt
+	No replies yet	Noch keine Antworten
+	Still going	Läuft noch
+	Stopped: too many tokens	Angehalten: zu viele Tokens
+	Stopped: it took too long	Angehalten: hat zu lange gedauert
+	Stopped: too many steps	Angehalten: zu viele Schritte
+	Not finished	Nicht abgeschlossen
+	Put off	Zurückgestellt
+	Questions: {n}	Fragen: {n}
+	Steps: {n}	Schritte: {n}
+	Tokens read: {n}	Gelesene Tokens: {n}
+	Tokens written: {n}	Geschriebene Tokens: {n}
+	Seconds: {n}	Sekunden: {n}

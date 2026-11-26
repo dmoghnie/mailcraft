@@ -2614,3 +2614,18 @@ count	occurrences	előfordulás
 	Sweep all but the newest	Söprés a legújabb kivételével
 	Read mail older than {days} days in {account}	{days} napnál régebbi olvasott levelek itt: {account}
 	Archive them	Archiválás
+	How the replies went…	Hogyan zajlottak a válaszok…
+	How the replies went	Hogyan zajlottak a válaszok
+	How each reply of MailCraft's AI went, never what was said: kept on this computer for {days} days	Hogyan zajlott a MailCraft MI-jének minden válasza, soha nem az, ami elhangzott: {days} napig marad ezen a számítógépen
+	No replies yet	Még nincsenek válaszok
+	Still going	Még folyamatban
+	Stopped: too many tokens	Leállt: túl sok token
+	Stopped: it took too long	Leállt: túl sokáig tartott
+	Stopped: too many steps	Leállt: túl sok lépés
+	Not finished	Nem fejeződött be
+	Put off	Elhalasztva
+	Questions: {n}	Kérdések: {n}
+	Steps: {n}	Lépések: {n}
+	Tokens read: {n}	Olvasott tokenek: {n}
+	Tokens written: {n}	Írt tokenek: {n}
+	Seconds: {n}	Másodpercek: {n}

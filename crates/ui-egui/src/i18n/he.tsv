@@ -2609,3 +2609,18 @@ count	occurrences	פעמים
 	Sweep all but the newest	טאטוא הכול מלבד החדשה ביותר
 	Read mail older than {days} days in {account}	דואר שנקרא ישן מ-{days} ימים ב-{account}
 	Archive them	העברה לארכיון
+	How the replies went…	איך התנהלו התשובות…
+	How the replies went	איך התנהלו התשובות
+	How each reply of MailCraft's AI went, never what was said: kept on this computer for {days} days	איך התנהלה כל תשובה של הבינה המלאכותית של MailCraft, אף פעם לא מה שנאמר: נשמר במחשב הזה למשך {days} ימים
+	No replies yet	אין עדיין תשובות
+	Still going	עדיין פועל
+	Stopped: too many tokens	נעצר: יותר מדי אסימונים
+	Stopped: it took too long	נעצר: נמשך זמן רב מדי
+	Stopped: too many steps	נעצר: יותר מדי שלבים
+	Not finished	לא הסתיים
+	Put off	נדחה
+	Questions: {n}	שאלות: {n}
+	Steps: {n}	שלבים: {n}
+	Tokens read: {n}	אסימונים שנקראו: {n}
+	Tokens written: {n}	אסימונים שנכתבו: {n}
+	Seconds: {n}	שניות: {n}

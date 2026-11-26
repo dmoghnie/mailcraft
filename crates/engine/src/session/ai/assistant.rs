@@ -33,6 +33,7 @@ mod pim;
 mod pim_changes;
 mod script;
 mod tools;
+mod trace;
 mod window;
 
 pub use automations::{Automation, AutomationReport, AutomationRun, AutomationWhen, Automations, ReportSaid};
@@ -44,6 +45,7 @@ pub use links::{Found, LINK as ASSISTANT_LINK, Linked, message_link as assistant
 #[doc(hidden)]
 pub use script::run_script_against;
 pub use script::{KeptScript, ScriptParam};
+pub use trace::{Limit as ReplyLimit, REPLY_SECONDS_MOST, REPLY_TOKENS_MOST, ReplyTrace, TRACE_DAYS, TRACES_MOST, TraceEnd, TraceTool};
 pub use window::{ASSISTANT_WIDTH, AssistantPane};
 
 /// The most of steps (answers with tool calls) the assistant takes for one thing the person
@@ -294,6 +296,8 @@ pub struct Assistant {
     estimates: HashMap<u64, u64>,
     /// The automations, and what's to be told of their runs ([`automations`]).
     automations: automations::Automations,
+    /// How each reply went ([`trace`]).
+    traces: trace::Traces,
 }
 
 impl Assistant {

@@ -43,6 +43,9 @@ fn chats() -> Vec<CommandSpec> {
         })
         .params(r#"{"on"?: bool (shown or hidden; not given: the other way, or shown when a width is given), "width"?: number}"#),
         CommandSpec::new("assistant.chat", "Show a chat with MailCraft's AI", WHERE, show).params(r#"{"chat": string}"#),
+        // How each reply went, never what was said.
+        CommandSpec::new("assistant.trace", "How MailCraft's AI's replies went", WHERE, |s, v| Ok(json!({"replies": s.ai_traces(p::str(v, "chat"))})))
+            .params(r#"{"chat"?: string (its replies alone)} (newest first: when, the model, questions and steps, the tools called and how each went, the tokens read and written, and how it ended)"#),
         CommandSpec::new("assistant.open", "Open what an answer of MailCraft's AI links to", WHERE, open).params(r#"{"chat": string, "link": string (as the answer has it: mailcraft:m0123456789)} (an event or a person: gives {"event": {"uid", "occurrence"}} or {"person": uid} for the window to open)"#),
         CommandSpec::new("assistant.send", "Say something to MailCraft's AI", WHERE, send).params(
             r#"{"chat"?: string (none: a new chat), "text": string, "context"?: [{"kind": "message", "id": string} | {"kind": "quote", "id": string, "text": string (the part selected)} | {"kind": "folder", "account": string, "folder": string}], "profile"?: string (the model the chat asks from now on; "": the one chat work goes to)}"#,

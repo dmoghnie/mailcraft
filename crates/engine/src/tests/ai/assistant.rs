@@ -17,6 +17,7 @@ mod script;
 mod script_asks;
 mod script_mcp;
 mod sent;
+mod trace;
 mod waiting;
 
 /// A sample session whose mail may go to a model on this computer, which is the one asked.

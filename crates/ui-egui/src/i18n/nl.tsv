@@ -2609,3 +2609,18 @@ count	occurrences	keer
 	Sweep all but the newest	Alles opruimen behalve de nieuwste
 	Read mail older than {days} days in {account}	Gelezen mail ouder dan {days} dagen in {account}
 	Archive them	Archiveren
+	How the replies went…	Hoe de antwoorden verliepen…
+	How the replies went	Hoe de antwoorden verliepen
+	How each reply of MailCraft's AI went, never what was said: kept on this computer for {days} days	Hoe elk antwoord van de AI van MailCraft verliep, nooit wat er gezegd is: {days} dagen bewaard op deze computer
+	No replies yet	Nog geen antwoorden
+	Still going	Nog bezig
+	Stopped: too many tokens	Gestopt: te veel tokens
+	Stopped: it took too long	Gestopt: duurde te lang
+	Stopped: too many steps	Gestopt: te veel stappen
+	Not finished	Niet afgerond
+	Put off	Uitgesteld
+	Questions: {n}	Vragen: {n}
+	Steps: {n}	Stappen: {n}
+	Tokens read: {n}	Gelezen tokens: {n}
+	Tokens written: {n}	Geschreven tokens: {n}
+	Seconds: {n}	Seconden: {n}

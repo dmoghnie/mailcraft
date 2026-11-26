@@ -1,7 +1,8 @@
 //! The assistant's exchange with its model. What the person says goes with the chat so far, the
 //! answer streamed; the tools it calls are run, or proposed, and once each is settled (read,
 //! failed, approved or declined) what they gave goes back, until the model answers without
-//! calling any, or [`STEPS_MOST`] steps were taken.
+//! calling any, or it reaches a limit: [`STEPS_MOST`] steps, or its tokens or its time
+//! ([`super::trace`], which keeps how each reply went).
 
 use mailcraft_model::{AiChat, AiRole, AiToolCall, AiToolResult, AiTurn, AiWork, Job, MessageKey};
 
@@ -120,6 +121,9 @@ impl Session {
         };
         let mut chat = self.take_chat(&id)?;
         let said = self.assistant_said(&mut chat, text, context, profile);
+        if said.is_ok() {
+            self.ai.assistant.traces.begin(&chat, self.clock.now);
+        }
         self.put_chat(chat);
         if let Err(e) = said {
             // A chat begun for it isn't kept.
@@ -187,14 +191,18 @@ impl Session {
         match asked {
             Ok((p, c)) => {
                 let estimated = estimate(&c);
+                self.ai.assistant.traces.ask(id, &p);
                 let q = self.ai_ask_profile(&p, accounts, PURPOSE, c, true);
                 self.ai.assistant.asking.insert(q, id.to_string());
                 self.ai.assistant.estimates.insert(q, estimated);
                 Ok(())
             }
             Err(e) => {
-                if let Some(c) = self.ai.assistant.chats.get_mut(id) {
+                let now = self.clock.now;
+                let a = &mut self.ai.assistant;
+                if let Some(c) = a.chats.get_mut(id) {
                     c.error = Some(said(&e));
+                    a.traces.end(c, TraceEnd::Failed, None, now);
                 }
                 Err(e)
             }
@@ -224,12 +232,18 @@ impl Session {
         let Some(answer) = self.ai_answer(q) else { return };
         let Ok(mut chat) = self.take_chat(&id) else { return };
         chat.answer_due = false;
+        let now = self.clock.now;
         match answer {
-            Err(e) => chat.error = Some(e),
+            Err(e) => {
+                chat.error = Some(e);
+                self.ai.assistant.traces.end(&chat, TraceEnd::Failed, None, now);
+            }
             Ok(a) => {
                 if let (Some(estimated), Some(read)) = (estimated, a.input_tokens) {
                     chat.counted = Some(Counted { estimated, read });
                 }
+                let reached = self.ai.assistant.traces.answered(&id, estimated, &a, now);
+                let calling = !a.calls.is_empty();
                 let calls = own_ids(&chat, a.calls);
                 let turn = AiTurn { role: AiRole::Assistant, text: a.text, calls, results: Vec::new(), images: Vec::new() };
                 let at = self.clock.now;
@@ -242,27 +256,34 @@ impl Session {
                     stopped: false,
                     at,
                 });
-                self.make_calls(&mut chat);
+                // It ends here unless it goes on with what its tools give back.
+                match self.make_calls(&mut chat, reached) {
+                    Some(limit) => self.ai.assistant.traces.end(&chat, TraceEnd::Limit, Some(limit), now),
+                    None if !calling => self.ai.assistant.traces.end(&chat, TraceEnd::Answered, None, now),
+                    None => {}
+                }
             }
         }
         self.put_chat(chat);
         self.assistant_go_on(&id);
     }
 
-    /// The open calls of `chat` made: read, failed, waiting for a message, or proposed.
-    fn make_calls(&mut self, chat: &mut Chat) {
+    /// The open calls of `chat` made: read, failed, waiting for a message, or proposed. Past
+    /// its steps, or `reached` (its tokens or its time), none is made, and it stops: the limit
+    /// it stopped at.
+    fn make_calls(&mut self, chat: &mut Chat, reached: Option<ReplyLimit>) -> Option<ReplyLimit> {
         let calls = chat.open_calls();
         if calls.is_empty() {
-            return;
+            return None;
         }
         let steps = self.ai.assistant.steps.entry(chat.id.clone()).or_default();
         *steps = steps.saturating_add(1);
-        let over = *steps > STEPS_MOST;
+        let limit = if *steps > STEPS_MOST { Some(ReplyLimit::Steps) } else { reached };
         let profile = self.assistant_profile(chat);
         let start = chat.runs.len();
         for (n, call) in calls.iter().enumerate() {
             let outcome = match &profile {
-                _ if over => Outcome::failed(&call.name, format!("stopped: {STEPS_MOST} steps were taken")),
+                _ if let Some(l) = limit => Outcome::failed(&call.name, format!("stopped after {}", l.said())),
                 _ if n >= CALLS_MOST => Outcome::failed(&call.name, format!("not run: at most {CALLS_MOST} calls at once")),
                 Err(e) => Outcome::failed(&call.name, said(e)),
                 Ok(p) => self.tool_call(chat, p, call),
@@ -288,9 +309,10 @@ impl Session {
                 r.result = PUT_OFF.into();
             }
         }
-        if over {
-            chat.error = Some(format!("MailCraft's AI stopped after {STEPS_MOST} steps: say what to do next to go on"));
+        if let Some(l) = limit {
+            chat.error = Some(format!("MailCraft's AI stopped after {}: say what to do next to go on", l.said()));
         }
+        limit
     }
 
     /// Chat `id`, its open calls settled, sends what they gave back and asks again.
@@ -400,6 +422,7 @@ impl Session {
     /// Approve or decline what chat `id` proposed: `call`'s, or all of it. What was decided.
     pub(crate) fn assistant_decide(&mut self, id: &str, call: Option<&str>, approve: bool) -> Result<usize, CmdError> {
         let mut chat = self.take_chat(id)?;
+        self.ai.assistant.traces.decided(id, self.clock.now);
         let mut open: Vec<AiToolCall> = chat.proposals().into_iter().filter(|c| call.is_none_or(|x| x == c.id)).collect();
         // Moves and deletes last, as the window's own changes: a message's id says its folder,
         // so a change after its move would find it gone.
@@ -465,6 +488,7 @@ impl Session {
                 at,
             });
         }
+        self.ai.assistant.traces.end(&chat, TraceEnd::Stopped, None, self.clock.now);
         self.put_chat(chat);
         Ok(asked.is_some() || open)
     }
@@ -486,6 +510,11 @@ impl Session {
         chat.error = None;
         self.assistant_changed(id);
         self.ai.assistant.steps.remove(id);
+        let now = self.clock.now;
+        let a = &mut self.ai.assistant;
+        if let Some(c) = a.chats.get(id) {
+            a.traces.begin(c, now);
+        }
         self.assistant_ask(id)
     }
 

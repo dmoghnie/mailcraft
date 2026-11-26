@@ -2613,3 +2613,18 @@ count	occurrences	회
 	Sweep all but the newest	가장 최근 것만 남기고 일괄 정리
 	Read mail older than {days} days in {account}	{account}에서 {days}일보다 오래된 읽은 메일
 	Archive them	보관하기
+	How the replies went…	응답 진행 내역…
+	How the replies went	응답 진행 내역
+	How each reply of MailCraft's AI went, never what was said: kept on this computer for {days} days	MailCraft AI의 각 응답이 어떻게 진행됐는지이며, 나눈 내용은 담지 않습니다. 이 컴퓨터에 {days}일 동안 보관됩니다
+	No replies yet	아직 응답이 없습니다
+	Still going	아직 진행 중
+	Stopped: too many tokens	중지됨: 토큰이 너무 많음
+	Stopped: it took too long	중지됨: 너무 오래 걸림
+	Stopped: too many steps	중지됨: 단계가 너무 많음
+	Not finished	끝나지 않음
+	Put off	미뤄짐
+	Questions: {n}	질문: {n}
+	Steps: {n}	단계: {n}
+	Tokens read: {n}	읽은 토큰: {n}
+	Tokens written: {n}	쓴 토큰: {n}
+	Seconds: {n}	초: {n}

@@ -2609,3 +2609,18 @@ count	occurrences	مرات
 	Sweep all but the newest	تنظيف الكل عدا الأحدث
 	Read mail older than {days} days in {account}	بريد مقروء أقدم من {days} يومًا في {account}
 	Archive them	أرشفتها
+	How the replies went…	كيف سارت الردود…
+	How the replies went	كيف سارت الردود
+	How each reply of MailCraft's AI went, never what was said: kept on this computer for {days} days	كيف سار كل رد من ردود الذكاء الاصطناعي في MailCraft، دون ما قيل أبدًا: يُحفظ على هذا الحاسوب مدة {days} يومًا
+	No replies yet	لا ردود بعد
+	Still going	لا يزال جاريًا
+	Stopped: too many tokens	توقف: رموز كثيرة جدًا
+	Stopped: it took too long	توقف: استغرق وقتًا طويلًا جدًا
+	Stopped: too many steps	توقف: خطوات كثيرة جدًا
+	Not finished	لم ينتهِ
+	Put off	مؤجَّل
+	Questions: {n}	الأسئلة: {n}
+	Steps: {n}	الخطوات: {n}
+	Tokens read: {n}	الرموز المقروءة: {n}
+	Tokens written: {n}	الرموز المكتوبة: {n}
+	Seconds: {n}	الثواني: {n}

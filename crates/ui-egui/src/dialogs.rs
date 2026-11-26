@@ -276,6 +276,11 @@ pub enum Dialog {
     Automation(Box<AutomationForm>),
     /// What MailCraft's AI suggests for arriving mail, to look over.
     Suggestions(Box<SuggestionsForm>),
+    /// How the replies of MailCraft's AI went: chat `chat`'s, or every chat's (the assistant's
+    /// chats menu).
+    Replies {
+        chat: Option<String>,
+    },
     /// What could leave the Inboxes (Home › Delete › Clean-up suggestions).
     Cleanup(Box<CleanupForm>),
     /// Everything with one person (issue #178).
@@ -820,6 +825,7 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         Dialog::Script(f) => ai::draw_script(ui, f, t, acts),
         Dialog::Automation(f) => ai::draw_automation(ui, f, s, t, acts),
         Dialog::Suggestions(f) => ai::draw_suggestions(ui, f, s, t, acts),
+        Dialog::Replies { chat } => ai::draw_replies(ui, chat.as_deref(), s, t),
         Dialog::Cleanup(f) => organize::draw_cleanup(ui, f, s, t, acts),
         Dialog::Server(f) => ai::draw_server(ui, f, t, acts),
         Dialog::Address(f) => addresses::draw(ui, f, s, t, acts),

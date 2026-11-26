@@ -2627,3 +2627,18 @@ count	occurrences	повторений
 	Sweep all but the newest	Расчистить все, кроме последнего
 	Read mail older than {days} days in {account}	Прочитанные письма старше {days} дн. в «{account}»
 	Archive them	Архивировать их
+	How the replies went…	Как шли ответы…
+	How the replies went	Как шли ответы
+	How each reply of MailCraft's AI went, never what was said: kept on this computer for {days} days	Как шёл каждый ответ ИИ MailCraft, но никогда не то, что было сказано: хранится на этом компьютере {days} дн.
+	No replies yet	Ответов пока нет
+	Still going	Ещё идёт
+	Stopped: too many tokens	Остановлен: слишком много токенов
+	Stopped: it took too long	Остановлен: занял слишком много времени
+	Stopped: too many steps	Остановлен: слишком много шагов
+	Not finished	Не завершён
+	Put off	Отложено
+	Questions: {n}	Вопросов: {n}
+	Steps: {n}	Шагов: {n}
+	Tokens read: {n}	Прочитано токенов: {n}
+	Tokens written: {n}	Написано токенов: {n}
+	Seconds: {n}	Секунд: {n}

@@ -2628,3 +2628,18 @@ count	occurrences	opakovaní
 	Sweep all but the newest	Vymiesť všetky okrem najnovšej
 	Read mail older than {days} days in {account}	Prečítaná pošta staršia ako {days} dní v {account}
 	Archive them	Archivovať ich
+	How the replies went…	Ako prebiehali odpovede…
+	How the replies went	Ako prebiehali odpovede
+	How each reply of MailCraft's AI went, never what was said: kept on this computer for {days} days	Ako prebiehala každá odpoveď AI MailCraftu, nikdy nie to, čo sa povedalo: uchováva sa na tomto počítači {days} dní
+	No replies yet	Zatiaľ žiadne odpovede
+	Still going	Stále prebieha
+	Stopped: too many tokens	Zastavená: príliš veľa tokenov
+	Stopped: it took too long	Zastavená: trvala príliš dlho
+	Stopped: too many steps	Zastavená: príliš veľa krokov
+	Not finished	Nedokončená
+	Put off	Odložené
+	Questions: {n}	Otázky: {n}
+	Steps: {n}	Kroky: {n}
+	Tokens read: {n}	Prečítané tokeny: {n}
+	Tokens written: {n}	Zapísané tokeny: {n}
+	Seconds: {n}	Sekundy: {n}
