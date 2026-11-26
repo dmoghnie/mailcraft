@@ -128,6 +128,10 @@ pub struct AiPrefs {
     /// needs the person (`needs_me.rs`).
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub needs_me: bool,
+    /// Mail arriving in an Inbox is read by the model for quick decisions, and what it suggests
+    /// kept for the person to apply (`triage/suggestions.rs`).
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub triage: bool,
     /// When the digest is made by itself (`digest.rs`), and the language it's written in.
     #[serde(skip_serializing_if = "super::DigestWhen::is_off")]
     pub digest: super::DigestWhen,

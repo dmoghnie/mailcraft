@@ -49,10 +49,34 @@ pub(super) fn models(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action
                 cmd: "ai.needsMe",
             };
             switch_row(s, ui, t, false, needs_me, acts);
+            let triage = Switch {
+                label: tl!("Suggest how to sort arriving mail"),
+                about: Some(tl!(
+                    "Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion"
+                )),
+                on: ai.triage,
+                cmd: "ai.triage",
+            };
+            switch_row(s, ui, t, false, triage, acts);
+            suggestions_waiting(s, t, ui, acts);
             digest_when(t, ui, ai.digest, acts);
             style(s, t, ui, acts);
         }
         keep_chats(t, ui, ai.chats_days, acts);
+    });
+}
+
+/// The suggestions MailCraft's AI made for arriving mail that wait, to look over, when any do.
+fn suggestions_waiting(s: &Session, t: &Tokens, ui: &mut Ui, acts: &mut Vec<Action>) {
+    let n = s.triage_suggestions().len();
+    if n == 0 {
+        return;
+    }
+    let about = tf!("Waiting: {n}", n = n);
+    setting(ui, t, false, tl!("Suggestions"), Some(&about), |ui| {
+        if button(ui, tl!("Suggestions"), tl!("Review…"), true).clicked() {
+            acts.push(Action::Dialog(Dialog::Suggestions(Box::default())));
+        }
     });
 }
 

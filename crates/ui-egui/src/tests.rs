@@ -488,6 +488,7 @@ pub(crate) fn tour() {
                 ..Default::default()
             }),
             Dialog::AiModel(Box::default()),
+            Dialog::Suggestions(Box::default()),
             Dialog::AiModel(Box::new(crate::dialogs::AiModelForm {
                 id: Some("p1".into()),
                 name: "Ollama".into(),

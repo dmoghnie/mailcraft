@@ -2605,3 +2605,16 @@ count	occurrences	opakovaní
 	{name} ran	{name} sa spustila
 	It proposes changes for you to approve, in MailCraft's AI.	Navrhuje zmeny na schválenie v AI MailCraftu.
 	It couldn't run: {why}	Nepodarilo sa ju spustiť: {why}
+	Suggest how to sort arriving mail	Navrhovať, ako triediť prichádzajúcu poštu
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion	Pošta prichádzajúca do priečinka Doručená pošta sa číta modelom na rýchle rozhodnutia, kam môže pošta účtu ísť, a ten navrhne kategóriu, pripnutie a skupinu Doručenej pošty, do ktorej patrí pošta odosielateľa. Nič sa nezmení, kým návrh nepoužijete
+	Suggestions	Návrhy
+	Waiting: {n}	Čaká: {n}
+	Review…	Prezrieť…
+	Category {name}	Kategória {name}
+	Pin it	Pripnúť
+	Mail from {sender} always in {group}	Pošta od {sender} vždy v {group}
+	Nothing is waiting	Nič nečaká
+	Apply	Použiť
+	MailCraft's AI suggests: {what}	AI MailCraftu navrhuje: {what}
+	Review all…	Prezrieť všetky…
+	Suggestion	Návrh

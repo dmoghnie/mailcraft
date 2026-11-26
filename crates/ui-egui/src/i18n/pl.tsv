@@ -2604,3 +2604,16 @@ count	occurrences	wystąpieniach
 	{name} ran	Uruchomiono: {name}
 	It proposes changes for you to approve, in MailCraft's AI.	Proponuje zmiany do zatwierdzenia w AI MailCraft.
 	It couldn't run: {why}	Nie udało się jej uruchomić: {why}
+	Suggest how to sort arriving mail	Sugeruj, jak sortować przychodzącą pocztę
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion	Poczta przychodząca do Skrzynki odbiorczej jest czytana przez model do szybkich decyzji, tam gdzie poczta konta może trafić, a on sugeruje kategorię, przypięcie i grupę Skrzynki odbiorczej, do której należy poczta nadawcy. Nic się nie zmienia, dopóki nie zastosujesz sugestii
+	Suggestions	Sugestie
+	Waiting: {n}	Oczekujące: {n}
+	Review…	Przejrzyj…
+	Category {name}	Kategoria {name}
+	Pin it	Przypnij
+	Mail from {sender} always in {group}	Poczta od {sender} zawsze w {group}
+	Nothing is waiting	Nic nie oczekuje
+	Apply	Zastosuj
+	MailCraft's AI suggests: {what}	AI MailCraft sugeruje: {what}
+	Review all…	Przejrzyj wszystkie…
+	Suggestion	Sugestia

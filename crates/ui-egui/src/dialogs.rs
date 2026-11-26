@@ -33,8 +33,8 @@ mod writing;
 pub use accounts::*;
 use accounts::{addresses, dav, trust};
 pub use addresses::AddressForm;
-pub(crate) use ai::{A_MONDAY, time_shown};
-pub use ai::{AiModelForm, AutomationForm, ScriptForm, ServerForm};
+pub(crate) use ai::{A_MONDAY, suggestion_said, time_shown};
+pub use ai::{AiModelForm, AutomationForm, ScriptForm, ServerForm, SuggestionsForm};
 pub use archiving::{ArchiveForm, AutoArchiveForm, FolderArchiveForm, FolderMode};
 pub use backup::RestoreForm;
 pub use dav::DavForm;
@@ -274,6 +274,8 @@ pub enum Dialog {
     Server(Box<ServerForm>),
     /// File › Options › AI: an automation, added or changed.
     Automation(Box<AutomationForm>),
+    /// What MailCraft's AI suggests for arriving mail, to look over.
+    Suggestions(Box<SuggestionsForm>),
     /// Everything with one person (issue #178).
     Person(Box<PersonForm>),
     /// File › Info › Clean up old items: old mail archived to a data file (issue #179).
@@ -815,6 +817,7 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         Dialog::AiModel(f) => ai::draw_model(ui, f, s, t, acts),
         Dialog::Script(f) => ai::draw_script(ui, f, t, acts),
         Dialog::Automation(f) => ai::draw_automation(ui, f, s, t, acts),
+        Dialog::Suggestions(f) => ai::draw_suggestions(ui, f, s, t, acts),
         Dialog::Server(f) => ai::draw_server(ui, f, t, acts),
         Dialog::Address(f) => addresses::draw(ui, f, s, t, acts),
         Dialog::Backup(..) | Dialog::Restore(..) => backup::draw(ui, d, t, acts),

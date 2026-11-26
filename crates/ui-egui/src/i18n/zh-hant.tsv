@@ -2590,3 +2590,16 @@ count	occurrences	次
 	{name} ran	{name} 已執行
 	It proposes changes for you to approve, in MailCraft's AI.	它提出了等待你核准的變更，請在 MailCraft 的 AI 中查看。
 	It couldn't run: {why}	未能執行：{why}
+	Suggest how to sort arriving mail	建議如何整理收到的郵件
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion	到達收件匣的郵件會在其帳戶的郵件可以傳送給模型時，由快速決策模型閱讀，並建議類別、是否釘選，以及寄件者的郵件所屬的收件匣群組。在你套用建議之前，什麼都不會改變
+	Suggestions	建議
+	Waiting: {n}	等待中: {n}
+	Review…	檢視…
+	Category {name}	類別 {name}
+	Pin it	釘選
+	Mail from {sender} always in {group}	{sender} 的郵件一律放在 {group}
+	Nothing is waiting	沒有等待中的建議
+	Apply	套用
+	MailCraft's AI suggests: {what}	MailCraft 的 AI 建議: {what}
+	Review all…	全部檢視…
+	Suggestion	建議

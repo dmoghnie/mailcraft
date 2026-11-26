@@ -15,6 +15,7 @@ mod sent_rules;
 mod server_rules;
 mod sweep;
 mod swipe;
+mod triage;
 mod vips;
 
 #[test]

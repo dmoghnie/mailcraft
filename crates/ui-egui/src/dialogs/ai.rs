@@ -1,5 +1,5 @@
 //! File › Options › AI's dialogs: a model added or changed, a script MailCraft's AI keeps, an
-//! MCP server, and an automation.
+//! MCP server, an automation, and the suggestions it made for arriving mail.
 
 use super::*;
 
@@ -18,3 +18,7 @@ pub(super) use script::draw as draw_script;
 mod server;
 pub use server::ServerForm;
 pub(super) use server::draw as draw_server;
+mod suggestions;
+pub use suggestions::SuggestionsForm;
+pub(super) use suggestions::draw as draw_suggestions;
+pub(crate) use suggestions::suggestion_said;

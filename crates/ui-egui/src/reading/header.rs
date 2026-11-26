@@ -51,6 +51,9 @@ pub(super) fn header(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, p
             if let Some(name) = s.opened_file_name(&r.key) {
                 opened_file_bar(&t, ui, name);
             }
+            if let Some(w) = s.triage_suggestion(&r.key) {
+                suggestion_bar(s, &t, ui, w, acts);
+            }
             action_bar(s, st, ui, o, beside, acts);
             ui.add_space(if beside { 4.0 } else { 12.0 });
         }
@@ -67,6 +70,44 @@ pub(super) fn header(s: &Session, st: &mut UiState, ui: &mut Ui, o: &Open<'_>, p
 }
 
 /// The subject (flagged: with a flag), and under it the message's categories.
+/// What MailCraft's AI suggests for the message as it arrived (File › Options › AI): applied
+/// or dismissed here, and everything it suggests looked over when more wait.
+fn suggestion_bar(s: &Session, t: &Tokens, ui: &mut Ui, w: &mailcraft_engine::TriageSuggestion, acts: &mut Vec<Action>) {
+    let what = crate::dialogs::suggestion_said(s, w).join(" · ");
+    let ids = json!({"ids": [w.id]});
+    let button = |ui: &mut Ui, label: &str| {
+        let r = ui.button(label);
+        widgets::named(ui, &r, &format!("{}: {label}", tl!("Suggestion")), true, None);
+        r.clicked()
+    };
+    egui::Frame::new().fill(t.chrome).stroke(egui::Stroke::new(1.0, t.border)).corner_radius(6).inner_margin(Margin::symmetric(10, 6)).show(
+        ui,
+        |ui| {
+            ui.set_width(ui.available_width());
+            ui.horizontal(|ui| {
+                let (ir, _) = ui.allocate_exact_size(vec2(16.0, 16.0), Sense::hover());
+                icons::paint(ui.painter(), ir, Icon::Sparkle, t.accent);
+                // Wrapped in a narrow window, its buttons under it.
+                ui.vertical(|ui| {
+                    ui.add(egui::Label::new(RichText::new(tf!("MailCraft's AI suggests: {what}", what = what)).color(t.text)).wrap());
+                    ui.horizontal_wrapped(|ui| {
+                        if button(ui, tl!("Apply")) {
+                            acts.push(Action::Run("mail.applySuggestions", ids.clone()));
+                        }
+                        if button(ui, tl!("Dismiss")) {
+                            acts.push(Action::Run("mail.dismissSuggestions", ids.clone()));
+                        }
+                        if s.triage_suggestions().len() > 1 && button(ui, tl!("Review all…")) {
+                            acts.push(Action::Dialog(crate::Dialog::Suggestions(Box::default())));
+                        }
+                    });
+                });
+            });
+        },
+    );
+    ui.add_space(8.0);
+}
+
 fn subject_line(s: &Session, t: &Tokens, ui: &mut Ui, o: &Open<'_>, acts: &mut Vec<Action>) {
     // Subject.
     ui.horizontal_wrapped(|ui| {

@@ -2591,3 +2591,16 @@ count	occurrences	kez
 	{name} ran	{name} çalıştı
 	It proposes changes for you to approve, in MailCraft's AI.	MailCraft yapay zekâsında onayınızı bekleyen değişiklikler öneriyor.
 	It couldn't run: {why}	Çalıştırılamadı: {why}
+	Suggest how to sort arriving mail	Gelen postaların nasıl sıralanacağını öner
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion	Gelen Kutusu'na gelen postalar, hesabın postasının gidebildiği yerde hızlı kararlar modeli tarafından okunur ve bir kategori, sabitleme ve gönderenin postalarının ait olduğu Gelen Kutusu grubunu önerir. Bir öneriyi uygulayana kadar hiçbir şey değişmez
+	Suggestions	Öneriler
+	Waiting: {n}	Bekleyen: {n}
+	Review…	Gözden geçir…
+	Category {name}	Kategori {name}
+	Pin it	Sabitle
+	Mail from {sender} always in {group}	{sender} postaları her zaman {group} içinde
+	Nothing is waiting	Bekleyen bir şey yok
+	Apply	Uygula
+	MailCraft's AI suggests: {what}	MailCraft yapay zekâsı öneriyor: {what}
+	Review all…	Tümünü gözden geçir…
+	Suggestion	Öneri

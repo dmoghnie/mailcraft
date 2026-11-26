@@ -2586,3 +2586,16 @@ count	occurrences	keer
 	{name} ran	{name} is gedraaid
 	It proposes changes for you to approve, in MailCraft's AI.	Ze stelt wijzigingen voor die je goedkeurt in de AI van MailCraft.
 	It couldn't run: {why}	Ze kon niet draaien: {why}
+	Suggest how to sort arriving mail	Voorstellen hoe binnenkomende mail wordt gesorteerd
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion	Mail die in het Postvak IN binnenkomt wordt gelezen door het model voor snelle beslissingen, waar de mail van het account heen mag, en het stelt een categorie voor, vastmaken en de groep in het Postvak IN waar de mail van de afzender in hoort. Er verandert niets tot je een voorstel toepast
+	Suggestions	Voorstellen
+	Waiting: {n}	Wachtend: {n}
+	Review…	Bekijken…
+	Category {name}	Categorie {name}
+	Pin it	Vastmaken
+	Mail from {sender} always in {group}	Mail van {sender} altijd in {group}
+	Nothing is waiting	Er wacht niets
+	Apply	Toepassen
+	MailCraft's AI suggests: {what}	De AI van MailCraft stelt voor: {what}
+	Review all…	Alles bekijken…
+	Suggestion	Voorstel

@@ -2591,3 +2591,16 @@ count	occurrences	Terminen
 	{name} ran	{name} wurde ausgeführt
 	It proposes changes for you to approve, in MailCraft's AI.	Sie schlägt Änderungen vor, die in der KI von MailCraft auf Ihre Zustimmung warten.
 	It couldn't run: {why}	Sie konnte nicht ausgeführt werden: {why}
+	Suggest how to sort arriving mail	Vorschlagen, wie eingehende E-Mails sortiert werden
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion	Eingehende E-Mails im Posteingang werden vom Modell für schnelle Entscheidungen gelesen, soweit die E-Mails ihres Kontos dorthin dürfen, und es schlägt eine Kategorie, das Anheften und die Posteingangsgruppe vor, in die die E-Mails des Absenders gehören. Nichts ändert sich, bis Sie einen Vorschlag übernehmen
+	Suggestions	Vorschläge
+	Waiting: {n}	Wartend: {n}
+	Review…	Durchsehen…
+	Category {name}	Kategorie {name}
+	Pin it	Anheften
+	Mail from {sender} always in {group}	E-Mails von {sender} immer in {group}
+	Nothing is waiting	Nichts wartet
+	Apply	Übernehmen
+	MailCraft's AI suggests: {what}	Die KI von MailCraft schlägt vor: {what}
+	Review all…	Alle durchsehen…
+	Suggestion	Vorschlag

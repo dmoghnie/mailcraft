@@ -43,4 +43,5 @@ pub use servers::{McpServer, ServerTools};
 pub use settings::{AiPrefs, AiProfile, AiReach, AiTask, local_url as ai_url_is_local};
 pub use style::STYLE_MOST;
 pub(crate) use style::commands as style_commands;
-pub(crate) use triage::needs_me_commands;
+pub use triage::TriageSuggestion;
+pub(crate) use triage::{needs_me_commands, triage_commands};

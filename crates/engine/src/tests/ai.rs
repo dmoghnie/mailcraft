@@ -19,6 +19,7 @@ mod servers;
 mod style;
 mod summary;
 mod translation;
+mod triage;
 
 const KEY: &str = "sk-secret-0123456789";
 

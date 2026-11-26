@@ -2591,3 +2591,16 @@ count	occurrences	előfordulás
 	{name} ran	{name} lefutott
 	It proposes changes for you to approve, in MailCraft's AI.	Változtatásokat javasol, amelyek a MailCraft MI-jében várnak a jóváhagyásodra.
 	It couldn't run: {why}	Nem futhatott le: {why}
+	Suggest how to sort arriving mail	Javaslat az érkező levelek rendezésére
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion	A Beérkezett üzenetek mappába érkező leveleket a gyors döntések modellje olvassa el, ahol a fiók levelei eljuthatnak hozzá, és javasol egy kategóriát, a rögzítést, valamint azt a csoportot, ahová a feladó levelei tartoznak. Semmi sem változik, amíg nem alkalmaz egy javaslatot
+	Suggestions	Javaslatok
+	Waiting: {n}	Várakozik: {n}
+	Review…	Áttekintés…
+	Category {name}	Kategória: {name}
+	Pin it	Rögzítés
+	Mail from {sender} always in {group}	{sender} levelei mindig ide: {group}
+	Nothing is waiting	Semmi sem várakozik
+	Apply	Alkalmaz
+	MailCraft's AI suggests: {what}	A MailCraft MI-je javasolja: {what}
+	Review all…	Az összes áttekintése…
+	Suggestion	Javaslat

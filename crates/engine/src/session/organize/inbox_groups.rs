@@ -285,6 +285,17 @@ impl Session {
         self.refresh_list();
     }
 
+    /// Always put `sender`'s mail (an address in lower case) in `g`, with the four groups or
+    /// not: in Focused for Primary, in Other for the rest.
+    pub(crate) fn put_sender_in_group(&mut self, sender: &str, g: InboxGroup) {
+        if self.prefs.group_overrides.len() < MOVED_MOST || self.prefs.group_overrides.contains_key(sender) {
+            self.prefs.group_overrides.insert(sender.to_string(), g);
+        }
+        if self.prefs.focus_overrides.len() < MOVED_MOST || self.prefs.focus_overrides.contains_key(sender) {
+            self.prefs.focus_overrides.insert(sender.to_string(), g == InboxGroup::Primary);
+        }
+    }
+
     /// Always put the selection's senders in `g`, with the four groups or not: in Focused for
     /// Primary, in Other for the rest.
     pub fn move_senders_to_group(&mut self, g: InboxGroup) -> CmdResult {
@@ -294,14 +305,8 @@ impl Session {
         }
         for m in &sel {
             let sender = m.from.email.trim().to_ascii_lowercase();
-            if sender.is_empty() {
-                continue;
-            }
-            if self.prefs.group_overrides.len() < MOVED_MOST || self.prefs.group_overrides.contains_key(&sender) {
-                self.prefs.group_overrides.insert(sender.clone(), g);
-            }
-            if self.prefs.focus_overrides.len() < MOVED_MOST || self.prefs.focus_overrides.contains_key(&sender) {
-                self.prefs.focus_overrides.insert(sender, g == InboxGroup::Primary);
+            if !sender.is_empty() {
+                self.put_sender_in_group(&sender, g);
             }
         }
         self.reading = None;

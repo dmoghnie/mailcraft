@@ -2587,3 +2587,16 @@ count	occurrences	回
 	{name} ran	{name} を実行しました
 	It proposes changes for you to approve, in MailCraft's AI.	承認を待つ変更を MailCraft の AI で提案しています。
 	It couldn't run: {why}	実行できませんでした: {why}
+	Suggest how to sort arriving mail	届いたメールの分け方を提案する
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion	受信トレイに届いたメールを、そのアカウントのメールを送れる場合に素早い判断用のモデルが読み、分類、ピン留め、差出人のメールが入る受信トレイのグループを提案します。提案を適用するまで何も変わりません
+	Suggestions	提案
+	Waiting: {n}	待機中: {n}
+	Review…	確認…
+	Category {name}	分類 {name}
+	Pin it	ピン留めする
+	Mail from {sender} always in {group}	{sender} のメールを常に {group} に
+	Nothing is waiting	待機中のものはありません
+	Apply	適用
+	MailCraft's AI suggests: {what}	MailCraft の AI の提案: {what}
+	Review all…	すべて確認…
+	Suggestion	提案

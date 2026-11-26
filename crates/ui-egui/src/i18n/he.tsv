@@ -2586,3 +2586,16 @@ count	occurrences	פעמים
 	{name} ran	{name} רצה
 	It proposes changes for you to approve, in MailCraft's AI.	היא מציעה שינויים לאישורך, ב-AI של MailCraft.
 	It couldn't run: {why}	לא ניתן היה להריץ אותה: {why}
+	Suggest how to sort arriving mail	הצעה כיצד למיין דואר שמגיע
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion	דואר שמגיע לתיבת הדואר הנכנס נקרא על ידי המודל להחלטות מהירות, היכן שדואר החשבון רשאי להגיע אליו, והוא מציע קטגוריה, הצמדה וקבוצת תיבת הדואר הנכנס שאליה שייך הדואר של השולח. דבר אינו משתנה עד שתחיל הצעה
+	Suggestions	הצעות
+	Waiting: {n}	ממתינות: {n}
+	Review…	סקירה…
+	Category {name}	קטגוריה {name}
+	Pin it	להצמיד
+	Mail from {sender} always in {group}	דואר מ-{sender} תמיד ב-{group}
+	Nothing is waiting	אין דבר שממתין
+	Apply	החל
+	MailCraft's AI suggests: {what}	ה-AI של MailCraft מציע: {what}
+	Review all…	סקירת הכול…
+	Suggestion	הצעה

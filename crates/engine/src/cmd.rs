@@ -146,6 +146,7 @@ pub fn registry() -> Registry {
     all.extend(crate::session::about_commands());
     all.extend(crate::session::rewriting_commands());
     all.extend(crate::session::needs_me_commands());
+    all.extend(crate::session::triage_commands());
     all.extend(crate::session::digest_commands());
     all.extend(crate::session::style_commands());
     all.extend(crate::session::drafting_commands());

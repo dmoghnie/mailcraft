@@ -2586,3 +2586,16 @@ count	occurrences	مرات
 	{name} ran	تم تشغيل {name}
 	It proposes changes for you to approve, in MailCraft's AI.	تقترح تغييرات تنتظر موافقتك في ذكاء MailCraft الاصطناعي.
 	It couldn't run: {why}	تعذّر تشغيلها: {why}
+	Suggest how to sort arriving mail	اقتراح طريقة فرز البريد الوارد
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion	يقرأ نموذج القرارات السريعة البريد الوارد إلى علبة الوارد، حيث يُسمح بإرسال بريد الحساب، ويقترح فئة وتثبيتًا ومجموعة علبة الوارد التي ينتمي إليها بريد المرسل. لا يتغير شيء حتى تطبّق اقتراحًا
+	Suggestions	الاقتراحات
+	Waiting: {n}	في الانتظار: {n}
+	Review…	مراجعة…
+	Category {name}	الفئة {name}
+	Pin it	تثبيته
+	Mail from {sender} always in {group}	بريد {sender} دائمًا في {group}
+	Nothing is waiting	لا شيء في الانتظار
+	Apply	تطبيق
+	MailCraft's AI suggests: {what}	يقترح ذكاء MailCraft الاصطناعي: {what}
+	Review all…	مراجعة الكل…
+	Suggestion	اقتراح

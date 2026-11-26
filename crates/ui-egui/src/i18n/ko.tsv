@@ -2590,3 +2590,16 @@ count	occurrences	회
 	{name} ran	{name} 실행됨
 	It proposes changes for you to approve, in MailCraft's AI.	MailCraft AI에서 승인할 변경을 제안합니다.
 	It couldn't run: {why}	실행하지 못했습니다: {why}
+	Suggest how to sort arriving mail	도착한 메일의 분류 방법 제안
+	Mail arriving in the Inbox is read by the model for quick decisions, where its account's mail may go, and it suggests a category, pinning and the Inbox group its sender's mail belongs in. Nothing changes until you apply a suggestion	받은 편지함에 도착한 메일을, 그 계정의 메일을 보낼 수 있는 경우 빠른 판단용 모델이 읽고, 범주, 고정 여부, 보낸 사람의 메일이 들어갈 받은 편지함 그룹을 제안합니다. 제안을 적용하기 전에는 아무것도 바뀌지 않습니다
+	Suggestions	제안
+	Waiting: {n}	대기 중: {n}
+	Review…	검토…
+	Category {name}	범주 {name}
+	Pin it	고정하기
+	Mail from {sender} always in {group}	{sender}의 메일은 항상 {group}에
+	Nothing is waiting	대기 중인 항목이 없습니다
+	Apply	적용
+	MailCraft's AI suggests: {what}	MailCraft AI의 제안: {what}
+	Review all…	모두 검토…
+	Suggestion	제안

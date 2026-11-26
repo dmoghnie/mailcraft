@@ -337,6 +337,8 @@ impl Session {
             let left: Vec<Summary> = arrived.iter().filter(|m| m.when() >= cutoff && !quiet.contains(&m.key)).cloned().collect();
             // The automations it sets off run, each in a chat of its own.
             self.automations_arrived(&left);
+            // What MailCraft's AI suggests for it, kept for the person to apply.
+            self.triage_arrived(&left);
             self.needs_me_arrived(left);
         }
         // With the Focused Inbox on, Other's mail comes in quietly unless asked for (issue #199):

@@ -106,6 +106,8 @@ pub struct AiState {
     pub(super) usage_changed: bool,
     /// Which mail arriving needs the person (`needs_me.rs`).
     pub(super) needs_me: super::triage::NeedsMe,
+    /// What it suggests for mail arriving (`triage/suggestions.rs`).
+    pub(super) triage: super::triage::Triage,
     /// The digest (`digest.rs`).
     pub(super) digest: super::digest::DigestState,
     /// The person's writing style being learned (`style.rs`).
@@ -294,6 +296,7 @@ impl Session {
                 if self.about_came(id, &w.profile, &result)
                     || self.rewrite_came(id, &w.profile, &result)
                     || self.needs_me_came(id, &result)
+                    || self.triage_came(id, &result)
                     || self.digest_came(id, &w.profile, &result)
                     || self.style_came(id, &result)
                     || self.drafting_came(id, &result)
