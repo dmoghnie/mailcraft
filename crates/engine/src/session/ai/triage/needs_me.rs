@@ -10,8 +10,8 @@ use mailcraft_model::{AiAnswer, AiChat, MessageKey, Summary};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-use super::AiTask;
-use super::assistant::cut;
+use super::super::AiTask;
+use super::super::assistant::cut;
 use crate::{CmdError, CmdResult, CommandSpec, Session, p};
 
 pub(crate) const NEEDS_ME_DOC: &str = "ai-needs-me.json";

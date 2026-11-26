@@ -105,7 +105,7 @@ pub struct AiState {
     pub(super) usage: super::budget::AiUsage,
     pub(super) usage_changed: bool,
     /// Which mail arriving needs the person (`needs_me.rs`).
-    pub(super) needs_me: super::needs_me::NeedsMe,
+    pub(super) needs_me: super::triage::NeedsMe,
     /// The digest (`digest.rs`).
     pub(super) digest: super::digest::DigestState,
     /// The person's writing style being learned (`style.rs`).
