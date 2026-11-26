@@ -108,6 +108,17 @@ pub(super) fn commands() -> Vec<CommandSpec> {
             s.stop_sweep(p::req_str(v, "account")?, p::req_str(v, "folder")?, p::req_str(v, "sender")?)
         })
         .params(r#"{"account": string, "folder": string, "sender": string (an address)} (its mail there is no longer swept each day)"#),
+        // What could leave the Inboxes, worked out here: nothing is done until the person chooses.
+        CommandSpec::new("mail.cleanupSuggestions", "Clean-up suggestions", "Home › Delete", |s, _| Ok(json!(s.cleanup_read()))),
+        // Sweep's keep-the-newest from a suggestion, whatever is selected (Sweep itself goes by
+        // the selection, as the ribbon's button does).
+        CommandSpec::new("mail.sweepPile", "Sweep all but the newest", "Home › Delete › Clean-up suggestions", |s, v| {
+            let key = parse_key(v).ok_or_else(|| CmdError::Params("`key`: a message of the sender".into()))?;
+            s.sweep(Some(key), crate::SweepChoice::KeepNewest)
+        })
+        .params(r#"{"key": string} (its sender's mail in its folder to Deleted Items, all but their newest, as one Undo)"#),
+        CommandSpec::new("mail.archiveOld", "Archive old read mail", "Home › Delete", |s, v| s.cleanup_archive(p::req_str(v, "account")?))
+            .params(r#"{"account": string} (its Inbox's mail older than 30 days that's been read, isn't flagged or pinned and doesn't need you, to Archive, as one Undo)"#),
         CommandSpec::new("mail.junk", "Report junk", "Home › Delete", |s, _| s.move_selection(MoveTarget::Role(FolderRole::Junk))).on_selection(has_selection),
         CommandSpec::new("mail.notJunk", "Not junk", "Home › Delete", |s, v| {
             // "Always trust mail from this sender", as Outlook asks.

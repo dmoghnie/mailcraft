@@ -86,7 +86,7 @@ pub(crate) use mailboxes::arrange_list;
 pub use mailboxes::{ARRANGE_HEADINGS, Arrange, ListFilter, PINNED_HEADING, ROW_ACTIONS_MAX, Row, RowAction};
 // Organizing mail's own parts, named here as before.
 pub use opening::SenderMarks;
-pub use organize::{attached, junk, quick_steps, search_folders, server_rules, sweep, vips};
+pub use organize::{attached, cleanup, junk, quick_steps, search_folders, server_rules, sweep, vips};
 pub use prefs::{
     ACCENTS, AGENTS_ALWAYS_MAX, CtrlEnter, DICTIONARY_MAX, FolderDensity, HOME_BUTTONS, InboxGroup, NORMAL_TEXT, NotesOrder, Prefs,
     RIBBON_ADDED_MOST, RIBBON_MOST, RIBBON_ROW, ReadInPane, ReadingPane, SenderAddresses, StartIn, SwipeAction, TEXT_SIZE_RANGE, TEXT_SIZES,

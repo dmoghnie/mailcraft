@@ -2603,3 +2603,13 @@ count	occurrences	회
 	MailCraft's AI suggests: {what}	MailCraft AI의 제안: {what}
 	Review all…	모두 검토…
 	Suggestion	제안
+	Clean-up suggestions…	정리 제안…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	전혀 읽지 않는 목록, 쌓여 가는 대량 메일, 한 달째 그대로 둔 읽은 메일을 받은 편지함에서
+	Clean-up suggestions	정리 제안
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	받은 편지함의 메일로 이 컴퓨터에서 계산했으며, 어디에도 아무것도 보내지 않습니다. 선택하기 전에는 아무것도 바뀌지 않습니다
+	Nothing to clean up	정리할 것이 없습니다
+	{n} messages, none read	메시지 {n}개, 읽은 것 없음
+	{n} messages, {unread} unread	메시지 {n}개, 읽지 않음 {unread}개
+	Sweep all but the newest	가장 최근 것만 남기고 일괄 정리
+	Read mail older than {days} days in {account}	{account}에서 {days}일보다 오래된 읽은 메일
+	Archive them	보관하기

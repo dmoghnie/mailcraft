@@ -8,6 +8,7 @@ use super::*;
 
 pub mod attached;
 pub mod categories;
+pub mod cleanup;
 pub mod inbox_groups;
 pub mod junk;
 pub mod quick_steps;

@@ -2599,3 +2599,13 @@ count	occurrences	مرات
 	MailCraft's AI suggests: {what}	يقترح ذكاء MailCraft الاصطناعي: {what}
 	Review all…	مراجعة الكل…
 	Suggestion	اقتراح
+	Clean-up suggestions…	اقتراحات التنظيف…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	قوائم لا تقرؤها أبدًا، وبريد جماعي يتراكم، وبريد مقروء تُرك شهرًا، من علبة الوارد
+	Clean-up suggestions	اقتراحات التنظيف
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	حُسبت على هذا الحاسوب من البريد في علبة الوارد، دون إرسال أي شيء إلى أي مكان. لا يتغير شيء حتى تختار
+	Nothing to clean up	لا شيء للتنظيف
+	{n} messages, none read	{n} رسائل، لم يُقرأ منها شيء
+	{n} messages, {unread} unread	{n} رسائل، {unread} غير مقروءة
+	Sweep all but the newest	تنظيف الكل عدا الأحدث
+	Read mail older than {days} days in {account}	بريد مقروء أقدم من {days} يومًا في {account}
+	Archive them	أرشفتها

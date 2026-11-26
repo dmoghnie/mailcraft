@@ -2599,3 +2599,13 @@ count	occurrences	keer
 	MailCraft's AI suggests: {what}	De AI van MailCraft stelt voor: {what}
 	Review all…	Alles bekijken…
 	Suggestion	Voorstel
+	Clean-up suggestions…	Opruimvoorstellen…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	Lijsten die je nooit leest, bulkmail die zich opstapelt en gelezen mail die er al een maand ligt, uit je Postvak IN
+	Clean-up suggestions	Opruimvoorstellen
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	Op deze computer berekend uit de mail in je Postvak IN, zonder iets ergens heen te sturen. Er verandert niets tot je kiest
+	Nothing to clean up	Niets op te ruimen
+	{n} messages, none read	{n} berichten, geen gelezen
+	{n} messages, {unread} unread	{n} berichten, {unread} ongelezen
+	Sweep all but the newest	Alles opruimen behalve de nieuwste
+	Read mail older than {days} days in {account}	Gelezen mail ouder dan {days} dagen in {account}
+	Archive them	Archiveren

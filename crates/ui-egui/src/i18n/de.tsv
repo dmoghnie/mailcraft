@@ -2604,3 +2604,13 @@ count	occurrences	Terminen
 	MailCraft's AI suggests: {what}	Die KI von MailCraft schlägt vor: {what}
 	Review all…	Alle durchsehen…
 	Suggestion	Vorschlag
+	Clean-up suggestions…	Aufräumvorschläge…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	Listen, die Sie nie lesen, Massen-E-Mails, die sich stapeln, und gelesene E-Mails, die seit einem Monat liegen, aus Ihrem Posteingang
+	Clean-up suggestions	Aufräumvorschläge
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	Auf diesem Computer aus den E-Mails in Ihrem Posteingang ermittelt, ohne dass etwas irgendwohin gesendet wird. Nichts ändert sich, bis Sie wählen
+	Nothing to clean up	Nichts aufzuräumen
+	{n} messages, none read	{n} Nachrichten, keine gelesen
+	{n} messages, {unread} unread	{n} Nachrichten, {unread} ungelesen
+	Sweep all but the newest	Alle bis auf die neueste aufräumen
+	Read mail older than {days} days in {account}	Gelesene E-Mails älter als {days} Tage in {account}
+	Archive them	Archivieren

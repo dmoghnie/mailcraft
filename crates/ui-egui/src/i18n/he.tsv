@@ -2599,3 +2599,13 @@ count	occurrences	פעמים
 	MailCraft's AI suggests: {what}	ה-AI של MailCraft מציע: {what}
 	Review all…	סקירת הכול…
 	Suggestion	הצעה
+	Clean-up suggestions…	הצעות לניקוי…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	רשימות שאינך קורא אף פעם, דואר המוני שמצטבר ודואר שנקרא ונשאר חודש, מתיבת הדואר הנכנס
+	Clean-up suggestions	הצעות לניקוי
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	חושב במחשב הזה מהדואר בתיבת הדואר הנכנס, בלי לשלוח דבר לשום מקום. דבר אינו משתנה עד שתבחר
+	Nothing to clean up	אין מה לנקות
+	{n} messages, none read	{n} הודעות, אף אחת לא נקראה
+	{n} messages, {unread} unread	{n} הודעות, {unread} לא נקראו
+	Sweep all but the newest	טאטוא הכול מלבד החדשה ביותר
+	Read mail older than {days} days in {account}	דואר שנקרא ישן מ-{days} ימים ב-{account}
+	Archive them	העברה לארכיון

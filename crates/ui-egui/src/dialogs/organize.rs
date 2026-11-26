@@ -2,12 +2,15 @@
 
 use super::*;
 
+mod cleanup;
 mod conditions;
 mod quick_steps;
 mod rule_words;
 mod search_folders;
 mod server_rules;
 mod sweep;
+pub use cleanup::CleanupForm;
+pub(super) use cleanup::draw as draw_cleanup;
 pub use quick_steps::{QuickStepForm, StepMove};
 pub use search_folders::{PresetKind, SEARCH_PRESETS, SearchFolderForm};
 pub use server_rules::ServerTarget;

@@ -2600,3 +2600,13 @@ count	occurrences	回
 	MailCraft's AI suggests: {what}	MailCraft の AI の提案: {what}
 	Review all…	すべて確認…
 	Suggestion	提案
+	Clean-up suggestions…	整理の提案…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	まったく読まないリスト、たまっていく一斉送信メール、1 か月置いたままの既読メールを受信トレイから
+	Clean-up suggestions	整理の提案
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	受信トレイのメールからこのコンピューターで割り出したもので、どこにも何も送りません。選ぶまで何も変わりません
+	Nothing to clean up	整理するものはありません
+	{n} messages, none read	{n} 件のメッセージ、既読なし
+	{n} messages, {unread} unread	{n} 件のメッセージ、未読 {unread} 件
+	Sweep all but the newest	最新以外を一括削除
+	Read mail older than {days} days in {account}	{account} の {days} 日より前の既読メール
+	Archive them	アーカイブする

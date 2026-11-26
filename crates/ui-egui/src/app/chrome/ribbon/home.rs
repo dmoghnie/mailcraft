@@ -343,6 +343,13 @@ fn delete_options(ui: &mut Ui, s: &Session, acts: &mut Vec<Action>) {
         acts.push(Action::Dialog(d));
         ui.close();
     }
+    let tip = tl!("Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox");
+    if ui.button(tl!("Clean-up suggestions…")).on_hover_text(tip).clicked() {
+        // Every Inbox read first, so the dialog finds what's in those not yet looked at.
+        acts.push(Action::Run("mail.cleanupSuggestions", json!({})));
+        acts.push(Action::Dialog(Dialog::Cleanup(Box::default())));
+        ui.close();
+    }
 }
 
 fn mark_all_read(ui: &mut Ui, s: &Session, acts: &mut Vec<Action>) {

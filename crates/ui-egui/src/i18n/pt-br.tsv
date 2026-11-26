@@ -2604,3 +2604,13 @@ count	occurrences	ocorrências
 	MailCraft's AI suggests: {what}	A IA do MailCraft sugere: {what}
 	Review all…	Revisar todas…
 	Suggestion	Sugestão
+	Clean-up suggestions…	Sugestões de limpeza…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	Listas que você nunca lê, e-mails em massa que se acumulam e e-mails lidos deixados há um mês, da sua Caixa de Entrada
+	Clean-up suggestions	Sugestões de limpeza
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	Calculado neste computador a partir dos e-mails da sua Caixa de Entrada, sem enviar nada a lugar algum. Nada muda até você escolher
+	Nothing to clean up	Nada para limpar
+	{n} messages, none read	{n} mensagens, nenhuma lida
+	{n} messages, {unread} unread	{n} mensagens, {unread} não lidas
+	Sweep all but the newest	Varrer todas menos a mais recente
+	Read mail older than {days} days in {account}	E-mails lidos com mais de {days} dias em {account}
+	Archive them	Arquivá-los

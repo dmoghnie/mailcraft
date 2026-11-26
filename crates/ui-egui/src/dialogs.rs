@@ -276,6 +276,8 @@ pub enum Dialog {
     Automation(Box<AutomationForm>),
     /// What MailCraft's AI suggests for arriving mail, to look over.
     Suggestions(Box<SuggestionsForm>),
+    /// What could leave the Inboxes (Home › Delete › Clean-up suggestions).
+    Cleanup(Box<CleanupForm>),
     /// Everything with one person (issue #178).
     Person(Box<PersonForm>),
     /// File › Info › Clean up old items: old mail archived to a data file (issue #179).
@@ -818,6 +820,7 @@ fn body(ui: &mut Ui, d: &mut Dialog, s: &Session, pics: &mut crate::reading::Pic
         Dialog::Script(f) => ai::draw_script(ui, f, t, acts),
         Dialog::Automation(f) => ai::draw_automation(ui, f, s, t, acts),
         Dialog::Suggestions(f) => ai::draw_suggestions(ui, f, s, t, acts),
+        Dialog::Cleanup(f) => organize::draw_cleanup(ui, f, s, t, acts),
         Dialog::Server(f) => ai::draw_server(ui, f, t, acts),
         Dialog::Address(f) => addresses::draw(ui, f, s, t, acts),
         Dialog::Backup(..) | Dialog::Restore(..) => backup::draw(ui, d, t, acts),

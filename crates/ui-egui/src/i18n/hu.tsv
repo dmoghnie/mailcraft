@@ -2604,3 +2604,13 @@ count	occurrences	előfordulás
 	MailCraft's AI suggests: {what}	A MailCraft MI-je javasolja: {what}
 	Review all…	Az összes áttekintése…
 	Suggestion	Javaslat
+	Clean-up suggestions…	Takarítási javaslatok…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	Listák, amelyeket sosem olvas, felgyűlő tömeges levelek és egy hónapja ott hagyott olvasott levelek a Beérkezett üzenetek mappából
+	Clean-up suggestions	Takarítási javaslatok
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	Ezen a számítógépen számolva a Beérkezett üzenetek leveleiből, semmit sem küldve sehová. Semmi sem változik, amíg nem választ
+	Nothing to clean up	Nincs mit takarítani
+	{n} messages, none read	{n} üzenet, egy sem olvasott
+	{n} messages, {unread} unread	{n} üzenet, {unread} olvasatlan
+	Sweep all but the newest	Söprés a legújabb kivételével
+	Read mail older than {days} days in {account}	{days} napnál régebbi olvasott levelek itt: {account}
+	Archive them	Archiválás

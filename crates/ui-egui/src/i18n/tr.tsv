@@ -2604,3 +2604,13 @@ count	occurrences	kez
 	MailCraft's AI suggests: {what}	MailCraft yapay zekâsı öneriyor: {what}
 	Review all…	Tümünü gözden geçir…
 	Suggestion	Öneri
+	Clean-up suggestions…	Temizlik önerileri…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	Hiç okumadığınız listeler, biriken toplu postalar ve bir aydır duran okunmuş postalar, Gelen Kutunuzdan
+	Clean-up suggestions	Temizlik önerileri
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	Gelen Kutunuzdaki postalardan bu bilgisayarda hesaplandı, hiçbir yere bir şey gönderilmedi. Siz seçene kadar hiçbir şey değişmez
+	Nothing to clean up	Temizlenecek bir şey yok
+	{n} messages, none read	{n} ileti, hiçbiri okunmadı
+	{n} messages, {unread} unread	{n} ileti, {unread} okunmamış
+	Sweep all but the newest	En yenisi dışında hepsini süpür
+	Read mail older than {days} days in {account}	{account} içinde {days} günden eski okunmuş postalar
+	Archive them	Arşivle

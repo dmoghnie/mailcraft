@@ -2603,3 +2603,13 @@ count	occurrences	次
 	MailCraft's AI suggests: {what}	MailCraft 的 AI 建議: {what}
 	Review all…	全部檢視…
 	Suggestion	建議
+	Clean-up suggestions…	清理建議…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	收件匣中你從不閱讀的清單、不斷堆積的大量郵件，以及已讀且放了一個月的郵件
+	Clean-up suggestions	清理建議
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	在這台電腦上根據收件匣中的郵件算出，不會傳送任何內容到任何地方。在你選擇之前，什麼都不會改變
+	Nothing to clean up	沒有需要清理的內容
+	{n} messages, none read	{n} 封郵件，皆未讀
+	{n} messages, {unread} unread	{n} 封郵件，{unread} 封未讀
+	Sweep all but the newest	清掃最新一封以外的全部郵件
+	Read mail older than {days} days in {account}	{account} 中超過 {days} 天的已讀郵件
+	Archive them	將其封存

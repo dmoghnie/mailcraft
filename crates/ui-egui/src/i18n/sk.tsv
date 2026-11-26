@@ -2618,3 +2618,13 @@ count	occurrences	opakovaní
 	MailCraft's AI suggests: {what}	AI MailCraftu navrhuje: {what}
 	Review all…	Prezrieť všetky…
 	Suggestion	Návrh
+	Clean-up suggestions…	Návrhy na upratanie…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	Zoznamy, ktoré nikdy nečítate, hromadná pošta, ktorá sa kopí, a prečítaná pošta ponechaná mesiac, z Doručenej pošty
+	Clean-up suggestions	Návrhy na upratanie
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	Vypočítané na tomto počítači z pošty v Doručenej pošte, bez toho, aby sa čokoľvek niekam posielalo. Nič sa nezmení, kým nevyberiete
+	Nothing to clean up	Nie je čo upratať
+	{n} messages, none read	Správy: {n}, žiadna prečítaná
+	{n} messages, {unread} unread	Správy: {n}, neprečítané: {unread}
+	Sweep all but the newest	Vymiesť všetky okrem najnovšej
+	Read mail older than {days} days in {account}	Prečítaná pošta staršia ako {days} dní v {account}
+	Archive them	Archivovať ich

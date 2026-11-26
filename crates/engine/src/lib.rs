@@ -45,6 +45,7 @@ pub use session::{
     TEMPLATES_MOST, TEXT_SIZE_RANGE, TEXT_SIZES, Template, TemplateFile, ToolRun, TransferRow, TriageSuggestion, TrustedCertificate, UNDO_SEND_MAX,
     UndoHold, UpdateCheck, VacationState, View, accent_code, accent_rgb, ai_server, ai_url_is_local, assistant_message_link,
     attached::{AttachedFile, FILES_MESSAGES_MOST, FILES_MOST, FileKind, FilesFilter},
+    cleanup::{Cleanup, OLD_DAYS, OldMail, SenderCleanup},
     invite::{AnsweredInvites, Fit, Invite, InviteDay, InviteProblem, MailWords, Route, WaitingInvite, forwarding_allowed, proposals_allowed},
     junk::{JunkList, junk_entry},
     leaving_way, newer_release,

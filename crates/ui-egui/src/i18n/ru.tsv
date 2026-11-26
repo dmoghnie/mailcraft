@@ -2617,3 +2617,13 @@ count	occurrences	повторений
 	MailCraft's AI suggests: {what}	ИИ MailCraft предлагает: {what}
 	Review all…	Просмотреть все…
 	Suggestion	Предложение
+	Clean-up suggestions…	Предложения по уборке…
+	Lists you never read, bulk mail that piles up, and read mail left for a month, from your Inbox	Рассылки, которые вы никогда не читаете, накапливающаяся массовая почта и прочитанные письма, лежащие месяц, из «Входящих»
+	Clean-up suggestions	Предложения по уборке
+	Worked out on this computer from the mail in your Inbox, with nothing sent anywhere. Nothing changes until you choose	Подсчитано на этом компьютере по почте во «Входящих», ничего никуда не отправляется. Ничего не меняется, пока вы не выберете
+	Nothing to clean up	Убирать нечего
+	{n} messages, none read	Сообщений: {n}, ни одно не прочитано
+	{n} messages, {unread} unread	Сообщений: {n}, непрочитанных: {unread}
+	Sweep all but the newest	Расчистить все, кроме последнего
+	Read mail older than {days} days in {account}	Прочитанные письма старше {days} дн. в «{account}»
+	Archive them	Архивировать их
