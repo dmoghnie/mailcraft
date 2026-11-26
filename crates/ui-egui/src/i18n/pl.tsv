@@ -2642,3 +2642,6 @@ count	occurrences	wystąpieniach
 	Tokens read: {n}	Przeczytane tokeny: {n}
 	Tokens written: {n}	Zapisane tokeny: {n}
 	Seconds: {n}	Sekundy: {n}
+	Tokens a day, at most	Tokeny na dzień, najwyżej
+	{used} of {budget} tokens used today	Dziś użyto tokenów: {used} z {budget}
+	It has used its {budget} tokens for today: questions go to the model it falls back to	Wykorzystał swoje tokeny na dziś ({budget}): pytania trafiają do modelu zapasowego

@@ -2624,3 +2624,6 @@ count	occurrences	keer
 	Tokens read: {n}	Gelezen tokens: {n}
 	Tokens written: {n}	Geschreven tokens: {n}
 	Seconds: {n}	Seconden: {n}
+	Tokens a day, at most	Tokens per dag, hoogstens
+	{used} of {budget} tokens used today	{used} van {budget} tokens vandaag gebruikt
+	It has used its {budget} tokens for today: questions go to the model it falls back to	Het heeft zijn {budget} tokens voor vandaag gebruikt: vragen gaan naar het reservemodel

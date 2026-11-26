@@ -2629,3 +2629,6 @@ count	occurrences	ocorrências
 	Tokens read: {n}	Tokens lidos: {n}
 	Tokens written: {n}	Tokens escritos: {n}
 	Seconds: {n}	Segundos: {n}
+	Tokens a day, at most	Tokens por dia, no máximo
+	{used} of {budget} tokens used today	{used} de {budget} tokens usados hoje
+	It has used its {budget} tokens for today: questions go to the model it falls back to	Usou seus {budget} tokens de hoje: as perguntas vão para o modelo reserva

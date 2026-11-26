@@ -2629,3 +2629,6 @@ count	occurrences	Terminen
 	Tokens read: {n}	Gelesene Tokens: {n}
 	Tokens written: {n}	Geschriebene Tokens: {n}
 	Seconds: {n}	Sekunden: {n}
+	Tokens a day, at most	Tokens pro Tag, höchstens
+	{used} of {budget} tokens used today	{used} von {budget} Tokens heute verbraucht
+	It has used its {budget} tokens for today: questions go to the model it falls back to	Es hat seine {budget} Tokens für heute verbraucht: Fragen gehen an das Ersatzmodell

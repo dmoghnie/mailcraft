@@ -2629,3 +2629,6 @@ count	occurrences	occurrences
 	Tokens read: {n}	Jetons lus : {n}
 	Tokens written: {n}	Jetons écrits : {n}
 	Seconds: {n}	Secondes : {n}
+	Tokens a day, at most	Jetons par jour, au plus
+	{used} of {budget} tokens used today	{used} jetons utilisés aujourd'hui sur {budget}
+	It has used its {budget} tokens for today: questions go to the model it falls back to	Il a utilisé ses {budget} jetons pour aujourd'hui : les questions vont au modèle de secours

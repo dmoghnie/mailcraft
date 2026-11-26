@@ -2642,3 +2642,6 @@ count	occurrences	повторений
 	Tokens read: {n}	Прочитано токенов: {n}
 	Tokens written: {n}	Написано токенов: {n}
 	Seconds: {n}	Секунд: {n}
+	Tokens a day, at most	Токенов в день, не больше
+	{used} of {budget} tokens used today	Сегодня использовано токенов: {used} из {budget}
+	It has used its {budget} tokens for today: questions go to the model it falls back to	Модель израсходовала свои {budget} токенов на сегодня: вопросы идут резервной модели

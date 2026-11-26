@@ -82,3 +82,47 @@ fn the_assistant_is_kept_within_a_models_budget() {
     assert!(!other.is_empty());
     assert_eq!(asked(&mut s).pop().expect("asked").2.model, "llama3.2", "its fallback");
 }
+
+/// A profile's budget for a day: counted beside its month's, past it the model is asked no
+/// more that day, saying so, in the assistant too; the next day it's asked again while the
+/// month's count goes on.
+#[test]
+fn a_profile_past_its_budget_for_today_waits_for_tomorrow() {
+    let mut s = sample_session("ai-budget-day");
+    s.run("ai.allow", &json!({"account": "sample", "reach": "local"})).unwrap();
+    let small = json!({"name": "Small", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small", "daily": 1000});
+    let small = s.run("ai.saveProfile", &small).unwrap()["id"].as_str().unwrap().to_string();
+    s.take_jobs();
+    ask(&mut s, "What's new?").unwrap();
+    let (id, ..) = asked(&mut s).pop().unwrap();
+    answered(&mut s, id, 1200);
+    let settings = s.run("ai.settings", &json!({})).unwrap();
+    let p = &settings["profiles"][0];
+    assert_eq!((&p["used"], &p["usedToday"], &p["overBudget"], &p["daily"]), (&json!(1200), &json!(1200), &json!(true), &json!(1000)));
+    let err = ask(&mut s, "Again?").unwrap_err();
+    assert!(err.to_string().contains("Small has used its budget for today"), "{err}");
+    let e = s.run("assistant.send", &json!({"text": "Hello"})).unwrap_err().to_string();
+    assert!(e.contains("Small has used its budget for today"), "{e}");
+    assert!(asked(&mut s).is_empty(), "nothing sent past it");
+
+    // Tomorrow, asked again; the month's count goes on, and today's begins again.
+    s.clock.now += 86_400;
+    assert_eq!((s.ai_used(&small), s.ai_used_today(&small)), (1200, 0));
+    ask(&mut s, "And today?").unwrap();
+    let (id, ..) = asked(&mut s).pop().expect("asked again");
+    answered(&mut s, id, 300);
+    assert_eq!((s.ai_used(&small), s.ai_used_today(&small)), (1500, 300));
+    // Kept across runs.
+    s.take_jobs();
+    let again = Session::open(s.store.clone(), mailcraft_model::dates::Clock::new(s.clock.now, 0));
+    assert_eq!(again.ai_used_today(&small), 300);
+
+    // A budget for a day is a number of tokens, or null for none.
+    for bad in [json!("lots"), json!(0), json!(-5)] {
+        let p = json!({"id": small, "name": "Small", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small", "daily": bad});
+        assert!(matches!(s.run("ai.saveProfile", &p), Err(CmdError::Params(_))), "{bad}");
+    }
+    let none = json!({"id": small, "name": "Small", "api": "openAi", "url": "http://localhost:11434/v1", "model": "small", "daily": null});
+    s.run("ai.saveProfile", &none).unwrap();
+    assert_eq!(s.prefs.ai.profile(&small).and_then(|p| p.daily), None);
+}

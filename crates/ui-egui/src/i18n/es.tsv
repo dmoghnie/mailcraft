@@ -2629,3 +2629,6 @@ count	occurrences	repeticiones
 	Tokens read: {n}	Tokens leídos: {n}
 	Tokens written: {n}	Tokens escritos: {n}
 	Seconds: {n}	Segundos: {n}
+	Tokens a day, at most	Tokens al día, como máximo
+	{used} of {budget} tokens used today	{used} de {budget} tokens usados hoy
+	It has used its {budget} tokens for today: questions go to the model it falls back to	Ha usado sus {budget} tokens de hoy: las preguntas van al modelo de respaldo

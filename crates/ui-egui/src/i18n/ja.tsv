@@ -2625,3 +2625,6 @@ count	occurrences	回
 	Tokens read: {n}	読み取ったトークン: {n}
 	Tokens written: {n}	書き出したトークン: {n}
 	Seconds: {n}	秒: {n}
+	Tokens a day, at most	1 日あたりのトークンの上限
+	{used} of {budget} tokens used today	今日 {budget} トークン中 {used} を使用
+	It has used its {budget} tokens for today: questions go to the model it falls back to	今日の {budget} トークンを使い切りました: 質問は代わりのモデルに送られます

@@ -32,7 +32,7 @@ pub(crate) fn commands() -> Vec<CommandSpec> {
     vec![
         CommandSpec::new("ai.settings", "Show MailCraft's AI settings", WHERE, |s, _| Ok(settings(s))),
         CommandSpec::new("ai.saveProfile", "Add or change a model MailCraft's AI may ask", WHERE, save_profile).params(
-            r#"{"id"?: string (none: a new profile), "name": string, "api": "openAi"|"anthropic"|"ollama" (Ollama's own, told what the model takes in), "url": string (the API address, up to its version: https://api.openai.com/v1; Ollama's own: http://localhost:11434), "model": string, "maxTokens"?: number, "context"?: number (what the model takes in at once, in tokens; 0: 32768, Ollama's own), "fallback"?: string (a profile asked instead when this one fails; "": none), "scripts"?: boolean (the assistant may run scripts it writes: code mode), "temperature"?: number|null (0 to 2; null: the model's own; not every model takes one), "effort"?: "default"|"off"|"low"|"medium"|"high" (how much it thinks before it answers; default: as the model does), "budget"?: number|null (the most tokens it may use in a calendar month; past it, its fallback is asked; null: no limit), "key"?: string (kept in the keychain; "": forgotten)}"#,
+            r#"{"id"?: string (none: a new profile), "name": string, "api": "openAi"|"anthropic"|"ollama" (Ollama's own, told what the model takes in), "url": string (the API address, up to its version: https://api.openai.com/v1; Ollama's own: http://localhost:11434), "model": string, "maxTokens"?: number, "context"?: number (what the model takes in at once, in tokens; 0: 32768, Ollama's own), "fallback"?: string (a profile asked instead when this one fails; "": none), "scripts"?: boolean (the assistant may run scripts it writes: code mode), "temperature"?: number|null (0 to 2; null: the model's own; not every model takes one), "effort"?: "default"|"off"|"low"|"medium"|"high" (how much it thinks before it answers; default: as the model does), "budget"?: number|null (the most tokens it may use in a calendar month; past it, its fallback is asked; null: no limit), "daily"?: number|null (the most it may use in a day, as the budget),  "key"?: string (kept in the keychain; "": forgotten)}"#,
         ),
         CommandSpec::new("ai.removeProfile", "Remove a model and forget its key", WHERE, |s, v| {
             let id = p::req_str(v, "id")?.to_string();
@@ -98,8 +98,9 @@ fn settings(s: &Session) -> Value {
             v["local"] = json!(pr.local());
             v["test"] = json!(s.ai.tests.get(&pr.id));
             v["keyError"] = json!(s.ai.key_errors.get(&pr.id));
-            // The tokens it used this month, and whether that's its budget.
+            // The tokens it used this month and today, and whether that's a budget.
             v["used"] = json!(s.ai_used(&pr.id));
+            v["usedToday"] = json!(s.ai_used_today(&pr.id));
             v["overBudget"] = json!(s.ai_over_budget(pr));
             v
         })
@@ -194,8 +195,30 @@ fn save_profile(s: &mut Session, v: &Value) -> CmdResult {
                 .ok_or_else(|| CmdError::Params(format!("`budget` is a number of tokens from 1 to {BUDGET_MOST}, or null")))?,
         ),
     };
-    let profile =
-        AiProfile { id: id.clone(), name, endpoint, has_key, max_tokens, context, fallback, temperature, effort, budget, scripts, agent: false };
+    let daily = match v.get("daily") {
+        None => old.as_ref().and_then(|o| o.daily),
+        Some(Value::Null) => None,
+        Some(b) => Some(
+            b.as_u64()
+                .filter(|b| (1..=BUDGET_MOST).contains(b))
+                .ok_or_else(|| CmdError::Params(format!("`daily` is a number of tokens from 1 to {BUDGET_MOST}, or null")))?,
+        ),
+    };
+    let profile = AiProfile {
+        id: id.clone(),
+        name,
+        endpoint,
+        has_key,
+        max_tokens,
+        context,
+        fallback,
+        temperature,
+        effort,
+        budget,
+        daily,
+        scripts,
+        agent: false,
+    };
     match key {
         Some(k) => s.jobs.push(Job::Ai { work: AiWork::SaveKey { name: id.clone(), key: (!k.is_empty()).then(|| Secret(k.to_string())) } }),
         None if moved => s.jobs.push(Job::Ai { work: AiWork::SaveKey { name: id.clone(), key: None } }),

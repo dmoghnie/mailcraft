@@ -77,6 +77,10 @@ pub struct AiProfile {
     /// limit. Past it, the model it falls back to is asked instead.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub budget: Option<u64>,
+    /// The most tokens it may use in a day, in local time; none: no limit. Past it, as past its
+    /// monthly budget.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub daily: Option<u64>,
     /// The assistant may run scripts it writes with it (code mode): off until the person turns
     /// it on.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
@@ -195,11 +199,11 @@ impl AiPrefs {
 
     /// `from`, or the first along its fallbacks allowed mail of every one of `accounts`, past
     /// those in `spent` (that have used their budget).
-    pub fn allowed_for_all<'a>(&'a self, from: &'a AiProfile, accounts: &[String], spent: &BTreeSet<String>) -> Option<&'a AiProfile> {
+    pub fn allowed_for_all<'a>(&'a self, from: &'a AiProfile, accounts: &[String], spent: &super::budget::Spent) -> Option<&'a AiProfile> {
         let mut seen: Vec<&str> = Vec::new();
         let mut at = Some(from);
         while let Some(p) = at.filter(|p| !seen.contains(&p.id.as_str())) {
-            if self.allows_all(p, accounts) && !spent.contains(&p.id) {
+            if self.allows_all(p, accounts) && !spent.contains_key(&p.id) {
                 return Some(p);
             }
             seen.push(&p.id);
@@ -211,7 +215,7 @@ impl AiPrefs {
     /// The profile `task` goes to for mail of `account`: the one named for it, or the first,
     /// or else along their fallbacks the first that's allowed and not in `spent` (that have used
     /// their budget). Why none, when none is.
-    pub fn route(&self, task: AiTask, account: Option<&str>, spent: &BTreeSet<String>) -> Result<&AiProfile, String> {
+    pub fn route(&self, task: AiTask, account: Option<&str>, spent: &super::budget::Spent) -> Result<&AiProfile, String> {
         if self.reach(account).is_none() {
             return Err("MailCraft's AI is off for this account: File › Options › AI lets its mail go to a model".into());
         }
@@ -219,8 +223,8 @@ impl AiPrefs {
         let first = chosen(task).or_else(|| (task == AiTask::Vision).then(|| chosen(AiTask::Chat)).flatten()).or_else(|| self.profiles.first());
         let Some(first) = first else { return Err("no model is set up: add one in File › Options › AI".into()) };
         self.allowed_from(first, account, spent).ok_or_else(|| {
-            if spent.contains(&first.id) {
-                format!("{} has used its monthly budget, and no model it falls back to may have this mail", first.name)
+            if let Some(used) = spent.get(&first.id) {
+                format!("{} has used its {used}, and no model it falls back to may have this mail", first.name)
             } else {
                 format!("{} isn't on this computer or its network, and this mail goes only to a model that is", first.name)
             }
@@ -229,11 +233,11 @@ impl AiPrefs {
 
     /// `from`, or the first allowed along its fallbacks (each profile tried once), past those in
     /// `spent`.
-    pub fn allowed_from<'a>(&'a self, from: &'a AiProfile, account: Option<&str>, spent: &BTreeSet<String>) -> Option<&'a AiProfile> {
+    pub fn allowed_from<'a>(&'a self, from: &'a AiProfile, account: Option<&str>, spent: &super::budget::Spent) -> Option<&'a AiProfile> {
         let mut seen: Vec<&str> = Vec::new();
         let mut at = Some(from);
         while let Some(p) = at.filter(|p| !seen.contains(&p.id.as_str())) {
-            if self.allows(p, account) && !spent.contains(&p.id) {
+            if self.allows(p, account) && !spent.contains_key(&p.id) {
                 return Some(p);
             }
             seen.push(&p.id);

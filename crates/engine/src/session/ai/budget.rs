@@ -1,8 +1,9 @@
-//! A model's monthly budget, in tokens: what each profile used this calendar month, as its server
-//! counted (or a token for every three bytes, where it doesn't say), kept in `ai-usage.json`. A
-//! profile that has used its budget isn't asked: the model it falls back to is, or none.
+//! A model's budgets, in tokens, for a calendar month and for a day: what each profile used this
+//! month and today, as its server counted (or a token for every three bytes, where it doesn't
+//! say), kept in `ai-usage.json`. A profile that has used either isn't asked: the model it falls
+//! back to is, or none.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 
 use mailcraft_model::{AiAnswer, dates};
 use serde::{Deserialize, Serialize};
@@ -20,7 +21,18 @@ pub(crate) struct AiUsage {
     month: i64,
     /// The tokens each profile used in it, by its id.
     tokens: BTreeMap<String, u64>,
+    /// The day counted (year × 10000 + month × 100 + day, in local time), and the tokens each
+    /// profile used in it.
+    day: i64,
+    today: BTreeMap<String, u64>,
 }
+
+/// The profiles that have used a budget, by id: which one, as an error says it.
+pub type Spent = BTreeMap<String, &'static str>;
+
+/// A budget used, as an error says it: "{model} has used its …".
+const MONTH_USED: &str = "monthly budget";
+const DAY_USED: &str = "budget for today";
 
 /// Bytes a token is taken for, where a server doesn't count them: few, so more are counted.
 const BYTES_A_TOKEN: u64 = 3;
@@ -32,20 +44,43 @@ impl Session {
         c.year.saturating_mul(12).saturating_add(i64::from(c.month)).saturating_sub(1)
     }
 
+    /// Today, as [`AiUsage`] counts days.
+    fn this_day(&self) -> i64 {
+        let c = dates::civil(self.clock.now, &self.clock);
+        c.year.saturating_mul(10_000).saturating_add(i64::from(c.month) * 100).saturating_add(i64::from(c.day))
+    }
+
     /// The tokens `profile` used this month.
     pub fn ai_used(&self, profile: &str) -> u64 {
         let u = &self.ai.usage;
         if u.month == self.this_month() { u.tokens.get(profile).copied().unwrap_or(0) } else { 0 }
     }
 
-    /// Whether `profile` has used its budget this month.
-    pub fn ai_over_budget(&self, profile: &AiProfile) -> bool {
-        profile.budget.is_some_and(|b| self.ai_used(&profile.id) >= b)
+    /// The tokens `profile` used today.
+    pub fn ai_used_today(&self, profile: &str) -> u64 {
+        let u = &self.ai.usage;
+        if u.day == self.this_day() { u.today.get(profile).copied().unwrap_or(0) } else { 0 }
     }
 
-    /// The profiles that have used their budget this month, by id.
-    pub(crate) fn ai_spent(&self) -> BTreeSet<String> {
-        self.prefs.ai.profiles.iter().filter(|p| self.ai_over_budget(p)).map(|p| p.id.clone()).collect()
+    /// The budget `profile` has used, this month's or today's, as an error says it.
+    pub(crate) fn ai_budget_used(&self, profile: &AiProfile) -> Option<&'static str> {
+        if profile.budget.is_some_and(|b| self.ai_used(&profile.id) >= b) {
+            Some(MONTH_USED)
+        } else if profile.daily.is_some_and(|b| self.ai_used_today(&profile.id) >= b) {
+            Some(DAY_USED)
+        } else {
+            None
+        }
+    }
+
+    /// Whether `profile` has used its budget this month, or its budget for today.
+    pub fn ai_over_budget(&self, profile: &AiProfile) -> bool {
+        self.ai_budget_used(profile).is_some()
+    }
+
+    /// The profiles that have used a budget, by id, and which.
+    pub(crate) fn ai_spent(&self) -> Spent {
+        self.prefs.ai.profiles.iter().filter_map(|p| self.ai_budget_used(p).map(|why| (p.id.clone(), why))).collect()
     }
 
     /// The profile `task` goes to with mail of `account`, as [`super::AiPrefs::route`] says,
@@ -60,13 +95,20 @@ impl Session {
         let bytes = |n: usize| u64::try_from(n).unwrap_or(u64::MAX).div_ceil(BYTES_A_TOKEN);
         let answered = a.text.len().saturating_add(a.thinking.len());
         let tokens = a.input_tokens.unwrap_or_else(|| bytes(asked)).saturating_add(a.output_tokens.unwrap_or_else(|| bytes(answered)));
-        let month = self.this_month();
+        let (month, day) = (self.this_month(), self.this_day());
         let u = &mut self.ai.usage;
         if u.month != month {
-            *u = AiUsage { month, tokens: BTreeMap::new() };
+            u.month = month;
+            u.tokens.clear();
+        }
+        if u.day != day {
+            u.day = day;
+            u.today.clear();
         }
         let used = u.tokens.entry(profile.to_string()).or_insert(0);
         *used = used.saturating_add(tokens);
+        let today = u.today.entry(profile.to_string()).or_insert(0);
+        *today = today.saturating_add(tokens);
         self.ai.usage_changed = true;
     }
 

@@ -2629,3 +2629,6 @@ count	occurrences	kez
 	Tokens read: {n}	Okunan token: {n}
 	Tokens written: {n}	Yazılan token: {n}
 	Seconds: {n}	Saniye: {n}
+	Tokens a day, at most	Günlük en fazla token
+	{used} of {budget} tokens used today	Bugün {budget} tokenden {used} kullanıldı
+	It has used its {budget} tokens for today: questions go to the model it falls back to	Bugünkü {budget} tokenini kullandı: sorular yedek modele gider

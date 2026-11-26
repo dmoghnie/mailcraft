@@ -2624,3 +2624,6 @@ count	occurrences	مرات
 	Tokens read: {n}	الرموز المقروءة: {n}
 	Tokens written: {n}	الرموز المكتوبة: {n}
 	Seconds: {n}	الثواني: {n}
+	Tokens a day, at most	الرموز في اليوم، بحد أقصى
+	{used} of {budget} tokens used today	استُخدم {used} من {budget} رمز اليوم
+	It has used its {budget} tokens for today: questions go to the model it falls back to	استخدم رموزه البالغة {budget} لهذا اليوم: تذهب الأسئلة إلى النموذج الاحتياطي

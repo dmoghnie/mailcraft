@@ -2624,3 +2624,6 @@ count	occurrences	פעמים
 	Tokens read: {n}	אסימונים שנקראו: {n}
 	Tokens written: {n}	אסימונים שנכתבו: {n}
 	Seconds: {n}	שניות: {n}
+	Tokens a day, at most	אסימונים ביום, לכל היותר
+	{used} of {budget} tokens used today	נוצלו היום {used} מתוך {budget} אסימונים
+	It has used its {budget} tokens for today: questions go to the model it falls back to	הוא ניצל את {budget} האסימונים שלו להיום: השאלות עוברות למודל החלופי

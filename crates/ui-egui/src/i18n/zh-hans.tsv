@@ -2625,3 +2625,6 @@ count	occurrences	次
 	Tokens read: {n}	读取的令牌: {n}
 	Tokens written: {n}	写出的令牌: {n}
 	Seconds: {n}	秒: {n}
+	Tokens a day, at most	每天最多令牌数
+	{used} of {budget} tokens used today	今天已用 {used} / {budget} 个令牌
+	It has used its {budget} tokens for today: questions go to the model it falls back to	它已用完今天的 {budget} 个令牌：问题会交给备用模型

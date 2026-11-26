@@ -2629,3 +2629,6 @@ count	occurrences	előfordulás
 	Tokens read: {n}	Olvasott tokenek: {n}
 	Tokens written: {n}	Írt tokenek: {n}
 	Seconds: {n}	Másodpercek: {n}
+	Tokens a day, at most	Token naponta, legfeljebb
+	{used} of {budget} tokens used today	Ma {used} / {budget} token felhasználva
+	It has used its {budget} tokens for today: questions go to the model it falls back to	Elhasználta a mai {budget} tokenjét: a kérdések a tartalék modellhez kerülnek

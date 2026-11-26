@@ -144,11 +144,11 @@ and `cargo xtask sizes` enforces them.
   taken): when, what for, which profile and server, whose mail, and its sizes; never what it
   said. The newest 500 are kept.
 - **A model's settings and budget.** A profile's temperature and how much it thinks go with each
-  question, told each server in its own words (`net/src/protocols/ai/`). Its monthly budget is
-  in tokens, as its server counts them, or a token for every three bytes where it doesn't
-  (`session/ai/budget.rs`, `ai-usage.json`); a profile that has used it is passed over in
-  routing (`AiPrefs::route` takes the ones spent) for its fallback, and the assistant's chat
-  that names it is refused.
+  question, told each server in its own words (`net/src/protocols/ai/`). Its budgets, for a
+  calendar month and for a day, are in tokens, as its server counts them, or a token for every
+  three bytes where it doesn't (`session/ai/budget.rs`, `ai-usage.json`); a profile that has used
+  one is passed over in routing (`AiPrefs::route` takes the ones spent, and which budget each
+  used) for its fallback, and the assistant's chat that names it is refused.
 - **Needs me** (`session/ai/needs_me.rs`): once turned on, mail arriving in an Inbox
   (`note_new_mail`, past blocking and rules; never bulk mail) waits its turn for the decision
   model, four questions at a time, and is marked by its YES or NO (`ai-needs-me.json`, the

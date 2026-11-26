@@ -2628,3 +2628,6 @@ count	occurrences	次
 	Tokens read: {n}	讀取的權杖: {n}
 	Tokens written: {n}	寫出的權杖: {n}
 	Seconds: {n}	秒: {n}
+	Tokens a day, at most	每天最多權杖數
+	{used} of {budget} tokens used today	今天已用 {used} / {budget} 個權杖
+	It has used its {budget} tokens for today: questions go to the model it falls back to	它已用完今天的 {budget} 個權杖：問題會交給備用模型

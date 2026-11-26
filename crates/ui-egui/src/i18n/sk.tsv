@@ -2643,3 +2643,6 @@ count	occurrences	opakovaní
 	Tokens read: {n}	Prečítané tokeny: {n}
 	Tokens written: {n}	Zapísané tokeny: {n}
 	Seconds: {n}	Sekundy: {n}
+	Tokens a day, at most	Tokeny za deň, najviac
+	{used} of {budget} tokens used today	Dnes použité tokeny: {used} z {budget}
+	It has used its {budget} tokens for today: questions go to the model it falls back to	Minul svoje tokeny na dnes ({budget}): otázky idú záložnému modelu

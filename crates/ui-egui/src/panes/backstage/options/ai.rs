@@ -178,6 +178,14 @@ fn profile(s: &Session, t: &Tokens, ui: &mut Ui, p: &AiProfile, acts: &mut Vec<A
         None if used > 0 => lines.push(tf!("{used} tokens used this month", used = used)),
         None => {}
     }
+    if let Some(b) = p.daily {
+        let today = s.ai_used_today(&p.id);
+        lines.push(if today >= b {
+            tf!("It has used its {budget} tokens for today: questions go to the model it falls back to", budget = b)
+        } else {
+            tf!("{used} of {budget} tokens used today", used = today, budget = b)
+        });
+    }
     if let Some(e) = s.ai.key_errors.get(&p.id) {
         lines.push(tf!("Its key couldn't be kept: {error}", error = e));
     } else if p.has_key {

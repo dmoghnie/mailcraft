@@ -43,9 +43,8 @@ impl Session {
         };
         if let Some(id) = &chat.profile {
             let p = ai.profile(id).ok_or_else(|| CmdError::Params(format!("no model profile {id}")))?;
-            if self.ai_over_budget(p) {
-                let why =
-                    format!("{} has used its monthly budget: choose another model for this chat, or raise its budget in File › Options › AI", p.name);
+            if let Some(used) = self.ai_budget_used(p) {
+                let why = format!("{} has used its {used}: choose another model for this chat, or raise its budget in File › Options › AI", p.name);
                 return Err(CmdError::Disabled(why));
             }
             return if ai.allows_all(p, &chat.accounts) { Ok(p.clone()) } else { Err(off(p)) };
@@ -54,8 +53,8 @@ impl Session {
         let first = first.ok_or_else(|| CmdError::Disabled("no model is set up: add one in File › Options › AI".into()))?;
         let spent = self.ai_spent();
         ai.allowed_for_all(first, &chat.accounts, &spent).cloned().ok_or_else(|| {
-            if spent.contains(&first.id) {
-                CmdError::Disabled(format!("{} has used its monthly budget, and no model it falls back to may have this chat's mail", first.name))
+            if let Some(used) = spent.get(&first.id) {
+                CmdError::Disabled(format!("{} has used its {used}, and no model it falls back to may have this chat's mail", first.name))
             } else {
                 off(first)
             }

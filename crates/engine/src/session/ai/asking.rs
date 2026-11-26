@@ -339,7 +339,7 @@ impl Session {
         while let Some(p) = at.filter(|p| !seen.contains(&p.id.as_str())) {
             if !w.tried.contains(&p.id)
                 && ai.allows_all(p, &w.accounts)
-                && !spent.contains(&p.id)
+                && !spent.contains_key(&p.id)
                 && let Some(chat) = self.chat_for(id, w, p)
             {
                 return Some((p.clone(), chat));

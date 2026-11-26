@@ -93,29 +93,37 @@ fn a_models_temperature_and_thinking_are_set_in_its_dialog() {
     assert_eq!((again.temperature.as_str(), again.effort), ("0.7", Some(AiEffort::High)));
 }
 
-/// A model's monthly budget is set in its dialog, and Options › AI says what it used of it, and
-/// when it has used it all.
+/// A model's budgets, for a month and for a day, are set in its dialog, and Options › AI says
+/// what it used of each, and when it has used them.
 #[test]
-fn a_models_budget_is_set_and_its_use_shown() {
+fn a_models_budgets_are_set_and_their_use_shown() {
     let _tall = crate::tests::windows::layout::Dressed::new(TALL, "");
     let (mut a, ctx) = options("ai-options-budget");
     click_named(&ctx, &mut a, "Add…");
     frame(&ctx, &mut a, vec![]);
     let Some(Dialog::AiModel(f)) = a.ui.dialog.as_mut() else { panic!("the model's dialog: {:?}", a.ui.dialog) };
     (f.name, f.api, f.url, f.model) = ("Local".into(), AiApi::Ollama, "http://localhost:11434".into(), "qwen3".into());
-    f.budget = "1000".into();
+    (f.budget, f.daily) = ("1000".into(), "500".into());
     frame(&ctx, &mut a, vec![]);
     click_named(&ctx, &mut a, "Save");
     assert!(a.ui.dialog.is_none(), "saved: {:?}", a.ui.dialog);
-    assert_eq!(a.session.prefs.ai.profiles[0].budget, Some(1000));
-    assert!(has(&drawn_strings(&ctx, &mut a, TALL), "0 of 1000 tokens used this month"));
+    assert_eq!((a.session.prefs.ai.profiles[0].budget, a.session.prefs.ai.profiles[0].daily), (Some(1000), Some(500)));
+    let texts = drawn_strings(&ctx, &mut a, TALL);
+    for line in ["0 of 1000 tokens used this month", "0 of 500 tokens used today"] {
+        assert!(has(&texts, line), "{line}: {texts:?}");
+    }
     a.run("ai.allow", json!({"account": "sample", "reach": "local"}));
     a.run("ai.test", json!({"profile": a.session.prefs.ai.profiles[0].id}));
     let id = waiting(&a);
     let answer = AiAnswer { text: "Hello".into(), input_tokens: Some(1200), output_tokens: Some(0), ..AiAnswer::default() };
     a.session.apply(MailEvent::Ai { done: AiDone::Answered { id, answer: Some(answer), error: None } });
     let texts = drawn_strings(&ctx, &mut a, TALL);
-    assert!(has(&texts, "It has used its 1000 tokens this month: questions go to the model it falls back to"), "{texts:?}");
+    for line in [
+        "It has used its 1000 tokens this month: questions go to the model it falls back to",
+        "It has used its 500 tokens for today: questions go to the model it falls back to",
+    ] {
+        assert!(has(&texts, line), "{line}: {texts:?}");
+    }
 }
 
 #[test]
